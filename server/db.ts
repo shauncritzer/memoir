@@ -1,6 +1,20 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users,
+  blogPosts,
+  BlogPost,
+  InsertBlogPost,
+  emailSubscribers,
+  EmailSubscriber,
+  InsertEmailSubscriber,
+  leadMagnets,
+  LeadMagnet,
+  InsertLeadMagnet,
+  leadMagnetDownloads,
+  InsertLeadMagnetDownload
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +103,141 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Blog Posts
+export async function getPublishedBlogPosts(limit = 10, offset = 0): Promise<BlogPost[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(blogPosts)
+    .where(eq(blogPosts.status, "published"))
+    .orderBy(desc(blogPosts.publishedAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db
+    .select()
+    .from(blogPosts)
+    .where(eq(blogPosts.slug, slug))
+    .limit(1);
+  
+  return result[0];
+}
+
+export async function createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(blogPosts).values(post);
+  const insertedId = Number(result[0].insertId);
+  
+  const inserted = await db
+    .select()
+    .from(blogPosts)
+    .where(eq(blogPosts.id, insertedId))
+    .limit(1);
+  
+  return inserted[0]!;
+}
+
+export async function incrementBlogPostViews(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(blogPosts)
+    .set({ viewCount: sql`${blogPosts.viewCount} + 1` })
+    .where(eq(blogPosts.id, id));
+}
+
+// Email Subscribers
+export async function createEmailSubscriber(subscriber: InsertEmailSubscriber): Promise<EmailSubscriber> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  try {
+    const result = await db.insert(emailSubscribers).values(subscriber);
+    const insertedId = Number(result[0].insertId);
+    
+    const inserted = await db
+      .select()
+      .from(emailSubscribers)
+      .where(eq(emailSubscribers.id, insertedId))
+      .limit(1);
+    
+    return inserted[0]!;
+  } catch (error) {
+    // If duplicate email, return existing subscriber
+    const existing = await db
+      .select()
+      .from(emailSubscribers)
+      .where(eq(emailSubscribers.email, subscriber.email))
+      .limit(1);
+    
+    if (existing[0]) {
+      return existing[0];
+    }
+    
+    throw error;
+  }
+}
+
+export async function getEmailSubscriberByEmail(email: string): Promise<EmailSubscriber | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db
+    .select()
+    .from(emailSubscribers)
+    .where(eq(emailSubscribers.email, email))
+    .limit(1);
+  
+  return result[0];
+}
+
+// Lead Magnets
+export async function getActiveleadMagnets(): Promise<LeadMagnet[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(leadMagnets)
+    .where(eq(leadMagnets.status, "active"))
+    .orderBy(desc(leadMagnets.createdAt));
+}
+
+export async function getLeadMagnetBySlug(slug: string): Promise<LeadMagnet | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db
+    .select()
+    .from(leadMagnets)
+    .where(and(
+      eq(leadMagnets.slug, slug),
+      eq(leadMagnets.status, "active")
+    ))
+    .limit(1);
+  
+  return result[0];
+}
+
+export async function trackLeadMagnetDownload(download: InsertLeadMagnetDownload): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.insert(leadMagnetDownloads).values(download);
+  
+  // Increment download count
+  await db
+    .update(leadMagnets)
+    .set({ downloadCount: sql`${leadMagnets.downloadCount} + 1` })
+    .where(eq(leadMagnets.id, download.leadMagnetId));
+}
