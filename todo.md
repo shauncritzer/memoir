@@ -21,7 +21,7 @@
 
 ## Phase 3: Course Infrastructure
 - [ ] Design course platform integration
-- [ ] Create "From Broken to Whole" course structure (8 modules)
+- [x] Create "From Broken to Whole" course structure (8 modules - COMPLETE)
 - [ ] Build course sales page
 - [ ] Set up course delivery system
 - [ ] Create course member area
@@ -59,10 +59,10 @@
 ## Content Creation
 - [x] Write first 5 blog posts (seeded in database)
 - [ ] Write 15 more blog posts
-- [ ] Create first 20 YouTube video scripts
-- [ ] Design 90-day social media calendar
-- [ ] Create email sequences
-- [ ] Write course module content
+- [x] Create 30 days of YouTube video scripts (complete)
+- [x] Design 90-day social media calendar (complete)
+- [x] Create email sequences (7 sequences complete)
+- [x] Write course module content (From Broken to Whole - 8 modules complete)
 
 ## Design & Branding
 - [x] Choose color palette and typography (teal + amber, Playfair + Inter)
