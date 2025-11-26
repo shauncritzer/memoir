@@ -6,14 +6,17 @@
 - [x] Create about page with Shaun's story
 - [x] Build blog infrastructure (database + API)
 - [x] Set up email capture system (database + API)
-- [ ] Create resources page
+- [x] Create resources page with lead magnet downloads
+- [x] Create blog listing page
+- [x] Create individual blog post page
 
 ## Phase 2: Lead Magnets & Digital Products
 - [x] Create "First 3 Chapters" PDF lead magnet (content ready)
 - [x] Create "Recovery Toolkit" PDF bundle lead magnet (content ready)
-- [ ] Create "Crooked Lines Reading Guide" PDF lead magnet
+- [x] Create "Crooked Lines Reading Guide" PDF lead magnet
 - [x] Build lead magnet delivery system (database + API)
-- [ ] Convert markdown to PDF files
+- [x] Convert markdown to PDF files
+- [x] Upload PDFs to S3 and seed database
 - [ ] Create paid digital product pages
 
 ## Phase 3: Course Infrastructure
@@ -54,7 +57,8 @@
 - [ ] Create admin dashboard
 
 ## Content Creation
-- [ ] Write first 20 blog posts
+- [x] Write first 5 blog posts (seeded in database)
+- [ ] Write 15 more blog posts
 - [ ] Create first 20 YouTube video scripts
 - [ ] Design 90-day social media calendar
 - [ ] Create email sequences
@@ -66,3 +70,6 @@
 - [x] Create consistent visual identity
 - [x] Design homepage and about page layouts
 - [x] Create mobile-responsive designs
+
+## Bugs to Fix
+- [x] Fix nested anchor tags in navigation (Link component already renders <a>)

@@ -9,33 +9,23 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center space-x-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Shaun Critzer
-              </span>
-            </a>
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Shaun Critzer
+            </span>
           </Link>
           <div className="flex items-center space-x-6">
-            <Link href="/about">
-              <a className="text-sm font-medium text-primary">
-                About
-              </a>
+            <Link href="/about" className="text-sm font-medium text-primary">
+              About
             </Link>
-            <Link href="/memoir">
-              <a className="text-sm font-medium hover:text-primary transition-colors">
-                The Memoir
-              </a>
+            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
+              The Memoir
             </Link>
-            <Link href="/blog">
-              <a className="text-sm font-medium hover:text-primary transition-colors">
-                Blog
-              </a>
+            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
+              Blog
             </Link>
-            <Link href="/resources">
-              <a className="text-sm font-medium hover:text-primary transition-colors">
-                Resources
-              </a>
+            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
+              Resources
             </Link>
             <Button size="sm" className="bg-primary hover:bg-primary/90">
               Get Started
@@ -207,17 +197,17 @@ export default function About() {
             <div className="space-y-4">
               <h4 className="font-semibold">The Memoir</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/memoir"><a className="hover:text-primary transition-colors">About the Book</a></Link></li>
-                <li><Link href="/memoir/excerpt"><a className="hover:text-primary transition-colors">Read an Excerpt</a></Link></li>
-                <li><Link href="/memoir/reviews"><a className="hover:text-primary transition-colors">Reviews</a></Link></li>
+                <li><Link href="/memoir" className="hover:text-primary transition-colors">About the Book</Link></li>
+                <li><Link href="/memoir/excerpt" className="hover:text-primary transition-colors">Read an Excerpt</Link></li>
+                <li><Link href="/memoir/reviews" className="hover:text-primary transition-colors">Reviews</Link></li>
               </ul>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/resources"><a className="hover:text-primary transition-colors">Free Downloads</a></Link></li>
-                <li><Link href="/courses"><a className="hover:text-primary transition-colors">Courses</a></Link></li>
-                <li><Link href="/community"><a className="hover:text-primary transition-colors">Community</a></Link></li>
+                <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
+                <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
+                <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
               </ul>
             </div>
             <div className="space-y-4">
@@ -226,7 +216,7 @@ export default function About() {
                 <li><a href="#" className="hover:text-primary transition-colors">YouTube</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
-                <li><Link href="/contact"><a className="hover:text-primary transition-colors">Contact</a></Link></li>
+                <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
               </ul>
             </div>
           </div>
