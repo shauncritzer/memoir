@@ -180,9 +180,10 @@
 ## URGENT BUG FIXES - November 26, 2025
 
 ### Completed Tonight
-- [x] Add photos to website (skydiving hero on homepage, beach couple on About page)
+- [x] Add photos to website (bodybuilding hero on homepage, beach couple on About page)
 - [x] Identify root cause of ConvertKit email failures (JavaScript didn't save to backend)
 - [x] Create comprehensive email copy-paste guides for Shaun
+- [x] Replace homepage hero photo per Shaun's request (bodybuilding photo - clean background)
 
 ### Still Need to Fix (Requires Live Site Access)
 - [ ] Fix broken homepage buttons (need to test which specific buttons are broken)

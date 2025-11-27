@@ -102,8 +102,8 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
                 <img 
-                  src="/shaun-skydiving.jpg" 
-                  alt="Shaun Critzer - Recovery Journey" 
+                  src="/shaun-bodybuilding.jpg" 
+                  alt="Shaun Critzer - Building Armor Through Fitness" 
                   className="w-full h-full object-cover rounded-xl"
                 />
               </div>
