@@ -100,10 +100,12 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1">
-                <div className="w-full h-full rounded-xl bg-card flex items-center justify-center">
-                  <BookOpen className="h-32 w-32 text-primary/40" />
-                </div>
+              <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
+                <img 
+                  src="/shaun-skydiving.jpg" 
+                  alt="Shaun Critzer - Recovery Journey" 
+                  className="w-full h-full object-cover rounded-xl"
+                />
               </div>
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>

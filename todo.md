@@ -175,3 +175,29 @@
 - [ ] Shaun: Paste remaining 23 emails into ConvertKit (30-45 min)
 - [ ] Shaun: Set up 6 automation rules (30-45 min)
 - [ ] Shaun: Test complete system (15-30 min)
+
+
+## URGENT BUG FIXES - November 26, 2025
+
+### Completed Tonight
+- [x] Add photos to website (skydiving hero on homepage, beach couple on About page)
+- [x] Identify root cause of ConvertKit email failures (JavaScript didn't save to backend)
+- [x] Create comprehensive email copy-paste guides for Shaun
+
+### Still Need to Fix (Requires Live Site Access)
+- [ ] Fix broken homepage buttons (need to test which specific buttons are broken)
+- [ ] Fix PDF content - all PDFs are empty/pre-formatted templates, need actual content
+- [ ] Fix form email delivery - test if ConvertKit integration actually triggers
+- [ ] Test lead magnet downloads end-to-end
+- [ ] Verify all navigation links work correctly
+
+### ConvertKit Manual Work (Shaun's Tasks)
+- [ ] Paste remaining 23 email contents into ConvertKit (30-45 min using guide)
+- [ ] Set up 6 automation rules (30-45 min using guide)
+- [ ] Test complete email flow
+
+### Root Cause Analysis
+- ConvertKit emails: JavaScript console.exec added content to DOM but didn't save to ConvertKit backend
+- PDFs: Generated from template markdown without actual memoir content
+- Forms: Backend integration exists but needs end-to-end testing
+- Homepage: Button functionality unknown without live site access

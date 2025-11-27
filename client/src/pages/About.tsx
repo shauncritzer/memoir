@@ -76,6 +76,13 @@ export default function About() {
               </div>
             </div>
             <div className="space-y-6">
+              <div className="rounded-2xl overflow-hidden">
+                <img 
+                  src="/shaun-beach-couple.jpg" 
+                  alt="Shaun and Shannon Critzer" 
+                  className="w-full h-auto"
+                />
+              </div>
               <Card className="p-8 bg-gradient-to-br from-primary/10 to-secondary/10">
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
