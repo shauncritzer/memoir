@@ -185,12 +185,20 @@
 - [x] Create comprehensive email copy-paste guides for Shaun
 - [x] Replace homepage hero photo per Shaun's request (bodybuilding photo - clean background)
 
-### Still Need to Fix (Requires Live Site Access)
-- [ ] Fix broken homepage buttons (need to test which specific buttons are broken)
-- [ ] Fix PDF content - all PDFs are empty/pre-formatted templates, need actual content
-- [ ] Fix form email delivery - test if ConvertKit integration actually triggers
+### Completed Tonight (Continued)
+- [x] Test all homepage buttons and identify broken ones
+- [x] Fix all 4 broken CTA buttons:
+  - "Read the First 3 Chapters" → now links to /resources
+  - "Watch My Story" → now links to YouTube channel
+  - "Get the Free Chapters" → now links to /resources  
+  - "Buy the Full Book" → now links to Amazon (placeholder URL)
+
+### Still Need to Fix
+- [ ] Update Amazon book URL when book is published
+- [ ] Fix PDF content - all PDFs are empty/pre-formatted templates, need actual memoir content
+- [ ] Test form email delivery - verify ConvertKit integration triggers
 - [ ] Test lead magnet downloads end-to-end
-- [ ] Verify all navigation links work correctly
+- [ ] Verify all navigation and footer links work correctly
 
 ### ConvertKit Manual Work (Shaun's Tasks)
 - [ ] Paste remaining 23 email contents into ConvertKit (30-45 min using guide)

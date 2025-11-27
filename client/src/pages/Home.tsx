@@ -91,12 +91,16 @@ export default function Home() {
                 A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                  Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8">
-                  Watch My Story
-                </Button>
+                <Link href="/resources">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+                    Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <a href="https://www.youtube.com/@ShaunCritzer" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="text-lg px-8">
+                    Watch My Story
+                  </Button>
+                </a>
               </div>
             </div>
             <div className="relative">
@@ -220,12 +224,16 @@ export default function Home() {
               Whether you're in active addiction, early recovery, or supporting someone who is—this memoir will show you that broken things can heal, that crooked lines can lead somewhere beautiful, and that redemption is real.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                Get the Free Chapters <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
-                Buy the Full Book
-              </Button>
+              <Link href="/resources">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+                  Get the Free Chapters <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <a href="https://www.amazon.com/dp/YOURBOOK" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" variant="outline" className="text-lg px-8">
+                  Buy the Full Book
+                </Button>
+              </a>
             </div>
           </div>
         </div>
