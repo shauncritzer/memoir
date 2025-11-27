@@ -73,3 +73,71 @@
 
 ## Bugs to Fix
 - [x] Fix nested anchor tags in navigation (Link component already renders <a>)
+
+## New Integration Tasks - Rewired Program
+
+### Rewired Program Development
+- [ ] Create Rewired 7-Day Reset Challenge content
+- [ ] Create Rewired 30-Day Foundation Program
+- [ ] Build Rewired landing page on website
+- [ ] Create AI Recovery Coach (free lead magnet)
+- [ ] Design nervous system education content
+- [ ] Create somatic practice guides and worksheets
+- [ ] Build Rewired sales page with payment integration
+
+### Website Enhancements
+- [ ] Upload and integrate personal photos (current, family, bodybuilding, childhood)
+- [ ] Create photo gallery for About page
+- [ ] Add hero image to homepage
+- [ ] Design visual timeline for recovery journey
+- [ ] Update brand to be gender-inclusive (not men-only)
+- [ ] Remove explicit language, use inclusive recovery terms
+
+### ConvertKit Integration
+- [ ] Connect ConvertKit API to website
+- [ ] Import all 7 email sequences into ConvertKit
+- [ ] Set up automation workflows
+- [ ] Create forms for each lead magnet
+- [ ] Test email delivery system
+- [ ] Set up tags and segments
+
+### Unified Ecosystem
+- [ ] Integrate memoir funnel → Rewired funnel
+- [ ] Create cross-promotion between offerings
+- [ ] Build unified navigation across all products
+- [ ] Design cohesive brand identity
+- [ ] Create master funnel strategy document
+
+## Immediate Tasks - Thanksgiving Week
+
+### ConvertKit Integration (IN PROGRESS)
+- [x] Connect ConvertKit API to website
+- [ ] Create all forms in ConvertKit (Shaun's task - see CONVERTKIT_SETUP_GUIDE.md)
+- [ ] Import email sequences (Shaun's task - content ready)
+- [ ] Set up tags and automation (Shaun's task - guide provided)
+- [ ] Get Form IDs and Tag IDs from Shaun to update code
+- [ ] Test email delivery
+
+### Photo Integration (IN PROGRESS)
+- [ ] Review and select best photos from 47 uploaded
+- [ ] Optimize photos for web
+- [ ] Integrate into homepage hero
+- [ ] Build photo-rich About page
+- [ ] Add instructor photos to course pages
+
+### Kajabi Preparation (Black Friday)
+- [ ] Purchase Kajabi (50% off Black Friday deal)
+- [ ] Prepare course content for Kajabi upload
+- [ ] Create Kajabi integration strategy
+- [ ] Decide: Kajabi standalone or integrated with website
+
+### Social Media Setup
+- [ ] Create Instagram: @shauncritzer
+- [ ] Create YouTube: Shaun Critzer
+- [ ] Create TikTok: @shauncritzer
+- [ ] Create Facebook Page: Shaun Critzer
+- [ ] Set up consistent branding across all platforms
+
+### Launch Timeline
+- [ ] Soft launch: December 9-15 (personal network)
+- [ ] Big launch: January 1, 2026 (New Year momentum)

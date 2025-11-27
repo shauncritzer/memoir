@@ -13,6 +13,7 @@ import {
   getBlogPostBySlug,
   incrementBlogPostViews,
 } from "./db";
+import { subscribeForLeadMagnet } from "./convertkit";
 
 export const appRouter = router({
   system: systemRouter,
@@ -111,6 +112,25 @@ export const appRouter = router({
           downloadUrl: leadMagnet.fileUrl,
           leadMagnet,
         };
+      }),
+  }),
+
+  // ConvertKit integration
+  convertkit: router({
+    subscribeForLeadMagnet: publicProcedure
+      .input(
+        z.object({
+          email: z.string().email(),
+          firstName: z.string().optional(),
+          leadMagnetType: z.enum(["first_3_chapters", "recovery_toolkit", "reading_guide", "ai_coach"]),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const result = await subscribeForLeadMagnet(input);
+        if (!result.success) {
+          throw new Error(result.error || "Failed to subscribe to ConvertKit");
+        }
+        return { success: true };
       }),
   }),
 
