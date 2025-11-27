@@ -156,6 +156,43 @@ export async function incrementBlogPostViews(id: number): Promise<void> {
     .where(eq(blogPosts.id, id));
 }
 
+export async function updateBlogPost(id: number, updates: Partial<InsertBlogPost>): Promise<BlogPost> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(blogPosts)
+    .set(updates)
+    .where(eq(blogPosts.id, id));
+  
+  const updated = await db
+    .select()
+    .from(blogPosts)
+    .where(eq(blogPosts.id, id))
+    .limit(1);
+  
+  return updated[0]!;
+}
+
+export async function deleteBlogPost(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .delete(blogPosts)
+    .where(eq(blogPosts.id, id));
+}
+
+export async function getAllBlogPosts(): Promise<BlogPost[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(blogPosts)
+    .orderBy(desc(blogPosts.createdAt));
+}
+
 // Email Subscribers
 export async function createEmailSubscriber(subscriber: InsertEmailSubscriber): Promise<EmailSubscriber> {
   const db = await getDb();

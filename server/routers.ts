@@ -183,6 +183,7 @@ export const appRouter = router({
 
   // Blog
   blog: router({
+    // Public procedures
     list: publicProcedure
       .input(z.object({
         limit: z.number().min(1).max(100).default(10),
@@ -205,6 +206,113 @@ export const appRouter = router({
         }
         
         return post;
+      }),
+    
+    // Admin-only procedures for blog management
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        content: z.string().min(1),
+        excerpt: z.string().optional(),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).default("draft"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is owner
+        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+          throw new Error("Unauthorized: Only the owner can create blog posts");
+        }
+        
+        const { createBlogPost } = await import("./db");
+        
+        // Generate slug from title
+        const slug = input.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+        
+        return createBlogPost({
+          title: input.title,
+          slug,
+          content: input.content,
+          excerpt: input.excerpt,
+          coverImage: input.coverImage,
+          category: input.category,
+          tags: input.tags ? JSON.stringify(input.tags) : undefined,
+          status: input.status,
+          authorId: ctx.user.id,
+          publishedAt: input.status === "published" ? new Date() : undefined,
+        });
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        content: z.string().min(1).optional(),
+        excerpt: z.string().optional(),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is owner
+        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+          throw new Error("Unauthorized: Only the owner can update blog posts");
+        }
+        
+        const { updateBlogPost } = await import("./db");
+        
+        const updates: any = {};
+        if (input.title) {
+          updates.title = input.title;
+          // Regenerate slug if title changes
+          updates.slug = input.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+        }
+        if (input.content !== undefined) updates.content = input.content;
+        if (input.excerpt !== undefined) updates.excerpt = input.excerpt;
+        if (input.coverImage !== undefined) updates.coverImage = input.coverImage;
+        if (input.category !== undefined) updates.category = input.category;
+        if (input.tags) updates.tags = JSON.stringify(input.tags);
+        if (input.status) {
+          updates.status = input.status;
+          // Set publishedAt when changing to published
+          if (input.status === "published") {
+            updates.publishedAt = new Date();
+          }
+        }
+        
+        return updateBlogPost(input.id, updates);
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is owner
+        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+          throw new Error("Unauthorized: Only the owner can delete blog posts");
+        }
+        
+        const { deleteBlogPost } = await import("./db");
+        return deleteBlogPost(input.id);
+      }),
+    
+    // Get all posts including drafts (admin only)
+    listAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is owner
+        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+          throw new Error("Unauthorized: Only the owner can view all posts");
+        }
+        
+        const { getAllBlogPosts } = await import("./db");
+        return getAllBlogPosts();
       }),
   }),
 });

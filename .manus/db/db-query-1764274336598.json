@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, title, SUBSTRING(content, 1, 300) as preview FROM blog_posts LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3q3JgbnADWj9PiL.3d9e2e7d484b --database TkLS7ZKMcJdwidVi9JjC4w --execute SELECT id, title, SUBSTRING(content, 1, 300) as preview FROM blog_posts LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "The Difference Between Sobriety and Recovery",
+      "preview": "# The Difference Between Sobriety and Recovery"
+    }
+  ],
+  "messages": [
+    "For years, I thought sobriety and recovery were the same thing. I was wrong, and that misunderstanding almost cost me everything.",
+    "## What Sobriety Looked Like for Me",
+    "Between 2002 and 2012, I had multiple periods of sobriety. Weeks, sometimes months, "
+  ],
+  "stdout": "id\ttitle\tpreview\n1\tThe Difference Between Sobriety and Recovery\t# The Difference Between Sobriety and Recovery\n\nFor years, I thought sobriety and recovery were the same thing. I was wrong, and that misunderstanding almost cost me everything.\n\n## What Sobriety Looked Like for Me\n\nBetween 2002 and 2012, I had multiple periods of sobriety. Weeks, sometimes months, \n",
+  "stderr": "",
+  "execution_time_ms": 1169
+}

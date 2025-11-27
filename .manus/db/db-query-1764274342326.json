@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, title, content LIKE \"% ' t%\" as has_error FROM blog_posts;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3q3JgbnADWj9PiL.3d9e2e7d484b --database TkLS7ZKMcJdwidVi9JjC4w --execute SELECT id, title, content LIKE \"% ' t%\" as has_error FROM blog_posts;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "The Difference Between Sobriety and Recovery",
+      "has_error": "0"
+    },
+    {
+      "id": "2",
+      "title": "Why I Finally Talked About My Childhood Sexual Abuse",
+      "has_error": "0"
+    },
+    {
+      "id": "3",
+      "title": "The Armor We Build Becomes Our Prison",
+      "has_error": "0"
+    },
+    {
+      "id": "4",
+      "title": "What EMDR Therapy Did for My Trauma (And Why Talk Therapy Wasn't Enough)",
+      "has_error": "0"
+    },
+    {
+      "id": "5",
+      "title": "How I Co-Parent Peacefully with My Ex-Wife After Everything We Put Each Other Through",
+      "has_error": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\thas_error\n1\tThe Difference Between Sobriety and Recovery\t0\n2\tWhy I Finally Talked About My Childhood Sexual Abuse\t0\n3\tThe Armor We Build Becomes Our Prison\t0\n4\tWhat EMDR Therapy Did for My Trauma (And Why Talk Therapy Wasn't Enough)\t0\n5\tHow I Co-Parent Peacefully with My Ex-Wife After Everything We Put Each Other Through\t0\n",
+  "stderr": "",
+  "execution_time_ms": 112
+}
