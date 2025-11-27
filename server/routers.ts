@@ -13,7 +13,7 @@ import {
   getBlogPostBySlug,
   incrementBlogPostViews,
 } from "./db";
-import { subscribeForLeadMagnet } from "./convertkit";
+import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
 
 export const appRouter = router({
   system: systemRouter,
@@ -39,6 +39,7 @@ export const appRouter = router({
         source: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
+        // Create subscriber in local database
         const subscriber = await createEmailSubscriber({
           email: input.email,
           firstName: input.firstName,
@@ -46,6 +47,32 @@ export const appRouter = router({
           source: input.source || "website",
           status: "active",
         });
+        
+        // Subscribe to ConvertKit based on source
+        const sourceFormMap: Record<string, string> = {
+          "homepage": CONVERTKIT_FORMS.HOMEPAGE_NEWSLETTER,
+          "blog-sidebar": CONVERTKIT_FORMS.BLOG_SIDEBAR,
+        };
+        
+        const sourceTagMap: Record<string, number> = {
+          "homepage": CONVERTKIT_TAGS.HOMEPAGE_NEWSLETTER,
+          "blog-sidebar": CONVERTKIT_TAGS.BLOG_SIDEBAR,
+        };
+        
+        const formUid = sourceFormMap[input.source || "homepage"] || CONVERTKIT_FORMS.HOMEPAGE_NEWSLETTER;
+        const tagId = sourceTagMap[input.source || "homepage"] || CONVERTKIT_TAGS.HOMEPAGE_NEWSLETTER;
+        
+        try {
+          await subscribeToForm({
+            email: input.email,
+            firstName: input.firstName,
+            formUid,
+            tags: [tagId, CONVERTKIT_TAGS.ACTIVE_SUBSCRIBER],
+          });
+        } catch (error) {
+          console.error("ConvertKit subscription failed:", error);
+          // Don't fail the subscription if ConvertKit fails
+        }
         
         return {
           success: true,
@@ -88,7 +115,7 @@ export const appRouter = router({
           throw new Error("Lead magnet not found");
         }
         
-        // Get or create subscriber
+        // Get or create subscriber in local database
         let subscriber = await getEmailSubscriberByEmail(input.email);
         if (!subscriber) {
           subscriber = await createEmailSubscriber({
@@ -96,6 +123,26 @@ export const appRouter = router({
             source: `lead-magnet-${input.slug}`,
             status: "active",
           });
+        }
+        
+        // Subscribe to ConvertKit (this triggers email sequence with download link)
+        const leadMagnetTypeMap: Record<string, "first_3_chapters" | "recovery_toolkit" | "reading_guide"> = {
+          "first-3-chapters": "first_3_chapters",
+          "recovery-toolkit": "recovery_toolkit",
+          "reading-guide": "reading_guide",
+        };
+        
+        const leadMagnetType = leadMagnetTypeMap[input.slug];
+        if (leadMagnetType) {
+          try {
+            await subscribeForLeadMagnet({
+              email: input.email,
+              leadMagnetType,
+            });
+          } catch (error) {
+            console.error("ConvertKit subscription failed:", error);
+            // Don't fail the download if ConvertKit fails
+          }
         }
         
         // Track download
@@ -122,7 +169,7 @@ export const appRouter = router({
         z.object({
           email: z.string().email(),
           firstName: z.string().optional(),
-          leadMagnetType: z.enum(["first_3_chapters", "recovery_toolkit", "reading_guide", "ai_coach"]),
+          leadMagnetType: z.enum(["first_3_chapters", "recovery_toolkit", "reading_guide"]),
         })
       )
       .mutation(async ({ input }) => {

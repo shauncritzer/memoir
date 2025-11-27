@@ -141,3 +141,37 @@
 ### Launch Timeline
 - [ ] Soft launch: December 9-15 (personal network)
 - [ ] Big launch: January 1, 2026 (New Year momentum)
+
+## New Tasks - Logo, Photos, ConvertKit Direct Setup
+
+### Logo Creation
+- [ ] Design professional logo for Shaun Critzer brand
+- [ ] Create variations (full logo, icon only, light/dark versions)
+- [ ] Integrate logo into website
+- [ ] Update favicon
+
+### Additional Photos
+- [ ] Extract and analyze new photos from ShaunPics(2).zip
+- [ ] Select best photos for memoir cover
+- [ ] Choose additional website photos
+- [ ] Optimize all photos for web
+- [ ] Upload photos to website public folder
+
+### Memoir Cover Design
+- [ ] Design 3-5 memoir cover concepts
+- [ ] Present options to Shaun for selection
+- [ ] Create final cover design
+
+### ConvertKit Direct Setup - BACKEND COMPLETE ✅
+- [x] Get ConvertKit login access
+- [x] Create 10 tags via API
+- [x] Create all 7 forms through browser (all Form UIDs collected)
+- [x] Update website code with all Form UIDs and backend integration
+- [x] Create First 3 Chapters Welcome Series (5 emails, 14 days) - COMPLETE
+- [x] Create Reading Guide Delivery Series Email 1 (ready to publish)
+- [x] Create comprehensive copy-paste guide for remaining 23 emails
+- [x] Create automation setup guide
+- [x] Create master integration documentation
+- [ ] Shaun: Paste remaining 23 emails into ConvertKit (30-45 min)
+- [ ] Shaun: Set up 6 automation rules (30-45 min)
+- [ ] Shaun: Test complete system (15-30 min)

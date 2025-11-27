@@ -11,34 +11,32 @@ const CONVERTKIT_API_SECRET = "x9Uzt8Xs2179XCHdJ6vZrb_-sq12AGihK_sxmuqK3ZY";
 const CONVERTKIT_API_BASE = "https://api.convertkit.com/v3";
 
 /**
- * Form IDs - These will be created in ConvertKit and updated here
+ * Form UIDs - From ConvertKit (used in API calls)
+ * These are the unique identifiers from the embed codes
  */
 export const CONVERTKIT_FORMS = {
-  FIRST_3_CHAPTERS: 0, // To be created
-  RECOVERY_TOOLKIT: 0, // To be created
-  READING_GUIDE: 0, // To be created
-  AI_RECOVERY_COACH: 0, // To be created
-  NERVOUS_SYSTEM_ASSESSMENT: 0, // To be created
-  NEWSLETTER: 0, // To be created
-  COURSE_WAITLIST: 0, // To be created
+  FIRST_3_CHAPTERS: 'd43af38a5e',
+  RECOVERY_TOOLKIT: '3a152c8af9',
+  READING_GUIDE: 'dd5d1bcd6a',
+  HOMEPAGE_NEWSLETTER: '776aa512c9',
+  BLOG_SIDEBAR: '01295fddb5',
+  COURSE_INTEREST: '5e54fb6d38',
 };
 
 /**
- * Tag IDs - These will be created in ConvertKit and updated here
+ * Tag IDs - Created in ConvertKit via API
  */
 export const CONVERTKIT_TAGS = {
-  LEAD_MAGNET_FIRST_3_CHAPTERS: 0,
-  LEAD_MAGNET_RECOVERY_TOOLKIT: 0,
-  LEAD_MAGNET_READING_GUIDE: 0,
-  LEAD_MAGNET_AI_COACH: 0,
-  INTEREST_MEMOIR: 0,
-  INTEREST_REWIRED: 0,
-  INTEREST_WEALTH: 0,
-  CUSTOMER_7_DAY_RESET: 0,
-  CUSTOMER_30_DAY_FOUNDATION: 0,
-  CUSTOMER_FROM_BROKEN_TO_WHOLE: 0,
-  CUSTOMER_90_DAY_RESET: 0,
-  MEMBER_ACTIVE: 0,
+  LEAD_MAGNET_FIRST_3_CHAPTERS: 8012734,
+  LEAD_MAGNET_RECOVERY_TOOLKIT: 8012736,
+  LEAD_MAGNET_READING_GUIDE: 8012735,
+  HOMEPAGE_NEWSLETTER: 8012737,
+  BLOG_SIDEBAR: 8012738,
+  COURSE_INTEREST: 8012739,
+  MEMOIR_READER: 8012740,
+  REWIRED_INTEREST: 8012741,
+  ACTIVE_SUBSCRIBER: 8012742,
+  LEAD_MAGNET_DOWNLOADED: 8012743,
 };
 
 /**
@@ -47,11 +45,11 @@ export const CONVERTKIT_TAGS = {
 export async function subscribeToForm(params: {
   email: string;
   firstName?: string;
-  formId: number;
+  formUid: string;
   tags?: number[];
 }): Promise<{ success: boolean; subscriberId?: number; error?: string }> {
   try {
-    const response = await fetch(`${CONVERTKIT_API_BASE}/forms/${params.formId}/subscribe`, {
+    const response = await fetch(`${CONVERTKIT_API_BASE}/forms/${params.formUid}/subscribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -178,26 +176,24 @@ export async function unsubscribe(email: string): Promise<{ success: boolean; er
 export async function subscribeForLeadMagnet(params: {
   email: string;
   firstName?: string;
-  leadMagnetType: "first_3_chapters" | "recovery_toolkit" | "reading_guide" | "ai_coach";
+  leadMagnetType: "first_3_chapters" | "recovery_toolkit" | "reading_guide";
 }): Promise<{ success: boolean; error?: string }> {
   const formMap = {
     first_3_chapters: CONVERTKIT_FORMS.FIRST_3_CHAPTERS,
     recovery_toolkit: CONVERTKIT_FORMS.RECOVERY_TOOLKIT,
     reading_guide: CONVERTKIT_FORMS.READING_GUIDE,
-    ai_coach: CONVERTKIT_FORMS.AI_RECOVERY_COACH,
   };
 
   const tagMap = {
     first_3_chapters: CONVERTKIT_TAGS.LEAD_MAGNET_FIRST_3_CHAPTERS,
     recovery_toolkit: CONVERTKIT_TAGS.LEAD_MAGNET_RECOVERY_TOOLKIT,
     reading_guide: CONVERTKIT_TAGS.LEAD_MAGNET_READING_GUIDE,
-    ai_coach: CONVERTKIT_TAGS.LEAD_MAGNET_AI_COACH,
   };
 
-  const formId = formMap[params.leadMagnetType];
+  const formUid = formMap[params.leadMagnetType];
   const tagId = tagMap[params.leadMagnetType];
 
-  if (!formId) {
+  if (!formUid) {
     return { success: false, error: "Form not configured in ConvertKit yet" };
   }
 
@@ -205,8 +201,8 @@ export async function subscribeForLeadMagnet(params: {
   const result = await subscribeToForm({
     email: params.email,
     firstName: params.firstName,
-    formId,
-    tags: tagId ? [tagId] : undefined,
+    formUid,
+    tags: tagId ? [tagId, CONVERTKIT_TAGS.LEAD_MAGNET_DOWNLOADED] : [CONVERTKIT_TAGS.LEAD_MAGNET_DOWNLOADED],
   });
 
   return result;

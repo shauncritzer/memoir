@@ -4,14 +4,40 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Heart, Users, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Home() {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const subscribeMutation = trpc.email.subscribe.useMutation();
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement email capture
-    console.log("Email submitted:", email);
+    
+    if (!email) return;
+
+    setIsSubmitting(true);
+
+    try {
+      await subscribeMutation.mutateAsync({
+        email,
+        source: "homepage",
+      });
+
+      toast.success("Success!", {
+        description: "Check your email for the first 3 chapters. You've also been added to our weekly newsletter.",
+      });
+
+      setEmail("");
+    } catch (error) {
+      toast.error("Something went wrong", {
+        description: "Please try again or contact support.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -106,8 +132,13 @@ export default function Home() {
                 className="bg-white text-foreground flex-1"
                 required
               />
-              <Button type="submit" size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                Get Free Chapters
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Subscribing..." : "Get Free Chapters"}
               </Button>
             </form>
             <p className="text-sm opacity-75">
