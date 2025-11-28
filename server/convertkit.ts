@@ -11,32 +11,32 @@ const CONVERTKIT_API_SECRET = "x9Uzt8Xs2179XCHdJ6vZrb_-sq12AGihK_sxmuqK3ZY";
 const CONVERTKIT_API_BASE = "https://api.convertkit.com/v3";
 
 /**
- * Form UIDs - From ConvertKit (used in API calls)
- * These are the unique identifiers from the embed codes
+ * Form IDs - From ConvertKit (used in API calls)
+ * These are the numeric IDs from the form URLs in ConvertKit dashboard
  */
 export const CONVERTKIT_FORMS = {
-  FIRST_3_CHAPTERS: 'd43af38a5e',
-  RECOVERY_TOOLKIT: '3a152c8af9',
-  READING_GUIDE: 'dd5d1bcd6a',
-  HOMEPAGE_NEWSLETTER: '776aa512c9',
-  BLOG_SIDEBAR: '01295fddb5',
-  COURSE_INTEREST: '5e54fb6d38',
+  FIRST_3_CHAPTERS: '8815112',
+  RECOVERY_TOOLKIT: '8815131',
+  READING_GUIDE: '8815140',
+  HOMEPAGE_NEWSLETTER: '776aa512c9', // TODO: Get correct ID from ConvertKit
+  BLOG_SIDEBAR: '01295fddb5', // TODO: Get correct ID from ConvertKit
+  COURSE_INTEREST: '5e54fb6d38', // TODO: Get correct ID from ConvertKit
 };
 
 /**
- * Tag IDs - Created in ConvertKit via API
+ * Tag IDs - From ConvertKit dashboard (hover over tag to see ID in URL)
  */
 export const CONVERTKIT_TAGS = {
-  LEAD_MAGNET_FIRST_3_CHAPTERS: 8012734,
-  LEAD_MAGNET_RECOVERY_TOOLKIT: 8012736,
-  LEAD_MAGNET_READING_GUIDE: 8012735,
-  HOMEPAGE_NEWSLETTER: 8012737,
-  BLOG_SIDEBAR: 8012738,
-  COURSE_INTEREST: 8012739,
-  MEMOIR_READER: 8012740,
-  REWIRED_INTEREST: 8012741,
-  ACTIVE_SUBSCRIBER: 8012742,
-  LEAD_MAGNET_DOWNLOADED: 8012743,
+  LEAD_MAGNET_FIRST_3_CHAPTERS: 12900740,
+  LEAD_MAGNET_RECOVERY_TOOLKIT: 12900742,
+  LEAD_MAGNET_READING_GUIDE: 12900743,
+  HOMEPAGE_NEWSLETTER: 8012737, // TODO: Get correct ID from ConvertKit
+  BLOG_SIDEBAR: 8012738, // TODO: Get correct ID from ConvertKit
+  COURSE_INTEREST: 8012739, // TODO: Get correct ID from ConvertKit
+  MEMOIR_READER: 8012740, // TODO: Get correct ID from ConvertKit
+  REWIRED_INTEREST: 8012741, // TODO: Get correct ID from ConvertKit
+  ACTIVE_SUBSCRIBER: 8012742, // TODO: Get correct ID from ConvertKit
+  LEAD_MAGNET_DOWNLOADED: 8012743, // TODO: Get correct ID from ConvertKit
 };
 
 /**

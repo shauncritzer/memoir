@@ -1,0 +1,26 @@
+{
+  "query": "SELECT * FROM lead_magnets WHERE slug = 'first-3-chapters'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3q3JgbnADWj9PiL.3d9e2e7d484b --database TkLS7ZKMcJdwidVi9JjC4w --execute SELECT * FROM lead_magnets WHERE slug = 'first-3-chapters'",
+  "rows": [
+    {
+      "id": "1",
+      "title": "First 3 Chapters - Free Excerpt",
+      "slug": "first-3-chapters",
+      "description": "Read the prologue and first two chapters of Crooked Lines: Bent, Not Broken. Experience the raw, unflinching honesty that makes this memoir a life-changing read.",
+      "file_url": "https://d2xsxph8kpxj0f.cloudfront.net/96788853/TkLS7ZKMcJdwidVi9JjC4w/lead-magnets/first-3-chapters-9b4f468c31f44739.pdf",
+      "file_key": "lead-magnets/first-3-chapters-9b4f468c31f44739.pdf",
+      "cover_image": "NULL",
+      "type": "pdf",
+      "is_paid": "0",
+      "price": "0",
+      "download_count": "10",
+      "status": "active",
+      "created_at": "2025-11-26 04:23:03",
+      "updated_at": "2025-11-27 23:53:19"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tslug\tdescription\tfile_url\tfile_key\tcover_image\ttype\tis_paid\tprice\tdownload_count\tstatus\tcreated_at\tupdated_at\n1\tFirst 3 Chapters - Free Excerpt\tfirst-3-chapters\tRead the prologue and first two chapters of Crooked Lines: Bent, Not Broken. Experience the raw, unflinching honesty that makes this memoir a life-changing read.\thttps://d2xsxph8kpxj0f.cloudfront.net/96788853/TkLS7ZKMcJdwidVi9JjC4w/lead-magnets/first-3-chapters-9b4f468c31f44739.pdf\tlead-magnets/first-3-chapters-9b4f468c31f44739.pdf\tNULL\tpdf\t0\t0\t10\tactive\t2025-11-26 04:23:03\t2025-11-27 23:53:19\n",
+  "stderr": "",
+  "execution_time_ms": 90
+}

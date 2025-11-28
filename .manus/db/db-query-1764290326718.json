@@ -1,0 +1,21 @@
+{
+  "query": "SELECT * FROM users LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3q3JgbnADWj9PiL.3d9e2e7d484b --database TkLS7ZKMcJdwidVi9JjC4w --execute SELECT * FROM users LIMIT 1",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "shaun-admin",
+      "name": "Shaun Critzer",
+      "email": "shaun@shauncritzer.com",
+      "loginMethod": "manual",
+      "role": "admin",
+      "createdAt": "2025-11-26 04:26:52",
+      "updatedAt": "2025-11-26 04:26:52",
+      "lastSignedIn": "2025-11-26 04:26:52"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\tloginMethod\trole\tcreatedAt\tupdatedAt\tlastSignedIn\n1\tshaun-admin\tShaun Critzer\tshaun@shauncritzer.com\tmanual\tadmin\t2025-11-26 04:26:52\t2025-11-26 04:26:52\t2025-11-26 04:26:52\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

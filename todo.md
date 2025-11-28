@@ -296,3 +296,26 @@
 - [x] Create BlogEditor page component with full CRUD functionality
 - [x] Add /admin/blog-editor route to App.tsx
 - [x] Implement owner-only authorization checks
+
+
+## URGENT FIXES - November 27 Evening
+
+- [ ] Fix blog editor authorization (showing "Unauthorized" for owner)
+- [ ] Fix ConvertKit email capture integration (emails not syncing)
+- [ ] Upload lead magnet content to ConvertKit forms
+- [x] Apply ChatGPT polish pass to memoir (remove redundancies, fix headings, clean duplicate end-matter)
+  - [x] Removed 221 lines of duplicate end-matter (Acknowledgments, Epilogue, Resources)
+  - [x] Fixed chapter headings (Ch 11: The Mentor, Ch 14: removed Strauss subtitle)
+  - [x] Removed duplicate jail gratitude story and three indispensables explanation
+  - [x] Fixed typos and formatting issues
+  - [x] Final: 7,160 lines (down from 7,410)
+
+
+## ConvertKit Handoff to Claude - November 27, 2025
+
+- [x] Create detailed ConvertKit integration instructions for Claude
+- [x] Document current state (what's been tried, what failed)
+- [x] Provide all credentials and IDs
+- [x] Create complete email sequences with exact day spacing (all 7 sequences, 31 emails total)
+- [x] Format sequences for easy copy-paste into ConvertKit
+- [x] Include automation rules and trigger setup

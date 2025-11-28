@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE lead_magnets SET file_url = 'https://files.manuscdn.com/user_upload_by_module/session_file/96788853/lMQMaTAKVQTHrWam.pdf', file_key = 'user_upload_by_module/session_file/96788853/lMQMaTAKVQTHrWam.pdf' WHERE slug = 'reading-guide'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3q3JgbnADWj9PiL.3d9e2e7d484b --database TkLS7ZKMcJdwidVi9JjC4w --execute UPDATE lead_magnets SET file_url = 'https://files.manuscdn.com/user_upload_by_module/session_file/96788853/lMQMaTAKVQTHrWam.pdf', file_key = 'user_upload_by_module/session_file/96788853/lMQMaTAKVQTHrWam.pdf' WHERE slug = 'reading-guide'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,8 +127,25 @@ export default function BlogEditor() {
     }
   };
 
+  // Check if user is logged in
+  if (!user) {
+    return (
+      <div className="container max-w-4xl py-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Please Log In</CardTitle>
+            <CardDescription>
+              You must be logged in to access the blog editor. <a href={getLoginUrl()} className="text-primary underline">Click here to log in</a>.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   // Check if user is owner
-  if (!user || user.openId !== import.meta.env.VITE_OWNER_OPEN_ID) {
+  const ownerOpenId = import.meta.env.VITE_OWNER_OPEN_ID;
+  if (user.openId !== ownerOpenId) {
     return (
       <div className="container max-w-4xl py-12">
         <Card>
@@ -136,6 +154,13 @@ export default function BlogEditor() {
             <CardDescription>
               Only the site owner can access the blog editor.
             </CardDescription>
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">Debug info:</p>
+              <pre className="text-xs bg-muted p-2 rounded mt-2">
+                Your openId: {user.openId}\n
+                Expected: {ownerOpenId}
+              </pre>
+            </CardContent>
           </CardHeader>
         </Card>
       </div>

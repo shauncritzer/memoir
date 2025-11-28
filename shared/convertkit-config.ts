@@ -5,28 +5,28 @@
  */
 
 export const CONVERTKIT_CONFIG = {
-  // Form UIDs (from ConvertKit form embed codes)
+  // Form IDs (from ConvertKit dashboard URLs)
   FORMS: {
-    FIRST_3_CHAPTERS: 'd43af38a5e',
-    READING_GUIDE: 'dd5d1bcd6a',
-    RECOVERY_TOOLKIT: '3a152c8af9',
-    HOMEPAGE_NEWSLETTER: '776aa512c9',
-    BLOG_SIDEBAR: '01295fddb5',
-    COURSE_INTEREST: '5e54fb6d38',
+    FIRST_3_CHAPTERS: '8815112',
+    READING_GUIDE: '8815140',
+    RECOVERY_TOOLKIT: '8815131',
+    HOMEPAGE_NEWSLETTER: '776aa512c9', // TODO: Get correct ID
+    BLOG_SIDEBAR: '01295fddb5', // TODO: Get correct ID
+    COURSE_INTEREST: '5e54fb6d38', // TODO: Get correct ID
   },
 
-  // Tag IDs (created via API)
+  // Tag IDs (from ConvertKit dashboard - hover over tag to see ID in URL)
   TAGS: {
-    FIRST_3_CHAPTERS: 8012734,
-    READING_GUIDE: 8012735,
-    RECOVERY_TOOLKIT: 8012736,
-    HOMEPAGE_NEWSLETTER: 8012737,
-    BLOG_SIDEBAR: 8012738,
-    COURSE_INTEREST: 8012739,
-    MEMOIR_READER: 8012740,
-    REWIRED_INTEREST: 8012741,
-    ACTIVE_SUBSCRIBER: 8012742,
-    LEAD_MAGNET_DOWNLOADED: 8012743,
+    FIRST_3_CHAPTERS: 12900740,
+    READING_GUIDE: 12900743,
+    RECOVERY_TOOLKIT: 12900742,
+    HOMEPAGE_NEWSLETTER: 8012737, // TODO: Get correct ID
+    BLOG_SIDEBAR: 8012738, // TODO: Get correct ID
+    COURSE_INTEREST: 8012739, // TODO: Get correct ID
+    MEMOIR_READER: 8012740, // TODO: Get correct ID
+    REWIRED_INTEREST: 8012741, // TODO: Get correct ID
+    ACTIVE_SUBSCRIBER: 8012742, // TODO: Get correct ID
+    LEAD_MAGNET_DOWNLOADED: 8012743, // TODO: Get correct ID
   },
 } as const;
 
