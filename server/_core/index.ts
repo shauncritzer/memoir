@@ -30,6 +30,36 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Stripe webhook endpoint (must be before body parser middleware)
+  // Stripe requires raw body for signature verification
+  app.post(
+    "/api/stripe/webhook",
+    express.raw({ type: "application/json" }),
+    async (req, res) => {
+      try {
+        const { handleWebhook } = await import("../stripe");
+        const signature = req.headers["stripe-signature"];
+
+        if (!signature || typeof signature !== "string") {
+          res.status(400).send("Missing stripe-signature header");
+          return;
+        }
+
+        const result = await handleWebhook({
+          payload: req.body.toString(),
+          signature,
+        });
+
+        res.json(result);
+      } catch (error) {
+        const err = error as Error;
+        console.error("Webhook error:", err.message);
+        res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+    }
+  );
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

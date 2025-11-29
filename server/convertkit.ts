@@ -171,6 +171,85 @@ export async function unsubscribe(email: string): Promise<{ success: boolean; er
 }
 
 /**
+ * General subscribe to ConvertKit (with optional tags)
+ * Used for product purchases and general newsletter signups
+ */
+export async function subscribeToConvertKit(params: {
+  email: string;
+  firstName?: string;
+  source?: string;
+  tags?: (number | string)[];
+}): Promise<{ success: boolean; subscriberId?: number; error?: string }> {
+  try {
+    // First, check if subscriber exists
+    const existingSubscriber = await getSubscriber(params.email);
+
+    const tagIds = params.tags?.map(tag =>
+      typeof tag === 'string' ? parseInt(tag, 10) : tag
+    ).filter(id => !isNaN(id)) || [];
+
+    // If subscriber exists, just add tags
+    if (existingSubscriber.success && existingSubscriber.subscriber) {
+      // Add all tags
+      for (const tagId of tagIds) {
+        await tagSubscriber({
+          email: params.email,
+          tagId
+        });
+      }
+
+      return {
+        success: true,
+        subscriberId: existingSubscriber.subscriber.id
+      };
+    }
+
+    // Create new subscriber
+    const response = await fetch(`${CONVERTKIT_API_BASE}/subscribers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        api_secret: CONVERTKIT_API_SECRET,
+        email: params.email,
+        first_name: params.firstName,
+        fields: {
+          source: params.source || 'website'
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("[ConvertKit] Subscribe failed:", error);
+      return { success: false, error };
+    }
+
+    const data = await response.json();
+    const subscriberId = data.subscriber?.id;
+
+    // Add tags to the new subscriber
+    if (subscriberId && tagIds.length > 0) {
+      for (const tagId of tagIds) {
+        await tagSubscriber({
+          email: params.email,
+          tagId
+        });
+      }
+    }
+
+    return {
+      success: true,
+      subscriberId
+    };
+  } catch (error) {
+    console.error("[ConvertKit] Subscribe error:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
  * Helper: Subscribe and deliver lead magnet
  */
 export async function subscribeForLeadMagnet(params: {

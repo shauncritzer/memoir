@@ -12,8 +12,13 @@ import {
   getPublishedBlogPosts,
   getBlogPostBySlug,
   incrementBlogPostViews,
+  getActiveProducts,
+  getProductBySlug,
+  getOrderBySessionId,
+  getOrderByNumber,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
+import { createCheckoutSession, getCheckoutSession } from "./stripe";
 
 export const appRouter = router({
   system: systemRouter,
@@ -310,9 +315,93 @@ export const appRouter = router({
         if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
           throw new Error("Unauthorized: Only the owner can view all posts");
         }
-        
+
         const { getAllBlogPosts } = await import("./db");
         return getAllBlogPosts();
+      }),
+  }),
+
+  // Products & Stripe
+  products: router({
+    list: publicProcedure.query(async () => {
+      return getActiveProducts();
+    }),
+
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return getProductBySlug(input.slug);
+      }),
+
+    createCheckoutSession: publicProcedure
+      .input(z.object({
+        productSlug: z.string(),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const product = await getProductBySlug(input.productSlug);
+
+        if (!product) {
+          throw new Error("Product not found");
+        }
+
+        // Build success and cancel URLs based on current request
+        const protocol = ctx.req.headers["x-forwarded-proto"] || "http";
+        const host = ctx.req.headers.host || "localhost:3000";
+        const baseUrl = `${protocol}://${host}`;
+
+        const session = await createCheckoutSession({
+          productId: product.id,
+          email: input.email,
+          successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${baseUrl}/products/${product.slug}`,
+        });
+
+        return {
+          sessionId: session.sessionId,
+          url: session.url,
+        };
+      }),
+  }),
+
+  // Orders
+  orders: router({
+    getBySessionId: publicProcedure
+      .input(z.object({ sessionId: z.string() }))
+      .query(async ({ input }) => {
+        const order = await getOrderBySessionId(input.sessionId);
+
+        if (!order) {
+          return null;
+        }
+
+        // Get product details
+        const { getProductById } = await import("./db");
+        const product = await getProductById(order.productId);
+
+        return {
+          order,
+          product,
+        };
+      }),
+
+    getByOrderNumber: publicProcedure
+      .input(z.object({ orderNumber: z.string() }))
+      .query(async ({ input }) => {
+        const order = await getOrderByNumber(input.orderNumber);
+
+        if (!order) {
+          return null;
+        }
+
+        // Get product details
+        const { getProductById } = await import("./db");
+        const product = await getProductById(order.productId);
+
+        return {
+          order,
+          product,
+        };
       }),
   }),
 });

@@ -1,7 +1,7 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
+import {
+  InsertUser,
   users,
   blogPosts,
   BlogPost,
@@ -13,7 +13,16 @@ import {
   LeadMagnet,
   InsertLeadMagnet,
   leadMagnetDownloads,
-  InsertLeadMagnetDownload
+  InsertLeadMagnetDownload,
+  products,
+  Product,
+  InsertProduct,
+  orders,
+  Order,
+  InsertOrder,
+  paymentEvents,
+  PaymentEvent,
+  InsertPaymentEvent
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -269,12 +278,175 @@ export async function getLeadMagnetBySlug(slug: string): Promise<LeadMagnet | un
 export async function trackLeadMagnetDownload(download: InsertLeadMagnetDownload): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  
+
   await db.insert(leadMagnetDownloads).values(download);
-  
+
   // Increment download count
   await db
     .update(leadMagnets)
     .set({ downloadCount: sql`${leadMagnets.downloadCount} + 1` })
     .where(eq(leadMagnets.id, download.leadMagnetId));
+}
+
+// Products
+export async function getActiveProducts(): Promise<Product[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(products)
+    .where(eq(products.status, "active"))
+    .orderBy(products.createdAt);
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(products)
+    .where(and(
+      eq(products.slug, slug),
+      eq(products.status, "active")
+    ))
+    .limit(1);
+
+  return result[0];
+}
+
+export async function getProductById(id: number): Promise<Product | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(products)
+    .where(eq(products.id, id))
+    .limit(1);
+
+  return result[0];
+}
+
+export async function createProduct(product: InsertProduct): Promise<Product> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(products).values(product);
+  const insertedId = Number(result[0].insertId);
+
+  const inserted = await db
+    .select()
+    .from(products)
+    .where(eq(products.id, insertedId))
+    .limit(1);
+
+  return inserted[0]!;
+}
+
+// Orders
+export async function createOrder(order: InsertOrder): Promise<Order> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(orders).values(order);
+  const insertedId = Number(result[0].insertId);
+
+  const inserted = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, insertedId))
+    .limit(1);
+
+  return inserted[0]!;
+}
+
+export async function getOrderBySessionId(sessionId: string): Promise<Order | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.stripeSessionId, sessionId))
+    .limit(1);
+
+  return result[0];
+}
+
+export async function getOrderByNumber(orderNumber: string): Promise<Order | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.orderNumber, orderNumber))
+    .limit(1);
+
+  return result[0];
+}
+
+export async function updateOrder(id: number, updates: Partial<InsertOrder>): Promise<Order> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(orders)
+    .set(updates)
+    .where(eq(orders.id, id));
+
+  const updated = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, id))
+    .limit(1);
+
+  return updated[0]!;
+}
+
+// Payment Events
+export async function createPaymentEvent(event: InsertPaymentEvent): Promise<PaymentEvent> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  try {
+    const result = await db.insert(paymentEvents).values(event);
+    const insertedId = Number(result[0].insertId);
+
+    const inserted = await db
+      .select()
+      .from(paymentEvents)
+      .where(eq(paymentEvents.id, insertedId))
+      .limit(1);
+
+    return inserted[0]!;
+  } catch (error) {
+    // If duplicate event, return existing
+    const existing = await db
+      .select()
+      .from(paymentEvents)
+      .where(eq(paymentEvents.stripeEventId, event.stripeEventId))
+      .limit(1);
+
+    if (existing[0]) {
+      return existing[0];
+    }
+
+    throw error;
+  }
+}
+
+export async function markPaymentEventProcessed(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db
+    .update(paymentEvents)
+    .set({
+      processed: 1,
+      processedAt: new Date()
+    })
+    .where(eq(paymentEvents.id, id));
 }

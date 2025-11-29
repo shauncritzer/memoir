@@ -10,6 +10,9 @@ import Resources from "./pages/Resources";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogEditor from "./pages/BlogEditor";
+import ProductPage from "./pages/ProductPage";
+import Success from "./pages/Success";
+import Cancel from "./pages/Cancel";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +24,9 @@ function Router() {
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
+      <Route path="/products/:slug" component={ProductPage} />
+      <Route path="/success" component={Success} />
+      <Route path="/cancel" component={Cancel} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

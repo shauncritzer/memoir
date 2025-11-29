@@ -105,3 +105,69 @@ export const leadMagnetDownloads = mysqlTable("lead_magnet_downloads", {
 
 export type LeadMagnetDownload = typeof leadMagnetDownloads.$inferSelect;
 export type InsertLeadMagnetDownload = typeof leadMagnetDownloads.$inferInsert;
+
+/**
+ * Products table for Stripe integrations
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  price: int("price").notNull(), // Price in cents
+  currency: varchar("currency", { length: 3 }).default("usd").notNull(),
+  stripeProductId: varchar("stripe_product_id", { length: 255 }),
+  stripePriceId: varchar("stripe_price_id", { length: 255 }),
+  type: mysqlEnum("type", ["one_time", "recurring"]).default("one_time").notNull(),
+  billingInterval: mysqlEnum("billing_interval", ["month", "year"]),
+  coverImage: varchar("cover_image", { length: 512 }),
+  features: text("features"), // JSON array of feature strings
+  convertKitTagId: varchar("convertkit_tag_id", { length: 100 }), // Tag to apply on purchase
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Orders table
+ */
+export const orders = mysqlTable("orders", {
+  id: int("id").autoincrement().primaryKey(),
+  orderNumber: varchar("order_number", { length: 50 }).notNull().unique(),
+  productId: int("product_id").notNull().references(() => products.id),
+  email: varchar("email", { length: 320 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  amount: int("amount").notNull(), // Amount in cents
+  currency: varchar("currency", { length: 3 }).default("usd").notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("pending").notNull(),
+  stripeSessionId: varchar("stripe_session_id", { length: 255 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  metadata: text("metadata"), // JSON for additional data
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof orders.$inferInsert;
+
+/**
+ * Payment events table (for webhook tracking)
+ */
+export const paymentEvents = mysqlTable("payment_events", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("order_id").references(() => orders.id),
+  eventType: varchar("event_type", { length: 100 }).notNull(),
+  stripeEventId: varchar("stripe_event_id", { length: 255 }).notNull().unique(),
+  payload: text("payload").notNull(), // JSON payload from Stripe
+  processed: int("processed").default(0).notNull(), // 0 = not processed, 1 = processed
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PaymentEvent = typeof paymentEvents.$inferSelect;
+export type InsertPaymentEvent = typeof paymentEvents.$inferInsert;
