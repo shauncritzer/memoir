@@ -319,3 +319,18 @@
 - [x] Create complete email sequences with exact day spacing (all 7 sequences, 31 emails total)
 - [x] Format sequences for easy copy-paste into ConvertKit
 - [x] Include automation rules and trigger setup
+
+
+## GitHub Push for Claude Handoff - November 27, 2025
+
+- [ ] Push project code to GitHub repository
+- [ ] Create comprehensive Claude handoff document
+- [ ] Include GitHub clone instructions for Claude
+- [ ] Document tech stack and project structure
+
+
+## Apply Claude's ConvertKit Fix - November 28, 2025
+
+- [x] Apply Claude's one-line fix to server/convertkit.ts (remove non-existent LEAD_MAGNET_DOWNLOADED tag)
+- [ ] Test ConvertKit integration
+- [ ] Verify emails get added to ConvertKit dashboard
