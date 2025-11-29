@@ -14,10 +14,12 @@ import {
   incrementBlogPostViews,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
+import { stripeRouter } from "./stripe";
 
 export const appRouter = router({
   system: systemRouter,
-  
+  stripe: stripeRouter,
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
