@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/mysql2/migrator";
 import { ENV } from "./_core/env.js";
 
 // Simple password protection - in production, use proper auth
-const SETUP_PASSWORD = "setup123";
+const SETUP_PASSWORD = "setup2025";
 
 /**
  * Admin router for database setup operations

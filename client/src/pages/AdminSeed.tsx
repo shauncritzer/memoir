@@ -119,7 +119,7 @@ export default function AdminSeed() {
                 )}
               </Button>
               <p className="text-sm text-muted-foreground text-center">
-                Default password: <code className="bg-muted px-1 py-0.5 rounded">setup123</code>
+                Default password: <code className="bg-muted px-1 py-0.5 rounded">setup2025</code>
               </p>
             </form>
           </CardContent>
