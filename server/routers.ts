@@ -12,6 +12,7 @@ import {
   getPublishedBlogPosts,
   getBlogPostBySlug,
   incrementBlogPostViews,
+  trackBlogPostDownload,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
 import { stripeRouter } from "./stripe";
@@ -203,13 +204,55 @@ export const appRouter = router({
       .input(z.object({ slug: z.string() }))
       .query(async ({ input }) => {
         const post = await getBlogPostBySlug(input.slug);
-        
+
         if (post && post.status === "published") {
           // Increment view count asynchronously
           incrementBlogPostViews(post.id).catch(console.error);
         }
-        
+
         return post;
+      }),
+
+    download: publicProcedure
+      .input(z.object({
+        slug: z.string(),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const blogPost = await getBlogPostBySlug(input.slug);
+
+        if (!blogPost) {
+          throw new Error("Blog post not found");
+        }
+
+        if (!blogPost.fileUrl) {
+          throw new Error("This blog post does not have a downloadable file");
+        }
+
+        // Get or create subscriber in local database
+        let subscriber = await getEmailSubscriberByEmail(input.email);
+        if (!subscriber) {
+          subscriber = await createEmailSubscriber({
+            email: input.email,
+            source: `blog-post-${input.slug}`,
+            status: "active",
+          });
+        }
+
+        // Track download
+        await trackBlogPostDownload({
+          blogPostId: blogPost.id,
+          subscriberId: subscriber.id,
+          email: input.email,
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"],
+        });
+
+        return {
+          success: true,
+          downloadUrl: blogPost.fileUrl,
+          blogPost,
+        };
       }),
     
     // Admin-only procedures for blog management

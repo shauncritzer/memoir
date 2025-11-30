@@ -33,6 +33,12 @@ export default function AdminSeed() {
     },
   });
 
+  const createAdmin = trpc.adminSetup.createAdmin.useMutation({
+    onSuccess: () => {
+      refetchStatus();
+    },
+  });
+
   const seedBlogPosts = trpc.adminSetup.seedBlogPosts.useMutation({
     onSuccess: () => {
       refetchStatus();
@@ -59,6 +65,12 @@ export default function AdminSeed() {
   const handleRunMigrations = () => {
     if (confirm("This will create/update database tables. Continue?")) {
       runMigrations.mutate({ password });
+    }
+  };
+
+  const handleCreateAdmin = () => {
+    if (confirm("This will create an admin user for blog post authoring. Continue?")) {
+      createAdmin.mutate({ password });
     }
   };
 
@@ -233,15 +245,67 @@ export default function AdminSeed() {
           </CardContent>
         </Card>
 
+        {/* Create Admin Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              2. Create Admin User
+            </CardTitle>
+            <CardDescription>
+              Create an admin user account required for blog post authoring. Run this before seeding blog posts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {status?.users > 0 && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  Admin user already exists! You can proceed to seed data.
+                </AlertDescription>
+              </Alert>
+            )}
+            <Button
+              onClick={handleCreateAdmin}
+              disabled={createAdmin.isPending}
+              className="w-full"
+            >
+              {createAdmin.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Admin User...
+                </>
+              ) : (
+                <>
+                  <Package className="mr-2 h-4 w-4" />
+                  Create Admin User
+                </>
+              )}
+            </Button>
+            {createAdmin.isSuccess && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{createAdmin.data.message}</AlertDescription>
+              </Alert>
+            )}
+            {createAdmin.isError && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{createAdmin.error.message}</AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Seeding Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              2. Seed Data
+              3. Seed Data
             </CardTitle>
             <CardDescription>
-              Populate your database with initial content. Make sure you've logged in to the website first to create your admin account.
+              Populate your database with initial content. Make sure you've created an admin user first.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -249,7 +313,7 @@ export default function AdminSeed() {
               <Alert variant="destructive">
                 <XCircle className="h-4 w-4" />
                 <AlertDescription>
-                  No users found. Please log in to the website first to create your admin account before seeding.
+                  No users found. Please create an admin user above before seeding blog posts.
                 </AlertDescription>
               </Alert>
             )}
@@ -385,15 +449,13 @@ export default function AdminSeed() {
                 <strong>Run Migrations:</strong> Click "Run Database Migrations" to create tables
               </li>
               <li>
-                <strong>Login First:</strong> Visit the homepage and log in to create your admin
-                account
+                <strong>Create Admin:</strong> Click "Create Admin User" to create the user account
               </li>
               <li>
-                <strong>Seed Data:</strong> Return here and click "Seed All Data" to populate content
+                <strong>Seed Data:</strong> Click "Seed All Data" to populate blog posts and lead magnets
               </li>
               <li>
-                <strong>Verify:</strong> Check your blog and resources pages to confirm everything
-                loaded
+                <strong>Verify:</strong> Check your blog and resources pages to confirm everything loaded
               </li>
             </ol>
             <div className="mt-4 p-3 bg-muted rounded-lg">

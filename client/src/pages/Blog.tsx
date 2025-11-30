@@ -1,14 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, Clock, ArrowRight, Download } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [email, setEmail] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadMutation = trpc.blog.download.useMutation();
 
   const filteredPosts = posts?.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,6 +33,40 @@ export default function Blog() {
     const wordCount = content.split(/\s+/).length;
     const minutes = Math.ceil(wordCount / wordsPerMinute);
     return `${minutes} min read`;
+  };
+
+  const handleDownload = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedPost || !email) return;
+
+    setIsDownloading(true);
+
+    try {
+      const result = await downloadMutation.mutateAsync({
+        slug: selectedPost.slug,
+        email: email,
+      });
+
+      if (result.success && result.downloadUrl) {
+        // Open download in new tab
+        window.open(result.downloadUrl, "_blank");
+
+        toast.success("Download started!", {
+          description: "Check your downloads folder.",
+        });
+
+        // Close dialog and reset
+        setSelectedPost(null);
+        setEmail("");
+      }
+    } catch (error) {
+      toast.error("Download failed", {
+        description: "Please try again or contact support.",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -118,12 +158,24 @@ export default function Blog() {
                     {post.excerpt && (
                       <p className="text-lg text-muted-foreground">{post.excerpt}</p>
                     )}
-                    <Link href={`/blog/${post.slug}`}>
-                      <Button variant="ghost" className="group">
-                        Read More
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                    <div className="flex gap-3">
+                      <Link href={`/blog/${post.slug}`}>
+                        <Button variant="ghost" className="group">
+                          Read More
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                      {post.fileUrl && (
+                        <Button
+                          variant="outline"
+                          className="group"
+                          onClick={() => setSelectedPost(post)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download PDF
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -156,6 +208,45 @@ export default function Blog() {
           </div>
         </div>
       </section>
+
+      {/* Download Dialog */}
+      <Dialog open={!!selectedPost} onOpenChange={(open) => !open && setSelectedPost(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Download {selectedPost?.title}</DialogTitle>
+            <DialogDescription>
+              Enter your email to download this blog post as a PDF.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDownload} className="space-y-4">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => setSelectedPost(null)}
+                disabled={isDownloading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary/90"
+                disabled={isDownloading}
+              >
+                {isDownloading ? "Downloading..." : "Download"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 bg-card">

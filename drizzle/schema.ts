@@ -35,12 +35,15 @@ export const blogPosts = mysqlTable("blog_posts", {
   excerpt: text("excerpt"),
   content: text("content").notNull(),
   coverImage: varchar("cover_image", { length: 512 }),
+  fileUrl: varchar("file_url", { length: 512 }), // S3 URL for downloadable PDF version
+  fileKey: varchar("file_key", { length: 512 }), // S3 key
   category: varchar("category", { length: 100 }),
   tags: text("tags"), // JSON array of tags
   status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
   publishedAt: timestamp("published_at"),
   authorId: int("author_id").notNull().references(() => users.id),
   viewCount: int("view_count").default(0).notNull(),
+  downloadCount: int("download_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
@@ -105,3 +108,19 @@ export const leadMagnetDownloads = mysqlTable("lead_magnet_downloads", {
 
 export type LeadMagnetDownload = typeof leadMagnetDownloads.$inferSelect;
 export type InsertLeadMagnetDownload = typeof leadMagnetDownloads.$inferInsert;
+
+/**
+ * Blog post downloads tracking
+ */
+export const blogPostDownloads = mysqlTable("blog_post_downloads", {
+  id: int("id").autoincrement().primaryKey(),
+  blogPostId: int("blog_post_id").notNull().references(() => blogPosts.id),
+  subscriberId: int("subscriber_id").references(() => emailSubscribers.id),
+  email: varchar("email", { length: 320 }).notNull(),
+  downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+});
+
+export type BlogPostDownload = typeof blogPostDownloads.$inferSelect;
+export type InsertBlogPostDownload = typeof blogPostDownloads.$inferInsert;

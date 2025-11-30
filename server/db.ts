@@ -1,7 +1,7 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
+import {
+  InsertUser,
   users,
   blogPosts,
   BlogPost,
@@ -13,7 +13,9 @@ import {
   LeadMagnet,
   InsertLeadMagnet,
   leadMagnetDownloads,
-  InsertLeadMagnetDownload
+  InsertLeadMagnetDownload,
+  blogPostDownloads,
+  InsertBlogPostDownload
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -269,12 +271,25 @@ export async function getLeadMagnetBySlug(slug: string): Promise<LeadMagnet | un
 export async function trackLeadMagnetDownload(download: InsertLeadMagnetDownload): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  
+
   await db.insert(leadMagnetDownloads).values(download);
-  
+
   // Increment download count
   await db
     .update(leadMagnets)
     .set({ downloadCount: sql`${leadMagnets.downloadCount} + 1` })
     .where(eq(leadMagnets.id, download.leadMagnetId));
+}
+
+export async function trackBlogPostDownload(download: InsertBlogPostDownload): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(blogPostDownloads).values(download);
+
+  // Increment download count
+  await db
+    .update(blogPosts)
+    .set({ downloadCount: sql`${blogPosts.downloadCount} + 1` })
+    .where(eq(blogPosts.id, download.blogPostId));
 }
