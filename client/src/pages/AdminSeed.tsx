@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, XCircle, Loader2, Database, FileText, BookOpen, Package } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Database, FileText, BookOpen, Package, Users, Copy, Check } from "lucide-react";
 
 export default function AdminSeed() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
+  const [copiedOpenId, setCopiedOpenId] = useState<string | null>(null);
 
   const verifyPassword = trpc.adminSetup.verifyPassword.useMutation({
     onSuccess: (data) => {
@@ -27,9 +28,15 @@ export default function AdminSeed() {
     { enabled: isAuthenticated }
   );
 
+  const { data: usersData, refetch: refetchUsers } = trpc.adminSetup.getUsers.useQuery(
+    { password },
+    { enabled: isAuthenticated }
+  );
+
   const runMigrations = trpc.adminSetup.runMigrations.useMutation({
     onSuccess: () => {
       refetchStatus();
+      refetchUsers();
     },
   });
 
@@ -50,6 +57,16 @@ export default function AdminSeed() {
       refetchStatus();
     },
   });
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedOpenId(text);
+      setTimeout(() => setCopiedOpenId(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,6 +198,88 @@ export default function AdminSeed() {
             )}
           </CardContent>
         </Card>
+
+        {/* Users & OpenID Section */}
+        {usersData && usersData.users.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                User OpenIDs
+              </CardTitle>
+              <CardDescription>
+                After logging in, find your OpenID below and update the OWNER_OPEN_ID environment variable
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {usersData.ownerOpenId && (
+                  <Alert>
+                    <AlertDescription>
+                      <strong>Current OWNER_OPEN_ID:</strong> <code className="bg-muted px-2 py-1 rounded">{usersData.ownerOpenId}</code>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="space-y-2">
+                  {usersData.users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-3 border rounded-lg bg-muted/50"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium">{user.name}</p>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            user.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {user.role}
+                          </span>
+                          {user.openId === usersData.ownerOpenId && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-700 dark:text-green-400">
+                              Owner
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <code className="text-xs bg-background px-2 py-1 rounded border">
+                            {user.openId}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(user.openId)}
+                            className="h-6 w-6 p-0"
+                          >
+                            {copiedOpenId === user.openId ? (
+                              <Check className="h-3 w-3 text-green-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {usersData.ownerOpenId === "temp123" && (
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Action Required:</strong> OWNER_OPEN_ID is still set to "temp123".
+                      Copy your OpenID above and update the OWNER_OPEN_ID environment variable in Railway.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Migration Section */}
         <Card>
@@ -385,15 +484,19 @@ export default function AdminSeed() {
                 <strong>Run Migrations:</strong> Click "Run Database Migrations" to create tables
               </li>
               <li>
-                <strong>Login First:</strong> Visit the homepage and log in to create your admin
-                account
+                <strong>Login First:</strong> Visit the homepage and log in via OAuth to create your admin account
               </li>
               <li>
-                <strong>Seed Data:</strong> Return here and click "Seed All Data" to populate content
+                <strong>Copy Your OpenID:</strong> After logging in, refresh this page to see your OpenID in the "User OpenIDs" section above
               </li>
               <li>
-                <strong>Verify:</strong> Check your blog and resources pages to confirm everything
-                loaded
+                <strong>Update OWNER_OPEN_ID:</strong> In Railway, update the OWNER_OPEN_ID environment variable with your actual OpenID (replace "temp123")
+              </li>
+              <li>
+                <strong>Seed Data:</strong> Click "Seed All Data" to populate content (blog posts + lead magnets)
+              </li>
+              <li>
+                <strong>Verify:</strong> Check your blog and resources pages to confirm everything loaded
               </li>
             </ol>
             <div className="mt-4 p-3 bg-muted rounded-lg">

@@ -82,6 +82,41 @@ export const adminSetupRouter = router({
     }),
 
   /**
+   * Get all users with their OpenIDs
+   */
+  getUsers: publicProcedure
+    .input(z.object({ password: z.string() }))
+    .query(async ({ input }) => {
+      if (input.password !== SETUP_PASSWORD) {
+        throw new Error("Invalid password");
+      }
+
+      const connection = await mysql2.createConnection(ENV.databaseUrl);
+      const db = drizzle(connection);
+
+      try {
+        const allUsers = await db.select({
+          id: users.id,
+          openId: users.openId,
+          name: users.name,
+          email: users.email,
+          role: users.role,
+          createdAt: users.createdAt,
+        }).from(users);
+
+        await connection.end();
+
+        return {
+          users: allUsers,
+          ownerOpenId: ENV.ownerOpenId,
+        };
+      } catch (error: any) {
+        await connection.end();
+        throw new Error(`Failed to fetch users: ${error.message}`);
+      }
+    }),
+
+  /**
    * Run database migrations
    */
   runMigrations: publicProcedure
