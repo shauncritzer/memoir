@@ -82,6 +82,59 @@ export const adminSetupRouter = router({
     }),
 
   /**
+   * Create admin user
+   */
+  createAdmin: publicProcedure
+    .input(z.object({ password: z.string() }))
+    .mutation(async ({ input }) => {
+      if (input.password !== SETUP_PASSWORD) {
+        throw new Error("Invalid password");
+      }
+
+      const connection = await mysql2.createConnection(ENV.databaseUrl);
+      const db = drizzle(connection);
+
+      try {
+        // Check if admin already exists
+        const existingAdmin = await db
+          .select()
+          .from(users)
+          .where(eq(users.role, "admin"))
+          .limit(1);
+
+        if (existingAdmin.length > 0) {
+          await connection.end();
+          return {
+            success: true,
+            message: "Admin user already exists.",
+            created: false,
+          };
+        }
+
+        // Create admin user
+        await db.insert(users).values({
+          openId: "shaun-admin",
+          name: "Shaun Critzer",
+          email: "shaun@shauncritzer.com",
+          loginMethod: "manual",
+          role: "admin",
+        });
+
+        await connection.end();
+
+        return {
+          success: true,
+          message: "Admin user created successfully!",
+          created: true,
+        };
+      } catch (error: any) {
+        await connection.end();
+        console.error("Admin creation error:", error);
+        throw new Error(`Failed to create admin: ${error.message}`);
+      }
+    }),
+
+  /**
    * Run database migrations
    */
   runMigrations: publicProcedure
