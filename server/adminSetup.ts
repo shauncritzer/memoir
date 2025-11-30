@@ -631,7 +631,7 @@ It's hard. But it's worth it.
             slug: "first-3-chapters",
             description:
               "Read the prologue and first two chapters of Crooked Lines: Bent, Not Broken. Experience the raw, unflinching honesty that makes this memoir a life-changing read.",
-            fileUrl: "/first_3_chapters.pdf",
+            fileUrl: "/first-3-chapters.pdf",
             fileKey: "lead-magnets/first-3-chapters.pdf",
             type: "pdf" as const,
           },
@@ -640,7 +640,7 @@ It's hard. But it's worth it.
             slug: "recovery-toolkit",
             description:
               "A collection of tools, exercises, and resources to support your recovery journey. Includes daily check-ins, trigger worksheets, gratitude templates, and more.",
-            fileUrl: "/recovery_toolkit.pdf",
+            fileUrl: "/recovery-toolkit.pdf",
             fileKey: "lead-magnets/recovery-toolkit.pdf",
             type: "pdf" as const,
           },
@@ -649,7 +649,7 @@ It's hard. But it's worth it.
             slug: "reading-guide",
             description:
               "Discussion questions and reflection prompts for individual use or group study. Go deeper with the themes of trauma, addiction, and redemption.",
-            fileUrl: "/reading_guide.pdf",
+            fileUrl: "/reading-guide.pdf",
             fileKey: "lead-magnets/reading-guide.pdf",
             type: "pdf" as const,
           },
