@@ -29,6 +29,47 @@ export async function quickSeedHandler(req: Request, res: Response) {
       messages: [] as string[],
     };
 
+    // STEP 0: Run missing migrations directly via SQL
+    try {
+      // Check if blog_posts has file_url column
+      const [columns] = await connection.query(
+        "SHOW COLUMNS FROM blog_posts LIKE 'file_url'"
+      ) as any;
+
+      if (!columns || columns.length === 0) {
+        // Run migration 0002 - add blog download columns
+        await connection.query(
+          "ALTER TABLE `blog_posts` ADD COLUMN `file_url` varchar(512)"
+        );
+        await connection.query(
+          "ALTER TABLE `blog_posts` ADD COLUMN `file_key` varchar(512)"
+        );
+        await connection.query(
+          "ALTER TABLE `blog_posts` ADD COLUMN `download_count` int NOT NULL DEFAULT 0"
+        );
+        results.messages.push("✅ Added blog download columns");
+
+        // Create blog_post_downloads table if it doesn't exist
+        await connection.query(`
+          CREATE TABLE IF NOT EXISTS \`blog_post_downloads\` (
+            \`id\` int AUTO_INCREMENT NOT NULL,
+            \`blog_post_id\` int NOT NULL,
+            \`subscriber_id\` int,
+            \`email\` varchar(320) NOT NULL,
+            \`downloaded_at\` timestamp NOT NULL DEFAULT (now()),
+            \`ip_address\` varchar(45),
+            \`user_agent\` text,
+            CONSTRAINT \`blog_post_downloads_id\` PRIMARY KEY(\`id\`)
+          )
+        `);
+        results.messages.push("✅ Created blog_post_downloads table");
+      } else {
+        results.messages.push("ℹ️ Blog download columns already exist");
+      }
+    } catch (error: any) {
+      results.messages.push(`⚠️ Migration check: ${error.message}`);
+    }
+
     // 1. Create admin user
     try {
       const existingAdmin = await db
