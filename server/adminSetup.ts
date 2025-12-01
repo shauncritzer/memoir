@@ -149,7 +149,10 @@ export const adminSetupRouter = router({
 
       try {
         // Run migrations from the drizzle folder
-        await migrate(db, { migrationsFolder: "./drizzle" });
+        // In production (after build), drizzle is in dist/drizzle
+        // In development, it's in ./drizzle
+        const migrationsPath = process.env.NODE_ENV === 'production' ? './dist/drizzle' : './drizzle';
+        await migrate(db, { migrationsFolder: migrationsPath });
         await connection.end();
 
         return {
