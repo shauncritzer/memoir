@@ -1,7 +1,7 @@
 import { publicProcedure, router } from "./_core/trpc.js";
 import { z } from "zod";
 import { drizzle } from "drizzle-orm/mysql2";
-import { blogPosts, users, leadMagnets } from "../drizzle/schema.js";
+import { blogPosts, users, leadMagnets, products } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 import mysql2 from "mysql2/promise";
 import { migrate } from "drizzle-orm/mysql2/migrator";
@@ -56,12 +56,26 @@ export const adminSetupRouter = router({
           .execute()
           .then((rows) => [{ count: rows.length }]);
 
+        // Try to get products count (table might not exist yet)
+        let productCount = 0;
+        try {
+          const [count] = await db
+            .select({ count: products.id })
+            .from(products)
+            .execute()
+            .then((rows) => [{ count: rows.length }]);
+          productCount = count?.count || 0;
+        } catch (e) {
+          // Products table doesn't exist yet
+        }
+
         await connection.end();
 
         return {
           blogPosts: blogCount?.count || 0,
           leadMagnets: leadMagnetCount?.count || 0,
           users: userCount?.count || 0,
+          products: productCount,
           ready: true,
         };
       } catch (error: any) {
@@ -73,6 +87,7 @@ export const adminSetupRouter = router({
             blogPosts: 0,
             leadMagnets: 0,
             users: 0,
+            products: 0,
             ready: false,
             needsMigration: true,
           };
