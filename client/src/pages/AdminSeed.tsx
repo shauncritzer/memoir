@@ -330,7 +330,7 @@ export default function AdminSeed() {
               <div>
                 <h3 className="font-semibold mb-1">Quick Setup (Recommended)</h3>
                 <p className="text-sm text-muted-foreground">
-                  Seeds everything at once: 5 blog posts + 3 lead magnets
+                  Seeds everything at once: 5 blog posts + 3 lead magnets + 3 products
                 </p>
               </div>
               <Button
