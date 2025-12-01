@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import mysql2 from "mysql2/promise";
 import { drizzle } from "drizzle-orm/mysql2";
-import { users, blogPosts, leadMagnets } from "../drizzle/schema.js";
+import { users, blogPosts, leadMagnets, products } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 import { ENV } from "./_core/env.js";
 
@@ -26,6 +26,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
       users: 0,
       blogPosts: 0,
       leadMagnets: 0,
+      products: 0,
       messages: [] as string[],
     };
 
@@ -253,6 +254,107 @@ export async function quickSeedHandler(req: Request, res: Response) {
       }
     } catch (error: any) {
       results.messages.push(`❌ Lead magnets error: ${error.message}`);
+    }
+
+    // 4. Create products table if it doesn't exist and seed products
+    try {
+      // Check if products table exists
+      const [tables] = await connection.query(
+        "SHOW TABLES LIKE 'products'"
+      ) as any;
+
+      if (!tables || tables.length === 0) {
+        // Create products table
+        await connection.query(`
+          CREATE TABLE \`products\` (
+            \`id\` int AUTO_INCREMENT NOT NULL,
+            \`name\` varchar(255) NOT NULL,
+            \`slug\` varchar(255) NOT NULL UNIQUE,
+            \`description\` text,
+            \`price\` int NOT NULL,
+            \`stripe_price_id\` varchar(255) NOT NULL,
+            \`type\` enum('one_time', 'subscription') NOT NULL,
+            \`features\` text,
+            \`status\` enum('active', 'inactive') NOT NULL DEFAULT 'active',
+            \`created_at\` timestamp NOT NULL DEFAULT (now()),
+            \`updated_at\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+            CONSTRAINT \`products_id\` PRIMARY KEY(\`id\`)
+          )
+        `);
+        results.messages.push("✅ Created products table");
+      }
+
+      // Check if products already exist
+      const existingProducts = await db.select().from(products).limit(1);
+
+      if (existingProducts.length === 0) {
+        const productsList = [
+          {
+            name: "7-Day Reset Challenge",
+            slug: "7-day-reset",
+            description: "A 7-day challenge to reset your habits and mindset. Transform your daily routines and build momentum for lasting change.",
+            price: 2700, // $27.00 in cents
+            stripePriceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU",
+            type: "one_time" as const,
+            features: JSON.stringify([
+              "7 days of guided challenges",
+              "Daily accountability check-ins",
+              "Habit tracking worksheets",
+              "Community support access"
+            ]),
+          },
+          {
+            name: "Recovery Roadmap Course",
+            slug: "recovery-roadmap",
+            description: "A comprehensive course on recovery and personal growth. Learn proven strategies for lasting transformation and healing.",
+            price: 9700, // $97.00 in cents
+            stripePriceId: "price_1SYt3KC2dOpPzSOOpAokf1UQ",
+            type: "one_time" as const,
+            features: JSON.stringify([
+              "12 comprehensive modules",
+              "Video lessons and worksheets",
+              "Lifetime access to materials",
+              "Private community membership",
+              "Monthly live Q&A sessions"
+            ]),
+          },
+          {
+            name: "Monthly Membership",
+            slug: "monthly-membership",
+            description: "Monthly access to exclusive content and community. Join a supportive group committed to growth and recovery.",
+            price: 2900, // $29.00/month in cents
+            stripePriceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+            type: "subscription" as const,
+            features: JSON.stringify([
+              "Weekly exclusive content",
+              "Private community access",
+              "Monthly group coaching calls",
+              "Resource library access",
+              "Cancel anytime"
+            ]),
+          },
+        ];
+
+        for (const product of productsList) {
+          await db.insert(products).values({
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            price: product.price,
+            stripePriceId: product.stripePriceId,
+            type: product.type,
+            features: product.features,
+            status: "active",
+          });
+        }
+
+        results.products = productsList.length;
+        results.messages.push(`✅ Seeded ${productsList.length} products`);
+      } else {
+        results.messages.push("ℹ️ Products already exist");
+      }
+    } catch (error: any) {
+      results.messages.push(`❌ Products error: ${error.message}`);
     }
 
     await connection.end();

@@ -124,3 +124,23 @@ export const blogPostDownloads = mysqlTable("blog_post_downloads", {
 
 export type BlogPostDownload = typeof blogPostDownloads.$inferSelect;
 export type InsertBlogPostDownload = typeof blogPostDownloads.$inferInsert;
+
+/**
+ * Products table for Stripe products
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  price: int("price").notNull(), // Price in cents
+  stripePriceId: varchar("stripe_price_id", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["one_time", "subscription"]).notNull(),
+  features: text("features"), // JSON array of features
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
