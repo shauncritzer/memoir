@@ -350,130 +350,71 @@ export async function quickSeedHandler(req: Request, res: Response) {
         results.messages.push("✅ Created products table");
       }
 
-      // Check if products already exist
-      const existingProducts = await db.select().from(products).limit(1);
+      // DELETE ALL existing products to avoid slug/price ID conflicts
+      await connection.query("DELETE FROM `products`");
+      results.messages.push("🗑️ Deleted old products");
 
-      if (existingProducts.length === 0) {
-        const productsList = [
-          {
-            name: "Crooked Lines 7-Day Reset",
-            slug: "7-day-reset",
-            description: "A focused, actionable challenge to break through plateaus and reignite your commitment to wholeness.",
-            price: 2700,
-            stripePriceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU",
-            type: "one_time" as const,
-            features: JSON.stringify([
-              "7 daily video lessons (10-15 minutes each)",
-              "Downloadable workbook with exercises",
-              "Daily reflection prompts",
-              "Private community access during challenge",
-              "Bonus: Trigger management worksheet"
-            ]),
-            status: "active" as const,
-          },
-          {
-            name: "From Broken to Whole Course",
-            slug: "from-broken-to-whole",
-            description: "An 8-module course that takes you from surviving to thriving—with proven strategies for lasting change.",
-            price: 9700,
-            stripePriceId: "price_1SYt3SC2dOpPzSOOGhcvJ8kF",
-            type: "one_time" as const,
-            features: JSON.stringify([
-              "8 comprehensive modules covering every stage of recovery",
-              "40+ video lessons (5-20 minutes each)",
-              "8 downloadable workbooks with exercises",
-              "Reflection prompts and homework for each module",
-              "Bonus resources and reading recommendations",
-              "Private course community",
-              "Lifetime access - learn at your own pace"
-            ]),
-            status: "active" as const,
-          },
-          {
-            name: "Bent Not Broken Circle",
-            slug: "bent-not-broken-circle",
-            description: "A monthly membership community for ongoing support, accountability, and growth in your recovery journey.",
-            price: 2900,
-            stripePriceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY",
-            type: "subscription" as const,
-            features: JSON.stringify([
-              "Monthly live group call with Q&A",
-              "Private online forum (24/7 access)",
-              "Exclusive monthly content (videos, worksheets, resources)",
-              "Accountability partnerships",
-              "Early access to new products and programs",
-              "Cancel anytime - no long-term commitment"
-            ]),
-            status: "active" as const,
-          },
-        ];
+      // Always seed products fresh
+      const productsList = [
+        {
+          name: "Crooked Lines 7-Day Reset",
+          slug: "7-day-reset",
+          description: "A focused, actionable challenge to break through plateaus and reignite your commitment to wholeness.",
+          price: 2700,
+          stripePriceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU",
+          type: "one_time" as const,
+          features: JSON.stringify([
+            "7 daily video lessons (10-15 minutes each)",
+            "Downloadable workbook with exercises",
+            "Daily reflection prompts",
+            "Private community access during challenge",
+            "Bonus: Trigger management worksheet"
+          ]),
+          status: "active" as const,
+        },
+        {
+          name: "From Broken to Whole Course",
+          slug: "from-broken-to-whole",
+          description: "An 8-module course that takes you from surviving to thriving—with proven strategies for lasting change.",
+          price: 9700,
+          stripePriceId: "price_1SYt3SC2dOpPzSOOGhcvJ8kF",
+          type: "one_time" as const,
+          features: JSON.stringify([
+            "8 comprehensive modules covering every stage of recovery",
+            "40+ video lessons (5-20 minutes each)",
+            "8 downloadable workbooks with exercises",
+            "Reflection prompts and homework for each module",
+            "Bonus resources and reading recommendations",
+            "Private course community",
+            "Lifetime access - learn at your own pace"
+          ]),
+          status: "active" as const,
+        },
+        {
+          name: "Bent Not Broken Circle",
+          slug: "bent-not-broken-circle",
+          description: "A monthly membership community for ongoing support, accountability, and growth in your recovery journey.",
+          price: 2900,
+          stripePriceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+          type: "subscription" as const,
+          features: JSON.stringify([
+            "Monthly live group call with Q&A",
+            "Private online forum (24/7 access)",
+            "Exclusive monthly content (videos, worksheets, resources)",
+            "Accountability partnerships",
+            "Early access to new products and programs",
+            "Cancel anytime - no long-term commitment"
+          ]),
+          status: "active" as const,
+        },
+      ];
 
-        for (const product of productsList) {
-          await db.insert(products).values(product);
-        }
-
-        results.products = productsList.length;
-        results.messages.push(`✅ Seeded ${productsList.length} products`);
-      } else {
-        results.messages.push("ℹ️ Products already exist");
-
-        // Update existing products with correct names and details
-        await connection.query(
-          "UPDATE `products` SET `name` = ?, `slug` = ?, `description` = ?, `features` = ? WHERE `stripe_price_id` = ?",
-          [
-            "Crooked Lines 7-Day Reset",
-            "7-day-reset",
-            "A focused, actionable challenge to break through plateaus and reignite your commitment to wholeness.",
-            JSON.stringify([
-              "7 daily video lessons (10-15 minutes each)",
-              "Downloadable workbook with exercises",
-              "Daily reflection prompts",
-              "Private community access during challenge",
-              "Bonus: Trigger management worksheet"
-            ]),
-            "price_1SYt2tC2dOpPzSOOpg5PW7eU"
-          ]
-        );
-
-        await connection.query(
-          "UPDATE `products` SET `name` = ?, `slug` = ?, `description` = ?, `features` = ? WHERE `stripe_price_id` = ?",
-          [
-            "From Broken to Whole Course",
-            "from-broken-to-whole",
-            "An 8-module course that takes you from surviving to thriving—with proven strategies for lasting change.",
-            JSON.stringify([
-              "8 comprehensive modules covering every stage of recovery",
-              "40+ video lessons (5-20 minutes each)",
-              "8 downloadable workbooks with exercises",
-              "Reflection prompts and homework for each module",
-              "Bonus resources and reading recommendations",
-              "Private course community",
-              "Lifetime access - learn at your own pace"
-            ]),
-            "price_1SYt3SC2dOpPzSOOGhcvJ8kF"
-          ]
-        );
-
-        await connection.query(
-          "UPDATE `products` SET `name` = ?, `slug` = ?, `description` = ?, `features` = ? WHERE `stripe_price_id` = ?",
-          [
-            "Bent Not Broken Circle",
-            "bent-not-broken-circle",
-            "A monthly membership community for ongoing support, accountability, and growth in your recovery journey.",
-            JSON.stringify([
-              "Monthly live group call with Q&A",
-              "Private online forum (24/7 access)",
-              "Exclusive monthly content (videos, worksheets, resources)",
-              "Accountability partnerships",
-              "Early access to new products and programs",
-              "Cancel anytime - no long-term commitment"
-            ]),
-            "price_1SYt3jC2dOpPzSOOR7dDuGtY"
-          ]
-        );
-
-        results.messages.push("✅ Updated product names and features");
+      for (const product of productsList) {
+        await db.insert(products).values(product);
       }
+
+      results.products = productsList.length;
+      results.messages.push(`✅ Seeded ${productsList.length} products with correct slugs`);
     } catch (error: any) {
       results.messages.push(`❌ Products error: ${error.message}`);
     }
