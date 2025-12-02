@@ -377,7 +377,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
           slug: "from-broken-to-whole",
           description: "An 8-module course that takes you from surviving to thriving—with proven strategies for lasting change.",
           price: 9700,
-          stripePriceId: "price_1SYt3SC2dOpPzSOOGhcvJ8kF",
+          stripePriceId: "price_1SYt3KC2dOpPzSOOpAokf1UQ",
           type: "one_time" as const,
           features: JSON.stringify([
             "8 comprehensive modules covering every stage of recovery",
