@@ -35,6 +35,12 @@ export const stripeRouter = router({
         // Determine mode based on product type (default to payment for backwards compatibility)
         const mode = input.productType === 'subscription' ? 'subscription' : 'payment';
 
+        console.log('Creating Stripe checkout session:', {
+          mode,
+          priceId: input.priceId,
+          productType: input.productType,
+        });
+
         const session = await stripe.checkout.sessions.create({
           mode,
           line_items: [
@@ -54,9 +60,15 @@ export const stripeRouter = router({
           sessionId: session.id,
           url: session.url,
         };
-      } catch (error) {
-        console.error('Error creating checkout session:', error);
-        throw new Error('Failed to create checkout session');
+      } catch (error: any) {
+        console.error('Error creating checkout session:', {
+          message: error.message,
+          type: error.type,
+          code: error.code,
+          statusCode: error.statusCode,
+          raw: error.raw,
+        });
+        throw new Error(`Failed to create checkout session: ${error.message}`);
       }
     }),
 
