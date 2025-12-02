@@ -28,6 +28,7 @@ export default function Product() {
     try {
       const result = await createCheckoutMutation.mutateAsync({
         priceId: product.stripePriceId,
+        productType: product.type,
         successUrl: `${window.location.origin}/products/success?product=${product.slug}`,
         cancelUrl: window.location.href,
       });
