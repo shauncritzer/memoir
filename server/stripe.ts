@@ -24,6 +24,7 @@ export const stripeRouter = router({
     .input(
       z.object({
         priceId: z.string(),
+        productType: z.enum(['one_time', 'subscription']).optional(),
         successUrl: z.string().url(),
         cancelUrl: z.string().url(),
         customerEmail: z.string().email().optional(),
@@ -31,8 +32,11 @@ export const stripeRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
+        // Determine mode based on product type (default to payment for backwards compatibility)
+        const mode = input.productType === 'subscription' ? 'subscription' : 'payment';
+
         const session = await stripe.checkout.sessions.create({
-          mode: input.priceId === STRIPE_PRICES.MONTHLY_MEMBERSHIP ? 'subscription' : 'payment',
+          mode,
           line_items: [
             {
               price: input.priceId,
