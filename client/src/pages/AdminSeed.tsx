@@ -163,7 +163,7 @@ export default function AdminSeed() {
           </CardHeader>
           <CardContent>
             {status ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
                   <FileText className="h-5 w-5 text-primary" />
                   <div>
@@ -176,6 +176,13 @@ export default function AdminSeed() {
                   <div>
                     <p className="text-sm font-medium">Lead Magnets</p>
                     <p className="text-2xl font-bold">{status.leadMagnets}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
+                  <Package className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Products</p>
+                    <p className="text-2xl font-bold">{status.products || 0}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
@@ -323,7 +330,7 @@ export default function AdminSeed() {
               <div>
                 <h3 className="font-semibold mb-1">Quick Setup (Recommended)</h3>
                 <p className="text-sm text-muted-foreground">
-                  Seeds everything at once: 5 blog posts + 3 lead magnets
+                  Seeds everything at once: 5 blog posts + 3 lead magnets + 3 products
                 </p>
               </div>
               <Button

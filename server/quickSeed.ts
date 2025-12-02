@@ -26,6 +26,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
       users: 0,
       blogPosts: 0,
       leadMagnets: 0,
+      products: 0,
       messages: [] as string[],
     };
 
@@ -288,8 +289,35 @@ export async function quickSeedHandler(req: Request, res: Response) {
       results.messages.push(`⚠️ PDF URL update: ${error.message}`);
     }
 
-    // 5. Seed products
+    // 5. Create products table if it doesn't exist and seed products
     try {
+      // Check if products table exists
+      const [tables] = await connection.query(
+        "SHOW TABLES LIKE 'products'"
+      ) as any;
+
+      if (!tables || tables.length === 0) {
+        // Create products table
+        await connection.query(`
+          CREATE TABLE \`products\` (
+            \`id\` int AUTO_INCREMENT NOT NULL,
+            \`name\` varchar(255) NOT NULL,
+            \`slug\` varchar(255) NOT NULL UNIQUE,
+            \`description\` text,
+            \`price\` int NOT NULL,
+            \`stripe_price_id\` varchar(255) NOT NULL,
+            \`type\` enum('one_time', 'subscription') NOT NULL,
+            \`features\` text,
+            \`status\` enum('active', 'inactive') NOT NULL DEFAULT 'active',
+            \`created_at\` timestamp NOT NULL DEFAULT (now()),
+            \`updated_at\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+            CONSTRAINT \`products_id\` PRIMARY KEY(\`id\`)
+          )
+        `);
+        results.messages.push("✅ Created products table");
+      }
+
+      // Check if products already exist
       const existingProducts = await db.select().from(products).limit(1);
 
       if (existingProducts.length === 0) {
@@ -351,6 +379,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
           await db.insert(products).values(product);
         }
 
+        results.products = productsList.length;
         results.messages.push(`✅ Seeded ${productsList.length} products`);
       } else {
         results.messages.push("ℹ️ Products already exist");
