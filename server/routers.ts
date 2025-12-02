@@ -13,6 +13,8 @@ import {
   getBlogPostBySlug,
   incrementBlogPostViews,
   trackBlogPostDownload,
+  getActiveProducts,
+  getProductBySlug,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
 import { stripeRouter } from "./stripe";
@@ -360,6 +362,23 @@ export const appRouter = router({
         
         const { getAllBlogPosts } = await import("./db");
         return getAllBlogPosts();
+      }),
+  }),
+
+  // Products
+  products: router({
+    list: publicProcedure.query(async () => {
+      return getActiveProducts();
+    }),
+
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const product = await getProductBySlug(input.slug);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+        return product;
       }),
   }),
 });
