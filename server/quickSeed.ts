@@ -207,7 +207,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
             slug: "first-3-chapters",
             description:
               "Read the prologue and first two chapters of Crooked Lines: Bent, Not Broken. Experience the raw, unflinching honesty that makes this memoir a life-changing read.",
-            fileUrl: "/first-3-chapters.pdf",
+            fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/yFWupfXwmsXYvqGT.pdf",
             fileKey: "lead-magnets/first-3-chapters.pdf",
             type: "pdf" as const,
           },
@@ -216,7 +216,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
             slug: "recovery-toolkit",
             description:
               "A collection of tools, exercises, and resources to support your recovery journey. Includes daily check-ins, trigger worksheets, gratitude templates, and more.",
-            fileUrl: "/recovery-toolkit.pdf",
+            fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/juTOwCWrbhEtuNoc.pdf",
             fileKey: "lead-magnets/recovery-toolkit.pdf",
             type: "pdf" as const,
           },
@@ -225,7 +225,7 @@ export async function quickSeedHandler(req: Request, res: Response) {
             slug: "reading-guide",
             description:
               "Discussion questions and reflection prompts for individual use or group study. Go deeper with the themes of trauma, addiction, and redemption.",
-            fileUrl: "/reading-guide.pdf",
+            fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/KGjRutgzKuxQLhgj.pdf",
             fileKey: "lead-magnets/reading-guide.pdf",
             type: "pdf" as const,
           },
@@ -253,6 +253,39 @@ export async function quickSeedHandler(req: Request, res: Response) {
       }
     } catch (error: any) {
       results.messages.push(`❌ Lead magnets error: ${error.message}`);
+    }
+
+    // 4. Update existing lead magnet URLs to use S3 links
+    try {
+      const urlUpdates = [
+        {
+          title: "First 3 Chapters - Free Excerpt",
+          fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/yFWupfXwmsXYvqGT.pdf"
+        },
+        {
+          title: "Recovery Toolkit - Practical Worksheets",
+          fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/juTOwCWrbhEtuNoc.pdf"
+        },
+        {
+          title: "Crooked Lines Reading Guide",
+          fileUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/96788853/KGjRutgzKuxQLhgj.pdf"
+        }
+      ];
+
+      let updatedCount = 0;
+      for (const update of urlUpdates) {
+        await connection.query(
+          "UPDATE `lead_magnets` SET `file_url` = ? WHERE `title` = ?",
+          [update.fileUrl, update.title]
+        );
+        updatedCount++;
+      }
+
+      if (updatedCount > 0) {
+        results.messages.push(`✅ Updated ${updatedCount} lead magnet PDF URLs to S3 links`);
+      }
+    } catch (error: any) {
+      results.messages.push(`⚠️ PDF URL update: ${error.message}`);
     }
 
     await connection.end();
