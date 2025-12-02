@@ -38,6 +38,33 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Quick seed endpoint - direct database seeding bypass
   app.get("/api/quick-seed", quickSeedHandler);
+
+  // Diagnostic endpoint to check database state
+  app.get("/api/debug/products", async (req, res) => {
+    try {
+      const { getActiveProducts } = await import("../db.js");
+      const products = await getActiveProducts();
+
+      const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.length > 0);
+
+      return res.json({
+        productsCount: products.length,
+        products: products.map(p => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          price: p.price,
+          stripePriceId: p.stripePriceId,
+          type: p.type,
+          status: p.status,
+        })),
+        stripeConfigured,
+        stripeKeyPrefix: process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.substring(0, 10) + "..." : "NOT SET",
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message, stack: error.stack });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",
