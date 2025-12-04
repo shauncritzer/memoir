@@ -319,3 +319,52 @@
 - [x] Create complete email sequences with exact day spacing (all 7 sequences, 31 emails total)
 - [x] Format sequences for easy copy-paste into ConvertKit
 - [x] Include automation rules and trigger setup
+
+
+## LAUNCH WEEK - December 4, 2025
+
+### ConvertKit Automation Setup
+- [ ] Set up ConvertKit automation triggers (connect sequences to forms)
+- [ ] Test automation triggers end-to-end
+- [ ] Verify all 7 sequences fire correctly
+
+### Stripe Webhook Integration
+- [ ] Set up Stripe webhooks to trigger ConvertKit sequences on purchase
+- [ ] Connect 7-Day Reset purchase → ConvertKit sequence
+- [ ] Connect From Broken to Whole purchase → ConvertKit sequence
+- [ ] Connect Bent Not Broken Circle purchase → ConvertKit sequence
+- [ ] Test webhook integration end-to-end
+
+### Product Content Creation
+- [ ] Create 7-Day Reset workbook/journal content (7 days of exercises, reflections, practices)
+- [ ] Create 7-Day Reset delivery format (PDF workbook)
+- [ ] Create From Broken to Whole course content (30-day journey, 8 modules)
+- [ ] Create From Broken to Whole delivery format (PDF modules or video scripts)
+- [ ] Upload product content to S3
+- [ ] Seed product content in database
+
+### Products Page Development
+- [ ] Design products page layout
+- [ ] Build products page with all 3 products
+- [ ] Integrate Stripe checkout for each product
+- [ ] Add product descriptions and benefits
+- [ ] Test checkout flow for all products
+
+### Final Launch Testing
+- [ ] Test complete customer journey (homepage → lead magnet → email → product purchase)
+- [ ] Verify all emails send correctly
+- [ ] Verify all webhooks fire correctly
+- [ ] Verify all product deliveries work
+- [ ] Create launch checklist
+
+
+## Products Page - December 4, 2025
+
+- [x] Create Products page component with professional design
+- [x] Add Stripe checkout integration (createCheckoutSession procedure)
+- [x] Install Stripe SDK
+- [x] Add Products route to App.tsx
+- [x] Create product cards for all 3 products (7-Day Reset, From Broken to Whole, Bent Not Broken Circle)
+- [x] Add product descriptions, features, and pricing
+- [ ] Replace placeholder Stripe Price IDs with actual Price IDs from Stripe dashboard
+- [ ] Test checkout flow with test card

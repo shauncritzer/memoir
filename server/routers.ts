@@ -14,6 +14,13 @@ import {
   incrementBlogPostViews,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
+import Stripe from "stripe";
+
+// Initialize Stripe only if API key is available
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeKey ? new Stripe(stripeKey, {
+  apiVersion: "2025-11-17.clover",
+}) : null;
 
 export const appRouter = router({
   system: systemRouter,
@@ -158,6 +165,37 @@ export const appRouter = router({
           success: true,
           downloadUrl: leadMagnet.fileUrl,
           leadMagnet,
+        };
+      }),
+  }),
+
+  // Stripe integration
+  stripe: router({
+    createCheckoutSession: publicProcedure
+      .input(z.object({
+        priceId: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!stripe) {
+          throw new Error("Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.");
+        }
+        
+        const session = await stripe.checkout.sessions.create({
+          mode: input.priceId.includes("month") ? "subscription" : "payment",
+          line_items: [
+            {
+              price: input.priceId,
+              quantity: 1,
+            },
+          ],
+          success_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/products`,
+          customer_email: ctx.user?.email || undefined,
+        });
+        
+        return {
+          url: session.url!,
+          sessionId: session.id,
         };
       }),
   }),
