@@ -244,6 +244,46 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Newsletter Section */}
+      <section className="py-20 bg-gradient-to-b from-accent/20 to-background">
+        <div className="container">
+          <div className="max-w-2xl mx-auto">
+            <Card className="p-8 md:p-12 text-center space-y-6 shadow-lg">
+              <div className="space-y-4">
+                <h2 className="text-3xl md:text-4xl font-bold">
+                  Join the Recovery Community
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Get weekly insights, stories, and tools for your recovery journey. No spam, just hope.
+                </p>
+              </div>
+              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <Input
+                  type="email"
+                  placeholder="Your Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="flex-1"
+                  disabled={isSubmitting}
+                />
+                <Button 
+                  type="submit" 
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90 whitespace-nowrap"
+                >
+                  {isSubmitting ? "Subscribing..." : "Get Weekly Updates"}
+                </Button>
+              </form>
+              <p className="text-sm text-muted-foreground">
+                We respect your privacy. Unsubscribe anytime.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">

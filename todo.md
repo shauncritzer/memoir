@@ -388,3 +388,21 @@
 - [x] Create Bent Not Broken Circle Membership form content
 - [x] Fix Passive Affiliate SLO Opt-In form (72 visitors, 0 conversions)
 - [x] Create comprehensive ConvertKit Forms Content Guide
+
+
+## Newsletter Signup Sections - December 4, 2025
+
+### Website Updates
+- [x] Add newsletter signup section to Homepage
+- [x] Add newsletter signup section to Blog page
+- [x] Make newsletter forms functional with email capture
+- [x] Add Products link to Blog navigation
+- [x] Update Blog footer links
+- [ ] Add AI Coach signup section (if needed)
+- [ ] Add Course Interest signup section (if needed)
+
+### ConvertKit Forms Simplification
+- [x] Create simplified guide for 3 purchase forms only
+- [x] Remove unnecessary form content instructions
+- [x] Focus on webhook-only forms (no copy needed)
+- [x] Create CONVERTKIT_PURCHASE_FORMS_GUIDE.md

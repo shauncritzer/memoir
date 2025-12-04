@@ -5,10 +5,37 @@ import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
+  const subscribeMutation = trpc.email.subscribe.useMutation();
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+
+    setIsSubscribing(true);
+    try {
+      await subscribeMutation.mutateAsync({
+        email: newsletterEmail,
+        source: "blog",
+      });
+      toast.success("Success!", {
+        description: "You've been added to our weekly newsletter. Check your email to confirm.",
+      });
+      setNewsletterEmail("");
+    } catch (error) {
+      toast.error("Something went wrong", {
+        description: "Please try again or contact support.",
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   const filteredPosts = posts?.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -52,9 +79,14 @@ export default function Blog() {
             <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
               Resources
             </Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/products">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -144,12 +176,24 @@ export default function Blog() {
             <p className="text-xl text-muted-foreground">
               Join thousands of readers finding hope in their recovery journey. Weekly insights on trauma, addiction, and building a life worth staying sober for.
             </p>
-            <div className="flex gap-3 max-w-md mx-auto">
-              <Input type="email" placeholder="your@email.com" className="flex-1" />
-              <Button className="bg-primary hover:bg-primary/90">
-                Subscribe
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-3 max-w-md mx-auto">
+              <Input 
+                type="email" 
+                placeholder="your@email.com" 
+                className="flex-1"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                required
+                disabled={isSubscribing}
+              />
+              <Button 
+                type="submit"
+                className="bg-primary hover:bg-primary/90"
+                disabled={isSubscribing}
+              >
+                {isSubscribing ? "Subscribing..." : "Subscribe"}
               </Button>
-            </div>
+            </form>
             <p className="text-sm text-muted-foreground">
               No spam. Unsubscribe anytime.
             </p>
@@ -179,8 +223,8 @@ export default function Blog() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-                <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
-                <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+                <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               </ul>
             </div>
             <div className="space-y-4">
