@@ -34,7 +34,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$27",
-      priceId: "price_7day_reset", // Replace with actual Stripe Price ID
+      priceId: "price_1SYt2tC2dOpPzSOOpg5Pw7eU", // 7-Day Reset from Stripe
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -53,7 +53,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_from_broken_to_whole", // Replace with actual Stripe Price ID
+      priceId: "price_1SYt3kC2dOpPzSOOpAokf1UQ", // From Broken to Whole from Stripe
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -75,7 +75,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: "price_bent_not_broken_circle", // Replace with actual Stripe Price ID
+      priceId: "price_1SYt3iC2dOpPzSOOR7dbuGtY", // Bent Not Broken Circle from Stripe
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",

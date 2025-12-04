@@ -22,26 +22,26 @@ const stripe = stripeKey ? new Stripe(stripeKey, {
 /**
  * Stripe Price ID to ConvertKit Form ID mapping
  * 
- * TODO: Replace placeholder Price IDs with actual IDs from Stripe dashboard
+ * Actual Price IDs from Stripe dashboard (via Railway environment variables)
  */
 export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
   // 7-Day Reset ($27 one-time)
-  "price_PLACEHOLDER_7DAY": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
+  "price_1SYt2tC2dOpPzSOOpg5Pw7eU": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
   
   // From Broken to Whole ($97 one-time)
-  "price_PLACEHOLDER_COURSE": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
+  "price_1SYt3kC2dOpPzSOOpAokf1UQ": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
   
   // Bent Not Broken Circle ($29/month recurring)
-  "price_PLACEHOLDER_MEMBERSHIP": CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
+  "price_1SYt3iC2dOpPzSOOR7dbuGtY": CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
 };
 
 /**
  * Product names for logging
  */
 export const STRIPE_PRICE_TO_PRODUCT_NAME: Record<string, string> = {
-  "price_PLACEHOLDER_7DAY": "7-Day Reset",
-  "price_PLACEHOLDER_COURSE": "From Broken to Whole",
-  "price_PLACEHOLDER_MEMBERSHIP": "Bent Not Broken Circle Membership",
+  "price_1SYt2tC2dOpPzSOOpg5Pw7eU": "7-Day Reset",
+  "price_1SYt3kC2dOpPzSOOpAokf1UQ": "From Broken to Whole",
+  "price_1SYt3iC2dOpPzSOOR7dbuGtY": "Bent Not Broken Circle Membership",
 };
 
 /**

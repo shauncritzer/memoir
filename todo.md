@@ -428,3 +428,22 @@
 - [ ] Update Products.tsx with real Price IDs
 - [ ] Test complete purchase flow
 - [ ] Verify webhook triggers ConvertKit forms
+
+
+## Stripe Price IDs Integration - December 4, 2025
+
+### Received Price IDs from Railway
+- [x] STRIPE_PRICE_MONTHLY_MEMBERSHIP: price_1SYt3iC2dOpPzSOOR7dbuGtY (Bent Not Broken Circle)
+- [x] STRIPE_PRICE_RECOVERY_ROADMAP: price_1SYt3kC2dOpPzSOOpAokf1UQ (From Broken to Whole)
+- [x] STRIPE_PRICE_RESET_CHALLENGE: price_1SYt2tC2dOpPzSOOpg5Pw7eU (7-Day Reset)
+
+### Code Updates Needed
+- [x] Update server/stripe-webhook.ts with actual Price IDs
+- [x] Update client/src/pages/Products.tsx with actual Price IDs
+- [ ] Test webhook mappings
+- [ ] Verify purchase flow works end-to-end
+
+### Deployment Preparation
+- [ ] Create deployment checklist
+- [ ] Guide user to publish via Manus UI
+- [ ] Verify Railway auto-deployment works
