@@ -368,3 +368,23 @@
 - [x] Add product descriptions, features, and pricing
 - [ ] Replace placeholder Stripe Price IDs with actual Price IDs from Stripe dashboard
 - [ ] Test checkout flow with test card
+
+
+## Navigation & ConvertKit Forms - December 4, 2025
+
+### Navigation Fixes
+- [x] Add "Products" link to homepage header navigation
+- [x] Add "Products" CTA buttons on homepage
+- [x] Update all navigation menus to include Products page
+- [ ] Test all navigation links
+
+### ConvertKit Forms Content
+- [x] Write content for Homepage Newsletter form
+- [x] Write content for Blog Sidebar Signup form
+- [x] Write content for AI Coach form
+- [x] Write content for Course Interest form
+- [x] Create 7-Day Reset Purchase form content
+- [x] Create From Broken to Whole Purchase form content
+- [x] Create Bent Not Broken Circle Membership form content
+- [x] Fix Passive Affiliate SLO Opt-In form (72 visitors, 0 conversions)
+- [x] Create comprehensive ConvertKit Forms Content Guide
