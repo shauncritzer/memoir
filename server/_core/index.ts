@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { handleStripeWebhook, verifyWebhookSignature } from "../stripe-webhook";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -30,6 +31,45 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  
+  // Stripe webhook endpoint - MUST be before body parser middleware
+  // Stripe requires raw body for signature verification
+  app.post(
+    "/api/stripe/webhook",
+    express.raw({ type: "application/json" }),
+    async (req, res) => {
+      const signature = req.headers["stripe-signature"];
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      if (!signature || typeof signature !== "string") {
+        console.error("[Stripe Webhook] No signature header");
+        return res.status(400).send("No signature");
+      }
+
+      if (!webhookSecret) {
+        console.error("[Stripe Webhook] STRIPE_WEBHOOK_SECRET not configured");
+        return res.status(500).send("Webhook secret not configured");
+      }
+
+      // Verify webhook signature
+      const event = verifyWebhookSignature(req.body, signature, webhookSecret);
+
+      if (!event) {
+        console.error("[Stripe Webhook] Invalid signature");
+        return res.status(400).send("Invalid signature");
+      }
+
+      // Handle the event
+      const result = await handleStripeWebhook(event);
+
+      if (result.success) {
+        res.json({ received: true, message: result.message });
+      } else {
+        res.status(500).json({ error: result.message });
+      }
+    }
+  );
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

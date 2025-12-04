@@ -15,12 +15,18 @@ const CONVERTKIT_API_BASE = "https://api.convertkit.com/v3";
  * These are the numeric IDs from the form URLs in ConvertKit dashboard
  */
 export const CONVERTKIT_FORMS = {
+  // Lead Magnets
   FIRST_3_CHAPTERS: '8815112',
   RECOVERY_TOOLKIT: '8815131',
   READING_GUIDE: '8815140',
+  // Newsletter Signups
   HOMEPAGE_NEWSLETTER: '776aa512c9', // TODO: Get correct ID from ConvertKit
   BLOG_SIDEBAR: '01295fddb5', // TODO: Get correct ID from ConvertKit
   COURSE_INTEREST: '5e54fb6d38', // TODO: Get correct ID from ConvertKit
+  // Product Purchases (Stripe Webhook Triggers)
+  SEVEN_DAY_RESET_PURCHASE: '8842147',
+  FROM_BROKEN_TO_WHOLE_PURCHASE: '8842151',
+  BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP: '8842155',
 };
 
 /**

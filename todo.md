@@ -406,3 +406,25 @@
 - [x] Remove unnecessary form content instructions
 - [x] Focus on webhook-only forms (no copy needed)
 - [x] Create CONVERTKIT_PURCHASE_FORMS_GUIDE.md
+
+
+## Stripe Webhook Integration - December 4, 2025
+
+### ConvertKit Form IDs (RECEIVED)
+- [x] 7-Day Reset Purchase: 8842147
+- [x] From Broken to Whole Purchase: 8842151
+- [x] Bent Not Broken Circle Membership: 8842155
+
+### Webhook Code Updates
+- [x] Update server/convertkit.ts with ConvertKit Form IDs
+- [x] Create stripe-webhook.ts handler
+- [x] Add webhook endpoint to Express server (/api/stripe/webhook)
+- [x] Add Stripe Price ID mapping (placeholder IDs ready)
+- [ ] Test webhook endpoint locally
+- [ ] Update STRIPE_WEBHOOK_SETUP_GUIDE with actual Form IDs
+
+### Waiting for Stripe Setup
+- [ ] Receive Stripe Price IDs from Shaun
+- [ ] Update Products.tsx with real Price IDs
+- [ ] Test complete purchase flow
+- [ ] Verify webhook triggers ConvertKit forms
