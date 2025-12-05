@@ -116,6 +116,9 @@ export default function Products() {
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
+            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
+              The Memoir
+            </Link>
             <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
               Blog
             </Link>
