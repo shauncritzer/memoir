@@ -334,3 +334,116 @@
 - [x] Apply Claude's one-line fix to server/convertkit.ts (remove non-existent LEAD_MAGNET_DOWNLOADED tag)
 - [ ] Test ConvertKit integration
 - [ ] Verify emails get added to ConvertKit dashboard
+
+
+## MEMBER PORTAL & AI COACH BUILD - December 5, 2025
+
+### Phase 1: Navigation & Pages (TONIGHT)
+- [ ] Add "AI Coach" link to About, Blog, Resources, Products pages navigation
+- [ ] Create /memoir page (book preview + Amazon link placeholder)
+- [ ] Verify "Get Started" buttons go to /products on all pages
+
+### Phase 2: AI Coach Integration (THIS WEEK)
+- [ ] Move coach from separate repo (github.com/shauncritzer/coach) to /coach page
+- [ ] Create usage_tracking table in database (user_id, month, message_count)
+- [ ] Implement 10 free messages/month limit (track by IP or email)
+- [ ] Add "Upgrade to Circle" CTA modal after hitting limit
+- [ ] Unlock unlimited AI Coach for Circle members (check subscription status)
+- [ ] Add usage counter UI component ("X/10 messages used this month")
+- [ ] Add AI Coach standalone subscription option ($14.99/mo)
+
+### Phase 3: Member Portal Structure (WEEK 1-2)
+- [ ] Create /members dashboard page (shows purchased products)
+- [ ] Add authentication middleware (redirect to login if not authenticated)
+- [ ] Create /members/7-day-reset course page structure
+- [ ] Create /members/from-broken-to-whole course page structure
+- [ ] Create /members/circle community hub page
+- [ ] Add purchases table to database (user_id, product_id, purchase_date, stripe_session_id)
+- [ ] Link Stripe webhook to create purchase records
+
+### Phase 4: Course Delivery Features (WEEK 2-3)
+- [ ] Set up Vimeo Pro account ($20/mo)
+- [ ] Create Vimeo video embedding component
+- [ ] Add course_progress table (user_id, course_id, module_id, completed, completion_date)
+- [ ] Build progress tracking UI (checkboxes per module, completion percentage)
+- [ ] Add PDF download buttons per module (link to S3-hosted workbooks)
+- [ ] Implement drip unlock logic:
+  - [ ] 7-Day Reset: Click-through (complete Day 1 to unlock Day 2)
+  - [ ] From Broken to Whole: Hybrid (complete module OR wait 4 days)
+- [ ] Create completion certificate generator (PDF with user name + date)
+- [ ] Add bonus materials section to each course
+
+### Phase 5: Content Creation (WEEK 3-6)
+- [ ] Write 7-Day Reset Day 1 workbook (15 pages - Honesty)
+- [ ] Write 7-Day Reset Day 2 workbook (15 pages - Support)
+- [ ] Write 7-Day Reset Day 3 workbook (15 pages - Triggers)
+- [ ] Write 7-Day Reset Day 4 workbook (15 pages - Routines)
+- [ ] Write 7-Day Reset Day 5 workbook (15 pages - Shame)
+- [ ] Write 7-Day Reset Day 6 workbook (15 pages - Resilience)
+- [ ] Write 7-Day Reset Day 7 workbook (15 pages - Celebration)
+- [ ] Write From Broken to Whole Module 1 (20 pages - Understanding Trauma, Days 1-4)
+- [ ] Write From Broken to Whole Module 2 (20 pages - Nervous System Healing, Days 5-8)
+- [ ] Write From Broken to Whole Module 3 (20 pages - Inner Child Work, Days 9-12)
+- [ ] Write From Broken to Whole Module 4 (20 pages - Shame Processing, Days 13-16)
+- [ ] Write From Broken to Whole Module 5 (20 pages - Relationship Healing, Days 17-20)
+- [ ] Write From Broken to Whole Module 6 (20 pages - Purpose Discovery, Days 21-24)
+- [ ] Write From Broken to Whole Module 7 (20 pages - Spiritual Awakening, Days 25-28)
+- [ ] Write From Broken to Whole Module 8 (20 pages - Integration & Next Steps, Days 29-30)
+- [ ] Write "Living Sober" bonus guide (50+ pages - 90 practical tips)
+- [ ] Create video scripts for 7-Day Reset (7 videos, 5-10 min each)
+- [ ] Create video scripts for From Broken to Whole (30 videos, 10-15 min each)
+
+### Phase 6: Video Production (Shaun's Tasks)
+- [ ] Test camera/audio setup (Sony 4K camera + tripod + light bar)
+- [ ] Record 2-minute test video and review quality
+- [ ] Batch-record 7-Day Reset videos (7 videos, 1-2 days)
+- [ ] Upload 7-Day Reset videos to Vimeo
+- [ ] Batch-record From Broken to Whole videos (30 videos, 5-10 per day)
+- [ ] Upload From Broken to Whole videos to Vimeo
+- [ ] Get Vimeo embed codes for all videos
+
+### Phase 7: Community Features (Bent Not Broken Circle)
+- [ ] Create /members/circle page with call schedule
+- [ ] Add Zoom integration for live calls
+- [ ] Create call_replays table (call_id, title, date, zoom_recording_url, vimeo_url)
+- [ ] Build replay library UI (filterable by date/topic)
+- [ ] Create simple forum (threads table: user_id, title, content, created_at)
+- [ ] Add forum UI (create thread, reply, like)
+- [ ] Create resource library section (links to bonus PDFs, worksheets, etc.)
+- [ ] Add monthly bonus drops section (new content each month)
+
+### Phase 8: Testing & Deployment (FINAL WEEK)
+- [ ] Test complete purchase flow: Stripe → webhook → email → member access
+- [ ] Test AI Coach free tier (10 messages, then paywall)
+- [ ] Test AI Coach unlimited for Circle members
+- [ ] Test video playback on all devices (desktop, mobile, tablet)
+- [ ] Test progress tracking (check modules, verify database updates)
+- [ ] Test drip unlock (7-Day click-through, From Broken to Whole hybrid)
+- [ ] Test PDF downloads from member area
+- [ ] Test completion certificates
+- [ ] Push all changes to GitHub
+- [ ] Verify Railway auto-deploys
+- [ ] Test live site end-to-end
+- [ ] Get Shaun's approval for launch
+
+### Stripe Product Setup
+- [ ] Create Stripe product for AI Coach Standalone ($14.99/mo recurring)
+- [ ] Update Products page with AI Coach option
+- [ ] Add AI Coach to Stripe webhook handler
+- [ ] Test AI Coach subscription purchase flow
+
+
+## Phase 1 (Tonight) - Navigation Fixes & Memoir Page - COMPLETED ✅
+
+- [x] Add "AI Coach" link to Products.tsx header navigation
+- [x] Add "AI Coach" link to Resources.tsx header navigation (also added Products link)
+- [x] Verify About.tsx has AI Coach link (already present)
+- [x] Verify Blog.tsx has AI Coach link (already present)
+- [x] Verify Home.tsx has AI Coach link (already present)
+- [x] Create /memoir page with book preview and Amazon link placeholder
+- [x] Add /memoir route to App.tsx
+- [x] Verify "Get Started" buttons point to /products on all pages
+
+**Status:** All navigation links now consistent across website. /memoir page created with book preview, "What's Inside" sections, early praise, and CTA to download first 3 chapters. Amazon link is disabled with "Coming 2025" message until book is published.
+
+**Next:** Push to GitHub and verify Railway deployment, then proceed to Phase 2 (AI Coach integration).

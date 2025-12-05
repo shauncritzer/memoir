@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 // Initialize Stripe
 export const stripe = new Stripe(ENV.stripeSecretKey, {
-  apiVersion: '2025-01-27.acacia',
+  apiVersion: '2025-11-17.clover',
 });
 
 // Stripe Product/Price IDs Configuration
@@ -200,7 +200,7 @@ export const stripeRouter = router({
           subscriptions: subscriptions.data.map((sub) => ({
             id: sub.id,
             status: sub.status,
-            currentPeriodEnd: sub.current_period_end,
+            currentPeriodEnd: (sub as any).current_period_end,
             cancelAtPeriodEnd: sub.cancel_at_period_end,
             items: sub.items.data.map((item) => ({
               priceId: item.price.id,

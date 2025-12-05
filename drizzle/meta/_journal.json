@@ -15,6 +15,13 @@
       "when": 1764130081471,
       "tag": "0001_grey_fabian_cortez",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1764910825195,
+      "tag": "0002_lyrical_raider",
+      "breakpoints": true
     }
   ]
 }

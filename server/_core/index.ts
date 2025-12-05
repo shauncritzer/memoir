@@ -137,7 +137,7 @@ async function startServer() {
       // Try to initialize Stripe
       try {
         const Stripe = (await import('stripe')).default;
-        const stripe = new Stripe(key, { apiVersion: '2025-01-27.acacia' });
+        const stripe = new Stripe(key, { apiVersion: '2025-11-17.clover' });
 
         // Try to make a simple API call
         const balance = await stripe.balance.retrieve();

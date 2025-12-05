@@ -11,6 +11,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogEditor from "./pages/BlogEditor";
 import Products from "./pages/Products";
+import Memoir from "./pages/Memoir";
 import AdminSeed from "./pages/AdminSeed";
 import Product from "./pages/Product";
 import ProductSuccess from "./pages/ProductSuccess";
@@ -21,6 +22,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
+      <Route path="/memoir" component={Memoir} />
       <Route path="/resources" component={Resources} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />

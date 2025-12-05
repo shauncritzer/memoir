@@ -125,6 +125,9 @@ export default function Products() {
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
             </Link>
+            <Link href="/coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
           </nav>
         </div>
       </header>
