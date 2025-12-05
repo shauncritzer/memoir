@@ -66,6 +66,9 @@ export default function Home() {
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
+            <Link href="/coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
             <Link href="/products">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started

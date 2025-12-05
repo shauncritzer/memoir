@@ -14,6 +14,7 @@ import Products from "./pages/Products";
 import AdminSeed from "./pages/AdminSeed";
 import Product from "./pages/Product";
 import ProductSuccess from "./pages/ProductSuccess";
+import Coach from "./pages/Coach";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/products/success" component={ProductSuccess} />
       <Route path="/products/:slug" component={Product} />
       <Route path="/products" component={Products} />
+      <Route path="/coach" component={Coach} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
       <Route path="/admin/seed" component={AdminSeed} />
       <Route path={"/404"} component={NotFound} />

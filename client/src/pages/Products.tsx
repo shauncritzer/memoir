@@ -109,6 +109,7 @@ export default function Products() {
       productType: "subscription" as const,
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
+        "Unlimited AI Recovery Coach access",
         "Monthly live group coaching calls",
         "Private community forum",
         "Weekly accountability check-ins",
