@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, Clock, ArrowRight, Download } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -9,33 +10,11 @@ import { toast } from "sonner";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [isSubscribing, setIsSubscribing] = useState(false);
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
-  const subscribeMutation = trpc.email.subscribe.useMutation();
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail) return;
-
-    setIsSubscribing(true);
-    try {
-      await subscribeMutation.mutateAsync({
-        email: newsletterEmail,
-        source: "blog",
-      });
-      toast.success("Success!", {
-        description: "You've been added to our weekly newsletter. Check your email to confirm.",
-      });
-      setNewsletterEmail("");
-    } catch (error) {
-      toast.error("Something went wrong", {
-        description: "Please try again or contact support.",
-      });
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [email, setEmail] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadMutation = trpc.blog.download.useMutation();
 
   const filteredPosts = posts?.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,6 +33,40 @@ export default function Blog() {
     const wordCount = content.split(/\s+/).length;
     const minutes = Math.ceil(wordCount / wordsPerMinute);
     return `${minutes} min read`;
+  };
+
+  const handleDownload = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedPost || !email) return;
+
+    setIsDownloading(true);
+
+    try {
+      const result = await downloadMutation.mutateAsync({
+        slug: selectedPost.slug,
+        email: email,
+      });
+
+      if (result.success && result.downloadUrl) {
+        // Open download in new tab
+        window.open(result.downloadUrl, "_blank");
+
+        toast.success("Download started!", {
+          description: "Check your downloads folder.",
+        });
+
+        // Close dialog and reset
+        setSelectedPost(null);
+        setEmail("");
+      }
+    } catch (error) {
+      toast.error("Download failed", {
+        description: "Please try again or contact support.",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -79,14 +92,9 @@ export default function Blog() {
             <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
               Resources
             </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
           </div>
         </div>
       </nav>
@@ -150,12 +158,24 @@ export default function Blog() {
                     {post.excerpt && (
                       <p className="text-lg text-muted-foreground">{post.excerpt}</p>
                     )}
-                    <Link href={`/blog/${post.slug}`}>
-                      <Button variant="ghost" className="group">
-                        Read More
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                    <div className="flex gap-3">
+                      <Link href={`/blog/${post.slug}`}>
+                        <Button variant="ghost" className="group">
+                          Read More
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                      {post.fileUrl && (
+                        <Button
+                          variant="outline"
+                          className="group"
+                          onClick={() => setSelectedPost(post)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download PDF
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -176,30 +196,57 @@ export default function Blog() {
             <p className="text-xl text-muted-foreground">
               Join thousands of readers finding hope in their recovery journey. Weekly insights on trauma, addiction, and building a life worth staying sober for.
             </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex gap-3 max-w-md mx-auto">
-              <Input 
-                type="email" 
-                placeholder="your@email.com" 
-                className="flex-1"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                required
-                disabled={isSubscribing}
-              />
-              <Button 
-                type="submit"
-                className="bg-primary hover:bg-primary/90"
-                disabled={isSubscribing}
-              >
-                {isSubscribing ? "Subscribing..." : "Subscribe"}
+            <div className="flex gap-3 max-w-md mx-auto">
+              <Input type="email" placeholder="your@email.com" className="flex-1" />
+              <Button className="bg-primary hover:bg-primary/90">
+                Subscribe
               </Button>
-            </form>
+            </div>
             <p className="text-sm text-muted-foreground">
               No spam. Unsubscribe anytime.
             </p>
           </div>
         </div>
       </section>
+
+      {/* Download Dialog */}
+      <Dialog open={!!selectedPost} onOpenChange={(open) => !open && setSelectedPost(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Download {selectedPost?.title}</DialogTitle>
+            <DialogDescription>
+              Enter your email to download this blog post as a PDF.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDownload} className="space-y-4">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => setSelectedPost(null)}
+                disabled={isDownloading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary/90"
+                disabled={isDownloading}
+              >
+                {isDownloading ? "Downloading..." : "Download"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
@@ -223,8 +270,8 @@ export default function Blog() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-                <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+                <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
+                <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
               </ul>
             </div>
             <div className="space-y-4">

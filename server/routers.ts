@@ -12,19 +12,19 @@ import {
   getPublishedBlogPosts,
   getBlogPostBySlug,
   incrementBlogPostViews,
+  trackBlogPostDownload,
+  getActiveProducts,
+  getProductBySlug,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
-import Stripe from "stripe";
-
-// Initialize Stripe only if API key is available
-const stripeKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeKey ? new Stripe(stripeKey, {
-  apiVersion: "2025-11-17.clover",
-}) : null;
+import { stripeRouter } from "./stripe";
+import { adminSetupRouter } from "./adminSetup";
 
 export const appRouter = router({
   system: systemRouter,
-  
+  stripe: stripeRouter,
+  adminSetup: adminSetupRouter,
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -169,37 +169,6 @@ export const appRouter = router({
       }),
   }),
 
-  // Stripe integration
-  stripe: router({
-    createCheckoutSession: publicProcedure
-      .input(z.object({
-        priceId: z.string(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        if (!stripe) {
-          throw new Error("Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.");
-        }
-        
-        const session = await stripe.checkout.sessions.create({
-          mode: input.priceId.includes("month") ? "subscription" : "payment",
-          line_items: [
-            {
-              price: input.priceId,
-              quantity: 1,
-            },
-          ],
-          success_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/products`,
-          customer_email: ctx.user?.email || undefined,
-        });
-        
-        return {
-          url: session.url!,
-          sessionId: session.id,
-        };
-      }),
-  }),
-
   // ConvertKit integration
   convertkit: router({
     subscribeForLeadMagnet: publicProcedure
@@ -237,13 +206,55 @@ export const appRouter = router({
       .input(z.object({ slug: z.string() }))
       .query(async ({ input }) => {
         const post = await getBlogPostBySlug(input.slug);
-        
+
         if (post && post.status === "published") {
           // Increment view count asynchronously
           incrementBlogPostViews(post.id).catch(console.error);
         }
-        
+
         return post;
+      }),
+
+    download: publicProcedure
+      .input(z.object({
+        slug: z.string(),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const blogPost = await getBlogPostBySlug(input.slug);
+
+        if (!blogPost) {
+          throw new Error("Blog post not found");
+        }
+
+        if (!blogPost.fileUrl) {
+          throw new Error("This blog post does not have a downloadable file");
+        }
+
+        // Get or create subscriber in local database
+        let subscriber = await getEmailSubscriberByEmail(input.email);
+        if (!subscriber) {
+          subscriber = await createEmailSubscriber({
+            email: input.email,
+            source: `blog-post-${input.slug}`,
+            status: "active",
+          });
+        }
+
+        // Track download
+        await trackBlogPostDownload({
+          blogPostId: blogPost.id,
+          subscriberId: subscriber.id,
+          email: input.email,
+          ipAddress: ctx.req.ip,
+          userAgent: ctx.req.headers["user-agent"],
+        });
+
+        return {
+          success: true,
+          downloadUrl: blogPost.fileUrl,
+          blogPost,
+        };
       }),
     
     // Admin-only procedures for blog management
@@ -351,6 +362,23 @@ export const appRouter = router({
         
         const { getAllBlogPosts } = await import("./db");
         return getAllBlogPosts();
+      }),
+  }),
+
+  // Products
+  products: router({
+    list: publicProcedure.query(async () => {
+      return getActiveProducts();
+    }),
+
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const product = await getProductBySlug(input.slug);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+        return product;
       }),
   }),
 });
