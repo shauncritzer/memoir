@@ -447,3 +447,32 @@
 - [ ] Create deployment checklist
 - [ ] Guide user to publish via Manus UI
 - [ ] Verify Railway auto-deployment works
+
+
+## Railway Deployment - December 4, 2025
+
+### Issue Identified
+- [x] Products page not showing on shauncritzer.com (Railway)
+- [x] Railway running old code without Products page
+- [x] Manus "Publish" doesn't auto-sync to Railway
+
+### Deployment Tasks
+- [x] Push code to GitHub via git CLI (already pushed via Manus checkpoints)
+- [ ] Wait for Railway auto-deployment (2-3 min)
+- [ ] User adds STRIPE_WEBHOOK_SECRET to Railway env vars
+- [ ] User creates 3 purchase tags in ConvertKit
+- [ ] User creates 3 purchase automations in ConvertKit
+- [ ] Verify Products page appears on shauncritzer.com
+- [ ] Test complete purchase flow on live site
+
+### ConvertKit Purchase Automations Needed
+- [ ] 7-Day Reset Purchase automation (Form 8842147) → Sequence: "7-Day Reset Welcome"
+- [ ] From Broken to Whole Purchase automation (Form 8842151) → Sequence: "From Broken to Whole Course Welcome"
+- [ ] Bent Not Broken Circle Membership automation (Form 8842155) → Sequence: "Membership Welcome"
+
+### Claude Deployment Package
+- [x] Create list of all changed files
+- [x] Create deployment instructions for Claude
+- [x] Include Railway webhook secret setup
+- [x] Include testing procedures
+- [x] Create CLAUDE_DEPLOYMENT_PACKAGE.md
