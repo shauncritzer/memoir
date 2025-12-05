@@ -101,7 +101,7 @@ export default function Home() {
                     Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <a href="https://www.youtube.com/@ShaunCritzer" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.youtube.com/watch?v=9ejH01kxzW4" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="text-lg px-8">
                     Watch My Story
                   </Button>

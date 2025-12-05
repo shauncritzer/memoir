@@ -36,6 +36,28 @@ export default function Products() {
 
   const products = [
     {
+      id: "the-memoir",
+      name: "Crooked Lines: Bent, Not Broken",
+      tagline: "The Complete Memoir",
+      price: "$19.99",
+      priceId: null, // External link to Amazon
+      productType: "external" as const,
+      externalUrl: "https://www.amazon.com/dp/YOURBOOK", // TODO: Replace with actual Amazon link
+      description: "The full memoir - from childhood trauma and active addiction to 13 years of recovery, redemption, and hope.",
+      features: [
+        "Complete 300+ page memoir",
+        "Unflinching honesty about trauma and addiction",
+        "The difference between sobriety and recovery",
+        "EMDR therapy and inner child healing",
+        "Peaceful co-parenting after chaos",
+        "Available in paperback, ebook, and audiobook",
+        "First 3 chapters free preview available",
+      ],
+      ideal: "Perfect for: Anyone struggling with addiction, trauma, or supporting someone who is",
+      badge: "The Foundation",
+      badgeVariant: "secondary" as const,
+    },
+    {
       id: "7-day-reset",
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
@@ -161,7 +183,7 @@ export default function Products() {
       {/* Products Grid */}
       <section className="py-12 px-4 pb-20">
         <div className="container max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.map((product) => (
               <Card key={product.id} className="flex flex-col hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -189,21 +211,33 @@ export default function Products() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => handlePurchase(product.priceId, product.id, product.productType)}
-                    disabled={loadingProduct === product.id}
-                  >
-                    {loadingProduct === product.id ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      `Get ${product.name}`
-                    )}
-                  </Button>
+                  {product.productType === "external" ? (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      asChild
+                    >
+                      <a href={product.externalUrl} target="_blank" rel="noopener noreferrer">
+                        Buy on Amazon
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={() => handlePurchase(product.priceId, product.id, product.productType)}
+                      disabled={loadingProduct === product.id}
+                    >
+                      {loadingProduct === product.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        `Get ${product.name}`
+                      )}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}
