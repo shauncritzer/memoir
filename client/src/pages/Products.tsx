@@ -53,7 +53,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_1SYt3kC2dOpPzSOOpAokf1UQ", // From Broken to Whole from Stripe
+      priceId: "price_1SYt3KC2dOpPzSOOpAokfJUQ", // From Broken to Whole from Stripe
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
