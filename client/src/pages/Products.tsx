@@ -23,9 +23,15 @@ export default function Products() {
     },
   });
 
-  const handlePurchase = (priceId: string, productName: string) => {
+  const handlePurchase = (priceId: string, productName: string, productType: 'one_time' | 'subscription') => {
     setLoadingProduct(productName);
-    createCheckoutSession.mutate({ priceId });
+    const baseUrl = window.location.origin;
+    createCheckoutSession.mutate({
+      priceId,
+      productType,
+      successUrl: `${baseUrl}/products/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/products`,
+    });
   };
 
   const products = [
@@ -35,6 +41,7 @@ export default function Products() {
       tagline: "Recovery Jumpstart",
       price: "$27",
       priceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU", // 7-Day Reset from Stripe
+      productType: "one_time" as const,
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -54,6 +61,7 @@ export default function Products() {
       tagline: "30-Day Transformation",
       price: "$97",
       priceId: "price_1SYt3KC2dOpPzSOOpAokfJUQ", // From Broken to Whole from Stripe
+      productType: "one_time" as const,
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -76,6 +84,7 @@ export default function Products() {
       tagline: "Monthly Membership",
       price: "$29/month",
       priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY", // Bent Not Broken Circle from Stripe
+      productType: "subscription" as const,
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
@@ -180,7 +189,7 @@ export default function Products() {
                   <Button
                     className="w-full"
                     size="lg"
-                    onClick={() => handlePurchase(product.priceId, product.id)}
+                    onClick={() => handlePurchase(product.priceId, product.id, product.productType)}
                     disabled={loadingProduct === product.id}
                   >
                     {loadingProduct === product.id ? (
