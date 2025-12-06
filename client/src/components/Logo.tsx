@@ -22,7 +22,6 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
       {showText && (
         <div className="flex flex-col">
           <span className="text-xl font-bold leading-tight">Shaun Critzer</span>
-          <span className="text-xs text-muted-foreground leading-tight">Bent, Not Broken</span>
         </div>
       )}
     </Link>

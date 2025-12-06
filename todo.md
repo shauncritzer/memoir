@@ -576,3 +576,42 @@
 - [ ] Test ConvertKit subscriber creation on purchase
 - [ ] Push all changes to GitHub memoir repo
 - [ ] Save final checkpoint with all updates
+
+
+## URGENT FIXES - User Reported Issues (December 5, Evening Session 3)
+
+### Navigation Issues
+- [x] Remove "Products/AI Coach" duplicate links appearing between "Download First 3 Chapters" and "Watch My Story"
+- [x] Ensure navigation only appears in header, not scattered throughout pages
+- [ ] Verify navigation consistency across ALL pages after fix
+
+### Homepage Cleanup
+- [x] Remove "13 Years Sober" badge from homepage
+- [x] Remove "Bent, Not Broken" tagline from below name
+- [ ] Keep gradient logo as-is (no changes)
+
+### Video Links
+- [x] Fix broken YouTube link in "Watch My Story" button
+- [x] Update with current/active YouTube video URL (https://youtu.be/9ejH01kxzW4)
+
+### AI Coach Styling
+- [x] Restyle AI Coach page to black/gold theme (separate app look)
+- [x] Make it visually distinct from main site (like old version)
+- [x] Keep functionality intact while changing visual design
+
+### PDF Fixes
+- [x] Remove unwanted photo: Shannon and Shaun on beach
+- [x] Remove unwanted photo: Shaun in skydiving gear on ground
+- [x] Apply moiré fix to family photo (boys' striped shirts)
+- [x] Regenerate PDFs with correct photos only (skydiving-solo, flying-plane, bodybuilding)
+
+### Deployment
+- [ ] Push ALL changes to GitHub memoir repo (verify commit)
+- [ ] Verify Railway auto-deployment completes
+- [ ] Test live site matches local preview exactly
+- [ ] Confirm Stripe integration works on live site
+
+### Testing
+- [ ] Test complete purchase flow on live Railway deployment
+- [ ] Verify course delivery system works end-to-end
+- [ ] Check all navigation links work correctly

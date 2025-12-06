@@ -66,12 +66,6 @@ export default function Home() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
             <Link href="/products">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started
@@ -86,12 +80,7 @@ export default function Home() {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="inline-block">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  13 Years Sober
-                </span>
-              </div>
+
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 Crooked Lines:{" "}
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -107,13 +96,7 @@ export default function Home() {
                     Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-                <a href="https://www.youtube.com/@ShaunCritzer" target="_blank" rel="noopener noreferrer">
+                <a href="https://youtu.be/9ejH01kxzW4" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="text-lg px-8">
                     Watch My Story
                   </Button>
@@ -246,12 +229,6 @@ export default function Home() {
                   Get the Free Chapters <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
               <a href="https://www.amazon.com/dp/YOURBOOK" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" variant="outline" className="text-lg px-8">
                   Buy the Full Book
@@ -324,19 +301,8 @@ export default function Home() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
                 <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               </ul>
             </div>
