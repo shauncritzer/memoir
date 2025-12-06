@@ -1,0 +1,308 @@
+Tool: accounts_list
+  Description:
+    List all accounts in your Cloudflare account
+  Inputs:
+    Takes an object, but no specific properties defined (or empty properties section).
+Tool: set_active_account
+  Description:
+    Set active account to be used for tool calls that require accountId
+  Inputs:
+    - activeAccountIdParam:
+        Type: string
+        Description: The accountId present in the users Cloudflare account, that should be the active accountId.
+        Required: true
+Tool: kv_namespaces_list
+  Description:
+    
+    			List all of the kv namespaces in your Cloudflare account.
+    			Use this tool when you need to list all of the kv namespaces in your Cloudflare account.
+    			Returns a list of kv namespaces with the following properties:
+    			- id: The id of the kv namespace.
+    			- title: The title of the kv namespace.
+    			
+  Inputs:
+    - params:
+        Type: object
+        Description: Optional parameters for listing KV namespaces
+        Required: false
+        Properties:
+          - per_page:
+              Type: integer
+              Description: Number of namespaces per page (1-100)
+              Required: false
+          - direction:
+              Type: string
+              Description: Direction to order namespaces (asc/desc)
+              Required: false
+          - order:
+              Type: string
+              Description: Field to order namespaces by (id/title)
+              Required: false
+          - page:
+              Type: integer
+              Description: Page number of results (starts at 1)
+              Required: false
+Tool: kv_namespace_create
+  Description:
+    Create a new kv namespace in your Cloudflare account
+  Inputs:
+    - title:
+        Type: string
+        Description: The human-readable name/title of the KV namespace
+        Required: true
+Tool: kv_namespace_delete
+  Description:
+    Delete a kv namespace in your Cloudflare account
+  Inputs:
+    - namespace_id:
+        Type: string
+        Description: The ID of the KV namespace
+        Required: true
+Tool: kv_namespace_get
+  Description:
+    Get details of a kv namespace in your Cloudflare account.
+    		Use this tool when you need to get details of a specific kv namespace in your Cloudflare account.
+    		Returns a kv namespace with the following properties:
+    			- id: The id of the kv namespace.
+    			- title: The title of the kv namespace.
+    			- supports_url_encoding: Whether the kv namespace supports url encoding.
+    			- beta: Whether the kv namespace is in beta.
+    		
+  Inputs:
+    - namespace_id:
+        Type: string
+        Description: The ID of the KV namespace
+        Required: true
+Tool: kv_namespace_update
+  Description:
+    Update the title of a kv namespace in your Cloudflare account
+  Inputs:
+    - namespace_id:
+        Type: string
+        Description: The ID of the KV namespace
+        Required: true
+    - title:
+        Type: string
+        Description: The human-readable name/title of the KV namespace
+        Required: true
+Tool: workers_list
+  Description:
+    List all Workers in your Cloudflare account.
+    
+    If you only need details of a single Worker, use workers_get_worker.
+  Inputs:
+    Takes an object, but no specific properties defined (or empty properties section).
+Tool: workers_get_worker
+  Description:
+    Get the details of the Cloudflare Worker.
+  Inputs:
+    - scriptName:
+        Type: string
+        Description: The name of the worker script to retrieve
+        Required: true
+Tool: workers_get_worker_code
+  Description:
+    Get the source code of a Cloudflare Worker. Note: This may be a bundled version of the worker.
+  Inputs:
+    - scriptName:
+        Type: string
+        Description: The name of the worker script to retrieve
+        Required: true
+Tool: r2_buckets_list
+  Description:
+    List r2 buckets in your Cloudflare account
+  Inputs:
+    - start_after:
+        Type: N/A
+        Description: Bucket name to start searching after. Buckets are ordered lexicographically.
+        Required: false
+    - cursor:
+        Type: N/A
+        Description: Query param: Pagination cursor received during the last List Buckets call. R2 buckets are paginated using cursors instead of page numbers.
+        Required: false
+    - direction:
+        Type: N/A
+        Description: Direction to order buckets
+        Required: false
+    - name_contains:
+        Type: N/A
+        Description: Bucket names to filter by. Only buckets with this phrase in their name will be returned.
+        Required: false
+    - per_page:
+        Type: N/A
+        Required: false
+Tool: r2_bucket_create
+  Description:
+    Create a new r2 bucket in your Cloudflare account
+  Inputs:
+    - name:
+        Type: string
+        Description: The name of the r2 bucket
+        Required: true
+Tool: r2_bucket_get
+  Description:
+    Get details about a specific R2 bucket
+  Inputs:
+    - name:
+        Type: string
+        Description: The name of the r2 bucket
+        Required: true
+Tool: r2_bucket_delete
+  Description:
+    Delete an R2 bucket
+  Inputs:
+    - name:
+        Type: string
+        Description: The name of the r2 bucket
+        Required: true
+Tool: d1_databases_list
+  Description:
+    List all of the D1 databases in your Cloudflare account
+  Inputs:
+    - name:
+        Type: N/A
+        Required: false
+    - page:
+        Type: N/A
+        Required: false
+    - per_page:
+        Type: N/A
+        Required: false
+Tool: d1_database_create
+  Description:
+    Create a new D1 database in your Cloudflare account
+  Inputs:
+    - name:
+        Type: string
+        Required: true
+    - primary_location_hint:
+        Type: N/A
+        Required: false
+Tool: d1_database_delete
+  Description:
+    Delete a d1 database in your Cloudflare account
+  Inputs:
+    - database_id:
+        Type: string
+        Required: true
+Tool: d1_database_get
+  Description:
+    Get a D1 database in your Cloudflare account
+  Inputs:
+    - database_id:
+        Type: string
+        Required: true
+Tool: d1_database_query
+  Description:
+    Query a D1 database in your Cloudflare account
+  Inputs:
+    - database_id:
+        Type: string
+        Required: true
+    - sql:
+        Type: string
+        Required: true
+    - params:
+        Type: N/A
+        Required: false
+Tool: hyperdrive_configs_list
+  Description:
+    List Hyperdrive configurations in your Cloudflare account
+  Inputs:
+    - page:
+        Type: N/A
+        Description: Page number of results
+        Required: false
+    - per_page:
+        Type: N/A
+        Description: Number of results per page
+        Required: false
+    - order:
+        Type: N/A
+        Description: Field to order by
+        Required: false
+    - direction:
+        Type: N/A
+        Description: Direction to order
+        Required: false
+Tool: hyperdrive_config_delete
+  Description:
+    Delete a Hyperdrive configuration in your Cloudflare account
+  Inputs:
+    - hyperdrive_id:
+        Type: string
+        Description: The ID of the Hyperdrive configuration
+        Required: true
+Tool: hyperdrive_config_get
+  Description:
+    Get details of a specific Hyperdrive configuration in your Cloudflare account
+  Inputs:
+    - hyperdrive_id:
+        Type: string
+        Description: The ID of the Hyperdrive configuration
+        Required: true
+Tool: hyperdrive_config_edit
+  Description:
+    Edit (patch) a Hyperdrive configuration in your Cloudflare account
+  Inputs:
+    - name:
+        Type: N/A
+        Description: The name of the Hyperdrive configuration (alphanumeric, underscore, hyphen)
+        Required: false
+    - user:
+        Type: N/A
+        Description: The database user
+        Required: false
+    - caching_disabled:
+        Type: N/A
+        Description: Whether caching is disabled
+        Required: false
+    - caching_max_age:
+        Type: N/A
+        Description: Maximum cache age in seconds
+        Required: false
+    - caching_stale_while_revalidate:
+        Type: N/A
+        Description: Stale while revalidate duration in seconds
+        Required: false
+    - hyperdrive_id:
+        Type: string
+        Description: The ID of the Hyperdrive configuration
+        Required: true
+    - database:
+        Type: N/A
+        Description: The database name
+        Required: false
+    - host:
+        Type: N/A
+        Description: The database host address
+        Required: false
+    - port:
+        Type: N/A
+        Description: The database port
+        Required: false
+    - scheme:
+        Type: N/A
+        Description: The database protocol
+        Required: false
+Tool: search_cloudflare_documentation
+  Description:
+    Search the Cloudflare documentation.
+    
+    		This tool should be used to answer any question about Cloudflare products or features, including:
+    		- Workers, Pages, R2, Images, Stream, D1, Durable Objects, KV, Workflows, Hyperdrive, Queues
+    		- AI Search, Workers AI, Vectorize, AI Gateway, Browser Rendering
+    		- Zero Trust, Access, Tunnel, Gateway, Browser Isolation, WARP, DDOS, Magic Transit, Magic WAN
+    		- CDN, Cache, DNS, Zaraz, Argo, Rulesets, Terraform, Account and Billing
+    
+    		Results are returned as semantically similar chunks to the query.
+    		
+  Inputs:
+    - query:
+        Type: string
+        Required: true
+Tool: migrate_pages_to_workers_guide
+  Description:
+    ALWAYS read this guide before migrating Pages projects to Workers.
+  Inputs:
+    Takes an object, but no specific properties defined (or empty properties section).

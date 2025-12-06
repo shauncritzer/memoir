@@ -527,4 +527,4 @@
 - [x] Fix homepage ocean headshot photo (make smaller, less zoomed in)
 - [x] Replace family photo on Resources page (fix moiré pattern on striped shirts)
 - [x] Test AI Coach integration end-to-end
-- [ ] Push all changes to GitHub memoir repo
+- [x] Push all changes to GitHub memoir repo (saved as checkpoint 00f78997)
