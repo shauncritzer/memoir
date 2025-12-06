@@ -31,6 +31,25 @@ export default function Products() {
 
   const products = [
     {
+      id: "crooked-lines-memoir",
+      name: "Crooked Lines: Bent, Not Broken",
+      tagline: "The Memoir",
+      price: "$19.99",
+      priceId: "price_MEMOIR_PLACEHOLDER", // TODO: Create Stripe product for memoir
+      description: "A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.",
+      features: [
+        "13-year recovery journey from rock bottom to redemption",
+        "Childhood trauma and its impact on addiction",
+        "Process addictions: porn, affairs, bodybuilding",
+        "Nervous system dysregulation explained",
+        "Honest account of relapse and resilience",
+        "Hope for those who feel broken beyond repair",
+      ],
+      ideal: "Perfect for: Anyone seeking hope, understanding addiction's roots, or supporting a loved one",
+      badge: "The Foundation",
+      badgeVariant: "secondary" as const,
+    },
+    {
       id: "7-day-reset",
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
@@ -117,6 +136,12 @@ export default function Products() {
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
             </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
+            <Link href="/get-started" className="text-sm font-medium hover:text-primary transition-colors">
+              Get Started
+            </Link>
           </nav>
         </div>
       </header>
@@ -150,7 +175,7 @@ export default function Products() {
       {/* Products Grid */}
       <section className="py-12 px-4 pb-20">
         <div className="container max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
               <Card key={product.id} className="flex flex-col hover:shadow-lg transition-shadow">
                 <CardHeader>

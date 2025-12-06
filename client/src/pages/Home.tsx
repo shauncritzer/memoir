@@ -66,6 +66,12 @@ export default function Home() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
             <Link href="/products">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started
@@ -101,6 +107,12 @@ export default function Home() {
                     Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 <a href="https://www.youtube.com/@ShaunCritzer" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="text-lg px-8">
                     Watch My Story
@@ -234,6 +246,12 @@ export default function Home() {
                   Get the Free Chapters <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
               <a href="https://www.amazon.com/dp/YOURBOOK" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" variant="outline" className="text-lg px-8">
                   Buy the Full Book
@@ -306,7 +324,19 @@ export default function Home() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               </ul>
             </div>

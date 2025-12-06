@@ -527,4 +527,52 @@
 - [x] Fix homepage ocean headshot photo (make smaller, less zoomed in)
 - [x] Replace family photo on Resources page (fix moiré pattern on striped shirts)
 - [x] Test AI Coach integration end-to-end
+- [x] Push all changes to GitHub memoir repo (saved as checkpoint 00f78997)
+
+
+## NEW USER REQUESTS - December 5, 2025 (Part 2)
+
+- [ ] Watch Loom video to understand navigation issues
+- [x] Add memoir as 4th product ($19.99, "The Foundation" badge)
+- [x] Change Products page to 4-column layout
+- [ ] Create Stripe product for memoir ($19.99)
+- [x] Fix navigation - Products and AI Coach links missing on About, Blog, Resources pages
+- [x] Ensure all navigation links appear consistently across ALL pages
+- [ ] Fix PDF UTF-8 encoding issues (apostrophes with spaces like "you' re" → "you're")
+- [ ] Add images to recovery-toolkit.pdf as discussed
+- [ ] Add images to reading-guide.pdf as discussed
+- [ ] Create 7 HeyGen videos for 7-Day Reset course
+- [ ] Use HeyGen avatars with ElevenLabs voice integration
+- [ ] Test complete system end-to-end
 - [ ] Push all changes to GitHub memoir repo
+
+
+## NEW USER REQUESTS - December 5, 2025 (Evening Session 2)
+
+### Video Scripts & Content
+- [x] Complete all 37 full video scripts (7-Day Reset + From Broken to Whole)
+- [x] Organize scripts by course and day for easy HeyGen upload
+- [x] Include timing, tone, and delivery notes for each script
+
+### Site Fixes
+- [x] Fix build error in server/routers.ts (merge conflict markers at line 368) - FALSE ALARM, restarted server
+- [x] Verify all navigation links appear on every page consistently
+- [x] Test Products page with 4-column layout and memoir product ($19.99)
+
+### Video Upload System
+- [x] Create admin interface for uploading video URLs to course lessons
+- [x] Add video URL fields to course_lessons table if not exists (already exists)
+- [ ] Test video playback in member portal after URLs added (pending video upload)
+
+### Community Space (Bent Not Broken Circle - $29/month)
+- [x] Decide on community platform approach (built-in forum vs Circle.so vs Discord) - See COMMUNITY_SPACE_PLAN.md
+- [x] Plan forum/discussion board structure if building in-site - See COMMUNITY_SPACE_PLAN.md
+- [ ] Research Circle.so, Mighty Networks, Discord integration if external
+- [ ] Implement chosen community solution
+
+### Testing & Deployment
+- [ ] Test complete purchase flow (Stripe → webhook → database → course unlock)
+- [ ] Verify AI Coach message tracking and 10-message limit works
+- [ ] Test ConvertKit subscriber creation on purchase
+- [ ] Push all changes to GitHub memoir repo
+- [ ] Save final checkpoint with all updates

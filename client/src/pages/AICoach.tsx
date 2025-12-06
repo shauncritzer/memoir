@@ -154,6 +154,12 @@ export default function AICoach() {
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
             <Link href="/products">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started
@@ -391,6 +397,12 @@ export default function AICoach() {
                   <Link href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
                     Resources
                   </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 </li>
                 <li>
                   <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
