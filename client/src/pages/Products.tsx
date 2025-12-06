@@ -108,6 +108,9 @@ export default function Products() {
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
+            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
+              The Memoir
+            </Link>
             <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
               Blog
             </Link>
@@ -116,6 +119,9 @@ export default function Products() {
             </Link>
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
             </Link>
           </nav>
         </div>
