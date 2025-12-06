@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,11 +65,7 @@ export default function Resources() {
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Shaun Critzer
-            </span>
-          </Link>
+          <Logo />
           <div className="flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
@@ -82,17 +79,9 @@ export default function Resources() {
             <Link href="/resources" className="text-sm font-medium text-primary">
               Resources
             </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
           </div>
         </div>
       </nav>
@@ -100,16 +89,25 @@ export default function Resources() {
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">
-              Free{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Recovery Resources
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Tools, guides, and downloads to support your recovery journey. All free, no strings attached—just enter your email to download.
-            </p>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-6xl font-bold">
+                Free{" "}
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Recovery Resources
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Tools, guides, and downloads to support your recovery journey. All free, no strings attached—just enter your email to download.
+              </p>
+            </div>
+            <div className="rounded-2xl overflow-hidden">
+              <img 
+                src="/family-of-5.jpg" 
+                alt="Shaun Critzer and family" 
+                className="w-full h-auto"
+              />
+            </div>
           </div>
         </div>
       </section>

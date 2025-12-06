@@ -1,1 +1,0 @@
-# Shaun Critzer - Memoir Website

@@ -35,15 +35,12 @@ export const blogPosts = mysqlTable("blog_posts", {
   excerpt: text("excerpt"),
   content: text("content").notNull(),
   coverImage: varchar("cover_image", { length: 512 }),
-  fileUrl: varchar("file_url", { length: 512 }), // S3 URL for downloadable PDF version
-  fileKey: varchar("file_key", { length: 512 }), // S3 key
   category: varchar("category", { length: 100 }),
   tags: text("tags"), // JSON array of tags
   status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
   publishedAt: timestamp("published_at"),
   authorId: int("author_id").notNull().references(() => users.id),
   viewCount: int("view_count").default(0).notNull(),
-  downloadCount: int("download_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
@@ -110,37 +107,80 @@ export type LeadMagnetDownload = typeof leadMagnetDownloads.$inferSelect;
 export type InsertLeadMagnetDownload = typeof leadMagnetDownloads.$inferInsert;
 
 /**
- * Blog post downloads tracking
+ * Purchases table - tracks product purchases
  */
-export const blogPostDownloads = mysqlTable("blog_post_downloads", {
+export const purchases = mysqlTable("purchases", {
   id: int("id").autoincrement().primaryKey(),
-  blogPostId: int("blog_post_id").notNull().references(() => blogPosts.id),
-  subscriberId: int("subscriber_id").references(() => emailSubscribers.id),
-  email: varchar("email", { length: 320 }).notNull(),
-  downloadedAt: timestamp("downloaded_at").defaultNow().notNull(),
-  ipAddress: varchar("ip_address", { length: 45 }),
-  userAgent: text("user_agent"),
+  userId: int("user_id").notNull().references(() => users.id),
+  productId: varchar("product_id", { length: 100 }).notNull(), // "7-day-reset", "from-broken-to-whole", "bent-not-broken-circle"
+  stripePaymentId: varchar("stripe_payment_id", { length: 255 }),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  amount: int("amount").notNull(), // Price in cents
+  status: mysqlEnum("status", ["pending", "completed", "refunded", "cancelled"]).default("pending").notNull(),
+  purchasedAt: timestamp("purchased_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"), // For subscriptions
+  metadata: text("metadata"), // JSON for additional data
 });
 
-export type BlogPostDownload = typeof blogPostDownloads.$inferSelect;
-export type InsertBlogPostDownload = typeof blogPostDownloads.$inferInsert;
+export type Purchase = typeof purchases.$inferSelect;
+export type InsertPurchase = typeof purchases.$inferInsert;
 
 /**
- * Products table for Stripe products
+ * Course modules table - stores module information
  */
-export const products = mysqlTable("products", {
+export const courseModules = mysqlTable("course_modules", {
   id: int("id").autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  productId: varchar("product_id", { length: 100 }).notNull(), // "7-day-reset" or "from-broken-to-whole"
+  moduleNumber: int("module_number").notNull(), // 1-8
+  title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  price: int("price").notNull(), // Price in cents
-  stripePriceId: varchar("stripe_price_id", { length: 255 }).notNull(),
-  type: mysqlEnum("type", ["one_time", "subscription"]).notNull(),
-  features: text("features"), // JSON array of features
-  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  unlockDay: int("unlock_day").notNull(), // Day 1, Day 2, etc. for drip content
+  workbookPdfUrl: varchar("workbook_pdf_url", { length: 512 }), // S3 URL for downloadable PDF
+  sortOrder: int("sort_order").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Product = typeof products.$inferSelect;
-export type InsertProduct = typeof products.$inferInsert;
+export type CourseModule = typeof courseModules.$inferSelect;
+export type InsertCourseModule = typeof courseModules.$inferInsert;
+
+/**
+ * Course lessons table - stores individual lesson details
+ */
+export const courseLessons = mysqlTable("course_lessons", {
+  id: int("id").autoincrement().primaryKey(),
+  moduleId: int("module_id").notNull().references(() => courseModules.id),
+  lessonNumber: int("lesson_number").notNull(), // 1, 2, 3, etc. within module
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  videoUrl: varchar("video_url", { length: 512 }), // Vimeo or YouTube URL
+  videoProvider: mysqlEnum("video_provider", ["vimeo", "youtube", "other"]).default("vimeo"),
+  videoDuration: int("video_duration"), // Duration in seconds
+  workbookPdfUrl: varchar("workbook_pdf_url", { length: 512 }), // Optional lesson-specific PDF
+  sortOrder: int("sort_order").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CourseLesson = typeof courseLessons.$inferSelect;
+export type InsertCourseLesson = typeof courseLessons.$inferInsert;
+
+/**
+ * Course progress table - tracks user completion
+ */
+export const courseProgress = mysqlTable("course_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id),
+  productId: varchar("product_id", { length: 100 }).notNull(),
+  moduleId: int("module_id").references(() => courseModules.id),
+  lessonId: int("lesson_id").references(() => courseLessons.id),
+  completed: int("completed").default(0).notNull(), // 0 = not completed, 1 = completed
+  completedAt: timestamp("completed_at"),
+  watchedSeconds: int("watched_seconds").default(0), // Track video progress
+  notes: text("notes"), // User's personal notes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CourseProgress = typeof courseProgress.$inferSelect;
+export type InsertCourseProgress = typeof courseProgress.$inferInsert;

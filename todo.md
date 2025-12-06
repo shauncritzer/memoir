@@ -321,129 +321,196 @@
 - [x] Include automation rules and trigger setup
 
 
-## GitHub Push for Claude Handoff - November 27, 2025
+## LAUNCH WEEK - December 4, 2025
 
-- [ ] Push project code to GitHub repository
-- [ ] Create comprehensive Claude handoff document
-- [ ] Include GitHub clone instructions for Claude
-- [ ] Document tech stack and project structure
+### ConvertKit Automation Setup
+- [ ] Set up ConvertKit automation triggers (connect sequences to forms)
+- [ ] Test automation triggers end-to-end
+- [ ] Verify all 7 sequences fire correctly
+
+### Stripe Webhook Integration
+- [ ] Set up Stripe webhooks to trigger ConvertKit sequences on purchase
+- [ ] Connect 7-Day Reset purchase → ConvertKit sequence
+- [ ] Connect From Broken to Whole purchase → ConvertKit sequence
+- [ ] Connect Bent Not Broken Circle purchase → ConvertKit sequence
+- [ ] Test webhook integration end-to-end
+
+### Product Content Creation
+- [ ] Create 7-Day Reset workbook/journal content (7 days of exercises, reflections, practices)
+- [ ] Create 7-Day Reset delivery format (PDF workbook)
+- [ ] Create From Broken to Whole course content (30-day journey, 8 modules)
+- [ ] Create From Broken to Whole delivery format (PDF modules or video scripts)
+- [ ] Upload product content to S3
+- [ ] Seed product content in database
+
+### Products Page Development
+- [ ] Design products page layout
+- [ ] Build products page with all 3 products
+- [ ] Integrate Stripe checkout for each product
+- [ ] Add product descriptions and benefits
+- [ ] Test checkout flow for all products
+
+### Final Launch Testing
+- [ ] Test complete customer journey (homepage → lead magnet → email → product purchase)
+- [ ] Verify all emails send correctly
+- [ ] Verify all webhooks fire correctly
+- [ ] Verify all product deliveries work
+- [ ] Create launch checklist
 
 
-## Apply Claude's ConvertKit Fix - November 28, 2025
+## Products Page - December 4, 2025
 
-- [x] Apply Claude's one-line fix to server/convertkit.ts (remove non-existent LEAD_MAGNET_DOWNLOADED tag)
-- [ ] Test ConvertKit integration
-- [ ] Verify emails get added to ConvertKit dashboard
+- [x] Create Products page component with professional design
+- [x] Add Stripe checkout integration (createCheckoutSession procedure)
+- [x] Install Stripe SDK
+- [x] Add Products route to App.tsx
+- [x] Create product cards for all 3 products (7-Day Reset, From Broken to Whole, Bent Not Broken Circle)
+- [x] Add product descriptions, features, and pricing
+- [ ] Replace placeholder Stripe Price IDs with actual Price IDs from Stripe dashboard
+- [ ] Test checkout flow with test card
 
 
-## MEMBER PORTAL & AI COACH BUILD - December 5, 2025
+## Navigation & ConvertKit Forms - December 4, 2025
 
-### Phase 1: Navigation & Pages (TONIGHT)
-- [ ] Add "AI Coach" link to About, Blog, Resources, Products pages navigation
-- [ ] Create /memoir page (book preview + Amazon link placeholder)
-- [ ] Verify "Get Started" buttons go to /products on all pages
+### Navigation Fixes
+- [x] Add "Products" link to homepage header navigation
+- [x] Add "Products" CTA buttons on homepage
+- [x] Update all navigation menus to include Products page
+- [ ] Test all navigation links
 
-### Phase 2: AI Coach Integration (THIS WEEK)
-- [ ] Move coach from separate repo (github.com/shauncritzer/coach) to /coach page
-- [ ] Create usage_tracking table in database (user_id, month, message_count)
-- [ ] Implement 10 free messages/month limit (track by IP or email)
-- [ ] Add "Upgrade to Circle" CTA modal after hitting limit
-- [ ] Unlock unlimited AI Coach for Circle members (check subscription status)
-- [ ] Add usage counter UI component ("X/10 messages used this month")
-- [ ] Add AI Coach standalone subscription option ($14.99/mo)
+### ConvertKit Forms Content
+- [x] Write content for Homepage Newsletter form
+- [x] Write content for Blog Sidebar Signup form
+- [x] Write content for AI Coach form
+- [x] Write content for Course Interest form
+- [x] Create 7-Day Reset Purchase form content
+- [x] Create From Broken to Whole Purchase form content
+- [x] Create Bent Not Broken Circle Membership form content
+- [x] Fix Passive Affiliate SLO Opt-In form (72 visitors, 0 conversions)
+- [x] Create comprehensive ConvertKit Forms Content Guide
 
-### Phase 3: Member Portal Structure (WEEK 1-2)
-- [ ] Create /members dashboard page (shows purchased products)
-- [ ] Add authentication middleware (redirect to login if not authenticated)
-- [ ] Create /members/7-day-reset course page structure
-- [ ] Create /members/from-broken-to-whole course page structure
-- [ ] Create /members/circle community hub page
-- [ ] Add purchases table to database (user_id, product_id, purchase_date, stripe_session_id)
-- [ ] Link Stripe webhook to create purchase records
 
-### Phase 4: Course Delivery Features (WEEK 2-3)
-- [ ] Set up Vimeo Pro account ($20/mo)
-- [ ] Create Vimeo video embedding component
-- [ ] Add course_progress table (user_id, course_id, module_id, completed, completion_date)
-- [ ] Build progress tracking UI (checkboxes per module, completion percentage)
-- [ ] Add PDF download buttons per module (link to S3-hosted workbooks)
-- [ ] Implement drip unlock logic:
-  - [ ] 7-Day Reset: Click-through (complete Day 1 to unlock Day 2)
-  - [ ] From Broken to Whole: Hybrid (complete module OR wait 4 days)
-- [ ] Create completion certificate generator (PDF with user name + date)
-- [ ] Add bonus materials section to each course
+## Newsletter Signup Sections - December 4, 2025
 
-### Phase 5: Content Creation (WEEK 3-6)
-- [ ] Write 7-Day Reset Day 1 workbook (15 pages - Honesty)
-- [ ] Write 7-Day Reset Day 2 workbook (15 pages - Support)
-- [ ] Write 7-Day Reset Day 3 workbook (15 pages - Triggers)
-- [ ] Write 7-Day Reset Day 4 workbook (15 pages - Routines)
-- [ ] Write 7-Day Reset Day 5 workbook (15 pages - Shame)
-- [ ] Write 7-Day Reset Day 6 workbook (15 pages - Resilience)
-- [ ] Write 7-Day Reset Day 7 workbook (15 pages - Celebration)
-- [ ] Write From Broken to Whole Module 1 (20 pages - Understanding Trauma, Days 1-4)
-- [ ] Write From Broken to Whole Module 2 (20 pages - Nervous System Healing, Days 5-8)
-- [ ] Write From Broken to Whole Module 3 (20 pages - Inner Child Work, Days 9-12)
-- [ ] Write From Broken to Whole Module 4 (20 pages - Shame Processing, Days 13-16)
-- [ ] Write From Broken to Whole Module 5 (20 pages - Relationship Healing, Days 17-20)
-- [ ] Write From Broken to Whole Module 6 (20 pages - Purpose Discovery, Days 21-24)
-- [ ] Write From Broken to Whole Module 7 (20 pages - Spiritual Awakening, Days 25-28)
-- [ ] Write From Broken to Whole Module 8 (20 pages - Integration & Next Steps, Days 29-30)
-- [ ] Write "Living Sober" bonus guide (50+ pages - 90 practical tips)
-- [ ] Create video scripts for 7-Day Reset (7 videos, 5-10 min each)
-- [ ] Create video scripts for From Broken to Whole (30 videos, 10-15 min each)
+### Website Updates
+- [x] Add newsletter signup section to Homepage
+- [x] Add newsletter signup section to Blog page
+- [x] Make newsletter forms functional with email capture
+- [x] Add Products link to Blog navigation
+- [x] Update Blog footer links
+- [ ] Add AI Coach signup section (if needed)
+- [ ] Add Course Interest signup section (if needed)
 
-### Phase 6: Video Production (Shaun's Tasks)
-- [ ] Test camera/audio setup (Sony 4K camera + tripod + light bar)
-- [ ] Record 2-minute test video and review quality
-- [ ] Batch-record 7-Day Reset videos (7 videos, 1-2 days)
-- [ ] Upload 7-Day Reset videos to Vimeo
-- [ ] Batch-record From Broken to Whole videos (30 videos, 5-10 per day)
-- [ ] Upload From Broken to Whole videos to Vimeo
-- [ ] Get Vimeo embed codes for all videos
+### ConvertKit Forms Simplification
+- [x] Create simplified guide for 3 purchase forms only
+- [x] Remove unnecessary form content instructions
+- [x] Focus on webhook-only forms (no copy needed)
+- [x] Create CONVERTKIT_PURCHASE_FORMS_GUIDE.md
 
-### Phase 7: Community Features (Bent Not Broken Circle)
-- [ ] Create /members/circle page with call schedule
-- [ ] Add Zoom integration for live calls
-- [ ] Create call_replays table (call_id, title, date, zoom_recording_url, vimeo_url)
-- [ ] Build replay library UI (filterable by date/topic)
-- [ ] Create simple forum (threads table: user_id, title, content, created_at)
-- [ ] Add forum UI (create thread, reply, like)
-- [ ] Create resource library section (links to bonus PDFs, worksheets, etc.)
-- [ ] Add monthly bonus drops section (new content each month)
 
-### Phase 8: Testing & Deployment (FINAL WEEK)
-- [ ] Test complete purchase flow: Stripe → webhook → email → member access
-- [ ] Test AI Coach free tier (10 messages, then paywall)
-- [ ] Test AI Coach unlimited for Circle members
-- [ ] Test video playback on all devices (desktop, mobile, tablet)
-- [ ] Test progress tracking (check modules, verify database updates)
-- [ ] Test drip unlock (7-Day click-through, From Broken to Whole hybrid)
-- [ ] Test PDF downloads from member area
-- [ ] Test completion certificates
+## Stripe Webhook Integration - December 4, 2025
+
+### ConvertKit Form IDs (RECEIVED)
+- [x] 7-Day Reset Purchase: 8842147
+- [x] From Broken to Whole Purchase: 8842151
+- [x] Bent Not Broken Circle Membership: 8842155
+
+### Webhook Code Updates
+- [x] Update server/convertkit.ts with ConvertKit Form IDs
+- [x] Create stripe-webhook.ts handler
+- [x] Add webhook endpoint to Express server (/api/stripe/webhook)
+- [x] Add Stripe Price ID mapping (placeholder IDs ready)
+- [ ] Test webhook endpoint locally
+- [ ] Update STRIPE_WEBHOOK_SETUP_GUIDE with actual Form IDs
+
+### Waiting for Stripe Setup
+- [ ] Receive Stripe Price IDs from Shaun
+- [ ] Update Products.tsx with real Price IDs
+- [ ] Test complete purchase flow
+- [ ] Verify webhook triggers ConvertKit forms
+
+
+## Stripe Price IDs Integration - December 4, 2025
+
+### Received Price IDs from Railway
+- [x] STRIPE_PRICE_MONTHLY_MEMBERSHIP: price_1SYt3iC2dOpPzSOOR7dbuGtY (Bent Not Broken Circle)
+- [x] STRIPE_PRICE_RECOVERY_ROADMAP: price_1SYt3kC2dOpPzSOOpAokf1UQ (From Broken to Whole)
+- [x] STRIPE_PRICE_RESET_CHALLENGE: price_1SYt2tC2dOpPzSOOpg5Pw7eU (7-Day Reset)
+
+### Code Updates Needed
+- [x] Update server/stripe-webhook.ts with actual Price IDs
+- [x] Update client/src/pages/Products.tsx with actual Price IDs
+- [ ] Test webhook mappings
+- [ ] Verify purchase flow works end-to-end
+
+### Deployment Preparation
+- [ ] Create deployment checklist
+- [ ] Guide user to publish via Manus UI
+- [ ] Verify Railway auto-deployment works
+
+
+## FULL COURSE DELIVERY SYSTEM - December 6, 2025
+
+### Phase 1: Images & PDFs
+- [x] Fix UTF-8 encoding in Recovery_Toolkit.md PDF (you' re → you're, What' s → What's) - Already clean
+- [x] Fix UTF-8 encoding in Reading_Guide.md PDF - Already clean
+- [x] Update homepage image to blue shirt ocean headshot
+- [x] Update About page image to B&W Shaun + Shannon
+- [x] Update Resources page image to family of 5
+- [x] Update Blog page image to pink/navy couple photo
+- [x] Update Toolkit page image to khakis by columns - Added to public folder
+- [x] Update Reading Guide image to flying plane photo - Added to public folder
+- [x] Use nano banana to remove instructor from skydiving photo
+- [x] Add dark/light bodybuilder with snake image to memoir page
+
+### Phase 2: Database Schema
+- [x] Create `purchases` table (user_id, product_id, stripe_payment_id, purchased_at)
+- [x] Create `course_progress` table (user_id, product_id, module_id, lesson_id, completed, completed_at)- [x] Create `course_modules` table (product_id, module_number, title, unlock_day, workbook_pdf_ur- [x] Create `course_lessons` table (module_id, lesson_number, title, video_url, video_provider), duration)
+- [x] Run database migrations with pnpm db:push
+
+### Phase 3: Member Portal
+- [x] Create /members page with authentication check
+- [x] Show purchased products for logged-in user
+- [ ] Create product access cards with progress indicators
+- [ ] Add "Continue Learning" vs "Start Course" buttons
+- [ ] Build purchase flow for non-purchased products
+
+### Phase 4: Course Delivery
+- [ ] Create /members/7-day-reset course page
+- [ ] Create /members/from-broken-to-whole course page
+- [ ] Build module/lesson navigation sidebar
+- [ ] Implement video embedding (Vimeo player)
+- [ ] Add progress checkboxes and completion tracking
+- [ ] Implement drip unlock logic (unlock by day number)
+- [ ] Add PDF workbook downloads per module
+- [ ] Create completion certificates
+
+### Phase 5: Stripe Integration
+- [ ] Create Stripe webhook endpoint /api/stripe/webhook
+- [ ] Handle checkout.session.completed event
+- [ ] Create purchase record in database
+- [ ] Send welcome email with member portal link
+- [ ] Handle subscription events for Circle membership
+- [ ] Test webhook with Stripe CLI
+
+### Phase 6: Testing & Deployment
+- [ ] Test purchase flow end-to-end
+- [ ] Test course access and progress tracking
+- [ ] Test drip unlock logic
+- [ ] Test video embedding
 - [ ] Push all changes to GitHub
-- [ ] Verify Railway auto-deploys
-- [ ] Test live site end-to-end
-- [ ] Get Shaun's approval for launch
-
-### Stripe Product Setup
-- [ ] Create Stripe product for AI Coach Standalone ($14.99/mo recurring)
-- [ ] Update Products page with AI Coach option
-- [ ] Add AI Coach to Stripe webhook handler
-- [ ] Test AI Coach subscription purchase flow
+- [ ] Verify Railway deployment
+- [ ] Check live site for all updates
 
 
-## Phase 1 (Tonight) - Navigation Fixes & Memoir Page - COMPLETED ✅
+## Branding & Logo Updates - December 5, 2025
+- [x] Update memoir page to use correct book cover (memoir-cover-front-natural.png)
+- [x] Implement gradient logo in site header (all pages)
+- [ ] Use logo-icon.png for favicon - TODO: Update in index.html
+- [x] Ensure logo works on both light and dark backgrounds
+- [x] Test logo visibility across all pages
 
-- [x] Add "AI Coach" link to Products.tsx header navigation
-- [x] Add "AI Coach" link to Resources.tsx header navigation (also added Products link)
-- [x] Verify About.tsx has AI Coach link (already present)
-- [x] Verify Blog.tsx has AI Coach link (already present)
-- [x] Verify Home.tsx has AI Coach link (already present)
-- [x] Create /memoir page with book preview and Amazon link placeholder
-- [x] Add /memoir route to App.tsx
-- [x] Verify "Get Started" buttons point to /products on all pages
-
-**Status:** All navigation links now consistent across website. /memoir page created with book preview, "What's Inside" sections, early praise, and CTA to download first 3 chapters. Amazon link is disabled with "Coming 2025" message until book is published.
-
-**Next:** Push to GitHub and verify Railway deployment, then proceed to Phase 2 (AI Coach integration).
+## GitHub Deployment - December 5, 2025
+- [ ] Resolve GitHub repository access issue
+- [ ] Push all changes to GitHub
+- [ ] Verify Railway auto-deployment

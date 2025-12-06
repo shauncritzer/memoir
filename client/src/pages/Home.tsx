@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Heart, Users, Sparkles } from "lucide-react";
@@ -45,11 +46,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Shaun Critzer
-            </span>
-          </Link>
+          <Logo />
           <div className="flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
@@ -111,8 +108,8 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
                 <img 
-                  src="/shaun-bodybuilding.jpg" 
-                  alt="Shaun Critzer - Building Armor Through Fitness" 
+                  src="/shaun-beach-headshot.jpg" 
+                  alt="Shaun Critzer - 13 Years Sober" 
                   className="w-full h-full object-cover rounded-xl"
                 />
               </div>

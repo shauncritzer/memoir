@@ -8,7 +8,6 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook, verifyWebhookSignature } from "../stripe-webhook";
-import { quickSeedHandler } from "../quickSeed.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -76,90 +75,6 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  // Quick seed endpoint - direct database seeding bypass
-  app.get("/api/quick-seed", quickSeedHandler);
-
-  // Diagnostic endpoint to check database state
-  app.get("/api/debug/products", async (req, res) => {
-    try {
-      const { getActiveProducts } = await import("../db.js");
-      const products = await getActiveProducts();
-
-      const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.length > 0);
-
-      return res.json({
-        productsCount: products.length,
-        products: products.map(p => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          price: p.price,
-          stripePriceId: p.stripePriceId,
-          type: p.type,
-          status: p.status,
-        })),
-        stripeConfigured,
-        stripeKeyPrefix: process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.substring(0, 10) + "..." : "NOT SET",
-      });
-    } catch (error: any) {
-      return res.status(500).json({ error: error.message, stack: error.stack });
-    }
-  });
-
-  // Diagnostic endpoint to test Stripe connection
-  app.get("/api/debug/stripe", async (req, res) => {
-    try {
-      const key = process.env.STRIPE_SECRET_KEY;
-
-      if (!key) {
-        return res.json({
-          error: "STRIPE_SECRET_KEY not set",
-          keyExists: false,
-        });
-      }
-
-      // Check for invalid characters
-      const hasInvalidChars = /[^\x20-\x7E]/.test(key);
-      const trimmedLength = key.trim().length;
-      const actualLength = key.length;
-
-      const result: any = {
-        keyExists: true,
-        keyLength: actualLength,
-        keyTrimmedLength: trimmedLength,
-        hasWhitespace: actualLength !== trimmedLength,
-        hasInvalidChars,
-        keyPrefix: key.substring(0, 15),
-        keySuffix: key.substring(key.length - 10),
-        keyStartsWithSkTest: key.startsWith('sk_test_'),
-      };
-
-      // Try to initialize Stripe
-      try {
-        const Stripe = (await import('stripe')).default;
-        const stripe = new Stripe(key, { apiVersion: '2025-11-17.clover' });
-
-        // Try to make a simple API call
-        const balance = await stripe.balance.retrieve();
-        result.stripeConnectionSuccess = true;
-        result.stripeAccountCurrency = balance.available[0]?.currency;
-      } catch (stripeError: any) {
-        result.stripeConnectionSuccess = false;
-        result.stripeError = {
-          message: stripeError.message,
-          type: stripeError.type,
-          code: stripeError.code,
-        };
-      }
-
-      return res.json(result);
-    } catch (error: any) {
-      return res.status(500).json({
-        error: error.message,
-        stack: error.stack
-      });
-    }
-  });
   // tRPC API
   app.use(
     "/api/trpc",

@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Award, Heart, Users, Briefcase } from "lucide-react";
@@ -9,11 +10,7 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Shaun Critzer
-            </span>
-          </Link>
+          <Logo />
           <div className="flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium text-primary">
               About
@@ -27,17 +24,9 @@ export default function About() {
             <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
               Resources
             </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
           </div>
         </div>
       </nav>
@@ -86,7 +75,7 @@ export default function About() {
             <div className="space-y-6">
               <div className="rounded-2xl overflow-hidden">
                 <img 
-                  src="/shaun-beach-couple.jpg" 
+                  src="/shaun-shannon-bw.jpg" 
                   alt="Shaun and Shannon Critzer" 
                   className="w-full h-auto"
                 />

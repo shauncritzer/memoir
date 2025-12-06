@@ -1,3 +1,4 @@
+import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,15 +24,9 @@ export default function Products() {
     },
   });
 
-  const handlePurchase = (priceId: string, productName: string, productType: 'one_time' | 'subscription') => {
+  const handlePurchase = (priceId: string, productName: string) => {
     setLoadingProduct(productName);
-    const baseUrl = window.location.origin;
-    createCheckoutSession.mutate({
-      priceId,
-      productType,
-      successUrl: `${baseUrl}/products/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/products`,
-    });
+    createCheckoutSession.mutate({ priceId });
   };
 
   const products = [
@@ -40,8 +35,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$27",
-      priceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU", // 7-Day Reset from Stripe
-      productType: "one_time" as const,
+      priceId: "price_1SYt2tC2dOpPzSOOpg5Pw7eU", // 7-Day Reset from Stripe
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -60,8 +54,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_1SYt3KC2dOpPzSOOpAokfJUQ", // From Broken to Whole from Stripe
-      productType: "one_time" as const,
+      priceId: "price_1SYt3kC2dOpPzSOOpAokf1UQ", // From Broken to Whole from Stripe
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -83,8 +76,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY", // Bent Not Broken Circle from Stripe
-      productType: "subscription" as const,
+      priceId: "price_1SYt3iC2dOpPzSOOR7dbuGtY", // Bent Not Broken Circle from Stripe
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
@@ -124,9 +116,6 @@ export default function Products() {
             </Link>
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
-            </Link>
-            <Link href="/coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
             </Link>
           </nav>
         </div>
@@ -192,7 +181,7 @@ export default function Products() {
                   <Button
                     className="w-full"
                     size="lg"
-                    onClick={() => handlePurchase(product.priceId, product.id, product.productType)}
+                    onClick={() => handlePurchase(product.priceId, product.id)}
                     disabled={loadingProduct === product.id}
                   >
                     {loadingProduct === product.id ? (

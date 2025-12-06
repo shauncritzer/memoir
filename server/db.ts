@@ -1,7 +1,7 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import {
-  InsertUser,
+import { 
+  InsertUser, 
   users,
   blogPosts,
   BlogPost,
@@ -13,12 +13,7 @@ import {
   LeadMagnet,
   InsertLeadMagnet,
   leadMagnetDownloads,
-  InsertLeadMagnetDownload,
-  blogPostDownloads,
-  InsertBlogPostDownload,
-  products,
-  Product,
-  InsertProduct
+  InsertLeadMagnetDownload
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -274,9 +269,9 @@ export async function getLeadMagnetBySlug(slug: string): Promise<LeadMagnet | un
 export async function trackLeadMagnetDownload(download: InsertLeadMagnetDownload): Promise<void> {
   const db = await getDb();
   if (!db) return;
-
+  
   await db.insert(leadMagnetDownloads).values(download);
-
+  
   // Increment download count
   await db
     .update(leadMagnets)
@@ -284,45 +279,188 @@ export async function trackLeadMagnetDownload(download: InsertLeadMagnetDownload
     .where(eq(leadMagnets.id, download.leadMagnetId));
 }
 
-export async function trackBlogPostDownload(download: InsertBlogPostDownload): Promise<void> {
-  const db = await getDb();
-  if (!db) return;
 
-  await db.insert(blogPostDownloads).values(download);
-
-  // Increment download count
-  await db
-    .update(blogPosts)
-    .set({ downloadCount: sql`${blogPosts.downloadCount} + 1` })
-    .where(eq(blogPosts.id, download.blogPostId));
-}
-
-// Products
-export async function getActiveProducts(): Promise<Product[]> {
+// Members & Purchases
+export async function getUserPurchases(userId: number) {
   const db = await getDb();
   if (!db) return [];
-
-  const result = await db
+  
+  const { purchases, courseProgress } = await import("../drizzle/schema");
+  
+  // Get all purchases for user
+  const userPurchases = await db
     .select()
-    .from(products)
-    .where(eq(products.status, "active"))
-    .orderBy(products.price);
-
-  return result;
+    .from(purchases)
+    .where(eq(purchases.userId, userId))
+    .orderBy(desc(purchases.purchasedAt));
+  
+  // Calculate progress for each purchase
+  const purchasesWithProgress = await Promise.all(
+    userPurchases.map(async (purchase) => {
+      // Get total lessons for this product
+      const { courseModules, courseLessons } = await import("../drizzle/schema");
+      
+      const modules = await db
+        .select()
+        .from(courseModules)
+        .where(eq(courseModules.productId, purchase.productId));
+      
+      if (modules.length === 0) {
+        return { ...purchase, progress: 0 };
+      }
+      
+      const moduleIds = modules.map(m => m.id);
+      const lessons = await db
+        .select()
+        .from(courseLessons)
+        .where(sql`${courseLessons.moduleId} IN (${moduleIds.join(",")})`);
+      
+      const totalLessons = lessons.length;
+      
+      if (totalLessons === 0) {
+        return { ...purchase, progress: 0 };
+      }
+      
+      // Get completed lessons
+      const completed = await db
+        .select()
+        .from(courseProgress)
+        .where(and(
+          eq(courseProgress.userId, userId),
+          eq(courseProgress.productId, purchase.productId),
+          eq(courseProgress.completed, 1)
+        ));
+      
+      const progress = Math.round((completed.length / totalLessons) * 100);
+      
+      return { ...purchase, progress };
+    })
+  );
+  
+  return purchasesWithProgress;
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+export async function checkCourseAccess(userId: number, productId: string): Promise<boolean> {
   const db = await getDb();
-  if (!db) return undefined;
-
-  const result = await db
+  if (!db) return false;
+  
+  const { purchases } = await import("../drizzle/schema");
+  
+  const purchase = await db
     .select()
-    .from(products)
+    .from(purchases)
     .where(and(
-      eq(products.slug, slug),
-      eq(products.status, "active")
+      eq(purchases.userId, userId),
+      eq(purchases.productId, productId),
+      eq(purchases.status, "completed")
     ))
     .limit(1);
+  
+  return purchase.length > 0;
+}
 
-  return result[0];
+export async function getCourseProgress(userId: number, productId: string) {
+  const db = await getDb();
+  if (!db) return { modules: [], progress: 0 };
+  
+  const { courseModules, courseLessons, courseProgress } = await import("../drizzle/schema");
+  
+  // Get all modules for this product
+  const modules = await db
+    .select()
+    .from(courseModules)
+    .where(eq(courseModules.productId, productId))
+    .orderBy(courseModules.sortOrder);
+  
+  // Get all lessons for these modules
+  const modulesWithLessons = await Promise.all(
+    modules.map(async (module) => {
+      const lessons = await db
+        .select()
+        .from(courseLessons)
+        .where(eq(courseLessons.moduleId, module.id))
+        .orderBy(courseLessons.sortOrder);
+      
+      // Get progress for each lesson
+      const lessonsWithProgress = await Promise.all(
+        lessons.map(async (lesson) => {
+          const progress = await db
+            .select()
+            .from(courseProgress)
+            .where(and(
+              eq(courseProgress.userId, userId),
+              eq(courseProgress.lessonId, lesson.id)
+            ))
+            .limit(1);
+          
+          return {
+            ...lesson,
+            completed: progress[0]?.completed === 1,
+            completedAt: progress[0]?.completedAt,
+            watchedSeconds: progress[0]?.watchedSeconds || 0,
+          };
+        })
+      );
+      
+      return {
+        ...module,
+        lessons: lessonsWithProgress,
+      };
+    })
+  );
+  
+  // Calculate overall progress
+  const totalLessons = modulesWithLessons.reduce((sum, m) => sum + m.lessons.length, 0);
+  const completedLessons = modulesWithLessons.reduce(
+    (sum, m) => sum + m.lessons.filter(l => l.completed).length,
+    0
+  );
+  
+  const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  
+  return {
+    modules: modulesWithLessons,
+    progress,
+    totalLessons,
+    completedLessons,
+  };
+}
+
+export async function markLessonComplete(userId: number, productId: string, lessonId: number) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  
+  const { courseProgress } = await import("../drizzle/schema");
+  
+  // Check if progress record exists
+  const existing = await db
+    .select()
+    .from(courseProgress)
+    .where(and(
+      eq(courseProgress.userId, userId),
+      eq(courseProgress.lessonId, lessonId)
+    ))
+    .limit(1);
+  
+  if (existing[0]) {
+    // Update existing record
+    await db
+      .update(courseProgress)
+      .set({
+        completed: 1,
+        completedAt: new Date(),
+      })
+      .where(eq(courseProgress.id, existing[0].id));
+  } else {
+    // Create new progress record
+    await db.insert(courseProgress).values({
+      userId,
+      productId,
+      lessonId,
+      completed: 1,
+      completedAt: new Date(),
+    });
+  }
+  
+  return { success: true };
 }

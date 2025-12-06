@@ -1,21 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Clock, ArrowLeft, Share2, Download } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, Share2 } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 import { toast } from "sonner";
-import { useState } from "react";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading } = trpc.blog.getBySlug.useQuery({ slug: slug! });
-  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
-  const [email, setEmail] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
-  const downloadMutation = trpc.blog.download.useMutation();
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return "";
@@ -40,40 +34,6 @@ export default function BlogPost() {
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied to clipboard!");
-    }
-  };
-
-  const handleDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!post || !email) return;
-
-    setIsDownloading(true);
-
-    try {
-      const result = await downloadMutation.mutateAsync({
-        slug: post.slug,
-        email: email,
-      });
-
-      if (result.success && result.downloadUrl) {
-        // Open download in new tab
-        window.open(result.downloadUrl, "_blank");
-
-        toast.success("Download started!", {
-          description: "Check your downloads folder.",
-        });
-
-        // Close dialog and reset
-        setShowDownloadDialog(false);
-        setEmail("");
-      }
-    } catch (error) {
-      toast.error("Download failed", {
-        description: "Please try again or contact support.",
-      });
-    } finally {
-      setIsDownloading(false);
     }
   };
 
@@ -165,16 +125,6 @@ export default function BlogPost() {
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
               </Button>
-              {post.fileUrl && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDownloadDialog(true)}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </Button>
-              )}
             </div>
           </div>
 
@@ -226,45 +176,6 @@ export default function BlogPost() {
           </Card>
         </div>
       </article>
-
-      {/* Download Dialog */}
-      <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Download {post?.title}</DialogTitle>
-            <DialogDescription>
-              Enter your email to download this blog post as a PDF.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleDownload} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowDownloadDialog(false)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={isDownloading}
-              >
-                {isDownloading ? "Downloading..." : "Download"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 bg-card">

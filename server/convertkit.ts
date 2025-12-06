@@ -208,7 +208,7 @@ export async function subscribeForLeadMagnet(params: {
     email: params.email,
     firstName: params.firstName,
     formUid,
-    tags: tagId ? [tagId] : undefined,
+    tags: tagId ? [tagId, CONVERTKIT_TAGS.LEAD_MAGNET_DOWNLOADED] : [CONVERTKIT_TAGS.LEAD_MAGNET_DOWNLOADED],
   });
 
   return result;

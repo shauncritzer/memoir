@@ -6,15 +6,14 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
+import Memoir from "./pages/Memoir";
 import Resources from "./pages/Resources";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogEditor from "./pages/BlogEditor";
 import Products from "./pages/Products";
-import Memoir from "./pages/Memoir";
-import AdminSeed from "./pages/AdminSeed";
-import Product from "./pages/Product";
-import ProductSuccess from "./pages/ProductSuccess";
+import Members from "./pages/Members";
+import Course from "./pages/Course";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -26,11 +25,10 @@ function Router() {
       <Route path="/resources" component={Resources} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
-      <Route path="/products/success" component={ProductSuccess} />
-      <Route path="/products/:slug" component={Product} />
-      <Route path="/products" component={Products} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
-      <Route path="/admin/seed" component={AdminSeed} />
+      <Route path="/products" component={Products} />
+      <Route path="/members" component={Members} />
+      <Route path="/course/:productId" component={Course} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
