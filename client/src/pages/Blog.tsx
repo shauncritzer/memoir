@@ -230,6 +230,9 @@ export default function Blog() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
                 <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               </ul>
             </div>

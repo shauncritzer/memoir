@@ -514,3 +514,17 @@
 - [ ] Resolve GitHub repository access issue
 - [ ] Push all changes to GitHub
 - [ ] Verify Railway auto-deployment
+
+
+## URGENT USER REQUESTS - December 5, 2025
+
+- [x] Research Hope Now Booth nonprofit interactive kiosk model
+- [x] Create AI Coach page with freemium model (10 free messages with countdown)
+- [x] Add AI Coach link to navigation across all pages
+- [x] Write explanatory content about REWIRED methodology vs standard LLM
+- [x] Integrate message tracking for freemium model
+- [x] Add paywall after 10 messages → upgrade to $97 course
+- [x] Fix homepage ocean headshot photo (make smaller, less zoomed in)
+- [x] Replace family photo on Resources page (fix moiré pattern on striped shirts)
+- [x] Test AI Coach integration end-to-end
+- [ ] Push all changes to GitHub memoir repo

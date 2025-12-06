@@ -63,6 +63,9 @@ export default function Home() {
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
             <Link href="/products">
               <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started
@@ -105,12 +108,12 @@ export default function Home() {
                 </a>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative max-w-md mx-auto lg:mx-0">
               <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
                 <img 
                   src="/shaun-beach-headshot.jpg" 
                   alt="Shaun Critzer - 13 Years Sober" 
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-cover object-top rounded-xl scale-90"
                 />
               </div>
               {/* Decorative elements */}
