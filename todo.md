@@ -630,3 +630,5 @@
 
 ### PDF Images (DEFERRED)
 - [x] PDF format is correct but images not showing - leaving as-is per user request to save credits
+
+- [x] Regenerate memoir cover v4: Combine full torso view from original with perfect face from v2, single snake with color split at centerline (purple left/gold right), aura glow ONLY on exterior (not chest), more muscular physique
