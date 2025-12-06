@@ -464,3 +464,65 @@ export async function markLessonComplete(userId: number, productId: string, less
   
   return { success: true };
 }
+
+
+/**
+ * Admin: Get all course lessons with module and product info
+ */
+export async function getAllCourseLessons() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { courseLessons, courseModules } = await import("../drizzle/schema");
+  const { eq } = await import("drizzle-orm");
+  
+  const lessons = await db
+    .select()
+    .from(courseLessons)
+    .leftJoin(courseModules, eq(courseLessons.moduleId, courseModules.id))
+    .orderBy(courseLessons.sortOrder);
+  
+  // Map product IDs to names
+  const productNames: Record<string, string> = {
+    "7-day-reset": "7-Day Reset Course",
+    "from-broken-to-whole": "From Broken to Whole Course",
+    "memoir": "Crooked Lines: Bent, Not Broken",
+    "bent-not-broken-circle": "Bent Not Broken Circle",
+  };
+  
+  return lessons.map(row => ({
+    ...row.course_lessons,
+    module: {
+      ...row.course_modules,
+      product: {
+        id: row.course_modules?.productId || "",
+        name: productNames[row.course_modules?.productId || ""] || row.course_modules?.productId || "",
+      },
+    },
+  }));
+}
+
+/**
+ * Admin: Update lesson video URL and duration
+ */
+export async function updateLessonVideo(
+  lessonId: number,
+  videoUrl: string | null,
+  videoDuration: number | null
+) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  
+  const { courseLessons } = await import("../drizzle/schema");
+  const { eq } = await import("drizzle-orm");
+  
+  await db
+    .update(courseLessons)
+    .set({
+      videoUrl,
+      videoDuration,
+    })
+    .where(eq(courseLessons.id, lessonId));
+  
+  return { success: true };
+}

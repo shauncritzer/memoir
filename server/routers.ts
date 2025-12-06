@@ -384,6 +384,36 @@ export const appRouter = router({
         return markLessonComplete(ctx.user.id, input.productId, input.lessonId);
       }),
   }),
+  
+  // Course admin
+  courseAdmin: router({
+    getAllLessons: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== 'admin') {
+          throw new Error("Unauthorized: Admin access required");
+        }
+        
+        const { getAllCourseLessons } = await import("./db");
+        return getAllCourseLessons();
+      }),
+    
+    updateLessonVideo: protectedProcedure
+      .input(z.object({
+        lessonId: z.number(),
+        videoUrl: z.string().nullable(),
+        videoDuration: z.number().nullable(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== 'admin') {
+          throw new Error("Unauthorized: Admin access required");
+        }
+        
+        const { updateLessonVideo } = await import("./db");
+        return updateLessonVideo(input.lessonId, input.videoUrl, input.videoDuration);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
