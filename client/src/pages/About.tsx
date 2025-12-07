@@ -30,9 +30,11 @@ export default function About() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
+            <Link href="/products">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -42,14 +44,34 @@ export default function About() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <h1 className="text-5xl md:text-6xl font-bold">
-              From Rock Bottom to{" "}
+              From Champion to Crisis to{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Redemption
+                Comeback
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              I'm Shaun Critzer—13 years sober, author, entrepreneur, husband, and father. I've walked through childhood trauma, active addiction, protective orders, psych wards, and rock bottoms I didn't think I'd survive. Today, I help others find the same hope and healing that saved my life.
-            </p>
+            <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
+              <p>
+                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and 13 years into the greatest transformation of my life.
+              </p>
+              <p>
+                At 17, I was crowned Mr. Teen USA, standing on stage in front of thousands as the top teenage bodybuilder in the country. I had discipline. I had drive. I had the world convinced I had it all together.
+              </p>
+              <p>
+                What no one knew was that beneath the muscle and the medals, I was already running—running from childhood trauma I'd buried so deep I convinced myself it didn't exist.
+              </p>
+              <p>
+                The next 15 years were a descent I never saw coming. Alcohol. Pills. A marriage that crumbled. Two sons I was losing. Protective orders. Psych wards. Rock bottoms that nearly killed me.
+              </p>
+              <p>
+                By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending, or finally deal with what I'd been running from my entire life.
+              </p>
+              <p>
+                On January 1, 2013, I chose recovery. Not just sobriety—actual healing.
+              </p>
+              <p className="font-semibold text-foreground">
+                Today, I help others do the same.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -90,20 +112,20 @@ export default function About() {
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Heart className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Husband & Father</h3>
+                      <p className="text-sm text-muted-foreground">Married to Shannon, father to Landon, Cameron & Brody</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <Award className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">13 Years Sober</h3>
                       <p className="text-sm text-muted-foreground">January 1, 2013 - Present</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Heart className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg">Blended Family</h3>
-                      <p className="text-sm text-muted-foreground">Husband to Shannon, father to Landon, Cameron & Brody</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">

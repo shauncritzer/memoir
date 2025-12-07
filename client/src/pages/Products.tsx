@@ -139,9 +139,6 @@ export default function Products() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Link href="/get-started" className="text-sm font-medium hover:text-primary transition-colors">
-              Get Started
-            </Link>
           </nav>
         </div>
       </header>
