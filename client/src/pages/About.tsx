@@ -54,16 +54,16 @@ export default function About() {
                 I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and 13 years into the greatest transformation of my life.
               </p>
               <p>
-                At 17, I was crowned Mr. Teen USA, standing on stage in front of thousands as the top teenage bodybuilder in the country. I had discipline. I had drive. I had the world convinced I had it all together.
+                At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
               </p>
               <p>
                 What no one knew was that beneath the muscle and the medals, I was already running—running from childhood trauma I'd buried so deep I convinced myself it didn't exist.
               </p>
               <p>
-                The next 15 years were a descent I never saw coming. Alcohol. Pills. A marriage that crumbled. Two sons I was losing. Protective orders. Psych wards. Rock bottoms that nearly killed me.
+                The next 15 years were a descent I never saw coming. Alcohol. Drugs. A marriage that crumbled. Two kids I was losing. Jails. Psych wards. Rock bottoms I didn't know existed.
               </p>
               <p>
-                By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending, or finally deal with what I'd been running from my entire life.
+                By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
               </p>
               <p>
                 On January 1, 2013, I chose recovery. Not just sobriety—actual healing.
@@ -87,7 +87,7 @@ export default function About() {
                   I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood trauma that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
                 </p>
                 <p>
-                  By my late teens, I discovered alcohol and prescription pills. They worked—until they didn't. What started as self-medication spiraled into full-blown addiction. I got married, had two beautiful sons (Landon and Cameron), built a successful career, and maintained the illusion of control. But inside, I was dying.
+                  By my late teens, I discovered alcohol and drugs. They worked—until they didn't. What started as magic turned into self-medication, which then spiraled into misery and full-blown addiction. I got married, had two beautiful children—my son Landon and my daughter Cameron, built a successful career, and maintained the illusion of control. But inside, I was dying.
                 </p>
                 <p>
                   The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
@@ -96,7 +96,7 @@ export default function About() {
                   On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
                 </p>
                 <p>
-                  Today, I'm 13 years sober. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and my stepson Brody. I peacefully co-parent with my ex-wife Jennie—something I never thought possible. I run Digital Gravity, helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
+                  Today, I'm 13 years sober. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
                 </p>
               </div>
             </div>
