@@ -170,16 +170,6 @@ export default function AICoach() {
       <section className="bg-gradient-to-b from-black to-yellow-900/10 py-12 border-b border-yellow-600/20">
         <div className="container max-w-4xl">
           <div className="text-center space-y-6">
-            {/* Couple Photo */}
-            <div className="flex justify-center mb-6">
-              <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-yellow-600/50 shadow-2xl">
-                <img 
-                  src="/shaun-bw-smiling.jpg" 
-                  alt="Shaun and Shannon Critzer" 
-                  className="w-full h-full object-cover grayscale"
-                />
-              </div>
-            </div>
             <div className="inline-block">
               <Badge className="text-sm px-4 py-1.5 bg-yellow-600 text-black border-yellow-500">
                 <Sparkles className="mr-2 h-4 w-4" />

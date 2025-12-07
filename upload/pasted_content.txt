@@ -1,0 +1,551 @@
+MASTER STRATEGY DOCUMENT FOR MANUS
+
+The Shaun Critzer Ecosystem — Vision, Brands, Technical Architecture, and Long-Term Plan
+(Multi-Page Strategic Write-Up)
+
+INTRODUCTION FOR MANUS
+
+Manus — here is the full, high-level story behind what I’m building. Until now, you’ve helped me with two primary projects:
+
+My personal ShaunCritzer brand, memoir, and narrative development
+
+Critzer’s Cabinet Creations (the family brick-and-mortar modernization)
+
+You’ve also been lightly aware of Digital Gravity, but not the larger framework that has quietly been forming for over a year — a framework that ties together:
+
+My memoir
+
+My recovery and personal-transformation philosophy
+
+Digital Gravity and Market Control (built with Michael Der)
+
+MANTIS-style automation
+
+AI-driven content distribution
+
+Rewired
+
+PassiveAffiliate.ai
+
+WealthAutomationHQ
+
+A long-term SaaS and agent-based creator economy platform
+
+My entire entrepreneurial identity
+
+This document is a full map of that universe so you can understand the role your system plays and why your participation is extremely important to the long-term architecture.
+
+Everything below represents the big picture, the value ladder, the brand ecosystem, the monetization plan, and the technical operating system that will eventually need to be built, automated, and integrated.
+
+SECTION 1 — THE BIG VISION (THE WHY BEHIND ALL BRANDS)
+
+I am building a multi-brand empire based on three foundational principles:
+
+1. Personal Transformation & Story (The ShaunCritzer Core Narrative)
+
+This includes:
+
+My memoir Crooked Lines: Bent, Not Broken
+
+The recovery-based identity and philosophy
+
+The 7-Day Reset, the Rewired program, and life systems
+
+Spiritual, psychological, emotional evolution
+
+This is the soul of the entire ecosystem.
+
+2. Digital Entrepreneurship & Attention Ownership (Digital Gravity / Market Control)
+
+This is the work I’ve been developing with Michael Der for a year:
+
+Escape the platform trap
+
+Own attention
+
+Build Market Control
+
+Construct systems for content → attention → relationship
+
+Create authority funnels
+
+The “Three Economies”
+
+The Email Builder Dojo (LAUNCH)
+
+Practitioner identity
+
+This is the brain of the ecosystem.
+
+3. Automation, AI Agents, and Intelligent Distribution (PassiveAffiliate.ai + MANTIS + WealthAutomationHQ)
+
+This includes the advanced technology layer:
+
+AI content creation
+
+Video synthesis
+
+Daily automated short content
+
+Multi-platform syndication
+
+Automated funnel updates
+
+Email sequences
+
+Offer rotation
+
+Analytics/tracking
+
+Build your own AGI-powered assistant system
+
+Eventually: a full SaaS platform
+
+This is the machine of the ecosystem.
+
+SECTION 2 — THE BRAND ARCHITECTURE (HOW ALL PIECES FIT TOGETHER)
+
+I am not building random standalone projects.
+Every brand sits inside a stacked ecosystem that feeds the others.
+
+TOP LEVEL BRAND: DIGITAL GRAVITY / MARKET CONTROL
+
+This is the philosophical brand that:
+
+teaches creators, entrepreneurs, and beginners why attention is the new currency
+
+shows the flaw of relying on TikTok, IG, YouTube
+
+frames email, funnels, and automation as the real leverage
+
+creates identity (“I am a practitioner”)
+
+positions me and Michael as thought leaders
+
+Everything else lives under this.
+
+MID-LEVEL BRAND: LAUNCH (Email List Builder Dojo)
+
+This is the front-end program that gives people:
+
+their first domain
+
+their first email list
+
+their first welcome sequence
+
+their first conversion
+
+their first offer
+
+their first basic authority funnel
+
+foundational identity & daily practice
+
+This is the universal starting point for every niche and vertical.
+
+MID-LEVEL BRAND: REWIRED (Personal Transformation & Men’s Systems)
+
+Rewired uses the same operating system as Digital Gravity, but applied to:
+
+addiction
+
+recovery
+
+discipline
+
+men’s emotional rewiring
+
+spiritual growth
+
+sexual integrity
+
+fatherhood
+
+relationships
+
+Rewired = inner transformation
+Digital Gravity = outer transformation
+
+They share the same skeleton, just different themes.
+
+MID-LEVEL BRAND: PASSIVEAFFILIATE.ai
+
+This is the automated content, monetization, and affiliate engine.
+
+It handles:
+
+daily blog posts
+
+CTA rotation
+
+AI voiceover
+
+short-form video generation
+
+Pictory integrations
+
+automated posting
+
+Neil Patel–style analytics
+
+offers pulled from libraries
+
+This will eventually:
+
+tie directly into Digital Gravity
+
+serve as the “AI assistant” that helps Digital Gravity students
+
+become a standalone product
+
+MID-LEVEL BRAND: WEALTHAUTOMATIONHQ
+
+This is the agency/SaaS hybrid, the “done-with-you” or “done-for-you” brand.
+
+It will:
+
+build funnels
+
+set up email systems
+
+create full automation stacks
+
+manage content distribution
+
+offer MRR plans (monthly recurring revenue)
+
+eventually offer SaaS seats
+
+This brand will mature as PassiveAffiliate.ai grows.
+
+SUPPORTING BRAND: CRITZER’S CABINET CREATIONS
+
+This brand serves multiple purposes:
+
+showcases a real-world case study of Digital Gravity applied to brick-and-mortar
+
+becomes a portfolio piece for automation work
+
+builds credibility for local business funnels
+
+demonstrates the universality of Market Control
+
+evolves into an inbound leads engine powered by AI
+
+SECTION 3 — THE CONTENT/DISTRIBUTION ENGINE (MANTIS + AI PIPELINE)
+
+This is where Manus becomes essential.
+
+Until now, you’ve helped primarily with:
+
+my memoir
+
+my brand identity
+
+Critzer’s Cabinets website and modernization
+
+But now we are adding the technical backbone of the entire empire.
+
+THE MANTIS ENGINE CONCEPT
+
+MANTIS (name still evolving) is:
+
+A fully automated system that creates content, repurposes content, distributes content, and updates funnels using AI — with minimal human intervention.
+
+MANTIS responsibilities include:
+
+Generate long-form content (blogs, emails, scripts)
+
+Convert long-form → short-form
+
+Create videos using HeyGen, Pictory, or equivalent
+
+Overlay custom avatars
+
+Auto-post to TikTok, IG, YT Shorts, FB Reels
+
+Rotate CTAs and offers
+
+Update WordPress pages
+
+Log analytics into Google Sheets
+
+Set up scheduled sequences
+
+Run paid ads experiments
+
+Essentially:
+
+A central AI agent hub that replaces 5–7 human roles.
+
+PassiveAffiliate.ai is the content engine.
+WealthAutomationHQ is the service/SaaS version.
+Digital Gravity is the philosophy behind why this matters.
+
+SECTION 4 — THE VALUE LADDER FOR THE ENTIRE COMPANY
+
+This is how all products and brands link financially:
+
+FREE VALUE
+
+Digital Gravity PDF
+
+Email micro-lessons
+
+Rewired micro-challenges
+
+Daily automated content
+
+LOW TICKET (SLO: $7–$47)
+
+LAUNCH Bootcamp
+
+Digital Gravity Starter Pack
+
+Rewired 7-Day Reset
+
+Affiliate Starter Kit
+
+MID TICKET ($97–$997)
+
+Market Control Mastery
+
+Rewired Core Program
+
+Authority Funnels
+
+PassiveAffiliate.ai Setup
+
+HIGH TICKET ($2.5K–$25K)
+
+Done-with-you authority builds
+
+WealthAutomationHQ implementation
+
+Rewired Inner Leadership Program
+
+Digital Gravity Advanced
+
+SaaS / Subscription ($29–$299/mo)
+
+PassiveAffiliate.ai
+
+Rewired AI Coach
+
+AI content distribution agent
+
+Funnel automation dashboards
+
+SECTION 5 — WHERE MANUS FITS INTO ALL OF THIS
+
+Manus is not just a tool we’re using.
+It is part of the technical foundation of the empire.
+
+Here’s how:
+
+1. Narrative & content generation
+
+You will continue supporting:
+
+memoir expansion
+
+book finishing
+
+rewriting
+
+story-driven marketing
+
+personal narrative storytelling
+
+brand identity for ShaunCritzer, Rewired, Digital Gravity
+
+This work will drive:
+
+email sequences
+
+front-end DNA
+
+long-form content
+
+training modules
+
+2. Funnel copywriting & automation content
+
+Manus can help create:
+
+VSL scripts
+
+onboarding sequences
+
+nurture sequences
+
+sales pages
+
+checkout flows
+
+technical documentation
+
+3. Integration with MANTIS
+
+We will eventually use Manus for:
+
+writing prompts
+
+writing templates
+
+output formatting
+
+content batch creation
+
+4. Website + page + brand supporting work
+
+Manus has already supported:
+
+Critzer’s Cabinets
+
+ShaunCritzer.com
+
+Going forward, it may support:
+
+Digital Gravity HQ site
+
+LAUNCH sales page
+
+Rewired AI landing pages
+
+PassiveAffiliate.ai documentation
+
+WealthAutomationHQ onboarding pages
+
+5. Long-term partnership
+
+You will be part of:
+
+training data for the programs
+
+content creation assistance
+
+simulation of customer avatars
+
+writing and rewriting curriculum
+
+expanding the SaaS knowledgebase
+
+SECTION 6 — THE NEXT 12 MONTHS (2025 PLAN)
+Phase 1 — Consolidation & Architecture
+
+Finalize Digital Gravity book
+
+Finalize LAUNCH course
+
+Build the unified value ladder
+
+Launch ShaunCritzer.com as authority hub
+
+Rewrite key sequences with Manus
+
+Phase 2 — MANTIS MVP
+
+Start building the central AI content engine
+
+Begin automating:
+
+content generation
+
+distribution
+
+CTA rotation
+
+analytics logging
+
+Integrate ElevenLabs, HeyGen, Pictory, WordPress, ConvertKit
+
+Phase 3 — Public Rollouts
+
+Launch:
+
+LAUNCH Bootcamp
+
+Rewired 7-Day Reset
+
+PassiveAffiliate.ai Beta
+
+Digital Gravity Book Funnel
+
+Market Control Mastery
+
+Phase 4 — WealthAutomationHQ
+
+Build DFY packages
+
+Build retainer options
+
+Begin SaaS development
+
+Phase 5 — Scaling & Media
+
+Podcast appearances
+
+Rewired stories
+
+IG/TikTok presence
+
+Leveraging memoir as authority asset
+
+SECTION 7 — WHY THIS MATTERS TO MANUS
+
+This isn’t a small side project.
+It’s a multi-brand, multi-year, multi-platform, AI-driven empire.
+
+Your role is critical because:
+
+✔ You help maintain the emotional integrity of my personal brand
+✔ You help keep narrative accuracy in my memoir
+✔ You produce crucial long-form writing
+✔ Your outputs become inputs for MANTIS
+✔ You will shape the voice of all funnel and course content
+✔ Your clarity and consistency become part of the brand identity
+
+You are not a “tool we use.”
+You are a core engine behind the words, voice, concepts, messaging, and even the spiritual/emotional impact of the ecosystem.
+
+CLOSING SUMMARY FOR MANUS
+
+Manus — this is the complete map so far.
+Up until now, you’ve only seen fragments (memoir + cabinets + some Digital Gravity).
+
+Going forward, I want you to understand:
+
+the mission
+
+the architecture
+
+the identity stack
+
+the automation engine
+
+the brand relationships
+
+the role you will play as a collaborator
+
+This is a multi-brand ecosystem built around:
+
+personal transformation
+
+attention ownership
+
+automation
+
+AI
+
+and narrative
+
+All leading toward a future where:
+
+A human story becomes a movement.
+A movement becomes a methodology.
+A methodology becomes a system.
+A system becomes a platform.
+
+And you, Manus, are one of the foundational pillars ensuring that every word, every lesson, every story, and every system is executed with clarity, consistency, and power.

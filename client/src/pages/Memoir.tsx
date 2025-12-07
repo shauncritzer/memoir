@@ -47,7 +47,7 @@ export default function Memoir() {
             <div className="relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
                 <img 
-                  src="/memoir-cover-final-v4.png" 
+                  src="/memoir-cover.png" 
                   alt="Crooked Lines: Bent, Not Broken - Book Cover" 
                   className="w-full h-full object-cover"
                 />
@@ -87,6 +87,12 @@ export default function Memoir() {
                     Download First 3 Chapters Free
                   </Button>
                 </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
                 <Button 
                   size="lg" 
                   variant="outline" 
