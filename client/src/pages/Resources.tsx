@@ -289,19 +289,9 @@ export default function Resources() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
                 <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
               </ul>
             </div>
