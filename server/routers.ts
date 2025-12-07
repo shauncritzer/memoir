@@ -414,6 +414,185 @@ export const appRouter = router({
         return updateLessonVideo(input.lessonId, input.videoUrl, input.videoDuration);
       }),
   }),
+
+  // Admin utilities
+  admin: router({
+    seedBlogPosts: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        // Simple protection - optional secret key
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "seed-blog-posts-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { blogPosts, users } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          // Get the admin user (owner)
+          const adminUsers = await db.select().from(users).where(eq(users.role, "admin")).limit(1);
+
+          if (adminUsers.length === 0) {
+            throw new Error("No admin user found. Please ensure an admin user exists.");
+          }
+
+          const authorId = adminUsers[0]!.id;
+
+          // Delete existing posts to avoid duplicates
+          await db.delete(blogPosts);
+
+          const posts = [
+            {
+              title: "The Difference Between Sobriety and Recovery",
+              slug: "sobriety-vs-recovery",
+              excerpt: "I was sober for months at a time, white-knuckling through each day, but I wasn't in recovery. Here's why that distinction almost killed me.",
+              category: "Recovery",
+              tags: JSON.stringify(["recovery", "sobriety", "mental health"]),
+              content: `# The Difference Between Sobriety and Recovery
+
+For years, I thought sobriety and recovery were the same thing. I was wrong, and that misunderstanding almost cost me everything.
+
+## What Sobriety Looked Like for Me
+
+Between 2002 and 2012, I had multiple periods of sobriety. Weeks, sometimes months, without a drink or a drug. On paper, I was "clean." But inside? I was dying.
+
+I was white-knuckling through every day, counting hours until I could justify using again. I was still lying, still manipulating, still running from my trauma. The only difference was I wasn't actively drinking.
+
+That's sobriety without recovery.
+
+## The Critical Difference
+
+**Sobriety** is abstinence from substances. It's necessary, but it's not sufficient.
+
+**Recovery** is healing the underlying wounds that drove you to use in the first place. It's processing trauma, building authentic relationships, and creating a life worth staying sober for.
+
+You can be sober and miserable. You can be sober and still emotionally unavailable to your kids. You can be sober and still carrying the same shame, rage, and fear that fueled your addiction.
+
+That's not recovery. That's just... not drinking.
+
+## What Changed for Me
+
+Real recovery started when I finally addressed my childhood trauma through EMDR therapy. When I stopped performing and started being honest about who I was and what I'd done. When I built a support system that knew the real me, not the version I'd been performing for decades.
+
+Recovery meant:
+- Therapy (EMDR, CBT, group work)
+- Rigorous honesty with myself and others
+- Processing trauma instead of burying it
+- Building authentic relationships
+- Making amends through changed behavior
+- Finding purpose beyond myself
+
+## The Question That Matters
+
+If you're sober but still miserable, ask yourself: **Am I just not drinking, or am I actually healing?**
+
+Because sobriety without recovery is a ticking time bomb. Eventually, the pain you're not addressing will find a way out—through relapse, through other addictive behaviors, or through the slow death of living a half-life.
+
+Recovery is possible. But it requires more than just putting down the bottle.
+
+It requires picking up the work.
+
+---
+
+*If you're struggling with addiction or trauma, please reach out for help. Resources are available at [/resources](/resources).*`,
+              publishedAt: new Date("2025-01-15"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+            {
+              title: "Why I Finally Talked About My Childhood Trauma",
+              slug: "breaking-silence-childhood-trauma",
+              excerpt: "I experienced childhood trauma that I didn't talk about for 25 years. When I finally did, it changed everything.",
+              category: "Trauma",
+              tags: JSON.stringify(["trauma", "healing", "childhood trauma"]),
+              content: `# Why I Finally Talked About My Childhood Trauma
+
+I experienced childhood trauma between ages 6-8. I didn't talk about it for 25 years.
+
+When I finally did, it changed everything.
+
+## The Weight of Silence
+
+From age 6 to 8, I experienced boundary violations by someone I trusted. I never told anyone. Not my parents, not my friends, not my wife. I buried it so deep I almost convinced myself it didn't happen.
+
+But trauma doesn't disappear just because you don't talk about it. It festers. It leaks out in other ways—rage, addiction, self-destruction, an inability to be truly intimate with anyone.
+
+For decades, I carried that weight alone. And it was killing me.
+
+## Why I Stayed Silent
+
+**Shame.** I thought it was my fault somehow.
+
+**Fear.** I was afraid no one would believe me.
+
+**Protection.** I didn't want to hurt my family by bringing it up.
+
+**Denial.** If I didn't talk about it, maybe it wasn't real.
+
+These are the lies trauma tells you. And I believed every single one.
+
+## What Finally Broke the Silence
+
+Rock bottom. Multiple psych ward stays. Losing access to my kids. Wanting to die.
+
+When I finally got to The Ranch treatment center in 2012, I had nothing left to lose. In a psychodrama session, surrounded by other broken people who understood, I finally said it out loud:
+
+"I experienced childhood trauma."
+
+And the world didn't end. In fact, it was the beginning of my healing.
+
+## What Happened When I Spoke
+
+**Relief.** The weight I'd been carrying for 25 years started to lift.
+
+**Connection.** Other people shared their stories. I wasn't alone.
+
+**Healing.** Through EMDR therapy, I was able to process the trauma instead of just carrying it.
+
+**Freedom.** The shame lost its power when I brought it into the light.
+
+## To Anyone Still Carrying This
+
+If you experienced childhood trauma and you've never told anyone: **it wasn't your fault.**
+
+You don't have to carry this alone. Speaking your truth doesn't make you weak—it makes you brave.
+
+Healing is possible. But it starts with breaking the silence.
+
+---
+
+*If you've experienced childhood trauma, help is available:*
+- *RAINN National Sexual Assault Hotline: 1-800-656-HOPE (4673)*
+- *Crisis Text Line: Text HOME to 741741*`,
+              publishedAt: new Date("2025-01-10"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+          ];
+
+          // Insert posts
+          for (const post of posts) {
+            await db.insert(blogPosts).values(post);
+          }
+
+          return {
+            success: true,
+            message: `Successfully seeded ${posts.length} blog posts`,
+            postsCreated: posts.length,
+          };
+        } catch (error: any) {
+          console.error("Blog seed error:", error);
+          throw new Error(`Failed to seed blog posts: ${error.message}`);
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
