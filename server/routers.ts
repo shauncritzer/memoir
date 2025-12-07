@@ -161,9 +161,15 @@ export const appRouter = router({
           userAgent: ctx.req.headers["user-agent"],
         });
         
+        // Add cache-busting parameter to PDF downloads
+        let downloadUrl = leadMagnet.fileUrl;
+        if (downloadUrl && downloadUrl.endsWith('.pdf')) {
+          downloadUrl = `${downloadUrl}?v=${Date.now()}`;
+        }
+
         return {
           success: true,
-          downloadUrl: leadMagnet.fileUrl,
+          downloadUrl,
           leadMagnet,
         };
       }),

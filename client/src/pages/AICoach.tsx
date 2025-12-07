@@ -63,7 +63,7 @@ export default function AICoach() {
 
     try {
       // Call the coach API endpoint from the separate Vercel deployment
-      const response = await fetch("https://coach-shauncritzers-projects.vercel.app/api/chat", {
+      const response = await fetch("https://coach-kohl-chi.vercel.app/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
