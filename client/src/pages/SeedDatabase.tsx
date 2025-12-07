@@ -81,11 +81,11 @@ export default function SeedDatabase() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Creates 2 new blog posts with updated language</span>
+              <span>Creates 5 comprehensive blog posts (800-1100 words each)</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Updates: "Sexual Abuse" → "Childhood Trauma"</span>
+              <span>Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
