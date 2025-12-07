@@ -47,7 +47,7 @@ export default function Memoir() {
             <div className="relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
                 <img 
-                  src="/memoir-cover.png" 
+                  src="/memoir-cover-final-v6.png" 
                   alt="Crooked Lines: Bent, Not Broken - Book Cover" 
                   className="w-full h-full object-cover"
                 />
