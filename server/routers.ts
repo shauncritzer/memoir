@@ -465,6 +465,10 @@ I was white-knuckling through every day, counting hours until I could justify us
 
 That's sobriety without recovery.
 
+I'd go to work, put on the mask, perform the role of "guy who has it together." Then I'd come home to an empty apartment, microwave a frozen dinner, and sit alone with my thoughts. No alcohol to numb them. No drugs to quiet them. Just me and the deafening roar of everything I was running from.
+
+I thought that's what sobriety was supposed to feel like. I thought I was supposed to be miserable. That this was my punishment for all the damage I'd done.
+
 ## The Critical Difference
 
 **Sobriety** is abstinence from substances. It's necessary, but it's not sufficient.
@@ -475,17 +479,23 @@ You can be sober and miserable. You can be sober and still emotionally unavailab
 
 That's not recovery. That's just... not drinking.
 
+And here's the brutal truth: if you're sober but not in recovery, you're one bad day away from relapse. Because eventually, the pain catches up. Eventually, the dysregulated nervous system demands relief. And when it does, willpower won't save you.
+
 ## What Changed for Me
 
 Real recovery started when I finally addressed my childhood trauma through EMDR therapy. When I stopped performing and started being honest about who I was and what I'd done. When I built a support system that knew the real me, not the version I'd been performing for decades.
 
 Recovery meant:
-- Therapy (EMDR, CBT, group work)
-- Rigorous honesty with myself and others
-- Processing trauma instead of burying it
-- Building authentic relationships
-- Making amends through changed behavior
-- Finding purpose beyond myself
+- **Therapy** (EMDR, CBT, group work) to process the trauma I'd been running from
+- **Rigorous honesty** with myself and others, even when it was terrifying
+- **Processing trauma** instead of burying it under achievement and performance
+- **Building authentic relationships** where people knew my story and loved me anyway
+- **Making amends** through changed behavior, not just empty apologies
+- **Finding purpose** beyond myself—service, connection, meaning
+
+It meant sitting with uncomfortable emotions instead of numbing them. It meant learning to regulate my nervous system through breathwork, somatic exercises, and co-regulation with safe people. It meant grieving the childhood I didn't get and the decades I lost to addiction.
+
+That work? It's harder than sobriety. But it's also what makes sobriety sustainable.
 
 ## The Question That Matters
 
@@ -493,218 +503,20 @@ If you're sober but still miserable, ask yourself: **Am I just not drinking, or 
 
 Because sobriety without recovery is a ticking time bomb. Eventually, the pain you're not addressing will find a way out—through relapse, through other addictive behaviors, or through the slow death of living a half-life.
 
+I've watched people with 5, 10, even 15 years of sobriety relapse because they never did the deeper work. They stayed sober, but they never healed. And the unhealed parts eventually demanded attention.
+
 Recovery is possible. But it requires more than just putting down the bottle.
 
 It requires picking up the work.
+
+It requires admitting you need help. Finding a therapist who understands trauma. Showing up to meetings even when you don't want to. Being honest about the ugly parts. Building relationships where you can be seen and loved anyway. Processing the shame. Forgiving yourself. Creating a life worth staying sober for.
+
+That's recovery. And it's worth every ounce of effort.
 
 ---
 
 *If you're struggling with addiction or trauma, please reach out for help. Resources are available at [/resources](/resources).*`,
               publishedAt: new Date("2025-01-15"),
-              authorId,
-              status: "published" as const,
-              viewCount: 0,
-            },
-            {
-              title: "Why I Finally Talked About My Childhood Trauma",
-              slug: "breaking-silence-childhood-trauma",
-              excerpt: "I experienced childhood trauma that I didn't talk about for 25 years. When I finally did, it changed everything.",
-              category: "Trauma",
-              tags: JSON.stringify(["trauma", "healing", "childhood trauma"]),
-              content: `# Why I Finally Talked About My Childhood Trauma
-
-I experienced childhood trauma between ages 6-8. I didn't talk about it for 25 years.
-
-When I finally did, it changed everything.
-
-## The Weight of Silence
-
-From age 6 to 8, I experienced boundary violations by someone I trusted. I never told anyone. Not my parents, not my friends, not my wife. I buried it so deep I almost convinced myself it didn't happen.
-
-But trauma doesn't disappear just because you don't talk about it. It festers. It leaks out in other ways—rage, addiction, self-destruction, an inability to be truly intimate with anyone.
-
-For decades, I carried that weight alone. And it was killing me.
-
-## Why I Stayed Silent
-
-**Shame.** I thought it was my fault somehow.
-
-**Fear.** I was afraid no one would believe me.
-
-**Protection.** I didn't want to hurt my family by bringing it up.
-
-**Denial.** If I didn't talk about it, maybe it wasn't real.
-
-These are the lies trauma tells you. And I believed every single one.
-
-## What Finally Broke the Silence
-
-Rock bottom. Multiple psych ward stays. Losing access to my kids. Wanting to die.
-
-When I finally got to The Ranch treatment center in 2012, I had nothing left to lose. In a psychodrama session, surrounded by other broken people who understood, I finally said it out loud:
-
-"I experienced childhood trauma."
-
-And the world didn't end. In fact, it was the beginning of my healing.
-
-## What Happened When I Spoke
-
-**Relief.** The weight I'd been carrying for 25 years started to lift.
-
-**Connection.** Other people shared their stories. I wasn't alone.
-
-**Healing.** Through EMDR therapy, I was able to process the trauma instead of just carrying it.
-
-**Freedom.** The shame lost its power when I brought it into the light.
-
-## To Anyone Still Carrying This
-
-If you experienced childhood trauma and you've never told anyone: **it wasn't your fault.**
-
-You don't have to carry this alone. Speaking your truth doesn't make you weak—it makes you brave.
-
-Healing is possible. But it starts with breaking the silence.
-
----
-
-*If you've experienced childhood trauma, help is available:*
-- *RAINN National Sexual Assault Hotline: 1-800-656-HOPE (4673)*
-- *Crisis Text Line: Text HOME to 741741*`,
-              publishedAt: new Date("2025-01-10"),
-              authorId,
-              status: "published" as const,
-              viewCount: 0,
-            },
-            {
-              title: "How Nervous System Dysregulation Drives Compulsive Behaviors",
-              slug: "nervous-system-dysregulation-compulsive-behaviors",
-              excerpt: "Compulsive behaviors aren't moral failures—they're nervous system responses to trauma. Here's how understanding this changes everything.",
-              category: "Recovery",
-              tags: JSON.stringify(["nervous system", "trauma", "compulsive behaviors", "regulation"]),
-              content: `# How Nervous System Dysregulation Drives Compulsive Behaviors
-
-For years, I thought my compulsive behaviors were a moral failure. A lack of willpower. A character defect that made me broken beyond repair.
-
-I was wrong.
-
-Compulsive behaviors—whether it's excessive drinking, overworking, scrolling social media for hours, or engaging in risky sexual behavior—aren't moral failures. They're nervous system responses to unresolved trauma.
-
-## The Nervous System Explanation
-
-Your nervous system has one job: keep you alive.
-
-When you experience trauma—especially childhood trauma—your nervous system gets stuck in survival mode. It's constantly scanning for threats, flooding your body with stress hormones, and activating the fight-flight-freeze response.
-
-This is called nervous system dysregulation.
-
-And when you're stuck in that state? Your brain desperately seeks relief. It craves anything that will calm the storm inside.
-
-That's where compulsive behaviors come in.
-
-## Why Compulsions Work (Temporarily)
-
-Compulsive behaviors provide temporary relief from nervous system dysregulation. They:
-
-- Release dopamine (the brain's feel-good chemical)
-- Create a sense of control in chaos
-- Numb overwhelming emotions
-- Provide predictable escape from unpredictable pain
-
-But here's the trap: the relief is temporary. The dysregulation returns. And you need more of the behavior to get the same relief.
-
-That's the addiction cycle.
-
-## The Solution: Regulate, Don't Resist
-
-Recovery isn't about willpower. It's about regulation.
-
-When you learn to regulate your nervous system through:
-
-- Breathwork
-- Somatic exercises
-- EMDR therapy
-- Mindfulness practices
-- Safe relationships
-
-You don't need the compulsive behaviors anymore. The internal chaos calms down. The desperate need for escape fades.
-
-This is why the REWIRED approach works. We don't shame you for the behavior. We help you regulate the nervous system that's driving it.
-
-Because you're not broken. You're dysregulated. And that's something we can fix.`,
-              publishedAt: new Date("2025-01-05"),
-              authorId,
-              status: "published" as const,
-              viewCount: 0,
-            },
-            {
-              title: "Why Willpower Alone Won't Keep You Sober",
-              slug: "why-willpower-alone-wont-keep-you-sober",
-              excerpt: "I white-knuckled sobriety for 18 months and almost relapsed. Here's what I learned about why willpower fails—and what actually works.",
-              category: "Recovery",
-              tags: JSON.stringify(["sobriety", "willpower", "nervous system", "relapse prevention"]),
-              content: `# Why Willpower Alone Won't Keep You Sober
-
-I was 18 months sober when I found myself standing in a liquor store, crying over bourbon bottles.
-
-I had done everything "right":
-
-- Attended meetings daily
-- Worked the 12 steps
-- Got a sponsor
-- Stayed away from triggers
-
-But I was miserable. Irritable. Restless. And dangerously close to throwing it all away.
-
-Why? Because I was relying on willpower alone.
-
-## The Willpower Myth
-
-Here's what nobody tells you about early recovery: willpower is a finite resource.
-
-Studies show that willpower depletes throughout the day. Every decision you make—from what to eat for breakfast to how to respond to a frustrating email—drains your willpower tank.
-
-And when you're using ALL your willpower just to stay sober? You have nothing left for:
-
-- Processing emotions
-- Healing trauma
-- Building healthy relationships
-- Creating a life worth living
-
-That's why so many people relapse. Not because they're weak. But because they're exhausted.
-
-## What Actually Works
-
-Recovery that lasts isn't built on willpower. It's built on:
-
-**1. Nervous System Regulation**
-Learning to calm your internal chaos without substances. Breathwork, somatic exercises, and trauma therapy aren't "nice to have"—they're essential.
-
-**2. Community Support**
-You can't do this alone. Safe relationships with people who understand what you're going through provide co-regulation—your nervous systems literally calm each other down.
-
-**3. Meaningful Purpose**
-Recovery gives you your life back. But you have to build a life worth staying sober for. What do you care about? What brings you joy? Start there.
-
-**4. Self-Compassion**
-You're going to make mistakes. You're going to have bad days. The question isn't "Will I struggle?" It's "How will I respond when I do?"
-
-## The Turning Point
-
-That day in the liquor store, I called someone. I admitted I was struggling. I asked for help.
-
-And instead of white-knuckling through another day, I started doing the deeper work:
-
-- EMDR therapy to process childhood trauma
-- Breathwork to regulate my nervous system
-- Building genuine connections with people in recovery
-- Creating a life I didn't need to escape from
-
-That was 11+ years ago. I haven't wanted a drink since.
-
-Not because I have superhuman willpower. But because I learned to do the work that makes sobriety sustainable.
-
-You can too.`,
-              publishedAt: new Date("2025-01-02"),
               authorId,
               status: "published" as const,
               viewCount: 0,

@@ -239,6 +239,48 @@ export default function Memoir() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t py-12 bg-card">
+        <div className="container">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg">Shaun Critzer</h3>
+              <p className="text-sm text-muted-foreground">
+                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">The Memoir</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/memoir" className="hover:text-primary transition-colors">About the Book</Link></li>
+                <li><Link href="/resources" className="hover:text-primary transition-colors">First 3 Chapters Free</Link></li>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Buy Now</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Resources</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
+                <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Support</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="text-sm">Crisis Hotline: 988</li>
+                <li className="text-sm">SAMHSA: 1-800-662-4357</li>
+                <li><a href="https://www.aa.org" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Find AA Meetings</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
