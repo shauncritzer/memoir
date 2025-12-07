@@ -234,7 +234,7 @@ export default function AICoach() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-300">
-                  Porn, affairs, work, fitness, bodybuilding—we address ALL compulsive behaviors, not just substances.
+                  Compulsive behaviors like affairs, work, fitness, bodybuilding—we address ALL process addictions, not just substances.
                 </p>
               </CardContent>
             </Card>
@@ -395,12 +395,6 @@ export default function AICoach() {
                   <Link href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
                     Resources
                   </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 </li>
                 <li>
                   <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">

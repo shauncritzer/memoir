@@ -575,6 +575,140 @@ Healing is possible. But it starts with breaking the silence.
               status: "published" as const,
               viewCount: 0,
             },
+            {
+              title: "How Nervous System Dysregulation Drives Compulsive Behaviors",
+              slug: "nervous-system-dysregulation-compulsive-behaviors",
+              excerpt: "Compulsive behaviors aren't moral failures—they're nervous system responses to trauma. Here's how understanding this changes everything.",
+              category: "Recovery",
+              tags: JSON.stringify(["nervous system", "trauma", "compulsive behaviors", "regulation"]),
+              content: `# How Nervous System Dysregulation Drives Compulsive Behaviors
+
+For years, I thought my compulsive behaviors were a moral failure. A lack of willpower. A character defect that made me broken beyond repair.
+
+I was wrong.
+
+Compulsive behaviors—whether it's excessive drinking, overworking, scrolling social media for hours, or engaging in risky sexual behavior—aren't moral failures. They're nervous system responses to unresolved trauma.
+
+## The Nervous System Explanation
+
+Your nervous system has one job: keep you alive.
+
+When you experience trauma—especially childhood trauma—your nervous system gets stuck in survival mode. It's constantly scanning for threats, flooding your body with stress hormones, and activating the fight-flight-freeze response.
+
+This is called nervous system dysregulation.
+
+And when you're stuck in that state? Your brain desperately seeks relief. It craves anything that will calm the storm inside.
+
+That's where compulsive behaviors come in.
+
+## Why Compulsions Work (Temporarily)
+
+Compulsive behaviors provide temporary relief from nervous system dysregulation. They:
+
+- Release dopamine (the brain's feel-good chemical)
+- Create a sense of control in chaos
+- Numb overwhelming emotions
+- Provide predictable escape from unpredictable pain
+
+But here's the trap: the relief is temporary. The dysregulation returns. And you need more of the behavior to get the same relief.
+
+That's the addiction cycle.
+
+## The Solution: Regulate, Don't Resist
+
+Recovery isn't about willpower. It's about regulation.
+
+When you learn to regulate your nervous system through:
+
+- Breathwork
+- Somatic exercises
+- EMDR therapy
+- Mindfulness practices
+- Safe relationships
+
+You don't need the compulsive behaviors anymore. The internal chaos calms down. The desperate need for escape fades.
+
+This is why the REWIRED approach works. We don't shame you for the behavior. We help you regulate the nervous system that's driving it.
+
+Because you're not broken. You're dysregulated. And that's something we can fix.`,
+              publishedAt: new Date("2025-01-05"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+            {
+              title: "Why Willpower Alone Won't Keep You Sober",
+              slug: "why-willpower-alone-wont-keep-you-sober",
+              excerpt: "I white-knuckled sobriety for 18 months and almost relapsed. Here's what I learned about why willpower fails—and what actually works.",
+              category: "Recovery",
+              tags: JSON.stringify(["sobriety", "willpower", "nervous system", "relapse prevention"]),
+              content: `# Why Willpower Alone Won't Keep You Sober
+
+I was 18 months sober when I found myself standing in a liquor store, crying over bourbon bottles.
+
+I had done everything "right":
+
+- Attended meetings daily
+- Worked the 12 steps
+- Got a sponsor
+- Stayed away from triggers
+
+But I was miserable. Irritable. Restless. And dangerously close to throwing it all away.
+
+Why? Because I was relying on willpower alone.
+
+## The Willpower Myth
+
+Here's what nobody tells you about early recovery: willpower is a finite resource.
+
+Studies show that willpower depletes throughout the day. Every decision you make—from what to eat for breakfast to how to respond to a frustrating email—drains your willpower tank.
+
+And when you're using ALL your willpower just to stay sober? You have nothing left for:
+
+- Processing emotions
+- Healing trauma
+- Building healthy relationships
+- Creating a life worth living
+
+That's why so many people relapse. Not because they're weak. But because they're exhausted.
+
+## What Actually Works
+
+Recovery that lasts isn't built on willpower. It's built on:
+
+**1. Nervous System Regulation**
+Learning to calm your internal chaos without substances. Breathwork, somatic exercises, and trauma therapy aren't "nice to have"—they're essential.
+
+**2. Community Support**
+You can't do this alone. Safe relationships with people who understand what you're going through provide co-regulation—your nervous systems literally calm each other down.
+
+**3. Meaningful Purpose**
+Recovery gives you your life back. But you have to build a life worth staying sober for. What do you care about? What brings you joy? Start there.
+
+**4. Self-Compassion**
+You're going to make mistakes. You're going to have bad days. The question isn't "Will I struggle?" It's "How will I respond when I do?"
+
+## The Turning Point
+
+That day in the liquor store, I called someone. I admitted I was struggling. I asked for help.
+
+And instead of white-knuckling through another day, I started doing the deeper work:
+
+- EMDR therapy to process childhood trauma
+- Breathwork to regulate my nervous system
+- Building genuine connections with people in recovery
+- Creating a life I didn't need to escape from
+
+That was 11+ years ago. I haven't wanted a drink since.
+
+Not because I have superhuman willpower. But because I learned to do the work that makes sobriety sustainable.
+
+You can too.`,
+              publishedAt: new Date("2025-01-02"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
           ];
 
           // Insert posts
