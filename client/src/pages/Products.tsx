@@ -35,7 +35,7 @@ export default function Products() {
       name: "Crooked Lines: Bent, Not Broken",
       tagline: "The Memoir",
       price: "$19.99",
-      priceId: "price_1SbFTrC2dOpPzSOOn2zoiXKU", // Crooked Lines memoir
+      priceId: "price_1SbOUTC2dOpPzSOOdxient8", // Crooked Lines memoir
       description: "A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.",
       features: [
         "13-year recovery journey from rock bottom to redemption",
@@ -73,7 +73,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_1SbFUCC2dOpPzSOOGwI21lbV", // From Broken to Whole
+      priceId: "price_1SYt3KC2dOpPzSOOpAokf1UQ", // From Broken to Whole (Recovery Roadmap)
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -95,7 +95,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: "price_1SYt3fC2dOpPzSOOR7dDuGtY", // Bent Not Broken Circle
+      priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY", // Bent Not Broken Circle (Monthly Membership)
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
