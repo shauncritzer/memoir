@@ -48,7 +48,7 @@ That's not recovery. That's just... not drinking.
 
 ## What Changed for Me
 
-Real recovery started when I finally addressed my childhood sexual abuse through EMDR therapy. When I stopped performing and started being honest about who I was and what I'd done. When I built a support system that knew the real me, not the version I'd been performing for decades.
+Real recovery started when I finally addressed my childhood trauma through EMDR therapy. When I stopped performing and started being honest about who I was and what I'd done. When I built a support system that knew the real me, not the version I'd been performing for decades.
 
 Recovery meant:
 - Therapy (EMDR, CBT, group work)
@@ -74,20 +74,20 @@ It requires picking up the work.
       publishedAt: new Date("2025-01-15"),
     },
     {
-      title: "Why I Finally Talked About My Childhood Sexual Abuse",
-      slug: "breaking-silence-childhood-abuse",
-      excerpt: "I buried my abuse for 25 years. Here's why I finally spoke up, and what happened when I did.",
+      title: "Why I Finally Talked About My Childhood Trauma",
+      slug: "breaking-silence-childhood-trauma",
+      excerpt: "I experienced childhood trauma that I didn't talk about for 25 years. When I finally did, it changed everything.",
       category: "Trauma",
-      tags: JSON.stringify(["trauma", "healing", "childhood abuse"]),
-      content: `# Why I Finally Talked About My Childhood Sexual Abuse
+      tags: JSON.stringify(["trauma", "healing", "childhood trauma"]),
+      content: `# Why I Finally Talked About My Childhood Trauma
 
-I was sexually abused as a child. I didn't talk about it for 25 years.
+I experienced childhood trauma between ages 6-8. I didn't talk about it for 25 years.
 
 When I finally did, it changed everything.
 
 ## The Weight of Silence
 
-From age 6 to 8, I was abused by someone I trusted. I never told anyone. Not my parents, not my friends, not my wife. I buried it so deep I almost convinced myself it didn't happen.
+From age 6 to 8, I experienced boundary violations by someone I trusted. I never told anyone. Not my parents, not my friends, not my wife. I buried it so deep I almost convinced myself it didn't happen.
 
 But trauma doesn't disappear just because you don't talk about it. It festers. It leaks out in other ways—rage, addiction, self-destruction, an inability to be truly intimate with anyone.
 
@@ -111,7 +111,7 @@ Rock bottom. Multiple psych ward stays. Losing access to my kids. Wanting to die
 
 When I finally got to The Ranch treatment center in 2012, I had nothing left to lose. In a psychodrama session, surrounded by other broken people who understood, I finally said it out loud:
 
-"I was sexually abused as a child."
+"I experienced childhood trauma."
 
 And the world didn't end. In fact, it was the beginning of my healing.
 
@@ -127,7 +127,7 @@ And the world didn't end. In fact, it was the beginning of my healing.
 
 ## To Anyone Still Carrying This
 
-If you were abused as a child and you've never told anyone: **it wasn't your fault.**
+If you experienced childhood trauma and you've never told anyone: **it wasn't your fault.**
 
 You don't have to carry this alone. Speaking your truth doesn't make you weak—it makes you brave.
 
@@ -135,7 +135,7 @@ Healing is possible. But it starts with breaking the silence.
 
 ---
 
-*If you've experienced childhood sexual abuse, help is available:*
+*If you've experienced childhood trauma, help is available:*
 - *RAINN National Sexual Assault Hotline: 1-800-656-HOPE (4673)*
 - *Crisis Text Line: Text HOME to 741741*`,
       publishedAt: new Date("2025-01-10"),
@@ -236,7 +236,7 @@ Don't get me wrong—talk therapy helped. It gave me language for my experiences
 
 But understanding trauma intellectually isn't the same as healing from it.
 
-I could explain my childhood sexual abuse, my protective mechanisms, my addiction patterns. But when triggered, my body still reacted like that scared six-year-old kid. The trauma was stored in my nervous system, not just my mind.
+I could explain my childhood trauma, my protective mechanisms, my addiction patterns. But when triggered, my body still reacted like that scared six-year-old kid. The trauma was stored in my nervous system, not just my mind.
 
 Talk therapy accessed my prefrontal cortex—the thinking brain. But trauma lives in the amygdala—the emotional, survival brain.
 
@@ -248,17 +248,17 @@ The bilateral stimulation appears to help your brain reprocess traumatic memorie
 
 ## What My EMDR Sessions Looked Like
 
-My therapist had me recall the abuse while following her finger with my eyes, moving back and forth. We'd pause periodically for me to notice what was coming up—images, emotions, body sensations.
+My therapist had me recall the trauma while following her finger with my eyes, moving back and forth. We'd pause periodically for me to notice what was coming up—images, emotions, body sensations.
 
 It was intense. I cried. I shook. I felt physical sensations I'd buried for decades.
 
-But after several sessions, something shifted. I could think about the abuse without my body going into fight-or-flight mode. The memory was still there, but it no longer controlled me.
+But after several sessions, something shifted. I could think about the trauma without my body going into fight-or-flight mode. The memory was still there, but it no longer controlled me.
 
 ## The Results
 
 After EMDR:
 - Triggers that used to send me spiraling barely registered
-- I could talk about my abuse without dissociating
+- I could talk about my trauma without dissociating
 - The shame that had defined me for decades started to lift
 - I could be present with my kids instead of emotionally checked out
 - My addiction cravings decreased significantly

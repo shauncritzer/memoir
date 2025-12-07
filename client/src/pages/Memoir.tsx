@@ -46,10 +46,10 @@ export default function Memoir() {
             {/* Book Cover */}
             <div className="relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src="/memoir-cover-final-v6.png" 
-                  alt="Crooked Lines: Bent, Not Broken - Book Cover" 
-                  className="w-full h-full object-cover"
+                <img
+                  src="/memoir-cover-final-v6.png"
+                  alt="Crooked Lines: Bent, Not Broken - Book Cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               {/* Decorative elements */}
@@ -118,7 +118,7 @@ export default function Memoir() {
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Childhood sexual abuse and decades of buried trauma</span>
+                    <span>Childhood trauma and decades of buried shame</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>

@@ -62,7 +62,7 @@ export default function About() {
               <h2 className="text-4xl font-bold">My Story</h2>
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                 <p>
-                  I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood sexual abuse that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
+                  I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood trauma that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
                 </p>
                 <p>
                   By my late teens, I discovered alcohol and prescription pills. They worked—until they didn't. What started as self-medication spiraled into full-blown addiction. I got married, had two beautiful sons (Landon and Cameron), built a successful career, and maintained the illusion of control. But inside, I was dying.

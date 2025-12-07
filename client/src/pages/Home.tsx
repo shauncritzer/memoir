@@ -172,7 +172,7 @@ export default function Home() {
               </div>
               <h3 className="text-2xl font-bold">Unflinching Honesty</h3>
               <p className="text-muted-foreground">
-                Childhood sexual abuse, protective orders, psych wards, suicidal ideation—the dark stuff no one talks about because they're too ashamed.
+                Childhood trauma, protective orders, psych wards, suicidal ideation—the dark stuff no one talks about because they're too ashamed.
               </p>
             </Card>
             <Card className="p-8 space-y-4 hover:shadow-lg transition-shadow">
