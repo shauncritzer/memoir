@@ -87,9 +87,11 @@ export default function BlogPost() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
+            <Link href="/products">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
