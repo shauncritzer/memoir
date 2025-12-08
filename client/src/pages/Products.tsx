@@ -54,7 +54,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$27",
-      priceId: "price_1SYt2tC2dOpPzSOOpg5Pw7eU", // 7-Day Reset
+      priceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU", // 7-Day Reset
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
