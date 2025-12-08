@@ -1024,34 +1024,26 @@ Recovery is possible. But it requires working with your biology, not against it.
 
           const db = drizzle(process.env.DATABASE_URL!);
 
-          // Get the base URL for the app
-          const baseUrl = process.env.VITE_APP_URL || "https://shauncritzer.com";
+          // Update Recovery Toolkit to point to public folder PDF
+          await db.update(leadMagnets)
+            .set({
+              fileUrl: "/recovery-toolkit.pdf",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "recovery-toolkit"));
 
-          // Update each lead magnet to point to the public folder PDFs
-          const updates = [
-            {
-              slug: "recovery-toolkit",
-              fileUrl: `${baseUrl}/recovery-toolkit.pdf`,
-            },
-            {
-              slug: "reading-guide",
-              fileUrl: `${baseUrl}/reading-guide.pdf`,
-            },
-          ];
-
-          let updatedCount = 0;
-          for (const update of updates) {
-            const result = await db
-              .update(leadMagnets)
-              .set({ fileUrl: update.fileUrl })
-              .where(eq(leadMagnets.slug, update.slug));
-            updatedCount++;
-          }
+          // Update Reading Guide to point to public folder PDF
+          await db.update(leadMagnets)
+            .set({
+              fileUrl: "/reading-guide.pdf",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "reading-guide"));
 
           return {
             success: true,
-            message: `Successfully updated ${updatedCount} lead magnet PDFs to use public folder URLs`,
-            updatedCount,
+            message: "PDF URLs updated successfully! PDFs now point to /client/public/ versions with correct apostrophes.",
+            updatedCount: 2
           };
         } catch (error: any) {
           console.error("PDF fix error:", error);

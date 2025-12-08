@@ -119,6 +119,9 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
                 <p className="text-sm text-green-800 dark:text-green-200">{pdfMessage}</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Visit <a href="/resources" className="underline font-medium hover:text-green-900">Resources page</a> to test PDF downloads
+                </p>
               </div>
             </div>
           )}
