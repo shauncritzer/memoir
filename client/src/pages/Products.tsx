@@ -35,7 +35,7 @@ export default function Products() {
       name: "Crooked Lines: Bent, Not Broken",
       tagline: "The Memoir",
       price: "$19.99",
-      priceId: "price_1SbOUTC2dOpPzSOOdxient8", // Crooked Lines memoir
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MEMOIR || "price_1SbOUTC2dOpPzSOOdxient8",
       description: "A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.",
       features: [
         "13-year recovery journey from rock bottom to redemption",
@@ -54,7 +54,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$27",
-      priceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU", // 7-Day Reset
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU",
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -73,7 +73,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_1SYt3KC2dOpPzSOOpAokf1UQ", // From Broken to Whole (Recovery Roadmap)
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokf1UQ",
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -95,7 +95,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY", // Bent Not Broken Circle (Monthly Membership)
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3jC2dOpPzSOOR7dDuGtY",
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
