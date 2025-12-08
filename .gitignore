@@ -105,3 +105,9 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Browser data (should never be committed)
+.browser_data_dir/
+**/browser_data/
+**/.chrome/
+**/.firefox/
