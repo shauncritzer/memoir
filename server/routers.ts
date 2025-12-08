@@ -161,9 +161,15 @@ export const appRouter = router({
           userAgent: ctx.req.headers["user-agent"],
         });
         
+        // Add cache-busting parameter to PDF downloads
+        let downloadUrl = leadMagnet.fileUrl;
+        if (downloadUrl && downloadUrl.endsWith('.pdf')) {
+          downloadUrl = `${downloadUrl}?v=${Date.now()}`;
+        }
+
         return {
           success: true,
-          downloadUrl: leadMagnet.fileUrl,
+          downloadUrl,
           leadMagnet,
         };
       }),
@@ -180,8 +186,11 @@ export const appRouter = router({
           throw new Error("Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.");
         }
         
+        // Determine mode based on price ID (Monthly Membership is subscription)
+        const isSubscription = input.priceId === "price_1SYt3jC2dOpPzSOOR7dDuGtY"; // Monthly Membership
+
         const session = await stripe.checkout.sessions.create({
-          mode: input.priceId.includes("month") ? "subscription" : "payment",
+          mode: isSubscription ? "subscription" : "payment",
           line_items: [
             {
               price: input.priceId,
