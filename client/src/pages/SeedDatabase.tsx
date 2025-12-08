@@ -7,6 +7,8 @@ import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 export default function SeedDatabase() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [pdfStatus, setPdfStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [pdfMessage, setPdfMessage] = useState("");
 
   const seedMutation = trpc.admin.seedBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -19,10 +21,27 @@ export default function SeedDatabase() {
     },
   });
 
+  const fixPdfMutation = trpc.admin.fixLeadMagnetPDFs.useMutation({
+    onSuccess: (data) => {
+      setPdfStatus("success");
+      setPdfMessage(data.message || "Successfully updated PDF URLs!");
+    },
+    onError: (error) => {
+      setPdfStatus("error");
+      setPdfMessage(error.message);
+    },
+  });
+
   const handleSeed = () => {
     setStatus("loading");
     setMessage("");
     seedMutation.mutate({});
+  };
+
+  const handleFixPdfs = () => {
+    setPdfStatus("loading");
+    setPdfMessage("");
+    fixPdfMutation.mutate({});
   };
 
   return (
@@ -67,6 +86,49 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
                 <p className="text-sm text-red-800 dark:text-red-200">{message}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Fix PDF Downloads</h3>
+          <p className="text-sm text-muted-foreground">
+            Update lead magnet PDFs to use the corrected versions with proper apostrophes
+          </p>
+
+          <Button
+            onClick={handleFixPdfs}
+            disabled={pdfStatus === "loading"}
+            variant="outline"
+            className="w-full h-12 text-lg"
+          >
+            {pdfStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Fixing PDFs...
+              </>
+            ) : (
+              "Fix PDF URLs"
+            )}
+          </Button>
+
+          {pdfStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{pdfMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {pdfStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{pdfMessage}</p>
               </div>
             </div>
           )}

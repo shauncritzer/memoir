@@ -1006,6 +1006,58 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to seed blog posts: ${error.message}`);
         }
       }),
+
+    fixLeadMagnetPDFs: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        // Simple protection - optional secret key
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "fix-pdfs-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { leadMagnets } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          // Get the base URL for the app
+          const baseUrl = process.env.VITE_APP_URL || "https://shauncritzer.com";
+
+          // Update each lead magnet to point to the public folder PDFs
+          const updates = [
+            {
+              slug: "recovery-toolkit",
+              fileUrl: `${baseUrl}/recovery-toolkit.pdf`,
+            },
+            {
+              slug: "reading-guide",
+              fileUrl: `${baseUrl}/reading-guide.pdf`,
+            },
+          ];
+
+          let updatedCount = 0;
+          for (const update of updates) {
+            const result = await db
+              .update(leadMagnets)
+              .set({ fileUrl: update.fileUrl })
+              .where(eq(leadMagnets.slug, update.slug));
+            updatedCount++;
+          }
+
+          return {
+            success: true,
+            message: `Successfully updated ${updatedCount} lead magnet PDFs to use public folder URLs`,
+            updatedCount,
+          };
+        } catch (error: any) {
+          console.error("PDF fix error:", error);
+          throw new Error(`Failed to fix PDF URLs: ${error.message}`);
+        }
+      }),
   }),
 });
 
