@@ -17,6 +17,7 @@ import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
 import SeedDatabase from "./pages/SeedDatabase";
+import StripeTest from "./pages/StripeTest";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/admin/videos" component={AdminVideos} />
       <Route path="/admin/seed" component={SeedDatabase} />
       <Route path="/products" component={Products} />
+      <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
