@@ -212,7 +212,7 @@ export default function Products() {
                         Loading...
                       </>
                     ) : (
-                      `Get ${product.name}`
+                      product.id === "crooked-lines-memoir" ? "Get the Book Now" : `Get ${product.name}`
                     )}
                   </Button>
                 </CardFooter>
