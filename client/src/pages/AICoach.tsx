@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Loader2, Send, Sparkles, Heart, Brain, Wind, ExternalLink } from "lucide-react";
+import RewiredRelief from "@/components/RewiredRelief";
 
 interface Message {
   role: "user" | "assistant";
@@ -453,6 +454,9 @@ export default function AICoach() {
           </div>
         </div>
       </footer>
+
+      {/* REWIRED Relief Floating Button & Modal */}
+      <RewiredRelief />
     </div>
   );
 }
