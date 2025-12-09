@@ -55,7 +55,7 @@ export default function Home() {
               Memoir
             </Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Programs
+              Products
             </Link>
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
@@ -78,12 +78,6 @@ export default function Home() {
           <div className="grid lg:grid-cols-5 gap-12 items-center">
             {/* Left Side - 60% */}
             <div className="lg:col-span-3 space-y-8 text-white">
-              <div className="inline-block">
-                <span className="px-4 py-2 bg-teal-500 text-black text-xs font-bold rounded-full uppercase tracking-wide">
-                  13 YEARS SOBER
-                </span>
-              </div>
-
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 Transform Your{" "}
                 <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
@@ -216,8 +210,13 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* R - RECOGNIZE */}
             <Card className="p-6 space-y-4 bg-blue-50 border-2 border-blue-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center text-3xl">
-                👁️
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center text-3xl">
+                  👁️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">R</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-blue-900">RECOGNIZE</h3>
               <p className="text-blue-800 text-sm">
@@ -227,8 +226,13 @@ export default function Home() {
 
             {/* E - ESTABLISH */}
             <Card className="p-6 space-y-4 bg-green-50 border-2 border-green-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center text-3xl">
-                🛡️
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center text-3xl">
+                  🛡️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">E</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-green-900">ESTABLISH</h3>
               <p className="text-green-800 text-sm">
@@ -238,8 +242,13 @@ export default function Home() {
 
             {/* W - WORK */}
             <Card className="p-6 space-y-4 bg-purple-50 border-2 border-purple-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-purple-500 flex items-center justify-center text-3xl">
-                🔨
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-purple-500 flex items-center justify-center text-3xl">
+                  🔨
+                </div>
+                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">W</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-purple-900">WORK</h3>
               <p className="text-purple-800 text-sm">
@@ -249,8 +258,13 @@ export default function Home() {
 
             {/* I - INTEGRATE */}
             <Card className="p-6 space-y-4 bg-amber-50 border-2 border-amber-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-amber-500 flex items-center justify-center text-3xl">
-                🧩
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-amber-500 flex items-center justify-center text-3xl">
+                  🧩
+                </div>
+                <div className="h-10 w-10 rounded-full bg-amber-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">I</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-amber-900">INTEGRATE</h3>
               <p className="text-amber-800 text-sm">
@@ -260,8 +274,13 @@ export default function Home() {
 
             {/* R - REBUILD */}
             <Card className="p-6 space-y-4 bg-teal-50 border-2 border-teal-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-teal-500 flex items-center justify-center text-3xl">
-                🔧
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-teal-500 flex items-center justify-center text-3xl">
+                  🔧
+                </div>
+                <div className="h-10 w-10 rounded-full bg-teal-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">R</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-teal-900">REBUILD</h3>
               <p className="text-teal-800 text-sm">
@@ -271,8 +290,13 @@ export default function Home() {
 
             {/* E - EMBRACE */}
             <Card className="p-6 space-y-4 bg-pink-50 border-2 border-pink-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-pink-500 flex items-center justify-center text-3xl">
-                🌱
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-pink-500 flex items-center justify-center text-3xl">
+                  🌱
+                </div>
+                <div className="h-10 w-10 rounded-full bg-pink-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">E</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-pink-900">EMBRACE</h3>
               <p className="text-pink-800 text-sm">
@@ -282,8 +306,13 @@ export default function Home() {
 
             {/* D - DEVELOP */}
             <Card className="p-6 space-y-4 bg-orange-50 border-2 border-orange-500 hover:shadow-xl transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-orange-500 flex items-center justify-center text-3xl">
-                🏗️
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-orange-500 flex items-center justify-center text-3xl">
+                  🏗️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-orange-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">D</span>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-orange-900">DEVELOP</h3>
               <p className="text-orange-800 text-sm">
@@ -441,7 +470,7 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
                 <img
-                  src="/shaun-stage-speaking-angle2.png"
+                  src="/shaun-stage-speaking-angle3.png"
                   alt="Shaun Critzer - Author, Speaker, Recovery Coach"
                   className="w-full h-full object-cover object-center"
                 />
@@ -456,12 +485,11 @@ export default function Home() {
 
               <div className="prose prose-lg prose-invert space-y-4">
                 <p>
-                  I'm Shaun Critzer. <strong className="text-teal-400">13 years sober.</strong>
+                  I'm Shaun Critzer. <strong className="text-teal-400">13 years in recovery.</strong>
                 </p>
 
                 <p>
-                  Former Mr. Teen USA (1998). Former alcoholic. Former porn addict.
-                  Former serial cheater. Former obsessive bodybuilder.
+                  Former Mr. Teen USA (1998). Co-CEO of Digital Gravity. Author, Speaker, and Recovery Coach specializing in nervous system-based addiction recovery.
                 </p>
 
                 <p>
