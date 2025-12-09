@@ -160,7 +160,7 @@ export default function Memoir() {
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Rebuilding relationships with my sons</span>
+                    <span>Rebuilding relationships with my kids</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>

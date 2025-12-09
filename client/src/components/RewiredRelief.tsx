@@ -176,7 +176,8 @@ export default function RewiredRelief() {
                       newAnswers[index] = e.target.value;
                       setGratitudeAnswers(newAnswers);
                     }}
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full p-3 border-2 border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-gray-900 font-sans"
+                    style={{ textDecoration: 'none', fontFamily: 'inherit' }}
                     rows={3}
                     placeholder="Type your answer here..."
                   />

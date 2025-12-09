@@ -30,7 +30,10 @@ export default function AICoach() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll when there are messages (prevents auto-scroll on page load)
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -331,32 +334,41 @@ export default function AICoach() {
               </div>
 
               {/* Input */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Share what's on your mind..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  disabled={isLoading}
-                  className="flex-1 bg-gray-900 border-yellow-600/30 text-white placeholder:text-gray-500"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !input.trim()}
-                  size="icon"
-                  className="bg-yellow-600 hover:bg-yellow-700 text-black"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
+              <div className="space-y-3 mb-8">
+                <label htmlFor="chat-input" className="block text-sm font-medium text-gray-400">
+                  Ask me anything about recovery, nervous system regulation, or trauma healing...
+                </label>
+                <div className="flex gap-3">
+                  <textarea
+                    id="chat-input"
+                    placeholder="Share what's on your mind..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isLoading}
+                    rows={3}
+                    className="flex-1 p-6 bg-gray-900 border-2 border-yellow-600/50 rounded-xl text-lg text-white placeholder:text-gray-500 focus:ring-4 focus:ring-yellow-600/20 focus:border-yellow-600 transition-all resize-none shadow-xl min-h-[80px]"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !input.trim()}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-black px-8 py-4 h-auto text-lg font-bold shadow-xl"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="h-6 w-6 mr-2" />
+                        Send
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </>
           )}

@@ -89,11 +89,11 @@ export default function Home() {
                 <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
                   Nervous System
                 </span>
-                , Reclaim Your Life
+                , Break Free From Compulsive Behaviors
               </h1>
 
               <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Evidence-based recovery for men struggling with compulsive behaviors—powered by the REWIRED methodology
+                Evidence-based recovery for men struggling with compulsive behaviors and process addictions—powered by the REWIRED methodology
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -112,12 +112,12 @@ export default function Home() {
               <div className="pt-4 space-y-2">
                 <p className="text-sm text-gray-400 font-semibold">Trusted by men recovering from:</p>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                  <div>• Porn & sex addiction</div>
-                  <div>• Affairs & betrayal</div>
+                  <div>• Process addictions & compulsive behaviors</div>
                   <div>• Substance abuse</div>
                   <div>• Work obsession</div>
                   <div>• Compulsive fitness</div>
                   <div>• Gaming addiction</div>
+                  <div>• Betrayal trauma recovery</div>
                 </div>
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                  <span>Husband & Father</span>
+                  <span>Married to Shannon, father to Landon, Cameron, and Brody</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">🎤</span>
