@@ -113,9 +113,9 @@ export default function Memoir() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              <Card className="p-8 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5">
+              <Card className="p-8 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5 flex flex-col">
                 <h3 className="text-2xl font-bold">The Darkness</h3>
-                <ul className="space-y-3 text-muted-foreground">
+                <ul className="space-y-4 text-muted-foreground flex-1">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>Childhood trauma and decades of buried shame</span>
@@ -143,9 +143,9 @@ export default function Memoir() {
                 </ul>
               </Card>
 
-              <Card className="p-8 space-y-4 bg-gradient-to-br from-secondary/5 to-primary/5">
+              <Card className="p-8 space-y-4 bg-gradient-to-br from-secondary/5 to-primary/5 flex flex-col">
                 <h3 className="text-2xl font-bold">The Light</h3>
-                <ul className="space-y-3 text-muted-foreground">
+                <ul className="space-y-4 text-muted-foreground flex-1">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>Getting sober for real on January 1, 2013</span>

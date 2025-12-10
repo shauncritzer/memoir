@@ -109,8 +109,9 @@ export default function Home() {
               <div className="pt-4 space-y-2">
                 <p className="text-sm text-gray-400 font-semibold">Trusted by men recovering from:</p>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                  <div>• Process addictions & compulsive behaviors</div>
+                  <div>• Process addictions</div>
                   <div>• Substance abuse</div>
+                  <div>• Compulsive behaviors</div>
                   <div>• Work obsession</div>
                   <div>• Compulsive fitness</div>
                   <div>• Gaming addiction</div>
@@ -131,7 +132,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-2xl">
                   <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">Speaker, Author, Recovery Coach</p>
+                  <p className="text-gray-300 text-sm text-center">Speaker, Author, Entrepreneur</p>
                 </div>
               </div>
             </div>
@@ -545,18 +546,18 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="flex flex-wrap gap-4 text-sm text-gray-300 pt-4">
+              <div className="flex flex-col gap-3 text-sm text-gray-300 pt-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">📖</span>
                   <span>Author of "Crooked Lines"</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">🏆</span>
-                  <span>Former Mr. Teen USA</span>
+                  <span>1998 Mr. Teen USA</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">💼</span>
-                  <span>CEO, Digital Gravity</span>
+                  <span>Co-Founder of Digital Gravity</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">👨‍👩‍👧‍👦</span>
@@ -564,7 +565,15 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">🎤</span>
-                  <span>Recovery Speaker</span>
+                  <span>Recovery Advocate</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🧩</span>
+                  <span>Special Needs Parent/Advocate</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">💪</span>
+                  <span>Health and Fitness Expert</span>
                 </div>
               </div>
             </div>

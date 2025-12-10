@@ -138,11 +138,7 @@ export default function Resources() {
                       <h3 className="text-2xl font-bold">{magnet.title}</h3>
                       <p className="text-muted-foreground">{magnet.description}</p>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span className="flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        {magnet.downloadCount} downloads
-                      </span>
+                    <div className="flex items-center justify-end text-sm text-muted-foreground">
                       <span className="uppercase font-medium">{magnet.type}</span>
                     </div>
                     <Button
