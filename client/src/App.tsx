@@ -18,6 +18,7 @@ import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import RewiredMethod from "./pages/RewiredMethod";
 import AdminVideos from "./pages/AdminVideos";
+import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
 import StripeTest from "./pages/StripeTest";
 
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/admin/blog-editor" component={BlogEditor} />
       <Route path="/admin/videos" component={AdminVideos} />
       <Route path="/admin/seed" component={SeedDatabase} />
+      <Route path="/admin/migrate" component={AdminMigrate} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
