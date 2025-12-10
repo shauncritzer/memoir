@@ -117,15 +117,19 @@ export default function Products() {
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="font-serif text-2xl font-bold text-primary">Shaun Critzer</span>
-          </Link>
-          <nav className="flex items-center gap-6">
+          <Logo />
+          <div className="flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
             <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              Memoir
+              The Memoir
+            </Link>
+            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
+              Blog
+            </Link>
+            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
+              Resources
             </Link>
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
@@ -133,10 +137,12 @@ export default function Products() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
+            <Link href="/">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
             </Link>
-          </nav>
+          </div>
         </div>
       </header>
 

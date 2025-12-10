@@ -52,7 +52,13 @@ export default function Home() {
               About
             </Link>
             <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              Memoir
+              The Memoir
+            </Link>
+            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
+              Blog
+            </Link>
+            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
+              Resources
             </Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
@@ -60,11 +66,8 @@ export default function Home() {
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
             </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/ai-coach">
-              <Button size="sm" className="bg-teal-500 hover:bg-teal-600">
+            <Link href="/products">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Get Started
               </Button>
             </Link>
