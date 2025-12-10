@@ -50,6 +50,18 @@ export default function AICoach() {
   }, [messages]);
 
   useEffect(() => {
+    // Check for reset query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'true') {
+      localStorage.removeItem("aiCoachMessageCount");
+      localStorage.removeItem("aiCoachEmail");
+      toast.success("AI Coach reset successfully", {
+        description: "You have 3 fresh messages to try!",
+      });
+      // Remove the query parameter from URL without reload
+      window.history.replaceState({}, '', '/ai-coach');
+    }
+
     // Check if user has registered email
     const storedEmail = localStorage.getItem("aiCoachEmail");
     if (storedEmail) {

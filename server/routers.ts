@@ -1054,6 +1054,48 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to fix PDF URLs: ${error.message}`);
         }
       }),
+
+    migrateAiCoachTable: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        // Simple protection - optional secret key
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "migrate-ai-coach-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { sql } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          // Create ai_coach_users table
+          await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS ai_coach_users (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              email VARCHAR(320) NOT NULL UNIQUE,
+              message_count INT NOT NULL DEFAULT 0,
+              has_unlimited_access INT NOT NULL DEFAULT 0 COMMENT '0 = false, 1 = true',
+              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX idx_email (email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+          `);
+
+          return {
+            success: true,
+            message: "AI Coach users table created successfully! You can now use the AI Coach with email tracking.",
+          };
+        } catch (error: any) {
+          console.error("AI Coach migration error:", error);
+          return {
+            success: false,
+            message: `Migration error: ${error.message}. Table might already exist.`,
+          };
+        }
+      }),
   }),
 
   // AI Coach counter system
