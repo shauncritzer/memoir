@@ -121,23 +121,20 @@ export default function Products() {
             <span className="font-serif text-2xl font-bold text-primary">Shaun Critzer</span>
           </Link>
           <nav className="flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
-              Home
-            </Link>
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
+            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
+              Memoir
             </Link>
             <Link href="/products" className="text-sm font-medium text-primary">
               Products
             </Link>
             <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
               AI Coach
+            </Link>
+            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
+              Blog
             </Link>
           </nav>
         </div>
@@ -289,17 +286,20 @@ export default function Products() {
             <div>
               <h4 className="font-semibold mb-4">Navigation</h4>
               <nav className="flex flex-col gap-2 text-sm">
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Home
-                </Link>
                 <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
                   About
                 </Link>
+                <Link href="/memoir" className="text-muted-foreground hover:text-primary transition-colors">
+                  Memoir
+                </Link>
+                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
+                  Products
+                </Link>
+                <Link href="/ai-coach" className="text-muted-foreground hover:text-primary transition-colors">
+                  AI Coach
+                </Link>
                 <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
                   Blog
-                </Link>
-                <Link href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
-                  Resources
                 </Link>
               </nav>
             </div>
