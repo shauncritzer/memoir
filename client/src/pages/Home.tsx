@@ -190,7 +190,7 @@ export default function Home() {
               </p>
             </div>
 
-            <Link href="#rewired">
+            <Link href="/rewired-method">
               <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-lg px-8">
                 Learn the REWIRED Approach →
               </Button>
