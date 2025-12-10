@@ -295,4 +295,15 @@ async function createPurchaseRecord(data: {
   });
 
   console.log(`[Stripe Webhook] Purchase recorded: ${data.productId} for user ${userId}`);
+
+  // Grant unlimited AI Coach access for "From Broken to Whole" course purchase
+  if (data.productId === "from-broken-to-whole") {
+    const { grantAiCoachUnlimitedAccess } = await import("./db");
+    const success = await grantAiCoachUnlimitedAccess(data.customerEmail);
+    if (success) {
+      console.log(`[Stripe Webhook] Granted unlimited AI Coach access to ${data.customerEmail}`);
+    } else {
+      console.warn(`[Stripe Webhook] Failed to grant AI Coach access to ${data.customerEmail}`);
+    }
+  }
 }

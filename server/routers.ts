@@ -12,6 +12,10 @@ import {
   getPublishedBlogPosts,
   getBlogPostBySlug,
   incrementBlogPostViews,
+  getOrCreateAiCoachUser,
+  getAiCoachUserByEmail,
+  incrementAiCoachMessageCount,
+  grantAiCoachUnlimitedAccess,
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
 import Stripe from "stripe";
@@ -1049,6 +1053,80 @@ Recovery is possible. But it requires working with your biology, not against it.
           console.error("PDF fix error:", error);
           throw new Error(`Failed to fix PDF URLs: ${error.message}`);
         }
+      }),
+  }),
+
+  // AI Coach counter system
+  aiCoach: router({
+    // Register email after 3 anonymous messages
+    registerEmail: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        initialMessageCount: z.number().default(3),
+      }))
+      .mutation(async ({ input }) => {
+        const user = await getOrCreateAiCoachUser(input.email, input.initialMessageCount);
+
+        if (!user) {
+          throw new Error("Failed to create AI Coach user");
+        }
+
+        // Subscribe to ConvertKit for email list building
+        try {
+          await subscribeToForm({
+            email: input.email,
+            formUid: CONVERTKIT_FORMS.HOMEPAGE_NEWSLETTER,
+            tags: [CONVERTKIT_TAGS.AI_COACH_USER, CONVERTKIT_TAGS.ACTIVE_SUBSCRIBER],
+          });
+        } catch (error) {
+          console.error("ConvertKit subscription failed:", error);
+          // Don't fail the registration if ConvertKit fails
+        }
+
+        return {
+          success: true,
+          user: {
+            email: user.email,
+            messageCount: user.messageCount,
+            hasUnlimitedAccess: user.hasUnlimitedAccess === 1,
+          },
+        };
+      }),
+
+    // Get message count and access level for a user
+    getMessageCount: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const user = await getAiCoachUserByEmail(input.email);
+
+        if (!user) {
+          return {
+            messageCount: 0,
+            hasUnlimitedAccess: false,
+          };
+        }
+
+        return {
+          messageCount: user.messageCount,
+          hasUnlimitedAccess: user.hasUnlimitedAccess === 1,
+        };
+      }),
+
+    // Increment message count (called before sending each message)
+    incrementMessageCount: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const user = await incrementAiCoachMessageCount(input.email);
+
+        if (!user) {
+          throw new Error("User not found or failed to increment count");
+        }
+
+        return {
+          success: true,
+          messageCount: user.messageCount,
+          hasUnlimitedAccess: user.hasUnlimitedAccess === 1,
+        };
       }),
   }),
 });
