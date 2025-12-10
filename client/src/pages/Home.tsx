@@ -661,7 +661,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-12 bg-gray-900 text-gray-300">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg text-white">Shaun Critzer</h3>
               <p className="text-sm">
@@ -691,6 +691,14 @@ export default function Home() {
                 <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Instagram</a></li>
                 <li><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Facebook</a></li>
                 <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-white">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/terms-of-use" className="hover:text-teal-400 transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-teal-400 transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-teal-400 transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>

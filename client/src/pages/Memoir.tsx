@@ -243,7 +243,7 @@ export default function Memoir() {
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -273,6 +273,14 @@ export default function Memoir() {
                 <li className="text-sm">Crisis Hotline: 988</li>
                 <li className="text-sm">SAMHSA: 1-800-662-4357</li>
                 <li><a href="https://www.aa.org" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Find AA Meetings</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>
