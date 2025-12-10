@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Loader2, Send, Sparkles, Heart, Brain, Wind, ExternalLink } from "lucide-react";
+import { Loader2, Send, Sparkles, Heart, Brain, Wind, ExternalLink, Mail } from "lucide-react";
 import RewiredRelief from "@/components/RewiredRelief";
 
 interface Message {
@@ -19,11 +20,23 @@ export default function AICoach() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messageCount, setMessageCount] = useState(0);
+  const [localMessageCount, setLocalMessageCount] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const MAX_FREE_MESSAGES = 10;
+  const MAX_ANONYMOUS_MESSAGES = 3;
+  const MAX_REGISTERED_MESSAGES = 10;
+
+  // tRPC queries and mutations
+  const { data: userData, refetch: refetchUserData } = trpc.aiCoach.getMessageCount.useQuery(
+    { email: userEmail! },
+    { enabled: !!userEmail }
+  );
+  const registerEmailMutation = trpc.aiCoach.registerEmail.useMutation();
+  const incrementMessageMutation = trpc.aiCoach.incrementMessageCount.useMutation();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,27 +50,74 @@ export default function AICoach() {
   }, [messages]);
 
   useEffect(() => {
-    // Load message count from localStorage
-    const stored = localStorage.getItem("aiCoachMessageCount");
-    if (stored) {
-      const count = parseInt(stored, 10);
-      setMessageCount(count);
-      if (count >= MAX_FREE_MESSAGES) {
-        setShowPaywall(true);
+    // Check if user has registered email
+    const storedEmail = localStorage.getItem("aiCoachEmail");
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+    } else {
+      // Load local message count for anonymous users
+      const stored = localStorage.getItem("aiCoachMessageCount");
+      if (stored) {
+        setLocalMessageCount(parseInt(stored, 10));
       }
     }
   }, []);
 
+  const handleEmailSubmit = async () => {
+    if (!emailInput.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+      toast.error("Invalid email", {
+        description: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    try {
+      const result = await registerEmailMutation.mutateAsync({
+        email: emailInput,
+        initialMessageCount: localMessageCount,
+      });
+
+      if (result.success) {
+        localStorage.setItem("aiCoachEmail", emailInput);
+        localStorage.removeItem("aiCoachMessageCount"); // Clear old local count
+        setUserEmail(emailInput);
+        setShowEmailModal(false);
+        toast.success("Email registered!", {
+          description: `You now have ${MAX_REGISTERED_MESSAGES - localMessageCount} more messages. Your chat history is saved.`,
+        });
+        refetchUserData();
+      }
+    } catch (error) {
+      console.error("Error registering email:", error);
+      toast.error("Registration failed", {
+        description: "Please try again.",
+      });
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    // Check if user has exceeded free messages
-    if (messageCount >= MAX_FREE_MESSAGES) {
-      setShowPaywall(true);
-      toast.error("Free message limit reached", {
-        description: "Upgrade to From Broken to Whole course for unlimited access.",
-      });
-      return;
+    // TIER 1: Anonymous users (first 3 messages)
+    if (!userEmail) {
+      if (localMessageCount >= MAX_ANONYMOUS_MESSAGES) {
+        setShowEmailModal(true);
+        return;
+      }
+    } else {
+      // TIER 2: Registered users (10 messages total)
+      if (userData) {
+        if (userData.hasUnlimitedAccess) {
+          // TIER 3: Unlimited access (has purchased course)
+          // Continue to send message
+        } else if (userData.messageCount >= MAX_REGISTERED_MESSAGES) {
+          setShowPaywall(true);
+          toast.error("Free message limit reached", {
+            description: "Upgrade to From Broken to Whole course for unlimited access.",
+          });
+          return;
+        }
+      }
     }
 
     const userMessage: Message = { role: "user", content: input };
@@ -117,12 +177,27 @@ export default function AICoach() {
       }
 
       // Increment message count
-      const newCount = messageCount + 1;
-      setMessageCount(newCount);
-      localStorage.setItem("aiCoachMessageCount", newCount.toString());
+      if (!userEmail) {
+        // Anonymous user - increment local count
+        const newCount = localMessageCount + 1;
+        setLocalMessageCount(newCount);
+        localStorage.setItem("aiCoachMessageCount", newCount.toString());
 
-      if (newCount >= MAX_FREE_MESSAGES) {
-        setShowPaywall(true);
+        if (newCount >= MAX_ANONYMOUS_MESSAGES) {
+          // Show email modal after this response completes
+          setTimeout(() => setShowEmailModal(true), 1000);
+        }
+      } else {
+        // Registered user - increment server-side count
+        if (userData && !userData.hasUnlimitedAccess) {
+          await incrementMessageMutation.mutateAsync({ email: userEmail });
+          refetchUserData();
+
+          if (userData.messageCount + 1 >= MAX_REGISTERED_MESSAGES) {
+            // Show paywall after this response completes
+            setTimeout(() => setShowPaywall(true), 1000);
+          }
+        }
       }
     } catch (error) {
       console.error("Error calling AI Coach:", error);
@@ -134,10 +209,66 @@ export default function AICoach() {
     }
   };
 
-  const remainingMessages = MAX_FREE_MESSAGES - messageCount;
+  // Calculate remaining messages based on user tier
+  const remainingMessages = userEmail
+    ? (userData?.hasUnlimitedAccess
+        ? Infinity
+        : MAX_REGISTERED_MESSAGES - (userData?.messageCount || 0))
+    : MAX_ANONYMOUS_MESSAGES - localMessageCount;
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
+      {/* Email Capture Modal */}
+      <Dialog open={showEmailModal} onOpenChange={setShowEmailModal}>
+        <DialogContent className="bg-gradient-to-br from-gray-900 to-black border-yellow-600/50 text-white">
+          <DialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="p-3 rounded-full bg-yellow-600/20">
+                <Mail className="h-8 w-8 text-yellow-500" />
+              </div>
+            </div>
+            <DialogTitle className="text-2xl text-center text-yellow-500">
+              Unlock 7 More Messages & Save Your History
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-300">
+              Enter your email to unlock 7 additional free messages and save your chat history so you can pick up where you left off, on any device.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              type="email"
+              placeholder="your.email@example.com"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleEmailSubmit();
+                }
+              }}
+              className="bg-gray-900 border-yellow-600/50 text-white placeholder:text-gray-500 focus:border-yellow-600"
+            />
+            <p className="text-xs text-gray-400 text-center">
+              We respect your privacy. No spam, ever. Unsubscribe anytime.
+            </p>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowEmailModal(false)}
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              Maybe Later
+            </Button>
+            <Button
+              onClick={handleEmailSubmit}
+              disabled={!emailInput.trim()}
+              className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold"
+            >
+              Unlock 7 More Messages
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* Navigation */}
       <nav className="border-b border-yellow-600/20 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
         <div className="container flex h-16 items-center justify-between">
@@ -188,13 +319,22 @@ export default function AICoach() {
             </p>
             {!showPaywall && (
               <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-gray-400">
-                  {remainingMessages} free messages remaining
-                </span>
-                {remainingMessages <= 3 && (
-                  <Badge className="bg-yellow-600/20 text-yellow-500 border-yellow-600">
-                    Upgrade for unlimited access
+                {userData?.hasUnlimitedAccess ? (
+                  <Badge className="bg-yellow-600 text-black border-yellow-500 font-bold">
+                    <Sparkles className="mr-1 h-3 w-3" />
+                    Unlimited Access
                   </Badge>
+                ) : (
+                  <>
+                    <span className="text-gray-400">
+                      {remainingMessages} free message{remainingMessages !== 1 ? 's' : ''} remaining
+                    </span>
+                    {remainingMessages <= 3 && remainingMessages > 0 && (
+                      <Badge className="bg-yellow-600/20 text-yellow-500 border-yellow-600">
+                        {userEmail ? 'Upgrade for unlimited' : 'Enter email for 7 more'}
+                      </Badge>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -271,9 +411,11 @@ export default function AICoach() {
                     size="lg"
                     variant="outline" className="border-yellow-600 text-yellow-500 hover:bg-yellow-600/10"
                     onClick={() => {
-                      setMessageCount(0);
+                      setLocalMessageCount(0);
                       setShowPaywall(false);
-                      localStorage.setItem("aiCoachMessageCount", "0");
+                      setUserEmail(null);
+                      localStorage.removeItem("aiCoachMessageCount");
+                      localStorage.removeItem("aiCoachEmail");
                       toast.success("Message count reset for demo purposes");
                     }}
                   >

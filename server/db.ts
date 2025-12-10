@@ -1,7 +1,7 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
+import {
+  InsertUser,
   users,
   blogPosts,
   BlogPost,
@@ -13,7 +13,10 @@ import {
   LeadMagnet,
   InsertLeadMagnet,
   leadMagnetDownloads,
-  InsertLeadMagnetDownload
+  InsertLeadMagnetDownload,
+  aiCoachUsers,
+  AiCoachUser,
+  InsertAiCoachUser
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -512,10 +515,10 @@ export async function updateLessonVideo(
 ) {
   const db = await getDb();
   if (!db) return { success: false };
-  
+
   const { courseLessons } = await import("../drizzle/schema");
   const { eq } = await import("drizzle-orm");
-  
+
   await db
     .update(courseLessons)
     .set({
@@ -523,6 +526,123 @@ export async function updateLessonVideo(
       videoDuration,
     })
     .where(eq(courseLessons.id, lessonId));
-  
+
   return { success: true };
+}
+
+/**
+ * Get or create AI Coach user by email
+ */
+export async function getOrCreateAiCoachUser(email: string, initialMessageCount: number = 0): Promise<AiCoachUser | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Check if user exists
+    const existingUsers = await db
+      .select()
+      .from(aiCoachUsers)
+      .where(eq(aiCoachUsers.email, email))
+      .limit(1);
+
+    if (existingUsers.length > 0) {
+      return existingUsers[0];
+    }
+
+    // Create new user
+    const [newUser] = await db
+      .insert(aiCoachUsers)
+      .values({
+        email,
+        messageCount: initialMessageCount,
+        hasUnlimitedAccess: 0,
+      });
+
+    // Fetch the created user
+    const createdUsers = await db
+      .select()
+      .from(aiCoachUsers)
+      .where(eq(aiCoachUsers.email, email))
+      .limit(1);
+
+    return createdUsers[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get or create AI Coach user:", error);
+    return null;
+  }
+}
+
+/**
+ * Get AI Coach user by email
+ */
+export async function getAiCoachUserByEmail(email: string): Promise<AiCoachUser | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const users = await db
+      .select()
+      .from(aiCoachUsers)
+      .where(eq(aiCoachUsers.email, email))
+      .limit(1);
+
+    return users[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get AI Coach user:", error);
+    return null;
+  }
+}
+
+/**
+ * Increment AI Coach message count for a user
+ */
+export async function incrementAiCoachMessageCount(email: string): Promise<AiCoachUser | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const user = await getAiCoachUserByEmail(email);
+    if (!user) return null;
+
+    // Don't increment if user has unlimited access
+    if (user.hasUnlimitedAccess === 1) {
+      return user;
+    }
+
+    await db
+      .update(aiCoachUsers)
+      .set({
+        messageCount: user.messageCount + 1,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiCoachUsers.email, email));
+
+    return await getAiCoachUserByEmail(email);
+  } catch (error) {
+    console.error("[Database] Failed to increment message count:", error);
+    return null;
+  }
+}
+
+/**
+ * Grant unlimited access to AI Coach user
+ */
+export async function grantAiCoachUnlimitedAccess(email: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  try {
+    await db
+      .update(aiCoachUsers)
+      .set({
+        hasUnlimitedAccess: 1,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiCoachUsers.email, email));
+
+    return true;
+  } catch (error) {
+    console.error("[Database] Failed to grant unlimited access:", error);
+    return false;
+  }
 }
