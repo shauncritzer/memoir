@@ -21,6 +21,9 @@ import AdminVideos from "./pages/AdminVideos";
 import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
 import StripeTest from "./pages/StripeTest";
+import TermsOfUse from "./pages/TermsOfUse";
+import RefundPolicy from "./pages/RefundPolicy";
+import FAQs from "./pages/FAQs";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -42,6 +45,9 @@ function Router() {
       <Route path="/ai-coach" component={AICoach} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
+      <Route path="/terms-of-use" component={TermsOfUse} />
+      <Route path="/refund-policy" component={RefundPolicy} />
+      <Route path="/faqs" component={FAQs} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
