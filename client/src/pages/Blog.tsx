@@ -70,6 +70,9 @@ export default function Blog() {
             <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
               The Memoir
             </Link>
+            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
+              REWIRED Method
+            </Link>
             <Link href="/blog" className="text-sm font-medium text-primary">
               Blog
             </Link>
