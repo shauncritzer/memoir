@@ -26,8 +26,8 @@ export default function Memoir() {
       <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
-        <div className="container">
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-hidden">
+        <div className="container max-w-full px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
             <div className="relative">
@@ -59,7 +59,7 @@ export default function Memoir() {
             {/* Book Info */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                   Crooked Lines:{" "}
                   <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     Bent, Not Broken

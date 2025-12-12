@@ -100,8 +100,8 @@ export default function Resources() {
             <div className="grid md:grid-cols-3 gap-8">
               {leadMagnets
                 ?.sort((a, b) => {
-                  // Custom order: REWIRED Relief, First 3 Chapters, Reading Guide, Recovery Toolkit
-                  const order = ['rewired-relief-toolkit', 'first-3-chapters', 'reading-guide', 'recovery-toolkit'];
+                  // Custom order: First 3 Chapters, Recovery Toolkit, Reading Guide
+                  const order = ['first-3-chapters', 'recovery-toolkit', 'reading-guide'];
                   return order.indexOf(a.slug) - order.indexOf(b.slug);
                 })
                 .map((magnet) => {
