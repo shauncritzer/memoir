@@ -50,7 +50,7 @@ export default function About() {
       {/* My Story Section */}
       <section className="py-20">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-12 items-start md:items-center">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold">My Story</h2>
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
