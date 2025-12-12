@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -282,36 +283,7 @@ export default function AICoach() {
         </DialogContent>
       </Dialog>
       {/* Navigation */}
-      <nav className="border-b border-yellow-600/20 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium text-yellow-500 font-bold transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-black to-yellow-900/10 py-12 border-b border-yellow-600/20">
