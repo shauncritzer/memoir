@@ -1,4 +1,4 @@
-# Living Sober
+# Thriving Sober
 ## 50+ Practical Tips for Thriving in Recovery
 
 ### By Shaun Critzer

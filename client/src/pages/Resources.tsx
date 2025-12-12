@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,36 +73,7 @@ export default function Resources() {
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium text-primary">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
@@ -140,19 +111,19 @@ export default function Resources() {
               {orderedMagnets.map((magnet) => {
                 const Icon = getIcon(magnet.type);
                 return (
-                  <Card key={magnet.id} className="p-8 space-y-6 hover:shadow-lg transition-shadow">
+                  <Card key={magnet.id} className="p-8 flex flex-col hover:shadow-lg transition-shadow">
                     <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-8 w-8 text-primary" />
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-6 flex-grow">
                       <h3 className="text-2xl font-bold">{magnet.title}</h3>
                       <p className="text-muted-foreground">{magnet.description}</p>
                     </div>
-                    <div className="flex items-center justify-end text-sm text-muted-foreground">
+                    <div className="flex items-center justify-end text-sm text-muted-foreground mt-4">
                       <span className="uppercase font-medium">{magnet.type}</span>
                     </div>
                     <Button
-                      className="w-full bg-primary hover:bg-primary/90"
+                      className="w-full bg-primary hover:bg-primary/90 mt-6"
                       onClick={() => setSelectedMagnet(magnet)}
                     >
                       Download Free
@@ -278,7 +249,7 @@ export default function Resources() {
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -310,6 +281,14 @@ export default function Resources() {
                 <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>

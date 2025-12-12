@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
@@ -8,36 +8,7 @@ export default function RefundPolicy() {
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       {/* Navigation */}
-      <nav className="border-b border-yellow-600/20 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium text-gray-300 hover:text-yellow-500 transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Content */}
       <main className="flex-1 py-12">
