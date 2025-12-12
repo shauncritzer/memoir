@@ -1280,13 +1280,13 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
-    hideReadingGuide: publicProcedure
+    activateReadingGuide: publicProcedure
       .input(z.object({
         secret: z.string().optional(),
       }).optional())
       .mutation(async ({ input }) => {
         // Simple protection - optional secret key
-        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "hide-reading-guide-2025") {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "activate-reading-guide-2025") {
           throw new Error("Unauthorized: Invalid secret key");
         }
 
@@ -1297,21 +1297,21 @@ Recovery is possible. But it requires working with your biology, not against it.
 
           const db = drizzle(process.env.DATABASE_URL!);
 
-          // Set reading guide to inactive status
+          // Set reading guide to active status
           await db.update(leadMagnets)
             .set({
-              status: "inactive",
+              status: "active",
               updatedAt: new Date()
             })
             .where(eq(leadMagnets.slug, "reading-guide"));
 
           return {
             success: true,
-            message: "Reading Guide has been hidden from the Resources page. Only 3 resources will now display.",
+            message: "Reading Guide is now active and will display as the 3rd resource (far right).",
           };
         } catch (error: any) {
-          console.error("Hide reading guide error:", error);
-          throw new Error(`Failed to hide reading guide: ${error.message}`);
+          console.error("Activate reading guide error:", error);
+          throw new Error(`Failed to activate reading guide: ${error.message}`);
         }
       }),
   }),

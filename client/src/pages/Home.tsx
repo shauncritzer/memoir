@@ -47,7 +47,7 @@ export default function Home() {
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Logo />
-          <div className="flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
@@ -75,6 +75,12 @@ export default function Home() {
               </Button>
             </Link>
           </div>
+          {/* Mobile menu button */}
+          <Link href="/products" className="lg:hidden">
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
+          </Link>
         </div>
       </nav>
 

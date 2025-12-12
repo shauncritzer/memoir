@@ -130,29 +130,35 @@ export default function Resources() {
             <div className="text-center text-muted-foreground">Loading resources...</div>
           ) : (
             <div className="grid md:grid-cols-3 gap-8">
-              {leadMagnets?.map((magnet) => {
+              {leadMagnets
+                ?.sort((a, b) => {
+                  // Custom order: REWIRED Relief, First 3 Chapters, Reading Guide, Recovery Toolkit
+                  const order = ['rewired-relief-toolkit', 'first-3-chapters', 'reading-guide', 'recovery-toolkit'];
+                  return order.indexOf(a.slug) - order.indexOf(b.slug);
+                })
+                .map((magnet) => {
                 const Icon = getIcon(magnet.type);
                 return (
-                  <Card key={magnet.id} className="p-8 space-y-6 hover:shadow-lg transition-shadow">
+                  <Card key={magnet.id} className="p-8 flex flex-col hover:shadow-lg transition-shadow">
                     <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-8 w-8 text-primary" />
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-6 flex-grow">
                       <h3 className="text-2xl font-bold">{magnet.title}</h3>
                       <p className="text-muted-foreground">{magnet.description}</p>
                     </div>
-                    <div className="flex items-center justify-end text-sm text-muted-foreground">
+                    <div className="flex items-center justify-end text-sm text-muted-foreground mt-4">
                       <span className="uppercase font-medium">{magnet.type}</span>
                     </div>
                     <Button
-                      className="w-full bg-primary hover:bg-primary/90"
+                      className="w-full bg-primary hover:bg-primary/90 mt-6"
                       onClick={() => setSelectedMagnet(magnet)}
                     >
                       Download Free
                     </Button>
                   </Card>
                 );
-              })}
+              })
             </div>
           )}
         </div>

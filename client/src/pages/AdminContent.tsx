@@ -35,10 +35,10 @@ export default function AdminContent() {
     },
   });
 
-  const hideReadingGuideMutation = trpc.admin.hideReadingGuide.useMutation({
+  const activateReadingGuideMutation = trpc.admin.activateReadingGuide.useMutation({
     onSuccess: (data) => {
       setResourceStatus("success");
-      setResourceMessage(data.message || "Reading Guide hidden successfully!");
+      setResourceMessage(data.message || "Reading Guide activated successfully!");
     },
     onError: (error) => {
       setResourceStatus("error");
@@ -58,10 +58,10 @@ export default function AdminContent() {
     updatePdfMutation.mutate({});
   };
 
-  const handleHideReadingGuide = () => {
+  const handleActivateReadingGuide = () => {
     setResourceStatus("loading");
     setResourceMessage("");
-    hideReadingGuideMutation.mutate({});
+    activateReadingGuideMutation.mutate({});
   };
 
   return (
@@ -140,19 +140,19 @@ export default function AdminContent() {
         <div className="space-y-4 border-b pb-6">
           <h3 className="font-semibold text-lg">Free Resources</h3>
           <p className="text-sm text-muted-foreground">
-            <strong>What this does:</strong> Hides the "Crooked Lines Reading Guide" from the Resources page.
+            <strong>What this does:</strong> Activates the "Crooked Lines Reading Guide" on the Resources page.
           </p>
           <p className="text-sm text-muted-foreground">
-            This will set the Reading Guide to "inactive" status so only 3 resources display:
+            This will set the Reading Guide to "active" status and display it as the 3rd resource (far right):
           </p>
           <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-4">
-            <li>REWIRED Relief Toolkit</li>
-            <li>First 3 Chapters - Free Excerpt</li>
-            <li>Recovery Toolkit - Practical Worksheets</li>
+            <li>1. REWIRED Relief Toolkit (left)</li>
+            <li>2. First 3 Chapters - Free Excerpt (center)</li>
+            <li>3. Crooked Lines Reading Guide (right)</li>
           </ul>
 
           <Button
-            onClick={handleHideReadingGuide}
+            onClick={handleActivateReadingGuide}
             disabled={resourceStatus === "loading"}
             variant="default"
             className="w-full h-12 text-lg bg-purple-600 hover:bg-purple-700 text-white font-bold"
@@ -160,10 +160,10 @@ export default function AdminContent() {
             {resourceStatus === "loading" ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Hiding Reading Guide...
+                Activating Reading Guide...
               </>
             ) : (
-              "Hide Reading Guide (Show Only 3 Resources)"
+              "Activate Reading Guide (Show as 3rd Resource)"
             )}
           </Button>
 
