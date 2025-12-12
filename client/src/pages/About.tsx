@@ -156,6 +156,21 @@ export default function About() {
         </div>
       </section>
 
+      {/* Family Photo Section */}
+      <section className="py-12">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="rounded-2xl overflow-hidden shadow-2xl">
+              <img 
+                src="/bahamas-family.jpg" 
+                alt="Shaun Critzer and family in the Bahamas" 
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* What I Believe Section */}
       <section className="py-20 bg-accent/30">
         <div className="container">
