@@ -505,7 +505,7 @@ export default function AICoach() {
         <div className="container">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <Logo />
+              <h3 className="font-bold text-lg text-yellow-500">Shaun Critzer</h3>
               <p className="text-sm text-gray-400">
                 13 years sober. Helping others find hope, healing, and wholeness in recovery.
               </p>
