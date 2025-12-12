@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

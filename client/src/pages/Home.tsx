@@ -1,5 +1,5 @@
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
@@ -43,46 +43,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="hidden lg:flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
-              REWIRED Method
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-          {/* Mobile menu button */}
-          <Link href="/products" className="lg:hidden">
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* SECTION 1: HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20 md:py-32">

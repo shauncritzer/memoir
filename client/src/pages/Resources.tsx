@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,39 +63,7 @@ export default function Resources() {
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
-              REWIRED Method
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium text-primary">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
@@ -158,7 +126,7 @@ export default function Resources() {
                     </Button>
                   </Card>
                 );
-              })
+              })}
             </div>
           )}
         </div>
