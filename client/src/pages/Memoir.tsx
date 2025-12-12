@@ -31,13 +31,13 @@ export default function Memoir() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
             <div className="relative">
-              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative">
+              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
                 {/* Animated video */}
                 {showVideo && (
                   <video
                     ref={videoRef}
                     src="/memoir-animated.mp4"
-                    className="w-full h-full object-cover absolute inset-0 z-10"
+                    className="w-full h-full object-contain absolute inset-0 z-10"
                     muted
                     playsInline
                   />
@@ -46,7 +46,7 @@ export default function Memoir() {
                 <img
                   src="/memoir-cover-final-v6.png"
                   alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                  className={`w-full h-full object-cover transition-opacity duration-1000 ${
+                  className={`w-full h-full object-contain transition-opacity duration-1000 ${
                     showVideo ? 'opacity-0' : 'opacity-100'
                   }`}
                 />
