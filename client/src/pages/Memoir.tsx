@@ -26,8 +26,8 @@ export default function Memoir() {
       <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-hidden">
-        <div className="container max-w-full px-4">
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+        <div className="container">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
             <div className="relative">

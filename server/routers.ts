@@ -1280,13 +1280,13 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
-    activateReadingGuide: publicProcedure
+    fixResourcesOrder: publicProcedure
       .input(z.object({
         secret: z.string().optional(),
       }).optional())
       .mutation(async ({ input }) => {
         // Simple protection - optional secret key
-        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "activate-reading-guide-2025") {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "fix-resources-2025") {
           throw new Error("Unauthorized: Invalid secret key");
         }
 
@@ -1297,7 +1297,15 @@ Recovery is possible. But it requires working with your biology, not against it.
 
           const db = drizzle(process.env.DATABASE_URL!);
 
-          // Set reading guide to active status
+          // Deactivate REWIRED Relief Toolkit
+          await db.update(leadMagnets)
+            .set({
+              status: "inactive",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "rewired-relief-toolkit"));
+
+          // Activate reading guide
           await db.update(leadMagnets)
             .set({
               status: "active",
@@ -1305,13 +1313,29 @@ Recovery is possible. But it requires working with your biology, not against it.
             })
             .where(eq(leadMagnets.slug, "reading-guide"));
 
+          // Activate first 3 chapters
+          await db.update(leadMagnets)
+            .set({
+              status: "active",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "first-3-chapters"));
+
+          // Activate recovery toolkit
+          await db.update(leadMagnets)
+            .set({
+              status: "active",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "recovery-toolkit"));
+
           return {
             success: true,
-            message: "Reading Guide is now active and will display as the 3rd resource (far right).",
+            message: "Resources fixed! Order: First 3 Chapters, Recovery Toolkit, Reading Guide",
           };
         } catch (error: any) {
-          console.error("Activate reading guide error:", error);
-          throw new Error(`Failed to activate reading guide: ${error.message}`);
+          console.error("Fix resources order error:", error);
+          throw new Error(`Failed to fix resources: ${error.message}`);
         }
       }),
   }),

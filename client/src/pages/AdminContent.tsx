@@ -35,10 +35,10 @@ export default function AdminContent() {
     },
   });
 
-  const activateReadingGuideMutation = trpc.admin.activateReadingGuide.useMutation({
+  const fixResourcesMutation = trpc.admin.fixResourcesOrder.useMutation({
     onSuccess: (data) => {
       setResourceStatus("success");
-      setResourceMessage(data.message || "Reading Guide activated successfully!");
+      setResourceMessage(data.message || "Resources order fixed!");
     },
     onError: (error) => {
       setResourceStatus("error");
@@ -58,10 +58,10 @@ export default function AdminContent() {
     updatePdfMutation.mutate({});
   };
 
-  const handleActivateReadingGuide = () => {
+  const handleFixResources = () => {
     setResourceStatus("loading");
     setResourceMessage("");
-    activateReadingGuideMutation.mutate({});
+    fixResourcesMutation.mutate({ secret: "fix-resources-2025" });
   };
 
   return (
@@ -152,7 +152,7 @@ export default function AdminContent() {
           </ul>
 
           <Button
-            onClick={handleActivateReadingGuide}
+            onClick={handleFixResources}
             disabled={resourceStatus === "loading"}
             variant="default"
             className="w-full h-12 text-lg bg-purple-600 hover:bg-purple-700 text-white font-bold"
