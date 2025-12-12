@@ -73,10 +73,18 @@ export default function SeedDatabase() {
           </p>
         </div>
 
+        <div className="bg-amber-900/20 border border-amber-600/30 rounded-lg p-4 mb-6">
+          <p className="text-sm text-amber-200">
+            <strong>⚠️ Important:</strong> Each button below performs a separate, independent action.
+            Clicking one will NOT trigger the others. Review what each button does before clicking.
+          </p>
+        </div>
+
         <div className="space-y-4">
           <h3 className="font-semibold">AI Coach Migration</h3>
           <p className="text-sm text-muted-foreground">
-            Create the ai_coach_users table for email tracking and message counter system
+            <strong>What this does:</strong> Creates the ai_coach_users table for email tracking and message counter system.
+            Does NOT modify any existing data or files.
           </p>
 
           <Button
@@ -122,7 +130,8 @@ export default function SeedDatabase() {
         <div className="border-t pt-6 space-y-4">
           <h3 className="font-semibold">Seed Blog Posts</h3>
           <p className="text-sm text-muted-foreground">
-            Seed the database with updated blog posts
+            <strong>What this does:</strong> Deletes existing blog posts and creates 5 new comprehensive blog posts (800-1100 words each).
+            Does NOT modify PDFs or any other data. Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience.
           </p>
 
           <Button
@@ -165,7 +174,8 @@ export default function SeedDatabase() {
         <div className="border-t pt-6 space-y-4">
           <h3 className="font-semibold">Fix PDF Downloads</h3>
           <p className="text-sm text-muted-foreground">
-            Update lead magnet PDFs to use the corrected versions with proper apostrophes
+            <strong>What this does:</strong> Updates database URLs only. Points Recovery Toolkit and Reading Guide to /recovery-toolkit.pdf and /reading-guide.pdf.
+            Does NOT generate or modify actual PDF files—only updates the database pointers to existing files in /client/public/.
           </p>
 
           <Button

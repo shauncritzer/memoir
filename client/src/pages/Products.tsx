@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,9 @@ export default function Products() {
             </Link>
             <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
               The Memoir
+            </Link>
+            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
+              REWIRED Method
             </Link>
             <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
               Blog
@@ -282,7 +286,7 @@ export default function Products() {
       {/* Footer */}
       <footer className="border-t py-12 px-4 bg-muted/30">
         <div className="container max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div>
               <h3 className="font-serif text-xl font-bold mb-4">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -332,6 +336,20 @@ export default function Products() {
                   Find AA Meetings
                 </a>
               </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <nav className="flex flex-col gap-2 text-sm">
+                <Link href="/terms-of-use" className="text-muted-foreground hover:text-primary transition-colors">
+                  Terms of Use
+                </Link>
+                <Link href="/refund-policy" className="text-muted-foreground hover:text-primary transition-colors">
+                  Refund Policy
+                </Link>
+                <Link href="/faqs" className="text-muted-foreground hover:text-primary transition-colors">
+                  FAQs
+                </Link>
+              </nav>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">

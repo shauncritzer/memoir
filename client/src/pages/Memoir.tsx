@@ -1,55 +1,54 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Download, Star } from "lucide-react";
 import { Link } from "wouter";
+import { useState, useRef, useEffect } from "react";
 
 export default function Memoir() {
+  const [showVideo, setShowVideo] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      // Play video once, then show static image
+      video.play();
+      video.addEventListener('ended', () => {
+        setShowVideo(false);
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium text-primary">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-hidden">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
             <div className="relative">
-              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-black">
+              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
+                {/* Animated video */}
+                {showVideo && (
+                  <video
+                    ref={videoRef}
+                    src="/memoir-animated.mp4"
+                    className="w-full h-full object-contain absolute inset-0 z-10"
+                    muted
+                    playsInline
+                  />
+                )}
+                {/* Static image (shows after video ends) */}
                 <img
                   src="/memoir-cover-final-v6.png"
                   alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                  className="w-full h-full object-contain"
+                  className={`w-full h-full object-contain transition-opacity duration-1000 ${
+                    showVideo ? 'opacity-0' : 'opacity-100'
+                  }`}
                 />
               </div>
               {/* Decorative elements */}
@@ -60,7 +59,7 @@ export default function Memoir() {
             {/* Book Info */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                   Crooked Lines:{" "}
                   <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     Bent, Not Broken
@@ -243,7 +242,7 @@ export default function Memoir() {
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -273,6 +272,14 @@ export default function Memoir() {
                 <li className="text-sm">Crisis Hotline: 988</li>
                 <li className="text-sm">SAMHSA: 1-800-662-4357</li>
                 <li><a href="https://www.aa.org" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Find AA Meetings</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>
