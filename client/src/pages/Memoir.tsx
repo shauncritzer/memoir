@@ -26,7 +26,7 @@ export default function Memoir() {
       <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-hidden">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
@@ -37,7 +37,7 @@ export default function Memoir() {
                   <video
                     ref={videoRef}
                     src="/memoir-animated.mp4"
-                    className="w-full h-full object-contain absolute inset-0 z-10"
+                    className="w-full h-full object-cover absolute inset-0 z-10"
                     muted
                     playsInline
                   />
@@ -46,7 +46,7 @@ export default function Memoir() {
                 <img
                   src="/memoir-cover-final-v6.png"
                   alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                  className={`w-full h-full object-contain transition-opacity duration-1000 ${
+                  className={`w-full h-full object-cover transition-opacity duration-1000 ${
                     showVideo ? 'opacity-0' : 'opacity-100'
                   }`}
                 />

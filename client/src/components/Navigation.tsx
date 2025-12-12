@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
@@ -20,7 +19,14 @@ export function Navigation() {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container flex h-16 items-center justify-between">
-        <Logo />
+        <Link href="/" className="flex items-center space-x-3">
+          <img 
+            src="/logo-icon.png" 
+            alt="Shaun Critzer Logo" 
+            className="h-10 w-auto"
+          />
+          <span className="text-xl font-bold leading-tight">Shaun Critzer</span>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6">
