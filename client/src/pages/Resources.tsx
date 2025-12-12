@@ -17,6 +17,16 @@ export default function Resources() {
   const { data: leadMagnets, isLoading } = trpc.leadMagnets.list.useQuery();
   const downloadMutation = trpc.leadMagnets.download.useMutation();
 
+  // Filter and order lead magnets to show only the desired 3 in the correct order
+  const desiredOrder = ['first-3-chapters', 'recovery-toolkit', 'reading-guide'];
+  const filteredMagnets = leadMagnets?.filter(m =>
+    desiredOrder.includes(m.slug)
+  ) || [];
+
+  const orderedMagnets = desiredOrder
+    .map(slug => filteredMagnets.find(m => m.slug === slug))
+    .filter((magnet): magnet is NonNullable<typeof magnet> => Boolean(magnet));
+
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -127,7 +137,7 @@ export default function Resources() {
             <div className="text-center text-muted-foreground">Loading resources...</div>
           ) : (
             <div className="grid md:grid-cols-3 gap-8">
-              {leadMagnets?.map((magnet) => {
+              {orderedMagnets.map((magnet) => {
                 const Icon = getIcon(magnet.type);
                 return (
                   <Card key={magnet.id} className="p-8 space-y-6 hover:shadow-lg transition-shadow">
