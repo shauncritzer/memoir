@@ -1094,7 +1094,54 @@ Recovery is possible. But it requires working with your biology, not against it.
               status: "published" as const,
               viewCount: 0,
             },
-            // Add the other 4 blog posts here (truncated for brevity - you have them in the blog_posts.md file)
+            {
+              title: "The Most Underrated Tool in Recovery: Self-Compassion",
+              slug: "most-underrated-tool-recovery-self-compassion",
+              excerpt: "Stop beating yourself up. Discover the science-backed power of self-compassion in addiction recovery and learn a simple practice to break the cycle of shame and relapse.",
+              category: "Recovery",
+              tags: JSON.stringify(["self-compassion", "recovery", "shame", "trauma"]),
+              content: `# The Most Underrated Tool in Recovery: Self-Compassion\n\nIn the world of addiction recovery, we talk a lot about tough love, hitting rock bottom, and radical honesty. We're told to take a fearless moral inventory and to admit our wrongs. These are powerful and necessary tools.\n\nBut there's another tool, one that is often overlooked, dismissed, or misunderstood, that may be the single most important factor in long-term, sustainable recovery: **self-compassion.**\n\nFor many of us, the idea of being kind to ourselves feels foreign, self-indulgent, or just plain wrong. We're used to a different approach: self-criticism. We have a drill sergeant in our heads that tells us we're stupid, weak, and worthless. We believe that if we are hard enough on ourselves, we'll finally change.\n\nBut what if that approach is actually fueling your addiction?\n\n## The Vicious Cycle of Shame and Addiction\n\nThink about it. You have a craving. The inner critic starts screaming at you: "You're so weak! You can't even handle this." You feel ashamed. That shame is so painful that you desperately want to escape it. So, you use. And then what happens? The inner critic comes back with a vengeance: "See? I told you you were a failure. You're hopeless." This triggers even more shame, which leads to more using. It's a vicious, self-perpetuating cycle.\n\nShame doesn't motivate change. It paralyzes us. It drives us into isolation. It is the food that addiction feeds on.\n\nSelf-compassion is the antidote to shame.\n\n## What Self-Compassion Is (and Isn't)\n\nDr. Kristin Neff, the world's leading researcher on self-compassion, defines it as having three main components:\n\n1. **Self-Kindness vs. Self-Judgment:** This means treating yourself with the same warmth, care, and understanding that you would offer to a good friend who was struggling.\n\n2. **Common Humanity vs. Isolation:** This involves recognizing that suffering and personal failure are part of the shared human experience. You are not the only one who has ever felt this way. It connects you to others instead of isolating you in your shame.\n\n3. **Mindfulness vs. Over-Identification:** This is about holding your painful thoughts and feelings in balanced awareness, neither suppressing them nor getting lost in them.\n\nSelf-compassion is not self-pity, self-indulgence, or letting yourself off the hook. It's about acknowledging your pain, treating yourself with kindness, and recognizing that you're not alone.\n\n## The Science: Self-Compassion Reduces Relapse\n\nResearch shows that people with higher levels of self-compassion are more likely to maintain long-term recovery. Why? Because self-compassion breaks the shame-relapse cycle. When you respond to a slip or a craving with kindness instead of criticism, you're less likely to spiral into a full relapse.\n\nSelf-compassion also increases motivation. When you feel safe and supported (even by yourself), you're more likely to take healthy risks and make positive changes.\n\n## A Simple Self-Compassion Practice\n\nThe next time you're struggling, try this:\n\n1. **Acknowledge your pain:** "This is really hard right now. I'm suffering."\n2. **Remind yourself of common humanity:** "I'm not the only one who feels this way. This is part of being human."\n3. **Offer yourself kindness:** "May I be kind to myself. May I give myself the compassion I need."\n\nYou can place your hand on your heart as you say these words. This simple gesture activates your body's caregiving system and helps to calm your nervous system.\n\nRecovery is hard enough. You don't need to make it harder by beating yourself up. Try a different approach. Try being your own best friend.\n\n---\n\n*If you're struggling with shame and self-criticism, reach out for support. Resources are available at [/resources](/resources).*`,
+              publishedAt: new Date("2025-01-22"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+            {
+              title: "Why Your Inner Child Might Be Driving Your Addiction",
+              slug: "inner-child-driving-addiction",
+              excerpt: "Explore the powerful connection between childhood wounds and adult addiction. Learn how healing your 'inner child' is a critical, and often missing, piece of sustainable recovery.",
+              category: "Trauma",
+              tags: JSON.stringify(["inner child", "trauma", "addiction", "recovery"]),
+              content: `# Why Your Inner Child Might Be Driving Your Addiction\n\nDoes this sound familiar? You're an adult. You're responsible. You have a job, a family, a life. But sometimes, you react to situations in ways that feel… childish. A small criticism sends you into a spiral of shame. A minor setback feels like the end of the world. You have an intense, overwhelming need for validation, or you run from intimacy, or you find yourself throwing a tantrum when you don't get your way.\n\nAnd often, these are the moments right before you pick up a drink or a drug.\n\nWhat if I told you that in those moments, it's not actually the adult you who's in the driver's seat? It's a younger version of you—your **inner child**—who never got what they needed and is still desperately trying to get it.\n\n## What Is the Inner Child?\n\nThe concept of the "inner child" comes from psychology and refers to the part of your psyche that holds the memories, emotions, and unmet needs from your childhood. When you experience trauma, neglect, or emotional misattunement as a child, certain developmental needs don't get met. You don't outgrow those needs; they just go underground.\n\nYour inner child is still in there, still hurting, still trying to get those needs met in whatever way possible—often through destructive adult behaviors like addiction.\n\n## How Childhood Wounds Fuel Adult Addiction\n\nHere's how it works:\n\n- **Unmet Need for Safety:** If you grew up in chaos or with unpredictable caregivers, your inner child never learned to feel safe. As an adult, you might use substances to create a false sense of safety or control.\n\n- **Unmet Need for Love and Belonging:** If you were neglected, criticized, or made to feel like you weren't enough, your inner child is still desperately seeking validation. You might use substances to numb the pain of feeling unlovable.\n\n- **Unmet Need for Autonomy:** If you were controlled, smothered, or not allowed to express yourself, your inner child is still fighting for freedom. Addiction can become a form of rebellion or escape.\n\nWhen your inner child gets triggered, you don't respond from your wise, adult self. You respond from that wounded place. And that's when you're most vulnerable to relapse.\n\n## Healing Your Inner Child\n\nThe good news is that you can re-parent yourself. You can give your inner child what they didn't get back then. This is called **inner child work**, and it's a powerful tool in trauma-informed recovery.\n\nHere's how to start:\n\n1. **Acknowledge your inner child:** Recognize that there's a younger version of you inside who is still hurting.\n\n2. **Listen to their needs:** When you're feeling triggered or dysregulated, pause and ask: "What does my inner child need right now?" Maybe they need reassurance, comfort, or permission to feel their feelings.\n\n3. **Offer compassion:** Speak to your inner child the way you would speak to a scared or hurt child. "I see you. I hear you. You're safe now. I've got you."\n\n4. **Meet their needs:** Do something nurturing for yourself. Take a bath, go for a walk, call a friend, or simply sit with your feelings without judgment.\n\nHealing your inner child doesn't happen overnight. But with practice, you can learn to respond to your triggers with compassion instead of compulsion.\n\nYour addiction isn't just about the substance. It's about the pain underneath. And that pain often has roots in childhood. By healing your inner child, you heal the root cause of your addiction.\n\n---\n\n*If you're ready to explore inner child work, consider working with a trauma-informed therapist or joining one of our courses at [/products](/products).*`,
+              publishedAt: new Date("2025-01-24"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+            {
+              title: "Why You Can't Think Your Way Out of Trauma (And What to Do Instead)",
+              slug: "cant-think-way-out-trauma",
+              excerpt: "If talk therapy hasn't been enough to heal your trauma and addiction, there's a reason. Learn why trauma lives in the body and how somatic (body-based) practices are essential for release and recovery.",
+              category: "Trauma",
+              tags: JSON.stringify(["somatic therapy", "trauma", "body", "recovery"]),
+              content: `# Why You Can't Think Your Way Out of Trauma (And What to Do Instead)\n\nFor years, the primary approach to mental health and addiction has been "top-down." We engage in talk therapy to understand our past, challenge our negative beliefs, and change our thought patterns. This work is incredibly valuable. But for many who have experienced trauma, it's not enough.\n\nYou can understand your trauma perfectly. You can know, intellectually, that the past is over and you are safe now. But you still feel it in your body. The chronic anxiety. The muscle tension. The digestive issues. The insomnia. The overwhelming urge to use.\n\nWhy? Because **trauma lives in the body, not just the mind.**\n\n## The Body Keeps the Score\n\nDr. Bessel van der Kolk, one of the world's leading trauma researchers, wrote a groundbreaking book called *The Body Keeps the Score*. His research shows that trauma is not just a psychological event; it's a physiological one. When you experience trauma, your body's stress response system gets activated. If that activation doesn't get fully discharged, it gets stored in your body.\n\nYour body literally holds the memory of the trauma. And no amount of talking about it will release it. You have to work with the body directly.\n\n## What Are Somatic (Body-Based) Practices?\n\nSomatic practices are therapeutic approaches that work directly with the body to release stored trauma and regulate the nervous system. They include:\n\n- **Somatic Experiencing (SE):** A gentle, body-oriented approach developed by Dr. Peter Levine that helps you complete the body's natural stress response cycle.\n\n- **EMDR (Eye Movement Desensitization and Reprocessing):** A therapy that uses bilateral stimulation (like eye movements) to help the brain reprocess traumatic memories.\n\n- **Yoga and Movement:** Trauma-informed yoga and mindful movement help you reconnect with your body and release stored tension.\n\n- **Breathwork:** Specific breathing techniques can directly regulate your nervous system and release trapped emotions.\n\n- **Body Scanning and Mindfulness:** Learning to tune into your body's sensations without judgment helps you build awareness and tolerance for difficult feelings.\n\n## Why This Matters for Addiction Recovery\n\nIf you're trying to stay sober but you're still carrying unprocessed trauma in your body, you're going to struggle. Your body will keep sending you signals that something is wrong. You'll feel anxious, restless, or numb. And your brain will say, "I know how to fix this: use."\n\nSomatic practices help you discharge that stored trauma so your body can finally relax. When your body feels safe, you don't need substances to feel safe.\n\n## How to Start\n\nIf you've been doing talk therapy and it's not enough, consider adding a somatic component to your recovery. Find a therapist trained in Somatic Experiencing, EMDR, or trauma-informed yoga. Start a daily breathwork or body scan practice.\n\nYou don't have to do this alone. And you don't have to stay stuck in your head.\n\nYour body has been holding onto this pain for a long time. It's time to let it go.\n\n---\n\n*Looking for somatic practices to support your recovery? Check out our [REWIRED Method courses](/products) or explore free resources at [/resources](/resources).*`,
+              publishedAt: new Date("2025-01-26"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
+            {
+              title: "Beyond Sobriety: Introducing the REWIRED Method for Lasting Recovery",
+              slug: "beyond-sobriety-rewired-method",
+              excerpt: "Sobriety is just the beginning. Discover the REWIRED method, a comprehensive, trauma-informed framework for healing the root causes of addiction and building a life you don't need to escape from.",
+              category: "REWIRED Method",
+              tags: JSON.stringify(["REWIRED", "recovery", "sobriety", "trauma-informed"]),
+              content: `# Beyond Sobriety: Introducing the REWIRED Method for Lasting Recovery\n\nWhat if getting sober isn't the goal?\n\nThat might sound like a strange thing to say on a website about addiction recovery. But stay with me.\n\nFor most people, the focus is entirely on abstinence. On not drinking. On not using. On counting days. And while sobriety is a necessary and life-saving first step, it is not the destination. It is the ticket to the dance. It is not the dance itself.\n\nWhat is the dance? It's recovery. It's healing. It's building a life that is so connected, so meaningful, and so aligned with your values that you don't need to escape from it.\n\nThat's what the **REWIRED Method** is all about.\n\n## What Is the REWIRED Method?\n\nThe REWIRED Method is a comprehensive, trauma-informed framework for lasting recovery. It's not just about stopping a behavior; it's about healing the root causes of addiction and building a new way of being in the world.\n\nREWIRED stands for:\n\n- **R**ecognize: Recognize nervous system dysregulation before you act.\n- **E**stablish: Establish safety and grounding in your body.\n- **W**ork: Work with the body through breathwork and somatic practices.\n- **I**ntegrate: Integrate the past by processing trauma with compassion.\n- **R**ebuild: Rebuild connection with yourself, others, and something greater.\n- **E**mbrace: Embrace imperfection and practice self-compassion.\n- **D**evelop: Develop a new narrative based on resilience, not shame.\n\n## Why REWIRED Works\n\nMost recovery programs focus on behavior change. They tell you what not to do. But they don't teach you how to heal the underlying nervous system dysregulation that's driving the behavior.\n\nThe REWIRED Method is different. It's a bottom-up approach that works directly with your nervous system, your body, and your trauma. It's based on the latest neuroscience and trauma research. And it's designed to help you not just survive, but thrive.\n\n## Who Is REWIRED For?\n\nThe REWIRED Method is for anyone who:\n\n- Has tried traditional recovery programs and found them lacking\n- Knows there's more to recovery than just "not using"\n- Wants to heal the root causes of their addiction, not just manage symptoms\n- Is ready to do the deep work of trauma healing and nervous system regulation\n- Wants to build a life worth staying sober for\n\n## How to Get Started\n\nYou can start your REWIRED journey today. Explore our [free resources](/resources), dive into the [REWIRED Method page](/rewired-method), or enroll in one of our [comprehensive courses](/products).\n\nRecovery is possible. Healing is possible. A life you don't need to escape from is possible.\n\nWelcome to REWIRED.\n\n---\n\n*Ready to go deeper? Check out our [7-Day REWIRED Reset](/products) or [book a discovery call](/contact) to learn how we can support your journey.*`,
+              publishedAt: new Date("2025-01-28"),
+              authorId,
+              status: "published" as const,
+              viewCount: 0,
+            },
           ];
 
           let postsCreated = 0;
@@ -1230,6 +1277,41 @@ Recovery is possible. But it requires working with your biology, not against it.
             success: false,
             message: `Migration error: ${error.message}. Table might already exist.`,
           };
+        }
+      }),
+
+    hideReadingGuide: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        // Simple protection - optional secret key
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "hide-reading-guide-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { leadMagnets } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          // Set reading guide to inactive status
+          await db.update(leadMagnets)
+            .set({
+              status: "inactive",
+              updatedAt: new Date()
+            })
+            .where(eq(leadMagnets.slug, "reading-guide"));
+
+          return {
+            success: true,
+            message: "Reading Guide has been hidden from the Resources page. Only 3 resources will now display.",
+          };
+        } catch (error: any) {
+          console.error("Hide reading guide error:", error);
+          throw new Error(`Failed to hide reading guide: ${error.message}`);
         }
       }),
   }),

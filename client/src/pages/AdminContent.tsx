@@ -10,6 +10,8 @@ export default function AdminContent() {
   const [blogMessage, setBlogMessage] = useState("");
   const [pdfStatus, setPdfStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pdfMessage, setPdfMessage] = useState("");
+  const [resourceStatus, setResourceStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [resourceMessage, setResourceMessage] = useState("");
 
   const seedBlogMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -33,6 +35,17 @@ export default function AdminContent() {
     },
   });
 
+  const hideReadingGuideMutation = trpc.admin.hideReadingGuide.useMutation({
+    onSuccess: (data) => {
+      setResourceStatus("success");
+      setResourceMessage(data.message || "Reading Guide hidden successfully!");
+    },
+    onError: (error) => {
+      setResourceStatus("error");
+      setResourceMessage(error.message);
+    },
+  });
+
   const handleSeedBlogs = () => {
     setBlogStatus("loading");
     setBlogMessage("");
@@ -43,6 +56,12 @@ export default function AdminContent() {
     setPdfStatus("loading");
     setPdfMessage("");
     updatePdfMutation.mutate({});
+  };
+
+  const handleHideReadingGuide = () => {
+    setResourceStatus("loading");
+    setResourceMessage("");
+    hideReadingGuideMutation.mutate({});
   };
 
   return (
@@ -113,6 +132,51 @@ export default function AdminContent() {
                 <XCircle className="h-5 w-5 flex-shrink-0" />
               )}
               <p className="text-sm">{blogMessage}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Resources Section */}
+        <div className="space-y-4 border-b pb-6">
+          <h3 className="font-semibold text-lg">Free Resources</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Hides the "Crooked Lines Reading Guide" from the Resources page.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            This will set the Reading Guide to "inactive" status so only 3 resources display:
+          </p>
+          <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-4">
+            <li>REWIRED Relief Toolkit</li>
+            <li>First 3 Chapters - Free Excerpt</li>
+            <li>Recovery Toolkit - Practical Worksheets</li>
+          </ul>
+
+          <Button
+            onClick={handleHideReadingGuide}
+            disabled={resourceStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-purple-600 hover:bg-purple-700 text-white font-bold"
+          >
+            {resourceStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Hiding Reading Guide...
+              </>
+            ) : (
+              "Hide Reading Guide (Show Only 3 Resources)"
+            )}
+          </Button>
+
+          {resourceMessage && (
+            <div className={`flex items-center gap-2 p-4 rounded-lg ${
+              resourceStatus === "success" ? "bg-green-900/20 text-green-200" : "bg-red-900/20 text-red-200"
+            }`}>
+              {resourceStatus === "success" ? (
+                <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+              ) : (
+                <XCircle className="h-5 w-5 flex-shrink-0" />
+              )}
+              <p className="text-sm">{resourceMessage}</p>
             </div>
           )}
         </div>
