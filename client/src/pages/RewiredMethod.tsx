@@ -140,6 +140,79 @@ const rewiredSteps: RewiredStep[] = [
   }
 ];
 
+// Pre-formulated AI responses for each step
+const aiResponseVariations: { [key: number]: string[] } = {
+  0: [ // Recognize Your State
+    "What you're noticing is your nervous system's two main survival responses—fight/flight (hyperarousal) or freeze/shutdown (hypoarousal). These aren't character flaws; they're biological protection strategies your body learned to keep you safe. The 7-Day REWIRED Reset teaches you to recognize these states in real-time, which is the first step to regulating them.",
+
+    "You've just identified your nervous system's default stress response, and that awareness alone is powerful. When we can't process threat or stress, our body either revs up (anxiety, racing thoughts) or shuts down (numbness, disconnection) to protect us. The REWIRED Reset will show you exactly how to work with these states instead of fighting them.",
+
+    "This ability to notice what's happening in your body—whether you're wired or shutdown—is the foundation of nervous system regulation. Most people spend years stuck in these states without realizing it's not a mental problem, it's a biological one. The 7-Day Reset gives you practical tools to shift out of these survival states and back into safety.",
+
+    "What you're describing is completely normal for someone whose nervous system has been shaped by stress or trauma. Your body learned to respond this way to keep you alive, but now it's responding to everyday stress like it's a life-or-death threat. The REWIRED Reset teaches you how to recalibrate your threat detection system."
+  ],
+
+  1: [ // Establish Safety
+    "What you're describing is your nervous system's ability to detect safety through your senses—something trauma and chronic stress can disrupt. When we've experienced chronic stress or trauma, our body stays in protection mode even when we're physically safe. The 7-Day REWIRED Reset teaches you specific techniques to signal safety to your nervous system, so you can feel calm without waiting for the feeling to pass.",
+
+    "You just used one of the most powerful nervous system regulation tools: grounding through present-moment sensory awareness. This works because safety isn't just a thought; it's a felt experience your body needs to register through sight, touch, sound, or smell. The REWIRED Reset expands on this with proven practices that help your body truly feel safe, not just think it.",
+
+    "That object or sensation is helping your nervous system orient to the present moment instead of staying stuck in threat mode. This simple practice—finding anchors of stability—interrupts the survival response and brings you back to your body. The 7-Day Reset teaches you how to create these moments of safety intentionally, even when your mind is telling you you're in danger.",
+
+    "What you're experiencing is co-regulation with your environment—your nervous system borrowing a sense of calm from something external. This shows your body still knows how to recognize safety; it just needs help finding it. The REWIRED Reset gives you a full toolkit of grounding practices that teach your system to generate safety from within."
+  ],
+
+  2: [ // Work with the Body
+    "You just activated your vagus nerve—the highway between your brain and body that controls your stress response. That shift you felt is your nervous system moving out of fight-or-flight and into rest-and-digest mode. The 7-Day REWIRED Reset teaches you exactly when and how to use breathwork to regulate anxiety, cravings, and shutdown states.",
+
+    "What you experienced is proof that you can't think your way out of a dysregulated nervous system—you have to work directly with your body. That longer exhale signals safety to your brain stem, which then tells your body it's okay to relax. The REWIRED Reset shows you how to use this and other somatic practices to replace compulsive behaviors with regulation.",
+
+    "The change you noticed is your parasympathetic nervous system coming online—the body's natural brake system that calms anxiety and restores balance. Most people try to manage stress mentally, but real regulation happens through the body. The 7-Day Reset gives you a complete breathwork protocol designed specifically for trauma and addiction recovery.",
+
+    "That simple breathing pattern just shifted your autonomic nervous system state in under a minute. This is the power of working with your body instead of against it—your nervous system responds to physical cues, not willpower. The REWIRED Reset teaches you to use these tools strategically throughout your day to prevent dysregulation before it leads to relapse."
+  ],
+
+  3: [ // Integrate the Past
+    "The fact that you can see growth in that pain shows your nervous system is ready to integrate, not just suppress. Unprocessed experiences get stored as physical tension and emotional triggers in your body, which is why willpower alone doesn't work. The 7-Day REWIRED Reset teaches you safe, gentle ways to release what's been stuck without retraumatizing yourself.",
+
+    "You've just reframed a survival memory into a source of wisdom—that's the beginning of integration. Trauma isn't about the events themselves; it's about the unprocessed energy that gets trapped in your nervous system. The REWIRED Reset gives you somatic practices that help your body complete what it couldn't finish back then.",
+
+    "What you're describing is post-traumatic growth, and it's only possible when we stop running from the past and start processing it. Your body has been holding this experience as incomplete danger, which keeps you stuck in survival mode. The 7-Day Reset shows you how to gently finish processing these old stories so they stop driving your present behavior.",
+
+    "That lesson came at a cost, but the fact that you found meaning in it means you're already doing the work of integration. The problem isn't the past itself—it's the unmetabolized pain still living in your nervous system. The REWIRED Reset teaches you trauma-informed practices that help your body finally let go of what it's been carrying."
+  ],
+
+  4: [ // Rebuild Connection
+    "What you're describing is co-regulation—the biological process where one nervous system helps calm another. Connection isn't just emotional; it's a physiological necessity for healing from addiction and trauma. The 7-Day REWIRED Reset teaches you how to cultivate these regulating relationships and repair the ones that have been damaged.",
+
+    "That sense of safety you feel with them is your nervous system recognizing a trustworthy attachment figure. Isolation keeps us sick; connection literally rewires our capacity for regulation. The REWIRED Reset shows you how to identify safe people and how to start letting them in, even when vulnerability feels terrifying.",
+
+    "You've identified someone who helps your body feel safe enough to come out of protection mode. This is co-regulation, and it's one of the most powerful tools for nervous system healing. The 7-Day Reset teaches you how to build a network of these regulating relationships, because we can't heal in isolation.",
+
+    "The feeling you described—safety and acceptance—is what your nervous system has been desperately seeking through compulsive behaviors. Real regulation comes through authentic connection, not through substances or process addictions. The REWIRED Reset helps you rebuild this capacity for healthy attachment, starting with yourself."
+  ],
+
+  5: [ // Embrace Imperfection
+    "The fact that you can acknowledge this small win shows you're breaking the perfectionism-shame cycle that fuels addiction. Your nervous system interprets perfectionism as constant threat ('I'm not good enough = I'm not safe'), which keeps you dysregulated. The 7-Day REWIRED Reset teaches you to celebrate progress over perfection, which literally rewires your brain's reward system.",
+
+    "That 'small' thing you're proud of is actually your nervous system learning that safety doesn't require perfection. Shame is a nervous system state, not a character flaw, and it keeps us stuck in fight-flight-freeze. The REWIRED Reset shows you how to replace self-criticism with self-compassion, which is essential for lasting recovery.",
+
+    "What you just practiced is the antidote to the all-or-nothing thinking that drives relapse. Your nervous system thrives on small, consistent wins, not dramatic transformations. The 7-Day Reset helps you build this muscle of self-acknowledgment, which changes your brain chemistry more than any substance ever could.",
+
+    "You're learning to regulate through self-compassion instead of self-punishment. Perfectionism is a trauma response that keeps your nervous system in hypervigilance, always scanning for what's wrong. The REWIRED Reset teaches you practices that help your body finally believe you're enough, exactly as you are."
+  ],
+
+  6: [ // Develop a New Narrative
+    "The identity you just described—that's who you've always been beneath the survival strategies. Your brain has been running old programming ('I'm broken,' 'I'm an addict'), which keeps your nervous system stuck in shame and defense. The 7-Day REWIRED Reset helps you rewire these neural pathways so your body can finally embody this truer version of yourself.",
+
+    "What you're doing is separating your identity from your coping mechanisms, and that's the foundation of a new narrative. Your nervous system has been shaped by your past, but it's not defined by it. The REWIRED Reset gives you practices that help your body catch up to this new story you're writing.",
+
+    "You just claimed an identity based on your values, not your pain. This matters because your nervous system responds to the stories you tell about yourself—shame keeps you dysregulated; self-compassion creates safety. The 7-Day Reset teaches you how to embody this new narrative through daily practices that rewire your brain and body.",
+
+    "That description is the real you—the one your survival brain has been trying to protect all along. Recovery isn't about fixing what's broken; it's about remembering who you were before trauma taught you to hide. The REWIRED Reset helps your nervous system finally feel safe enough to let this authentic self emerge."
+  ]
+};
+
 export default function RewiredMethod() {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [responses, setResponses] = useState<{ [key: number]: string }>({});
@@ -165,65 +238,20 @@ export default function RewiredMethod() {
 
     setLoadingAi({ ...loadingAi, [index]: true });
 
-    try {
-      const step = rewiredSteps[index];
-      const systemPrompt = `You are a compassionate recovery coach trained in nervous system regulation and trauma-informed care. A person is working through the REWIRED Method step "${step.title}". They were asked: "${step.prompt}"
+    // Simulate realistic loading time (1.5-2.5 seconds)
+    const loadingDelay = 1500 + Math.random() * 1000;
 
-Your response should:
-1. Validate their experience (1 sentence)
-2. Explain why this happens using nervous system language (1-2 sentences)
-3. Offer a hope-focused reframe (1-2 sentences)
+    await new Promise(resolve => setTimeout(resolve, loadingDelay));
 
-Keep it conversational, not clinical. Maximum 4-5 sentences total.`;
+    // Randomly select one of the pre-formulated responses for this step
+    const variations = aiResponseVariations[index] || [];
+    const randomIndex = Math.floor(Math.random() * variations.length);
+    const selectedResponse = variations[randomIndex];
 
-      const response = await fetch("https://coach-kohl-chi.vercel.app/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userResponse }
-          ],
-        }),
-      });
+    setAiResponses({ ...aiResponses, [index]: selectedResponse });
+    setLoadingAi({ ...loadingAi, [index]: false });
 
-      if (!response.ok) {
-        throw new Error("Failed to get AI feedback");
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let aiMessage = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const data = JSON.parse(line.slice(6));
-              if (data.type === "text") {
-                aiMessage += data.content;
-                setAiResponses({ ...aiResponses, [index]: aiMessage });
-              }
-            }
-          }
-        }
-      }
-
-      toast.success("Feedback received!");
-    } catch (error) {
-      console.error("Error getting AI feedback:", error);
-      toast.error("Couldn't get feedback right now. Please try again.");
-    } finally {
-      setLoadingAi({ ...loadingAi, [index]: false });
-    }
+    toast.success("Feedback received!");
   };
 
   const handleDownloadPDF = async () => {
