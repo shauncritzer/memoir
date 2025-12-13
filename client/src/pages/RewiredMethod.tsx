@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface RewiredStep {
@@ -143,6 +143,8 @@ const rewiredSteps: RewiredStep[] = [
 export default function RewiredMethod() {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [responses, setResponses] = useState<{ [key: number]: string }>({});
+  const [aiResponses, setAiResponses] = useState<{ [key: number]: string }>({});
+  const [loadingAi, setLoadingAi] = useState<{ [key: number]: boolean }>({});
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -152,6 +154,76 @@ export default function RewiredMethod() {
 
   const handleResponseChange = (index: number, value: string) => {
     setResponses({ ...responses, [index]: value });
+  };
+
+  const handleGetAiFeedback = async (index: number) => {
+    const userResponse = responses[index];
+    if (!userResponse || userResponse.trim().length < 10) {
+      toast.error("Please write at least a few sentences before getting feedback");
+      return;
+    }
+
+    setLoadingAi({ ...loadingAi, [index]: true });
+
+    try {
+      const step = rewiredSteps[index];
+      const systemPrompt = `You are a compassionate recovery coach trained in nervous system regulation and trauma-informed care. A person is working through the REWIRED Method step "${step.title}". They were asked: "${step.prompt}"
+
+Your response should:
+1. Validate their experience (1 sentence)
+2. Explain why this happens using nervous system language (1-2 sentences)
+3. Offer a hope-focused reframe (1-2 sentences)
+
+Keep it conversational, not clinical. Maximum 4-5 sentences total.`;
+
+      const response = await fetch("https://coach-kohl-chi.vercel.app/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userResponse }
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get AI feedback");
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let aiMessage = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === "text") {
+                aiMessage += data.content;
+                setAiResponses({ ...aiResponses, [index]: aiMessage });
+              }
+            }
+          }
+        }
+      }
+
+      toast.success("Feedback received!");
+    } catch (error) {
+      console.error("Error getting AI feedback:", error);
+      toast.error("Couldn't get feedback right now. Please try again.");
+    } finally {
+      setLoadingAi({ ...loadingAi, [index]: false });
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -251,14 +323,14 @@ export default function RewiredMethod() {
 
                   {expandedStep === index && (
                     <div className="px-6 pb-6 space-y-4">
-                      <div className={`p-4 bg-white/50 rounded-lg border ${step.colorScheme.border}`}>
-                        <p className={`text-sm font-semibold ${step.colorScheme.text} mb-2`}>The Lie:</p>
-                        <p className={`italic ${step.colorScheme.textLight}`}>"{step.lie}"</p>
+                      <div className="p-4 rounded-lg border border-red-300" style={{ backgroundColor: '#ffe6e6' }}>
+                        <p className="text-sm font-semibold text-red-900 mb-2">The Lie:</p>
+                        <p className="italic text-red-800">"{step.lie}"</p>
                       </div>
 
-                      <div className={`p-4 bg-white/80 rounded-lg border-2 ${step.colorScheme.border}`}>
-                        <p className={`text-sm font-semibold ${step.colorScheme.text} mb-2`}>The Truth:</p>
-                        <p className={`font-semibold ${step.colorScheme.text}`}>"{step.truth}"</p>
+                      <div className="p-4 rounded-lg border-2 border-green-500" style={{ backgroundColor: '#e6ffe6' }}>
+                        <p className="text-sm font-semibold text-green-900 mb-2">The Truth:</p>
+                        <p className="font-semibold text-green-900">"{step.truth}"</p>
                       </div>
 
                       <p className={step.colorScheme.textLight}>{step.content}</p>
@@ -272,6 +344,29 @@ export default function RewiredMethod() {
                           onChange={(e) => handleResponseChange(index, e.target.value)}
                           className={`min-h-[100px] ${step.colorScheme.border} focus:${step.colorScheme.border}`}
                         />
+                        <div className="mt-3">
+                          <Button
+                            onClick={() => handleGetAiFeedback(index)}
+                            disabled={loadingAi[index] || !responses[index] || responses[index].trim().length < 10}
+                            className={`${step.colorScheme.badgeDark} hover:opacity-90 text-white`}
+                          >
+                            {loadingAi[index] ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Getting feedback...
+                              </>
+                            ) : (
+                              "Get AI Feedback"
+                            )}
+                          </Button>
+                        </div>
+
+                        {aiResponses[index] && (
+                          <div className="mt-4 p-4 bg-white border-2 border-gray-300 rounded-lg">
+                            <p className="text-sm font-semibold text-gray-700 mb-2">💚 AI Coach Response:</p>
+                            <p className="text-gray-800 leading-relaxed">{aiResponses[index]}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
