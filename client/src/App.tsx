@@ -25,6 +25,9 @@ import StripeTest from "./pages/StripeTest";
 import TermsOfUse from "./pages/TermsOfUse";
 import RefundPolicy from "./pages/RefundPolicy";
 import FAQs from "./pages/FAQs";
+import RecoveryToolkit from "./pages/RecoveryToolkit";
+import ReadingGuide from "./pages/ReadingGuide";
+import FirstThreeChapters from "./pages/FirstThreeChapters";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -34,6 +37,9 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/memoir" component={Memoir} />
       <Route path="/resources" component={Resources} />
+      <Route path="/recovery-toolkit" component={RecoveryToolkit} />
+      <Route path="/reading-guide" component={ReadingGuide} />
+      <Route path="/first-3-chapters" component={FirstThreeChapters} />
       <Route path="/rewired-method" component={RewiredMethod} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />

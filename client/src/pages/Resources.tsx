@@ -1,21 +1,12 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, FileText, BookOpen, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
 
 export default function Resources() {
-  const [selectedMagnet, setSelectedMagnet] = useState<any>(null);
-  const [email, setEmail] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
-
   const { data: leadMagnets, isLoading } = trpc.leadMagnets.list.useQuery();
-  const downloadMutation = trpc.leadMagnets.download.useMutation();
 
   // Filter and order lead magnets to show only the desired 3 in the correct order
   const desiredOrder = ['first-3-chapters', 'recovery-toolkit', 'reading-guide'];
@@ -27,38 +18,14 @@ export default function Resources() {
     .map(slug => filteredMagnets.find(m => m.slug === slug))
     .filter((magnet): magnet is NonNullable<typeof magnet> => Boolean(magnet));
 
-  const handleDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedMagnet || !email) return;
-
-    setIsDownloading(true);
-
-    try {
-      const result = await downloadMutation.mutateAsync({
-        slug: selectedMagnet.slug,
-        email: email,
-      });
-
-      if (result.success && result.downloadUrl) {
-        // Open download in new tab
-        window.open(result.downloadUrl, "_blank");
-        
-        toast.success("Download started!", {
-          description: "Check your downloads folder. You've also been added to our email list for weekly insights.",
-        });
-
-        // Close dialog and reset
-        setSelectedMagnet(null);
-        setEmail("");
-      }
-    } catch (error) {
-      toast.error("Download failed", {
-        description: "Please try again or contact support.",
-      });
-    } finally {
-      setIsDownloading(false);
-    }
+  // Map slugs to routes for the new interactive pages
+  const getRouteForSlug = (slug: string): string => {
+    const routes: Record<string, string> = {
+      'first-3-chapters': '/first-3-chapters',
+      'recovery-toolkit': '/recovery-toolkit',
+      'reading-guide': '/reading-guide',
+    };
+    return routes[slug] || '/resources';
   };
 
   const getIcon = (type: string) => {
@@ -120,14 +87,13 @@ export default function Resources() {
                       <p className="text-muted-foreground">{magnet.description}</p>
                     </div>
                     <div className="flex items-center justify-end text-sm text-muted-foreground mt-4">
-                      <span className="uppercase font-medium">{magnet.type}</span>
+                      <span className="uppercase font-medium">Interactive</span>
                     </div>
-                    <Button
-                      className="w-full bg-primary hover:bg-primary/90 mt-6"
-                      onClick={() => setSelectedMagnet(magnet)}
-                    >
-                      Download Free
-                    </Button>
+                    <Link href={getRouteForSlug(magnet.slug)}>
+                      <Button className="w-full bg-primary hover:bg-primary/90 mt-6">
+                        Access Resource
+                      </Button>
+                    </Link>
                   </Card>
                 );
               })}
@@ -204,47 +170,6 @@ export default function Resources() {
         </div>
       </section>
 
-      {/* Download Dialog */}
-      <Dialog open={!!selectedMagnet} onOpenChange={(open) => !open && setSelectedMagnet(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Download {selectedMagnet?.title}</DialogTitle>
-            <DialogDescription>
-              Enter your email to download this free resource. You'll also receive weekly insights on recovery, trauma healing, and building a life worth staying sober for.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleDownload} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setSelectedMagnet(null)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={isDownloading}
-              >
-                {isDownloading ? "Downloading..." : "Download"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground text-center">
-              No spam. Unsubscribe anytime. Your email is safe with me.
-            </p>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
