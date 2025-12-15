@@ -175,7 +175,7 @@ export default function Home() {
           <div className="flex justify-center">
             <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-teal-500 shadow-2xl">
               <img
-                src="/shaun-beach-headshot.jpg"
+                src="/shaun-podcast.png"
                 alt="Shaun Critzer - Recovery Coach"
                 className="w-full h-full object-cover object-center"
               />
@@ -366,8 +366,8 @@ export default function Home() {
 
             {/* PATH 2: Go Deeper - HIGHLIGHTED */}
             <Card className="p-8 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 relative">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap">
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                <span className="bg-amber-500 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase whitespace-nowrap shadow-lg">
                   Most Popular
                 </span>
               </div>
@@ -459,7 +459,7 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
                 <img
-                  src="/shaun-columns-khakis.jpg"
+                  src="/shaun-laptop.png"
                   alt="Shaun Critzer - Author, Speaker, Recovery Coach"
                   className="w-full h-full object-cover object-center"
                 />
