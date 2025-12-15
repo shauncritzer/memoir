@@ -282,38 +282,72 @@ export default function RewiredMethod() {
       {/* Navigation - Matching Home Page */}
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
-        <div className="container max-w-5xl">
-          <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold text-white">
-              Stop Fighting. Start Healing.
+      {/* Hero Section with Video Background */}
+      <section className="relative overflow-hidden py-32 md:py-40">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="w-full h-full object-cover opacity-40"
+            poster="/rewired-opaque.png"
+          >
+            <source src="/rewired-lightning.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/70 to-black/80"></div>
+        </div>
+
+        {/* Content */}
+        <div className="container max-w-4xl relative z-10">
+          <div className="text-center space-y-8">
+            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
+              Welcome to Rewired.
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              You can't solve a nervous system problem with willpower. The REWIRED Method is a science-backed, 
-              compassionate approach to breaking free from compulsive behaviors and process addictions by healing 
-              the root cause: a dysregulated nervous system.
-            </p>
-            
-            <div className="bg-gray-800/50 rounded-lg p-8 text-left max-w-3xl mx-auto mt-8">
-              <p className="text-gray-300 mb-4">
-                For years, you've been told that recovery is about white-knuckling your way through cravings, 
-                fighting your own mind, and simply "trying harder." You've been told that failure is a sign of weakness.
+            <div className="space-y-4">
+              <p className="text-3xl md:text-4xl font-semibold text-white">
+                This isn't motivation.
               </p>
-              <p className="text-gray-300 mb-4">
-                We're here to tell you that's not true.
-              </p>
-              <p className="text-gray-300 mb-4">
-                Failure isn't the opposite of success; <strong className="text-white">it's a part of it.</strong> And 
-                your struggle isn't a moral failing; it's a biological one. Your nervous system is stuck in a cycle of 
-                survival, and until you learn to work <em>with</em> it, you'll always feel like you're fighting a losing battle.
-              </p>
-              <p className="text-gray-300">
-                The REWIRED Method is different. It's not about fighting; it's about understanding. It's not about 
-                willpower; it's about regulation. It's a 7-step journey to rewire your nervous system for safety, 
-                connection, and lasting freedom.
+              <p className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-teal-400 to-green-400">
+                It's regulation.
               </p>
             </div>
+            <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mt-8 leading-relaxed">
+              In seven days, we don't fix you — we rewire how you respond.
+            </p>
+            
+            <div className="mt-12">
+              <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600">
+                Start Your Journey
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What Makes REWIRED Different */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-5xl">
+          <div className="max-w-3xl mx-auto space-y-6 text-lg text-gray-700 leading-relaxed">
+            <p>
+              For years, you've been told that recovery is about white-knuckling your way through cravings, 
+              fighting your own mind, and simply "trying harder." You've been told that failure is a sign of weakness.
+            </p>
+            <p className="font-semibold text-gray-900">
+              We're here to tell you that's not true.
+            </p>
+            <p>
+              Failure isn't the opposite of success; <strong>it's a part of it.</strong> And 
+              your struggle isn't a moral failing; it's a biological one. Your nervous system is stuck in a cycle of 
+              survival, and until you learn to work <em>with</em> it, you'll always feel like you're fighting a losing battle.
+            </p>
+            <p className="text-xl font-semibold text-teal-700">
+              The REWIRED Method is different. It's not about fighting; it's about understanding. It's not about 
+              willpower; it's about regulation. It's a 7-step journey to rewire your nervous system for safety, 
+              connection, and lasting freedom.
+            </p>
           </div>
         </div>
       </section>
