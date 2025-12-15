@@ -26,11 +26,11 @@ export default function Memoir() {
       <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-hidden">
-        <div className="container px-4 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-x-hidden">
+        <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-full">
             {/* Book Cover */}
-            <div className="relative">
+            <div className="relative max-w-md mx-auto lg:mx-0 w-full">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
                 {/* Animated video */}
                 {showVideo && (
@@ -51,9 +51,6 @@ export default function Memoir() {
                   }`}
                 />
               </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
             </div>
 
             {/* Book Info */}
