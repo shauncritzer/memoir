@@ -145,9 +145,9 @@ export default function Home() {
               <div className="bg-gray-100 border-l-4 border-amber-500 p-6 my-8">
                 <p className="font-semibold text-gray-900 mb-4">This is why:</p>
                 <ul className="space-y-2">
-                  <li>• 12-step programs have a 5-10% success rate</li>
-                  <li>• Therapy alone isn't enough</li>
-                  <li>• You keep going back</li>
+                  <li>• Traditional programs are valuable but need additional tools</li>
+                  <li>• Therapy alone doesn't address nervous system dysregulation</li>
+                  <li>• You keep relapsing despite your best efforts</li>
                 </ul>
               </div>
 
@@ -165,6 +165,21 @@ export default function Home() {
                 Learn the REWIRED Approach →
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2.5: SHAUN HEADSHOT */}
+      <section className="py-12 bg-white">
+        <div className="container max-w-2xl">
+          <div className="flex justify-center">
+            <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-teal-500 shadow-2xl">
+              <img
+                src="/shaun-beach-headshot.jpg"
+                alt="Shaun Critzer - Recovery Coach"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -352,7 +367,7 @@ export default function Home() {
             {/* PATH 2: Go Deeper - HIGHLIGHTED */}
             <Card className="p-8 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 relative">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <span className="bg-amber-500 text-white px-6 py-2 rounded-full text-sm font-bold uppercase">
+                <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap">
                   Most Popular
                 </span>
               </div>
@@ -444,7 +459,7 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
                 <img
-                  src="/shaun-stage-speaking-angle3.png"
+                  src="/shaun-columns-khakis.jpg"
                   alt="Shaun Critzer - Author, Speaker, Recovery Coach"
                   className="w-full h-full object-cover object-center"
                 />
