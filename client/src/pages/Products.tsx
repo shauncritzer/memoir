@@ -115,40 +115,8 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
-              REWIRED Method
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium text-primary">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Navigation */}
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 px-4">

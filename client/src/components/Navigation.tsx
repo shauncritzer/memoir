@@ -68,7 +68,7 @@ export function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block py-2 text-base font-medium hover:text-primary transition-colors"
+                className="block py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
