@@ -365,8 +365,9 @@ export default function Home() {
             </Card>
 
             {/* PATH 2: Go Deeper - HIGHLIGHTED */}
-            <Card className="p-8 pt-10 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 relative mt-4">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+            <Card className="p-8 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 overflow-visible">
+              {/* Most Popular Badge - inline at top */}
+              <div className="flex justify-center -mt-12 mb-2">
                 <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap shadow-lg tracking-wide">
                   Most Popular
                 </span>
