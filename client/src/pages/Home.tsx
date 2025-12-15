@@ -367,7 +367,7 @@ export default function Home() {
             {/* PATH 2: Go Deeper - HIGHLIGHTED */}
             <Card className="p-8 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 relative">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                <span className="bg-amber-500 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase whitespace-nowrap shadow-lg">
+                <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap shadow-lg tracking-wide">
                   Most Popular
                 </span>
               </div>
