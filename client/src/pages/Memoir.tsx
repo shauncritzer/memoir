@@ -26,71 +26,73 @@ export default function Memoir() {
       <Navigation />
 
       {/* Hero Section with Book Cover */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20 overflow-x-hidden">
-        <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-full">
-            {/* Book Cover */}
-            <div className="relative max-w-md mx-auto lg:mx-0 w-full">
-              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
-                {/* Animated video */}
-                {showVideo && (
-                  <video
-                    ref={videoRef}
-                    src="/memoir-animated.mp4"
-                    className="w-full h-full object-contain absolute inset-0 z-10"
-                    muted
-                    playsInline
+      <section className="py-12 md:py-20 bg-gradient-to-b from-background to-accent/20">
+        <div className="w-full px-4 md:px-6 lg:px-8" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
+              {/* Book Cover */}
+              <div className="w-full max-w-xs sm:max-w-sm mx-auto lg:mx-0 lg:w-2/5 flex-shrink-0">
+                <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
+                  {/* Animated video */}
+                  {showVideo && (
+                    <video
+                      ref={videoRef}
+                      src="/memoir-animated.mp4"
+                      className="w-full h-full object-contain absolute inset-0 z-10"
+                      muted
+                      playsInline
+                    />
+                  )}
+                  {/* Static image (shows after video ends) */}
+                  <img
+                    src="/memoir-cover-final-v6.png"
+                    alt="Crooked Lines: Bent, Not Broken - Book Cover"
+                    className={`w-full h-full object-contain transition-opacity duration-1000 ${
+                      showVideo ? 'opacity-0' : 'opacity-100'
+                    }`}
                   />
-                )}
-                {/* Static image (shows after video ends) */}
-                <img
-                  src="/memoir-cover-final-v6.png"
-                  alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                  className={`w-full h-full object-contain transition-opacity duration-1000 ${
-                    showVideo ? 'opacity-0' : 'opacity-100'
-                  }`}
-                />
-              </div>
-            </div>
-
-            {/* Book Info */}
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                  Crooked Lines:{" "}
-                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Bent, Not Broken
-                  </span>
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
-                </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 text-amber-500">
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <span className="text-muted-foreground ml-2">(Coming 2025)</span>
-              </div>
+              {/* Book Info */}
+              <div className="w-full lg:w-3/5 space-y-6 text-center lg:text-left">
+                <div className="space-y-4">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight break-words">
+                    Crooked Lines:{" "}
+                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      Bent, Not Broken
+                    </span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-muted-foreground">
+                    A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
+                  </p>
+                </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/resources">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                    <Download className="mr-2 h-5 w-5" />
-                    Download First 3 Chapters Free
+                <div className="flex items-center justify-center lg:justify-start gap-2 text-amber-500">
+                  <Star className="h-5 w-5 fill-current" />
+                  <Star className="h-5 w-5 fill-current" />
+                  <Star className="h-5 w-5 fill-current" />
+                  <Star className="h-5 w-5 fill-current" />
+                  <Star className="h-5 w-5 fill-current" />
+                  <span className="text-muted-foreground ml-2">(Coming 2025)</span>
+                </div>
+
+                <div className="flex flex-col gap-3 w-full">
+                  <Link href="/resources" className="w-full">
+                    <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-base md:text-lg px-4 md:px-8">
+                      <Download className="mr-2 h-5 w-5" />
+                      Download First 3 Chapters Free
+                    </Button>
+                  </Link>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full text-base md:text-lg px-4 md:px-8"
+                    disabled
+                  >
+                    Pre-Order on Amazon (Coming 2025)
                   </Button>
-                </Link>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8"
-                  disabled
-                >
-                  Pre-Order on Amazon (Coming 2025)
-                </Button>
+                </div>
               </div>
             </div>
           </div>
