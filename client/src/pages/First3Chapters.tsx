@@ -1,4 +1,44 @@
-# CROOKED LINES: BENT, NOT BROKEN
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { BookOpen } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { Streamdown } from "streamdown";
+
+export default function First3Chapters() {
+  const [email, setEmail] = useState("");
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const subscribeForLeadMagnet = trpc.leadMagnets.subscribeForLeadMagnet.useMutation({
+    onSuccess: () => {
+      setHasAccess(true);
+      toast.success("Access granted! You've been added to our email list for weekly insights.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to grant access. Please try again.");
+      setIsSubmitting(false);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    subscribeForLeadMagnet.mutate({
+      email,
+      leadMagnetType: "first_3_chapters",
+    });
+  };
+
+  // Full content with all intro sections
+  const fullContent = `# CROOKED LINES: BENT, NOT BROKEN
 ## A Memoir by Shaun Critzer
 
 ---
@@ -15,6 +55,19 @@ The Portuguese saying "Deus escreve direito por linhas tortas"—translated as "
 For years, I thought my story was too broken to matter. But every misstep and detour turned out to be part of the same sentence—God's handwriting on my life. The crooked lines weren't mistakes; they were directions.
 
 This is what Crooked Lines means to me: grace inside imperfection, purpose hiding in the mess, and proof that redemption doesn't need a straight road.
+
+---
+
+## Content Warnings
+
+This memoir contains frank discussions of:
+* Childhood sexual abuse
+* Substance abuse and addiction
+* Suicidal ideation and mental health crises
+* Domestic conflict and protective orders
+* Trauma and PTSD
+
+Reader discretion is advised. If you need support, please see the Resources section at the end of this document.
 
 ---
 
@@ -52,19 +105,6 @@ One day at a time.
 Charlottesville, Virginia  
 October 2025  
 13 years sober
-
----
-
-## Content Warnings
-
-This memoir contains frank discussions of:
-* Childhood sexual abuse
-* Substance abuse and addiction
-* Suicidal ideation and mental health crises
-* Domestic conflict and protective orders
-* Trauma and PTSD
-
-Reader discretion is advised. If you need support, please see the Resources section at the end of this document.
 
 ---
 
@@ -110,68 +150,84 @@ This is that story.
 
 ---
 
-## PROLOGUE: The Liquor Store Parking Lot
+*[Note: Full prologue and chapters content would continue here from the manuscript]*
+`;
 
-*[Note: Full prologue content from the manuscript would be inserted here]*
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container flex h-16 items-center justify-between">
+          <a href="/" className="flex items-center space-x-2">
+            <BookOpen className="h-6 w-6" />
+            <span className="font-bold">Shaun Critzer</span>
+          </a>
+        </div>
+      </header>
 
----
+      {/* Hero Section */}
+      <div className="container py-12 md:py-16">
+        <div className="mx-auto max-w-3xl text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-amber-500 mb-4">
+            <BookOpen className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">First 3 Chapters</h1>
+          <p className="text-xl text-muted-foreground">
+            Free Excerpt from Crooked Lines: Bent, Not Broken
+          </p>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Thank you for your interest in reading the first three chapters of <em>Crooked Lines: Bent, Not Broken</em>. 
+            This memoir chronicles my journey through childhood trauma, addiction, rock bottom, and the redemption that comes 
+            from choosing recovery one day at a time.
+          </p>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            What you're about to read is raw, unflinching, and honest. If you're struggling with addiction, trauma, or the 
+            crushing weight of being human—this book is for you.
+          </p>
+          <p className="text-lg font-semibold">You are not alone, and you are not too far gone.</p>
+        </div>
+      </div>
 
-## Chapter 1: The Oxygen Tent
-
-*[Note: Full Chapter 1 content from the manuscript would be inserted here]*
-
----
-
-## Chapter 2: The Caged Animal In Me
-
-*[Note: Full Chapter 2 content from the manuscript would be inserted here]*
-
----
-
-## What Happens Next?
-
-The journey from that ABC store parking lot to 13 years of sobriety wasn't linear. It wasn't pretty. And it definitely wasn't easy.
-
-In the full memoir, you'll discover:
-
-- **The childhood trauma** I buried for decades and how it fueled my addiction
-- **The decade of darkness** (2002-2012) - DUIs, protective orders, psych wards, and rock bottoms I didn't think I'd survive
-- **The critical difference** between sobriety and recovery
-- **The treatment and therapy** that finally cracked me open - EMDR, inner child work, and rigorous honesty
-- **The redemption** - peaceful co-parenting, blended family, meaningful work, and a life beyond my wildest dreams
-
----
-
-## Get the Full Book
-
-Ready to read the complete story?
-
-**Visit www.shauncritzer.com to:**
-- Purchase the full memoir
-- Join the recovery community
-- Access free resources and tools
-- Watch video content
-- Connect with others on the same journey
-
----
-
-## Resources
-
-If you or someone you know is struggling, please reach out:
-
-**Substance Abuse and Mental Health Services Administration (SAMHSA)**  
-National Helpline: 1-800-662-HELP (4357)  
-24/7, 365-day-a-year treatment referral and information service  
-Website: www.samhsa.gov
-
-**Alcoholics Anonymous**  
-Find meetings near you: www.aa.org
-
-**RAINN (Rape, Abuse & Incest National Network)**  
-National Sexual Assault Hotline: 1-800-656-HOPE (4673)  
-Website: www.rainn.org
-
-**National Suicide Prevention Lifeline**  
-988 Suicide & Crisis Lifeline  
-Call or text: 988  
-Website: 988lifeline.org
+      {/* Access Gate or Content */}
+      {!hasAccess ? (
+        <div className="container pb-16">
+          <Card className="mx-auto max-w-md p-8 space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Access Required</h2>
+              <p className="text-muted-foreground">
+                Enter your email to read the first three chapters online. You'll also receive updates about the full book 
+                release and exclusive recovery resources.
+              </p>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : "Read the Excerpt"}
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                No spam. Unsubscribe anytime. Your email is safe with me.
+              </p>
+            </form>
+          </Card>
+        </div>
+      ) : (
+        <div className="container pb-16">
+          <article className="mx-auto max-w-3xl prose prose-lg dark:prose-invert">
+            <Streamdown>{fullContent}</Streamdown>
+          </article>
+        </div>
+      )}
+    </div>
+  );
+}

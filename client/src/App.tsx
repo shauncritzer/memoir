@@ -16,6 +16,7 @@ import Members from "./pages/Members";
 import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
+import First3Chapters from "./pages/First3Chapters";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/memoir" component={Memoir} />
       <Route path="/resources" component={Resources} />
+      <Route path="/first-3-chapters" component={First3Chapters} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
