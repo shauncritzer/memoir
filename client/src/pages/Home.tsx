@@ -52,15 +52,15 @@ export default function Home() {
             {/* Left Side - 60% */}
             <div className="lg:col-span-3 space-y-8 text-white">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Transform Your{" "}
+                Break Free From Compulsive Behaviors Through{" "}
                 <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
-                  Nervous System
+                  Nervous System Regulation
                 </span>
-                , Break Free From Compulsive Behaviors
+                —Not Willpower
               </h1>
 
               <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Evidence-based recovery for men struggling with compulsive behaviors and process addictions—powered by the REWIRED methodology
+                Evidence-based recovery for anyone struggling with process addictions—powered by the REWIRED methodology
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -77,7 +77,7 @@ export default function Home() {
               </div>
 
               <div className="pt-4 space-y-2">
-                <p className="text-sm text-gray-400 font-semibold">Trusted by men recovering from:</p>
+                <p className="text-sm text-gray-400 font-semibold">REWIRED helps people break free from:</p>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
                   <div>• Process addictions</div>
                   <div>• Substance abuse</div>
@@ -85,7 +85,6 @@ export default function Home() {
                   <div>• Work obsession</div>
                   <div>• Compulsive fitness</div>
                   <div>• Gaming addiction</div>
-                  <div>• Betrayal trauma recovery</div>
                 </div>
               </div>
             </div>
@@ -432,7 +431,7 @@ export default function Home() {
                   <li>• Private Discord community</li>
                   <li>• Weekly accountability check-ins</li>
                   <li>• Exclusive content & resources</li>
-                  <li>• Connection with men who get it</li>
+                  <li>• Connection with people who get it</li>
                 </ul>
                 <p className="text-sm italic text-gray-600">
                   Perfect for: Need accountability, want community, value connection over isolation
@@ -498,7 +497,7 @@ export default function Home() {
 
                 <p>
                   I wrote a memoir (<em>Crooked Lines</em>) about my journey from chaos to wholeness.
-                  I built REWIRED to help men like you do the same.
+                  I built REWIRED to help you do the same.
                 </p>
 
                 <div className="bg-gray-800 border-l-4 border-teal-500 p-6 my-6">
