@@ -60,7 +60,7 @@ export default function Home() {
               </h1>
 
               <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Evidence-based recovery for anyone struggling with process addictions—powered by the REWIRED methodology
+                Evidence-based recovery guided by the REWIRED methodology
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">

@@ -413,7 +413,7 @@ export default function AICoach() {
               <div className="flex-1 overflow-y-auto space-y-4 mb-4">
                 {messages.length === 0 && (
                   <Card className="border-dashed bg-gradient-to-br from-yellow-900/10 to-black border-yellow-600/30">
-                    <CardContent className="py-12 text-center space-y-4">
+                    <CardContent className="py-12 text-center space-y-6">
                       <div className="inline-block p-4 rounded-full bg-yellow-600/20">
                         <Heart className="h-8 w-8 text-yellow-500" />
                       </div>
@@ -423,6 +423,47 @@ export default function AICoach() {
                           Share what's on your mind. I'm here to help you understand your nervous system, process trauma, and find hope in recovery.
                         </p>
                       </div>
+
+                      {/* Starter Prompts */}
+                      <div className="space-y-3 max-w-md mx-auto">
+                        <p className="text-sm text-gray-400 font-semibold">Try asking:</p>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setInput("I'm struggling today");
+                              setTimeout(() => document.getElementById("chat-input")?.focus(), 100);
+                            }}
+                            className="border-yellow-600/50 hover:bg-yellow-600/20 hover:border-yellow-600 text-white justify-start text-left h-auto py-3 px-4"
+                          >
+                            <span className="text-yellow-500 mr-2">•</span>
+                            I'm struggling today
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setInput("Help me understand my triggers");
+                              setTimeout(() => document.getElementById("chat-input")?.focus(), 100);
+                            }}
+                            className="border-yellow-600/50 hover:bg-yellow-600/20 hover:border-yellow-600 text-white justify-start text-left h-auto py-3 px-4"
+                          >
+                            <span className="text-yellow-500 mr-2">•</span>
+                            Help me understand my triggers
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setInput("I want to learn about nervous system regulation");
+                              setTimeout(() => document.getElementById("chat-input")?.focus(), 100);
+                            }}
+                            className="border-yellow-600/50 hover:bg-yellow-600/20 hover:border-yellow-600 text-white justify-start text-left h-auto py-3 px-4"
+                          >
+                            <span className="text-yellow-500 mr-2">•</span>
+                            I want to learn about nervous system regulation
+                          </Button>
+                        </div>
+                      </div>
+
                       <div className="text-sm text-muted-foreground">
                         You have {remainingMessages} free messages to explore.
                       </div>
@@ -466,7 +507,7 @@ export default function AICoach() {
                 <div className="flex gap-3">
                   <textarea
                     id="chat-input"
-                    placeholder="Share what's on your mind..."
+                    placeholder="How are you feeling right now?"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => {
