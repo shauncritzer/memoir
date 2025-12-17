@@ -355,9 +355,40 @@ export default function RewiredMethod() {
       {/* REWIRED Steps */}
       <section className="py-20 bg-white">
         <div className="container max-w-4xl">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
             The Interactive REWIRED Journey
           </h2>
+
+          {/* Progress Bar */}
+          <div className="mb-12 px-4">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-gray-600">Your Progress</p>
+              <p className="text-sm text-gray-500">
+                {expandedStep !== null ? `Step ${expandedStep + 1}` : 'Start your journey'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {rewiredSteps.map((step, index) => (
+                <div key={index} className="flex-1">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      expandedStep === index
+                        ? step.colorScheme.badgeDark
+                        : expandedStep !== null && index <= expandedStep
+                        ? step.colorScheme.badge
+                        : 'bg-gray-200'
+                    }`}
+                    title={`${step.letter} - ${step.title}`}
+                  />
+                  <p className={`text-xs mt-1 text-center font-bold ${
+                    expandedStep === index ? step.colorScheme.text : 'text-gray-400'
+                  }`}>
+                    {step.letter}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="space-y-4">
             {rewiredSteps.map((step, index) => (
@@ -372,8 +403,8 @@ export default function RewiredMethod() {
                         {step.letter}
                       </div>
                       <div>
+                        <p className={`text-xs font-semibold ${step.colorScheme.textLight} mb-1`}>Step {index + 1} of 7</p>
                         <h3 className={`text-xl font-bold ${step.colorScheme.text}`}>{step.title}</h3>
-                        <p className={`text-sm ${step.colorScheme.textLight}`}>Click to explore</p>
                       </div>
                     </div>
                     {expandedStep === index ? (
