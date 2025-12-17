@@ -10,10 +10,14 @@ import { toast } from "sonner";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
   const subscribeMutation = trpc.email.subscribe.useMutation();
+
+  // Define available categories
+  const categories = ["Trauma", "Recovery", "Neuroscience", "Mental Health", "Addiction"];
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +42,15 @@ export default function Blog() {
     }
   };
 
-  const filteredPosts = posts?.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPosts = posts?.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.category?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = !selectedCategory || post.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return "";
@@ -76,14 +84,51 @@ export default function Blog() {
               <p className="text-xl text-muted-foreground">
                 Real talk about trauma, addiction, healing, and building a life worth staying sober for.
               </p>
-              <div className="max-w-md">
+              <div className="space-y-4">
                 <Input
                   type="search"
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
+                  className="w-full max-w-md"
                 />
+
+                {/* Category Filter Pills */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-muted-foreground">Filter by category:</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      variant={selectedCategory === null ? "default" : "outline"}
+                      onClick={() => setSelectedCategory(null)}
+                      className={`text-base px-6 py-3 h-auto ${
+                        selectedCategory === null
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      All Posts
+                    </Button>
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`text-base px-6 py-3 h-auto ${
+                          selectedCategory === category
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
+                        }`}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                  {selectedCategory && (
+                    <p className="text-sm text-muted-foreground">
+                      Showing posts in <span className="font-semibold text-primary">{selectedCategory}</span>
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden">

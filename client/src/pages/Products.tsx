@@ -197,6 +197,113 @@ export default function Products() {
         </div>
       </section>
 
+      {/* Comparison Table */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container max-w-6xl mx-auto">
+          <h2 className="font-serif text-3xl font-bold mb-8 text-center">Compare Our Programs</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-gray-300">
+                  <th className="text-left p-4 font-semibold text-gray-600">Feature</th>
+                  <th className="text-center p-4 bg-amber-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">7-Day Reset</div>
+                    <div className="text-sm text-muted-foreground">Recovery Jumpstart</div>
+                  </th>
+                  <th className="text-center p-4 bg-teal-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">30-Day Course</div>
+                    <div className="text-sm text-muted-foreground">From Broken to Whole</div>
+                  </th>
+                  <th className="text-center p-4 bg-purple-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">Monthly Circle</div>
+                    <div className="text-sm text-muted-foreground">Bent Not Broken</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Price</td>
+                  <td className="text-center p-4 bg-amber-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-amber-700">$27</span>
+                  </td>
+                  <td className="text-center p-4 bg-teal-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-teal-700">$97</span>
+                  </td>
+                  <td className="text-center p-4 bg-purple-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-purple-700">$29/mo</span>
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Best For</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Getting started</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Deep trauma work</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Ongoing support</td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Length</td>
+                  <td className="text-center p-4 border-l border-gray-200">7 days</td>
+                  <td className="text-center p-4 border-l border-gray-200">30 days</td>
+                  <td className="text-center p-4 border-l border-gray-200">Ongoing</td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Community Access</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Live Coaching</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Workbook & Exercises</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Lifetime Access</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 text-sm text-muted-foreground border-l border-gray-200">
+                    While subscribed
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-center text-muted-foreground mt-6 text-sm">
+            Not sure which is right for you? <Link href="/ai-coach" className="text-primary hover:underline">Ask our AI Coach</Link> for personalized recommendations.
+          </p>
+        </div>
+      </section>
+
       {/* Trust Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container max-w-4xl mx-auto text-center">
