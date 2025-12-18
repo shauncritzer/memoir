@@ -1,98 +1,100 @@
-import { Navigation } from "@/components/Navigation";
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Download, Star } from "lucide-react";
 import { Link } from "wouter";
-import { useState, useRef, useEffect } from "react";
 
 export default function Memoir() {
-  const [showVideo, setShowVideo] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      // Play video once, then show static image
-      video.play();
-      video.addEventListener('ended', () => {
-        setShowVideo(false);
-      });
-    }
-  }, []);
-
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <Navigation />
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <Logo />
+          <div className="flex items-center space-x-6">
+            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
+              About
+            </Link>
+            <Link href="/memoir" className="text-sm font-medium text-primary">
+              The Memoir
+            </Link>
+            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
+              Blog
+            </Link>
+            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
+              Resources
+            </Link>
+            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
+              AI Coach
+            </Link>
+            <Link href="/products">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Section with Book Cover */}
-      <section className="py-12 md:py-20 bg-gradient-to-b from-background to-accent/20">
-        <div className="w-full px-4 md:px-6 lg:px-8" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
-              {/* Book Cover */}
-              <div className="w-full max-w-xs sm:max-w-sm mx-auto lg:mx-0 lg:w-2/5 flex-shrink-0">
-                <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl relative bg-black">
-                  {/* Animated video */}
-                  {showVideo && (
-                    <video
-                      ref={videoRef}
-                      src="/memoir-animated.mp4"
-                      className="w-full h-full object-contain absolute inset-0 z-10"
-                      muted
-                      playsInline
-                    />
-                  )}
-                  {/* Static image (shows after video ends) */}
-                  <img
-                    src="/memoir-cover-final-v6.png"
-                    alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                    className={`w-full h-full object-contain transition-opacity duration-1000 ${
-                      showVideo ? 'opacity-0' : 'opacity-100'
-                    }`}
-                  />
-                </div>
+      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Book Cover */}
+            <div className="relative">
+              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                  src="/memoir-cover-final-v6.png" 
+                  alt="Crooked Lines: Bent, Not Broken - Book Cover" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+            </div>
+
+            {/* Book Info */}
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+                  Crooked Lines:{" "}
+                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Bent, Not Broken
+                  </span>
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                  A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
+                </p>
               </div>
 
-              {/* Book Info */}
-              <div className="w-full lg:w-3/5 space-y-6 text-center lg:text-left">
-                <div className="space-y-4">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight break-words">
-                    Crooked Lines:{" "}
-                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      Bent, Not Broken
-                    </span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-muted-foreground">
-                    A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 text-amber-500">
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <span className="text-muted-foreground ml-2">(Coming 2025)</span>
+              </div>
 
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-amber-500">
-                  <Star className="h-5 w-5 fill-current" />
-                  <Star className="h-5 w-5 fill-current" />
-                  <Star className="h-5 w-5 fill-current" />
-                  <Star className="h-5 w-5 fill-current" />
-                  <Star className="h-5 w-5 fill-current" />
-                  <span className="text-muted-foreground ml-2">(Coming 2025)</span>
-                </div>
-
-                <div className="flex flex-col gap-3 w-full">
-                  <Link href="/resources" className="w-full">
-                    <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-base md:text-lg px-4 md:px-8">
-                      <Download className="mr-2 h-5 w-5" />
-                      Download First 3 Chapters Free
-                    </Button>
-                  </Link>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full text-base md:text-lg px-4 md:px-8"
-                    disabled
-                  >
-                    Pre-Order on Amazon (Coming 2025)
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/resources">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+                    <Download className="mr-2 h-5 w-5" />
+                    Download First 3 Chapters Free
                   </Button>
-                </div>
+                </Link>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg px-8"
+                  disabled
+                >
+                  Pre-Order on Amazon (Coming 2025)
+                </Button>
               </div>
             </div>
           </div>
@@ -111,12 +113,12 @@ export default function Memoir() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              <Card className="p-8 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5 flex flex-col">
+              <Card className="p-8 space-y-4 bg-gradient-to-br from-primary/5 to-secondary/5">
                 <h3 className="text-2xl font-bold">The Darkness</h3>
-                <ul className="space-y-4 text-muted-foreground flex-1">
+                <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Childhood trauma and decades of buried shame</span>
+                    <span>Childhood sexual abuse and decades of buried trauma</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
@@ -141,9 +143,9 @@ export default function Memoir() {
                 </ul>
               </Card>
 
-              <Card className="p-8 space-y-4 bg-gradient-to-br from-secondary/5 to-primary/5 flex flex-col">
+              <Card className="p-8 space-y-4 bg-gradient-to-br from-secondary/5 to-primary/5">
                 <h3 className="text-2xl font-bold">The Light</h3>
-                <ul className="space-y-4 text-muted-foreground flex-1">
+                <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>Getting sober for real on January 1, 2013</span>
@@ -158,7 +160,7 @@ export default function Memoir() {
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Rebuilding relationships with my kids</span>
+                    <span>Rebuilding relationships with my sons</span>
                   </li>
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
@@ -237,56 +239,6 @@ export default function Memoir() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-12 bg-card">
-        <div className="container">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">Shaun Critzer</h3>
-              <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">The Memoir</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/memoir" className="hover:text-primary transition-colors">About the Book</Link></li>
-                <li><Link href="/resources" className="hover:text-primary transition-colors">First 3 Chapters Free</Link></li>
-                <li><Link href="/products" className="hover:text-primary transition-colors">Buy Now</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
-                <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="text-sm">Crisis Hotline: 988</li>
-                <li className="text-sm">SAMHSA: 1-800-662-4357</li>
-                <li><a href="https://www.aa.org" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Find AA Meetings</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
-                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
-                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
