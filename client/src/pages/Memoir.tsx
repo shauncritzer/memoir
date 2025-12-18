@@ -45,11 +45,11 @@ export default function Memoir() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Book Cover */}
             <div className="relative">
-              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src="/memoir-cover-final-v6.png" 
-                  alt="Crooked Lines: Bent, Not Broken - Book Cover" 
-                  className="w-full h-full object-cover"
+              <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
+                <img
+                  src="/memoir-cover-final-v6.png"
+                  alt="Crooked Lines: Bent, Not Broken - Book Cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               {/* Decorative elements */}
