@@ -61,7 +61,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
                   <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">13 Years Sober • Recovery Coach</p>
+                  <p className="text-gray-300 text-sm text-center">Author, Speaker, Entrepreneur</p>
                 </div>
               </div>
             </div>
