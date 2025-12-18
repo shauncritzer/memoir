@@ -46,13 +46,13 @@ export default function Home() {
       <Navigation />
 
       {/* SECTION 1: HERO - NEW DESIGN */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12 md:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-6 md:py-10 lg:py-12">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             {/* Left Side - Hero Image (40%) */}
             <div className="order-2 lg:order-1">
               <div className="relative max-w-md mx-auto">
-                <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
+                <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
                   <img
                     src="/pro-creator-portrait (29).png"
                     alt="Shaun Critzer - Speaker, Author, Recovery Coach"
@@ -84,15 +84,15 @@ export default function Home() {
               </div>
 
               {/* Email Capture Box */}
-              <Card className="bg-gray-800/50 border-2 border-amber-500/50 p-6 md:p-8 backdrop-blur-sm">
-                <div className="space-y-6">
+              <Card className="bg-gray-800/50 border-2 border-amber-500/50 p-5 md:p-6 backdrop-blur-sm">
+                <div className="space-y-4">
                   {/* Box Headline */}
-                  <h3 className="text-2xl md:text-3xl font-bold text-amber-400">
+                  <h3 className="text-xl md:text-2xl font-bold text-amber-400">
                     Start Your Transformation Today
                   </h3>
 
                   {/* Value Props */}
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-start gap-3">
                       <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
                       <p className="text-white">First 3 chapters of <em>Crooked Lines</em> memoir</p>
@@ -112,7 +112,7 @@ export default function Home() {
                   </div>
 
                   {/* Email Form */}
-                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                  <form onSubmit={handleEmailSubmit} className="space-y-3">
                     <Input
                       type="email"
                       placeholder="Enter your email address"
@@ -503,11 +503,11 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             {/* Left Side - Image */}
             <div className="relative">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
+              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500 bg-gray-800">
                 <img
                   src="/family-of-5-fixed.png"
                   alt="Shaun Critzer with family - Recovery and Redemption"
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-contain"
                 />
               </div>
             </div>
