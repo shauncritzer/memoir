@@ -54,7 +54,7 @@ export default function Home() {
               <div className="relative max-w-md mx-auto">
                 <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
                   <img
-                    src="/pro-creator-portrait__29_.png"
+                    src="/pro-creator-portrait (29).png"
                     alt="Shaun Critzer - Speaker, Author, Recovery Coach"
                     className="w-full h-full object-cover object-center rounded-xl"
                   />
