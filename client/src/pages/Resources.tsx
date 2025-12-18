@@ -58,9 +58,9 @@ export default function Resources() {
               </p>
             </div>
             <div className="rounded-2xl overflow-hidden">
-              <img 
-                src="/family-of-5-fixed.png" 
-                alt="Shaun Critzer and family" 
+              <img
+                src="/pro-creator-portrait__38_.png"
+                alt="Shaun Critzer and wife Shannon"
                 className="w-full h-auto"
               />
             </div>

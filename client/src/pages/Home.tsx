@@ -54,7 +54,7 @@ export default function Home() {
               <div className="relative max-w-md mx-auto">
                 <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
                   <img
-                    src="/shaun-stage-speaking-angle2.png"
+                    src="/pro-creator-portrait__29_.png"
                     alt="Shaun Critzer - Speaker, Author, Recovery Coach"
                     className="w-full h-full object-cover object-center rounded-xl"
                   />
@@ -505,8 +505,8 @@ export default function Home() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
                 <img
-                  src="/shaun-laptop.png"
-                  alt="Shaun Critzer - Author, Speaker, Recovery Coach"
+                  src="/family-of-5-fixed.png"
+                  alt="Shaun Critzer with family - Recovery and Redemption"
                   className="w-full h-full object-cover object-center"
                 />
               </div>
@@ -618,7 +618,7 @@ export default function Home() {
           <Card className="p-8 md:p-12 shadow-2xl border-2 border-teal-500">
             <div className="text-center space-y-6">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-                Start Your Transformation Today
+                Ready to Begin Your Journey?
               </h2>
               <p className="text-xl text-gray-700">
                 Get the first 3 chapters of "Crooked Lines" free + nervous system recovery toolkit
