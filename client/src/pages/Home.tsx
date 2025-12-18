@@ -2,7 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -45,64 +45,110 @@ export default function Home() {
     <div className="min-h-screen">
       <Navigation />
 
-      {/* SECTION 1: HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20 md:py-32">
+      {/* SECTION 1: HERO - NEW DESIGN */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12 md:py-20">
         <div className="container">
-          <div className="grid lg:grid-cols-5 gap-12 items-center">
-            {/* Left Side - 60% */}
-            <div className="lg:col-span-3 space-y-8 text-white">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Break Free From Compulsive Behaviors Through{" "}
-                <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
-                  Nervous System Regulation
-                </span>
-                —Not Willpower
-              </h1>
-
-              <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Evidence-based recovery guided by the REWIRED methodology
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/ai-coach">
-                  <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-lg px-8">
-                    Try Free AI Coach <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/products">
-                  <Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white hover:text-black">
-                    Explore Courses
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="pt-4 space-y-2">
-                <p className="text-sm text-gray-400 font-semibold">REWIRED helps people break free from:</p>
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                  <div>• Process addictions</div>
-                  <div>• Substance abuse</div>
-                  <div>• Compulsive behaviors</div>
-                  <div>• Work obsession</div>
-                  <div>• Compulsive fitness</div>
-                  <div>• Gaming addiction</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side - 40% */}
-            <div className="lg:col-span-2 relative">
-              <div className="relative max-w-md mx-auto lg:mx-0">
-                <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-teal-500/20 to-amber-500/20 p-1 overflow-hidden border-4 border-amber-500">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left Side - Hero Image (40%) */}
+            <div className="order-2 lg:order-1">
+              <div className="relative max-w-md mx-auto">
+                <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
                   <img
                     src="/shaun-stage-speaking-angle2.png"
                     alt="Shaun Critzer - Speaker, Author, Recovery Coach"
                     className="w-full h-full object-cover object-center rounded-xl"
                   />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-2xl">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
                   <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">Speaker, Author, Entrepreneur</p>
+                  <p className="text-gray-300 text-sm text-center">13 Years Sober • Recovery Coach</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Right Side - Headline + Email Capture (60%) */}
+            <div className="order-1 lg:order-2 space-y-6 text-white">
+              {/* Main Headline */}
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  Break Free From Compulsive Behaviors Through{" "}
+                  <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
+                    Nervous System Regulation
+                  </span>
+                  —Not Willpower
+                </h1>
+
+                <p className="text-lg md:text-xl text-gray-300">
+                  Evidence-based recovery guided by the REWIRED methodology
+                </p>
+              </div>
+
+              {/* Email Capture Box */}
+              <Card className="bg-gray-800/50 border-2 border-amber-500/50 p-6 md:p-8 backdrop-blur-sm">
+                <div className="space-y-6">
+                  {/* Box Headline */}
+                  <h3 className="text-2xl md:text-3xl font-bold text-amber-400">
+                    Start Your Transformation Today
+                  </h3>
+
+                  {/* Value Props */}
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">First 3 chapters of <em>Crooked Lines</em> memoir</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">Free access to AI Recovery Coach</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">Nervous system regulation toolkit</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">5-day email series on breaking compulsive patterns</p>
+                    </div>
+                  </div>
+
+                  {/* Email Form */}
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    <Input
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      className="h-12 text-base bg-white text-black border-amber-500 focus:ring-2 focus:ring-amber-500"
+                    />
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={isSubmitting}
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold text-lg h-12"
+                    >
+                      {isSubmitting ? "Processing..." : "Get Free Access"}
+                    </Button>
+                    <p className="text-xs text-gray-400 text-center">
+                      No spam. Unsubscribe anytime.
+                    </p>
+                  </form>
+
+                  {/* Social Proof */}
+                  <p className="text-sm text-gray-300 text-center">
+                    Join thousands of people rewiring their nervous system
+                  </p>
+                </div>
+              </Card>
+
+              {/* Secondary CTA */}
+              <div className="text-center lg:text-left">
+                <Link href="/products">
+                  <Button variant="link" className="text-amber-400 hover:text-amber-300 p-0 h-auto text-base">
+                    Explore Courses <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
