@@ -106,7 +106,7 @@ export default function Home() {
             <div className="relative max-w-md mx-auto lg:mx-0">
               <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
                 <img 
-                  src="/shaun-beach-headshot.jpg" 
+                  src="/pro-creator-portrait-29.png" 
                   alt="Shaun Critzer - 13 Years Sober" 
                   className="w-full h-full object-cover object-top rounded-xl scale-90"
                 />
@@ -218,7 +218,7 @@ export default function Home() {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <h2 className="text-4xl md:text-5xl font-bold">
-              Ready to Start Your Journey?
+              Ready to Begin Your Journey?
             </h2>
             <p className="text-xl text-muted-foreground">
               Whether you're in active addiction, early recovery, or supporting someone who is—this memoir will show you that broken things can heal, that crooked lines can lead somewhere beautiful, and that redemption is real.

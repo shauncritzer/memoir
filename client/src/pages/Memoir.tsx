@@ -87,12 +87,6 @@ export default function Memoir() {
                     Download First 3 Chapters Free
                   </Button>
                 </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <Button 
                   size="lg" 
                   variant="outline" 
@@ -241,12 +235,6 @@ export default function Memoir() {
                   Get First 3 Chapters Free
                 </Button>
               </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
             </div>
           </div>
         </div>

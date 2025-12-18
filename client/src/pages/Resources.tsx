@@ -109,8 +109,8 @@ export default function Resources() {
             </div>
             <div className="rounded-2xl overflow-hidden">
               <img 
-                src="/family-of-5-fixed.png" 
-                alt="Shaun Critzer and family" 
+                src="/pro-creator-portrait-38.png" 
+                alt="Shaun Critzer and Shannon" 
                 className="w-full h-auto"
               />
             </div>
