@@ -187,8 +187,8 @@ export default function Home() {
                 But they don't heal what's broken. They just mask it.
               </p>
 
-              <div className="bg-gray-100 border-l-4 border-amber-500 p-6 my-8">
-                <p className="font-semibold text-gray-900 mb-4">This is why:</p>
+              <div className="bg-gray-100 border-l-4 border-amber-500 p-6 mt-4 mb-4">
+                <p className="font-semibold text-gray-900 mb-3">This is why:</p>
                 <ul className="space-y-2">
                   <li>• Traditional programs are valuable but need additional tools</li>
                   <li>• Therapy alone doesn't address nervous system dysregulation</li>
@@ -196,7 +196,7 @@ export default function Home() {
                 </ul>
               </div>
 
-              <p className="text-xl font-bold text-center text-gray-900">
+              <p className="text-xl font-bold text-center text-gray-900 mt-6">
                 Because you're trying to solve a nervous system problem with willpower.
               </p>
 
@@ -500,10 +500,10 @@ export default function Home() {
       {/* SECTION 5: CREDIBILITY - About Shaun */}
       <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
             {/* Left Side - Image */}
-            <div className="relative">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500 bg-gray-800">
+            <div className="relative lg:sticky lg:top-8">
+              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500 bg-gray-800 max-w-md mx-auto lg:mx-0">
                 <img
                   src="/family-of-5-fixed.png"
                   alt="Shaun Critzer with family - Recovery and Redemption"

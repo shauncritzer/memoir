@@ -60,11 +60,11 @@ export default function Resources() {
                 Real resources from real recovery. These tools helped Shannon and me navigate our journey from chaos to wholeness. Everything here is free—no strings attached—because healing shouldn't have a paywall.
               </p>
             </div>
-            <div className="rounded-2xl overflow-hidden shadow-xl">
+            <div className="rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-100 to-gray-200">
               <img
                 src="/pro-creator-portrait (38).png"
                 alt="Shaun Critzer and wife Shannon"
-                className="w-full h-auto object-cover scale-90"
+                className="w-full h-auto object-cover"
               />
             </div>
           </div>
