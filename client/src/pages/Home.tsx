@@ -1,8 +1,8 @@
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, BookOpen, Heart, Users, Sparkles } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -16,7 +16,7 @@ export default function Home() {
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) return;
 
     setIsSubmitting(true);
@@ -28,7 +28,7 @@ export default function Home() {
       });
 
       toast.success("Success!", {
-        description: "Check your email for the first 3 chapters. You've also been added to our weekly newsletter.",
+        description: "Check your email for the first 3 chapters and your nervous system recovery toolkit!",
       });
 
       setEmail("");
@@ -43,280 +43,697 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background to-accent/20 py-20 md:py-32">
+      {/* SECTION 1: HERO - NEW DESIGN */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12 md:py-20">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Crooked Lines:{" "}
-                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Bent, Not Broken
-                </span>
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/resources">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                    Read the First 3 Chapters <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <a href="https://youtu.be/9ejH01kxzW4" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="text-lg px-8">
-                    Watch My Story
-                  </Button>
-                </a>
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left Side - Hero Image (40%) */}
+            <div className="order-2 lg:order-1">
+              <div className="relative max-w-md mx-auto">
+                <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
+                  <img
+                    src="/pro-creator-portrait (29).png"
+                    alt="Shaun Critzer - Speaker, Author, Recovery Coach"
+                    className="w-full h-full object-cover object-center rounded-xl"
+                  />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
+                  <p className="text-white font-semibold text-center">Shaun Critzer</p>
+                  <p className="text-gray-300 text-sm text-center">13 Years Sober • Recovery Coach</p>
+                </div>
               </div>
             </div>
-            <div className="relative max-w-md mx-auto lg:mx-0">
-              <div className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 p-1 overflow-hidden">
-                <img 
-                  src="/pro-creator-portrait-29.png" 
-                  alt="Shaun Critzer - 13 Years Sober" 
-                  className="w-full h-full object-cover object-top rounded-xl scale-90"
-                />
-              </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Email Capture Section */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Get the First 3 Chapters Free
-            </h2>
-            <p className="text-lg opacity-90">
-              Join thousands of readers finding hope in their own recovery journey. Plus, get weekly insights on trauma, addiction, and building a life worth staying sober for.
-            </p>
-            <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white text-foreground flex-1"
-                required
-              />
-              <Button 
-                type="submit" 
-                size="lg" 
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Subscribing..." : "Get Free Chapters"}
-              </Button>
-            </form>
-            <p className="text-sm opacity-75">
-              No spam. Unsubscribe anytime. Your email is safe with me.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* What You'll Learn Section */}
-      <section className="py-20">
-        <div className="container">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold">
-              This Memoir Will Save Lives
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              If you're struggling with addiction, trauma, or the crushing weight of being human—this book is for you.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-8 space-y-4 hover:shadow-lg transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Heart className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold">Unflinching Honesty</h3>
-              <p className="text-muted-foreground">
-                Childhood sexual abuse, protective orders, psych wards, suicidal ideation—the dark stuff no one talks about because they're too ashamed.
-              </p>
-            </Card>
-            <Card className="p-8 space-y-4 hover:shadow-lg transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold">Real Recovery</h3>
-              <p className="text-muted-foreground">
-                The critical difference between sobriety and recovery. Why white-knuckling doesn't work. How EMDR, inner child work, and rigorous honesty changed everything.
-              </p>
-            </Card>
-            <Card className="p-8 space-y-4 hover:shadow-lg transition-shadow">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold">Proof of Redemption</h3>
-              <p className="text-muted-foreground">
-                From losing everything to building a life beyond my wildest dreams. Peaceful co-parenting, blended family, meaningful work, 13 years sober.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonial Section */}
-      <section className="py-20 bg-accent/30">
-        <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <blockquote className="text-center space-y-6">
-              <p className="text-2xl md:text-3xl font-serif italic leading-relaxed">
-                "For years, I thought my story was too broken to matter. But every misstep and detour turned out to be part of the same sentence—God's handwriting on my life. The crooked lines weren't mistakes; they were directions."
-              </p>
-              <footer className="text-lg font-medium">
-                — Shaun Critzer
-              </footer>
-            </blockquote>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold">
-              Ready to Begin Your Journey?
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Whether you're in active addiction, early recovery, or supporting someone who is—this memoir will show you that broken things can heal, that crooked lines can lead somewhere beautiful, and that redemption is real.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/resources">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                  Get the Free Chapters <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <a href="https://www.amazon.com/dp/YOURBOOK" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="text-lg px-8">
-                  Buy the Full Book
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-b from-accent/20 to-background">
-        <div className="container">
-          <div className="max-w-2xl mx-auto">
-            <Card className="p-8 md:p-12 text-center space-y-6 shadow-lg">
+            {/* Right Side - Headline + Email Capture (60%) */}
+            <div className="order-1 lg:order-2 space-y-6 text-white">
+              {/* Main Headline */}
               <div className="space-y-4">
-                <h2 className="text-3xl md:text-4xl font-bold">
-                  Join the Recovery Community
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Get weekly insights, stories, and tools for your recovery journey. No spam, just hope.
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  Break Free From Compulsive Behaviors Through{" "}
+                  <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
+                    Nervous System Regulation
+                  </span>
+                  —Not Willpower
+                </h1>
+
+                <p className="text-lg md:text-xl text-gray-300">
+                  Evidence-based recovery guided by the REWIRED methodology
                 </p>
               </div>
-              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Your Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="flex-1"
-                  disabled={isSubmitting}
-                />
-                <Button 
-                  type="submit" 
-                  size="lg"
-                  disabled={isSubmitting}
-                  className="bg-primary hover:bg-primary/90 whitespace-nowrap"
-                >
-                  {isSubmitting ? "Subscribing..." : "Get Weekly Updates"}
-                </Button>
-              </form>
-              <p className="text-sm text-muted-foreground">
-                We respect your privacy. Unsubscribe anytime.
+
+              {/* Email Capture Box */}
+              <Card className="bg-gray-800/50 border-2 border-amber-500/50 p-6 md:p-8 backdrop-blur-sm">
+                <div className="space-y-6">
+                  {/* Box Headline */}
+                  <h3 className="text-2xl md:text-3xl font-bold text-amber-400">
+                    Start Your Transformation Today
+                  </h3>
+
+                  {/* Value Props */}
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">First 3 chapters of <em>Crooked Lines</em> memoir</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">Free access to AI Recovery Coach</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">Nervous system regulation toolkit</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <p className="text-white">5-day email series on breaking compulsive patterns</p>
+                    </div>
+                  </div>
+
+                  {/* Email Form */}
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    <Input
+                      type="email"
+                      placeholder="Enter your email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      className="h-12 text-base bg-white text-black border-amber-500 focus:ring-2 focus:ring-amber-500"
+                    />
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={isSubmitting}
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold text-lg h-12"
+                    >
+                      {isSubmitting ? "Processing..." : "Get Free Access"}
+                    </Button>
+                    <p className="text-xs text-gray-400 text-center">
+                      No spam. Unsubscribe anytime.
+                    </p>
+                  </form>
+
+                  {/* Social Proof */}
+                  <p className="text-sm text-gray-300 text-center">
+                    Join thousands of people rewiring their nervous system
+                  </p>
+                </div>
+              </Card>
+
+              {/* Secondary CTA */}
+              <div className="text-center lg:text-left">
+                <Link href="/products">
+                  <Button variant="link" className="text-amber-400 hover:text-amber-300 p-0 h-auto text-base">
+                    Explore Courses <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2: THE PROBLEM */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-4xl">
+          <div className="text-center space-y-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+              Why Willpower Doesn't Work
+            </h2>
+
+            <div className="prose prose-lg mx-auto text-left space-y-6 text-gray-700">
+              <p>
+                For years, you've tried to quit. You white-knuckled through cravings.
+                You promised yourself "never again." And then you relapsed.
+              </p>
+
+              <p className="text-2xl font-bold text-center text-gray-900 py-4">
+                It's not your fault.
+              </p>
+
+              <p>
+                Addiction isn't a character defect—<strong>it's your nervous system trying to survive.</strong>
+              </p>
+
+              <p>
+                When you grow up with trauma, neglect, or chaos, your nervous system gets stuck.
+                It swings between anxiety (hyperarousal) and numbness (shutdown).
+                And compulsive behaviors? They work. Temporarily.
+              </p>
+
+              <p>
+                But they don't heal what's broken. They just mask it.
+              </p>
+
+              <div className="bg-gray-100 border-l-4 border-amber-500 p-6 my-8">
+                <p className="font-semibold text-gray-900 mb-4">This is why:</p>
+                <ul className="space-y-2">
+                  <li>• Traditional programs are valuable but need additional tools</li>
+                  <li>• Therapy alone doesn't address nervous system dysregulation</li>
+                  <li>• You keep relapsing despite your best efforts</li>
+                </ul>
+              </div>
+
+              <p className="text-xl font-bold text-center text-gray-900">
+                Because you're trying to solve a nervous system problem with willpower.
+              </p>
+
+              <p className="text-xl font-bold text-center text-gray-900">
+                And that never works.
+              </p>
+            </div>
+
+            <Link href="/rewired-method">
+              <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-lg px-8">
+                Learn the REWIRED Approach →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2.5: SHAUN HEADSHOT */}
+      <section className="py-12 bg-white">
+        <div className="container max-w-2xl">
+          <div className="flex justify-center">
+            <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-teal-500 shadow-2xl">
+              <img
+                src="/shaun-podcast.png"
+                alt="Shaun Critzer - Recovery Coach"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: THE SOLUTION - REWIRED FRAMEWORK */}
+      <section id="rewired" className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="container">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white">
+              The REWIRED Method
+            </h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              A nervous system-first approach to lasting recovery
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* R - RECOGNIZE */}
+            <Card className="p-6 space-y-4 bg-blue-50 border-2 border-blue-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center text-3xl">
+                  👁️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">R</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-blue-900">RECOGNIZE</h3>
+              <p className="text-blue-800 text-sm">
+                Recognize nervous system dysregulation before you act. Learn to spot hyperarousal and shutdown states.
+              </p>
+            </Card>
+
+            {/* E - ESTABLISH */}
+            <Card className="p-6 space-y-4 bg-green-50 border-2 border-green-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center text-3xl">
+                  🛡️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">E</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-green-900">ESTABLISH</h3>
+              <p className="text-green-800 text-sm">
+                Establish safety and grounding in your body. Build a foundation your nervous system trusts.
+              </p>
+            </Card>
+
+            {/* W - WORK */}
+            <Card className="p-6 space-y-4 bg-purple-50 border-2 border-purple-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-purple-500 flex items-center justify-center text-3xl">
+                  🔨
+                </div>
+                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">W</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-purple-900">WORK</h3>
+              <p className="text-purple-800 text-sm">
+                Work through trauma with compassion, not judgment. Process what you've been avoiding.
+              </p>
+            </Card>
+
+            {/* I - INTEGRATE */}
+            <Card className="p-6 space-y-4 bg-amber-50 border-2 border-amber-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-amber-500 flex items-center justify-center text-3xl">
+                  🧩
+                </div>
+                <div className="h-10 w-10 rounded-full bg-amber-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">I</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-amber-900">INTEGRATE</h3>
+              <p className="text-amber-800 text-sm">
+                Integrate new patterns and beliefs into daily life. Build sustainable habits, not white-knuckle discipline.
+              </p>
+            </Card>
+
+            {/* R - REBUILD */}
+            <Card className="p-6 space-y-4 bg-teal-50 border-2 border-teal-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-teal-500 flex items-center justify-center text-3xl">
+                  🔧
+                </div>
+                <div className="h-10 w-10 rounded-full bg-teal-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">R</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-teal-900">REBUILD</h3>
+              <p className="text-teal-800 text-sm">
+                Rebuild your regulation toolkit with evidence-based practices. Breathwork, movement, connection, mindfulness.
+              </p>
+            </Card>
+
+            {/* E - EMBRACE */}
+            <Card className="p-6 space-y-4 bg-pink-50 border-2 border-pink-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-pink-500 flex items-center justify-center text-3xl">
+                  🌱
+                </div>
+                <div className="h-10 w-10 rounded-full bg-pink-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">E</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-pink-900">EMBRACE</h3>
+              <p className="text-pink-800 text-sm">
+                Embrace ongoing growth and imperfection. Recovery is a journey, not a destination.
+              </p>
+            </Card>
+
+            {/* D - DEVELOP */}
+            <Card className="p-6 space-y-4 bg-orange-50 border-2 border-orange-500 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-orange-500 flex items-center justify-center text-3xl">
+                  🏗️
+                </div>
+                <div className="h-10 w-10 rounded-full bg-orange-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">D</span>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-orange-900">DEVELOP</h3>
+              <p className="text-orange-800 text-sm">
+                Develop sustainable recovery practices that last. Build a life you don't need to escape from.
               </p>
             </Card>
           </div>
+
+          <div className="text-center mt-12">
+            <Link href="/products">
+              <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-lg px-8">
+                Start Your 7-Day Reset →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: YOUR PATHS TO TRANSFORMATION */}
+      <section className="py-20 bg-white">
+        <div className="container">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+              Choose Your Path
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Whether you're just starting or ready to go deep, there's a path for you.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* PATH 1: Start Free */}
+            <Card className="p-8 space-y-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-500 hover:shadow-2xl transition-all">
+              <div className="text-center">
+                <div className="text-5xl mb-4">🤖</div>
+                <h3 className="text-2xl font-bold text-blue-900">Start Free</h3>
+                <p className="text-lg font-semibold text-blue-700">AI Recovery Coach</p>
+              </div>
+
+              <div className="space-y-4 text-gray-700">
+                <p className="font-semibold">Not sure where to begin? Start here.</p>
+                <ul className="space-y-2 text-sm">
+                  <li>• 10 free messages with REWIRED AI Coach</li>
+                  <li>• 24/7 availability, no judgment</li>
+                  <li>• Trained on nervous system recovery</li>
+                  <li>• Crisis resources when you need them</li>
+                </ul>
+                <p className="text-sm italic text-gray-600">
+                  Perfect for: First-timers, late-night cravings, immediate support
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-3xl font-bold text-blue-900 text-center">FREE</p>
+                <Link href="/ai-coach">
+                  <Button className="w-full bg-blue-500 hover:bg-blue-600 text-lg py-6">
+                    Try AI Coach Now
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+
+            {/* PATH 2: Go Deeper - HIGHLIGHTED */}
+            <Card className="p-8 space-y-6 bg-gradient-to-br from-amber-50 to-amber-100 border-4 border-amber-500 hover:shadow-2xl transition-all transform md:scale-105 overflow-visible">
+              {/* Most Popular Badge - inline at top */}
+              <div className="flex justify-center -mt-12 mb-2">
+                <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap shadow-lg tracking-wide">
+                  Most Popular
+                </span>
+              </div>
+
+              <div className="text-center">
+                <div className="text-5xl mb-4">📚</div>
+                <h3 className="text-2xl font-bold text-amber-900">Go Deeper</h3>
+                <p className="text-lg font-semibold text-amber-700">Structured Courses</p>
+              </div>
+
+              <div className="space-y-4 text-gray-700">
+                <p className="font-semibold">Ready to do the work? Start here.</p>
+
+                <div className="bg-white/80 p-4 rounded-lg border border-amber-300">
+                  <p className="font-bold text-amber-900">7-Day REWIRED Reset ($27)</p>
+                  <ul className="space-y-1 text-sm mt-2">
+                    <li>• Learn nervous system basics</li>
+                    <li>• Daily video lessons + worksheets</li>
+                    <li>• Breathwork & grounding tools</li>
+                    <li>• Start seeing results in one week</li>
+                  </ul>
+                </div>
+
+                <div className="bg-white/80 p-4 rounded-lg border border-amber-300">
+                  <p className="font-bold text-amber-900">From Broken to Whole ($97)</p>
+                  <ul className="space-y-1 text-sm mt-2">
+                    <li>• 30-day deep dive into recovery</li>
+                    <li>• 8 modules, 30 video lessons</li>
+                    <li>• Trauma processing techniques</li>
+                    <li>• Lifetime access + unlimited AI Coach</li>
+                  </ul>
+                </div>
+
+                <p className="text-sm italic text-gray-600">
+                  Perfect for: Committed to change, want structure, ready to invest in yourself
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-3xl font-bold text-amber-900 text-center">$27 - $97</p>
+                <Link href="/products">
+                  <Button className="w-full bg-amber-500 hover:bg-amber-600 text-lg py-6">
+                    Explore Courses
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+
+            {/* PATH 3: Join the Community */}
+            <Card className="p-8 space-y-6 bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-500 hover:shadow-2xl transition-all">
+              <div className="text-center">
+                <div className="text-5xl mb-4">👥</div>
+                <h3 className="text-2xl font-bold text-teal-900">Join the Community</h3>
+                <p className="text-lg font-semibold text-teal-700">Bent Not Broken Circle</p>
+              </div>
+
+              <div className="space-y-4 text-gray-700">
+                <p className="font-semibold">Don't do this alone. Join us.</p>
+                <ul className="space-y-2 text-sm">
+                  <li>• Monthly live Q&A with Shaun</li>
+                  <li>• Private Discord community</li>
+                  <li>• Weekly accountability check-ins</li>
+                  <li>• Exclusive content & resources</li>
+                  <li>• Connection with people who get it</li>
+                </ul>
+                <p className="text-sm italic text-gray-600">
+                  Perfect for: Need accountability, want community, value connection over isolation
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-3xl font-bold text-teal-900 text-center">$29/month</p>
+                <Link href="/products">
+                  <Button className="w-full bg-teal-500 hover:bg-teal-600 text-lg py-6">
+                    Join the Circle
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: CREDIBILITY - About Shaun */}
+      <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            {/* Left Side - Image */}
+            <div className="relative">
+              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500">
+                <img
+                  src="/family-of-5-fixed.png"
+                  alt="Shaun Critzer with family - Recovery and Redemption"
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+            </div>
+
+            {/* Right Side - Story */}
+            <div className="space-y-6 text-white">
+              <h2 className="text-4xl md:text-5xl font-bold">
+                Bent, Not Broken
+              </h2>
+
+              <div className="prose prose-lg prose-invert space-y-4">
+                <p>
+                  I'm Shaun Critzer. <strong className="text-teal-400">13 years in recovery.</strong>
+                </p>
+
+                <p>
+                  Former Mr. Teen USA (1998). Co-CEO of Digital Gravity. Author, Speaker, and Recovery Coach specializing in nervous system-based addiction recovery.
+                </p>
+
+                <p>
+                  I spent years thinking I was broken. That I just needed more willpower.
+                  More discipline. More strength.
+                </p>
+
+                <p className="text-xl font-bold text-amber-400">
+                  I was wrong.
+                </p>
+
+                <p>
+                  What I needed was to understand my nervous system.
+                  To learn that addiction isn't a character defect—it's dysregulation.
+                </p>
+
+                <p>
+                  I wrote a memoir (<em>Crooked Lines</em>) about my journey from chaos to wholeness.
+                  I built REWIRED to help you do the same.
+                </p>
+
+                <div className="bg-gray-800 border-l-4 border-teal-500 p-6 my-6">
+                  <p className="font-semibold text-teal-400 mb-3">This isn't about:</p>
+                  <ul className="space-y-2">
+                    <li>• Perfection → It's about <strong>progress</strong></li>
+                    <li>• Willpower → It's about <strong>nervous system regulation</strong></li>
+                    <li>• Being "fixed" → It's about being <strong>free</strong></li>
+                  </ul>
+                </div>
+
+                <p className="text-xl font-bold text-white">
+                  You're not broken. You're dysregulated.
+                </p>
+
+                <p className="text-xl font-bold text-teal-400">
+                  And that can change.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-6">
+                <Link href="/about">
+                  <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
+                    Read My Story
+                  </Button>
+                </Link>
+                <Link href="/memoir">
+                  <Button size="lg" className="w-full bg-amber-500 hover:bg-amber-600">
+                    Get the Book
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="flex flex-col gap-3 text-sm text-gray-300 pt-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">📖</span>
+                  <span>Author of "Crooked Lines"</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🏆</span>
+                  <span>1998 Mr. Teen USA</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">💼</span>
+                  <span>Co-Founder of Digital Gravity</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">👨‍👩‍👧‍👦</span>
+                  <span>Married to Shannon, father to Landon, Cameron, and Brody</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🎤</span>
+                  <span>Recovery Advocate</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🧩</span>
+                  <span>Special Needs Parent/Advocate</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">💪</span>
+                  <span>Health and Fitness Expert</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6: START YOUR JOURNEY - Lead Magnet */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-100">
+        <div className="container max-w-3xl">
+          <Card className="p-8 md:p-12 shadow-2xl border-2 border-teal-500">
+            <div className="text-center space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+                Ready to Begin Your Journey?
+              </h2>
+              <p className="text-xl text-gray-700">
+                Get the first 3 chapters of "Crooked Lines" free + nervous system recovery toolkit
+              </p>
+
+              <div className="flex flex-col md:flex-row gap-6 items-center bg-gray-50 p-6 rounded-lg">
+                <div className="md:w-1/3">
+                  <img
+                    src="/shaun-beach-headshot.jpg"
+                    alt="Crooked Lines Book"
+                    className="rounded-lg shadow-lg w-full"
+                  />
+                </div>
+                <div className="md:w-2/3 text-left space-y-3">
+                  <p className="font-bold text-lg text-gray-900">What you'll get:</p>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start">
+                      <span className="text-teal-500 mr-2 text-xl">✓</span>
+                      <span>First 3 chapters of Crooked Lines (PDF)</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-teal-500 mr-2 text-xl">✓</span>
+                      <span>Nervous System Recovery Toolkit (10-page guide)</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-teal-500 mr-2 text-xl">✓</span>
+                      <span>5-day email series on REWIRED basics</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-teal-500 mr-2 text-xl">✓</span>
+                      <span>Access to free AI Recovery Coach</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="space-y-4 max-w-md mx-auto">
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="text-lg py-6"
+                  required
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full bg-teal-500 hover:bg-teal-600 text-lg py-6"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Get Free Resources"}
+                </Button>
+              </form>
+
+              <p className="text-sm text-gray-500">
+                No spam. Unsubscribe anytime. Your email is safe with us.
+              </p>
+
+              <div className="pt-6 border-t border-gray-200">
+                <blockquote className="italic text-gray-700">
+                  "Shaun's approach changed my life. I finally understand why I kept relapsing—and what to do about it."
+                </blockquote>
+                <p className="text-sm text-gray-500 mt-2">— Jason K., 6 months sober</p>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 bg-card">
+      <footer className="border-t py-12 bg-gray-900 text-gray-300">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
-              <h3 className="font-bold text-lg">Shaun Critzer</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-bold text-lg text-white">Shaun Critzer</h3>
+              <p className="text-sm">
                 Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">The Memoir</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/memoir" className="hover:text-primary transition-colors">About the Book</Link></li>
-                <li><Link href="/memoir/excerpt" className="hover:text-primary transition-colors">Read an Excerpt</Link></li>
-                <li><Link href="/memoir/reviews" className="hover:text-primary transition-colors">Reviews</Link></li>
+              <h4 className="font-semibold text-white">Programs</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/products" className="hover:text-teal-400 transition-colors">Courses</Link></li>
+                <li><Link href="/ai-coach" className="hover:text-teal-400 transition-colors">AI Coach</Link></li>
+                <li><Link href="/memoir" className="hover:text-teal-400 transition-colors">The Memoir</Link></li>
               </ul>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
-                <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              <h4 className="font-semibold text-white">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/resources" className="hover:text-teal-400 transition-colors">Free Downloads</Link></li>
+                <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
+                <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
               </ul>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">Connect</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">YouTube</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
-                <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              <h4 className="font-semibold text-white">Connect</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">YouTube</a></li>
+                <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Instagram</a></li>
+                <li><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Facebook</a></li>
+                <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-white">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/terms-of-use" className="hover:text-teal-400 transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-teal-400 transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-teal-400 transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+          <div className="mt-12 pt-8 border-t border-gray-700 text-center text-sm">
             <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
           </div>
         </div>

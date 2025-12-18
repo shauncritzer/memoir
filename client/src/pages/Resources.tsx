@@ -1,96 +1,46 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Download, FileText, BookOpen, CheckCircle2 } from "lucide-react";
+import { FileText, BookOpen, CheckCircle2, Wrench, BookMarked, FileDown } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+
+// Define the resources we want to display
+const resources = [
+  {
+    id: 1,
+    title: "First 3 Chapters",
+    description: "Read the opening chapters of Crooked Lines: Bent, Not Broken. Experience the raw, unflinching story of trauma, addiction, and the beginning of redemption.",
+    icon: BookOpen,
+    link: "/first-3-chapters",
+    type: "Interactive Page"
+  },
+  {
+    id: 2,
+    title: "The Recovery Toolkit",
+    description: "Interactive worksheets and exercises for your recovery journey. Daily check-ins, trigger identification, gratitude practice, and more.",
+    icon: Wrench,
+    link: "/recovery-toolkit",
+    type: "Interactive Tools"
+  },
+  {
+    id: 3,
+    title: "Reading Guide",
+    description: "Discussion questions for individual reflection or group study. Go deeper with the themes of trauma, addiction, and redemption.",
+    icon: BookMarked,
+    link: "/reading-guide",
+    type: "Study Guide"
+  }
+];
 
 export default function Resources() {
-  const [selectedMagnet, setSelectedMagnet] = useState<any>(null);
-  const [email, setEmail] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  const { data: leadMagnets, isLoading } = trpc.leadMagnets.list.useQuery();
-  const downloadMutation = trpc.leadMagnets.download.useMutation();
-
-  const handleDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedMagnet || !email) return;
-
-    setIsDownloading(true);
-
-    try {
-      const result = await downloadMutation.mutateAsync({
-        slug: selectedMagnet.slug,
-        email: email,
-      });
-
-      if (result.success && result.downloadUrl) {
-        // Open download in new tab
-        window.open(result.downloadUrl, "_blank");
-        
-        toast.success("Download started!", {
-          description: "Check your downloads folder. You've also been added to our email list for weekly insights.",
-        });
-
-        // Close dialog and reset
-        setSelectedMagnet(null);
-        setEmail("");
-      }
-    } catch (error) {
-      toast.error("Download failed", {
-        description: "Please try again or contact support.",
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "pdf":
-        return FileText;
-      default:
-        return Download;
-    }
+  const getIcon = (IconComponent: any) => {
+    return IconComponent;
   };
 
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium text-primary">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
@@ -108,9 +58,9 @@ export default function Resources() {
               </p>
             </div>
             <div className="rounded-2xl overflow-hidden">
-              <img 
-                src="/pro-creator-portrait-38.png" 
-                alt="Shaun Critzer and Shannon" 
+              <img
+                src="/pro-creator-portrait (38).png"
+                alt="Shaun Critzer and wife Shannon"
                 className="w-full h-auto"
               />
             </div>
@@ -118,42 +68,33 @@ export default function Resources() {
         </div>
       </section>
 
-      {/* Lead Magnets Grid */}
+      {/* Resources Grid */}
       <section className="py-20">
         <div className="container">
-          {isLoading ? (
-            <div className="text-center text-muted-foreground">Loading resources...</div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-8">
-              {leadMagnets?.map((magnet) => {
-                const Icon = getIcon(magnet.type);
-                return (
-                  <Card key={magnet.id} className="p-8 space-y-6 hover:shadow-lg transition-shadow">
-                    <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-2xl font-bold">{magnet.title}</h3>
-                      <p className="text-muted-foreground">{magnet.description}</p>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span className="flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        {magnet.downloadCount} downloads
-                      </span>
-                      <span className="uppercase font-medium">{magnet.type}</span>
-                    </div>
-                    <Button
-                      className="w-full bg-primary hover:bg-primary/90"
-                      onClick={() => setSelectedMagnet(magnet)}
-                    >
-                      Download Free
+          <div className="grid md:grid-cols-3 gap-8">
+            {resources.map((resource) => {
+              const Icon = resource.icon;
+              return (
+                <Card key={resource.id} className="p-8 flex flex-col hover:shadow-lg transition-shadow">
+                  <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="space-y-3 mt-6 flex-grow">
+                    <h3 className="text-2xl font-bold">{resource.title}</h3>
+                    <p className="text-muted-foreground">{resource.description}</p>
+                  </div>
+                  <div className="flex items-center justify-end text-sm text-muted-foreground mt-4">
+                    <span className="uppercase font-medium">{resource.type}</span>
+                  </div>
+                  <Link href={resource.link}>
+                    <Button className="w-full bg-primary hover:bg-primary/90 mt-6">
+                      Access Free
                     </Button>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+                  </Link>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -225,52 +166,10 @@ export default function Resources() {
         </div>
       </section>
 
-      {/* Download Dialog */}
-      <Dialog open={!!selectedMagnet} onOpenChange={(open) => !open && setSelectedMagnet(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Download {selectedMagnet?.title}</DialogTitle>
-            <DialogDescription>
-              Enter your email to download this free resource. You'll also receive weekly insights on recovery, trauma healing, and building a life worth staying sober for.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleDownload} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setSelectedMagnet(null)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={isDownloading}
-              >
-                {isDownloading ? "Downloading..." : "Download"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground text-center">
-              No spam. Unsubscribe anytime. Your email is safe with me.
-            </p>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -289,19 +188,9 @@ export default function Resources() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
                 <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
               </ul>
             </div>
@@ -312,6 +201,14 @@ export default function Resources() {
                 <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>
