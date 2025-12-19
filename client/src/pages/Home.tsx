@@ -48,10 +48,10 @@ export default function Home() {
       {/* SECTION 1: HERO - NEW DESIGN */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-6 md:py-10 lg:py-12">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Side - Hero Image (40%) */}
-            <div className="order-2 lg:order-1">
-              <div className="relative max-w-md mx-auto">
+            <div className="order-2 lg:order-1 flex items-center justify-center">
+              <div className="relative w-full max-w-md">
                 <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
                   <img
                     src="/pro-creator-portrait (29).png"
@@ -61,13 +61,13 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
                   <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">Author, Speaker, Entrepreneur</p>
+                  <p className="text-gray-300 text-sm text-center">13 Years Sober • Recovery Coach</p>
                 </div>
               </div>
             </div>
 
             {/* Right Side - Headline + Email Capture (60%) */}
-            <div className="order-1 lg:order-2 space-y-6 text-white">
+            <div className="order-1 lg:order-2 flex flex-col justify-center space-y-6 text-white">
               {/* Main Headline */}
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
@@ -187,8 +187,8 @@ export default function Home() {
                 But they don't heal what's broken. They just mask it.
               </p>
 
-              <div className="bg-gray-100 border-l-4 border-amber-500 p-6 mt-4 mb-4">
-                <p className="font-semibold text-gray-900 mb-3">This is why:</p>
+              <div className="bg-gray-100 border-l-4 border-amber-500 p-6 my-8">
+                <p className="font-semibold text-gray-900 mb-4">This is why:</p>
                 <ul className="space-y-2">
                   <li>• Traditional programs are valuable but need additional tools</li>
                   <li>• Therapy alone doesn't address nervous system dysregulation</li>
@@ -196,7 +196,7 @@ export default function Home() {
                 </ul>
               </div>
 
-              <p className="text-xl font-bold text-center text-gray-900 mt-6">
+              <p className="text-xl font-bold text-center text-gray-900">
                 Because you're trying to solve a nervous system problem with willpower.
               </p>
 
@@ -500,20 +500,18 @@ export default function Home() {
       {/* SECTION 5: CREDIBILITY - About Shaun */}
       <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             {/* Left Side - Image */}
-            <div className="relative lg:sticky lg:top-8">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden border-4 border-amber-500 bg-gray-800 max-w-md mx-auto lg:mx-0">
-                <img
-                  src="/family-of-5-fixed.png"
-                  alt="Shaun Critzer with family - Recovery and Redemption"
-                  className="w-full h-full object-contain"
-                />
-              </div>
+            <div className="flex items-center justify-center">
+              <img
+                src="/family-of-5-fixed.png"
+                alt="Shaun Critzer with family - Recovery and Redemption"
+                className="w-full h-auto max-w-lg object-contain rounded-lg"
+              />
             </div>
 
             {/* Right Side - Story */}
-            <div className="space-y-6 text-white">
+            <div className="flex flex-col justify-center space-y-6 text-white">
               <h2 className="text-4xl md:text-5xl font-bold">
                 Bent, Not Broken
               </h2>

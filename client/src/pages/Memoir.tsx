@@ -43,24 +43,21 @@ export default function Memoir() {
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Book Cover - Animated */}
+            {/* Book Cover */}
             <div className="relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
                 <video
+                  src="/memoir-animated.mp4"
+                  poster="/memoir-cover-final-v6.png"
                   autoPlay
-                  loop
                   muted
                   playsInline
                   className="w-full h-full object-contain"
-                >
-                  <source src="/memoir-animated.mp4" type="video/mp4" />
-                  {/* Fallback to static image if video doesn't load */}
-                  <img
-                    src="/memoir-cover-final-v6.png"
-                    alt="Crooked Lines: Bent, Not Broken - Book Cover"
-                    className="w-full h-full object-contain"
-                  />
-                </video>
+                  onEnded={(e) => {
+                    // Stay on final frame after animation completes
+                    e.currentTarget.pause();
+                  }}
+                />
               </div>
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>

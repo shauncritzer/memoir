@@ -45,7 +45,8 @@ export default function Resources() {
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+            {/* Text on left */}
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold">
                 Free{" "}
@@ -60,11 +61,13 @@ export default function Resources() {
                 Real resources from real recovery. These tools helped Shannon and me navigate our journey from chaos to wholeness. Everything here is free—no strings attached—because healing shouldn't have a paywall.
               </p>
             </div>
-            <div className="rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-gray-100 to-gray-200 max-w-sm mx-auto lg:max-w-md">
+
+            {/* Photo on right - FIXED SIZE */}
+            <div className="flex justify-center">
               <img
                 src="/pro-creator-portrait (38).png"
-                alt="Shaun Critzer and wife Shannon"
-                className="w-full h-auto object-cover max-h-[400px] object-top"
+                alt="Shaun and Shannon"
+                className="w-full max-w-md h-auto object-contain rounded-lg shadow-xl"
               />
             </div>
           </div>
