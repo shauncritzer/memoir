@@ -1,5 +1,5 @@
 import { Navigation } from "@/components/Navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -220,6 +220,14 @@ export default function RewiredMethod() {
   const [loadingAi, setLoadingAi] = useState<{ [key: number]: boolean }>({});
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Preload video to prevent flash
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.src = '/rewired-lightning.mp4';
+    video.load();
+  }, []);
 
   const toggleStep = (index: number) => {
     setExpandedStep(expandedStep === index ? null : index);
@@ -285,14 +293,14 @@ export default function RewiredMethod() {
       {/* Hero Section with Video Background */}
       <section className="relative overflow-hidden py-32 md:py-40">
         {/* Video Background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-gray-900">
           <video
             autoPlay
             muted
             playsInline
             loop
-            className="w-full h-full object-cover opacity-40"
-            poster="/rewired-opaque.png"
+            className={`w-full h-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-40' : 'opacity-0'}`}
+            onLoadedData={() => setVideoLoaded(true)}
           >
             <source src="/rewired-lightning.mp4" type="video/mp4" />
           </video>
