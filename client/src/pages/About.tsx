@@ -10,32 +10,27 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <Navigation />
 
-      {/* Hero Image Section */}
-      <section className="relative h-96 md:h-[500px] overflow-hidden">
-        <img
-          src="/pro-creator-portrait (38).png"
-          alt="Shaun Critzer - Recovery Advocate"
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 to-gray-900"></div>
-        {/* Optional overlay text */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg">
-            From Champion to Crisis to{" "}
-            <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
-              Comeback
-            </span>
-          </h1>
+      {/* Story Content Section */}
+      <section className="pt-20 pb-12 bg-gradient-to-b from-background to-accent/20">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold">
+              From Champion to Crisis to{" "}
+              <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
+                Comeback
+              </span>
+            </h1>
+          </div>
         </div>
       </section>
 
-      {/* Story Content Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      {/* Story Intro Section */}
+      <section className="pb-20 bg-gradient-to-b from-accent/20 to-background">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
               <p>
-                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and 13 years into the greatest transformation of my life.
+                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and over a decade into the greatest transformation of my life.
               </p>
               <p>
                 At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
@@ -50,7 +45,7 @@ export default function About() {
                 By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
               </p>
               <p>
-                On January 1, 2013, I chose recovery. Not just sobriety—actual healing.
+                Years ago, I chose recovery. Not just sobriety—actual healing.
               </p>
               <p className="font-semibold text-foreground">
                 Today, I help others do the same.
@@ -80,7 +75,7 @@ export default function About() {
                   On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
                 </p>
                 <p>
-                  Today, I'm 13 years sober. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
+                  Today, I'm over a decade into recovery. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
                 </p>
               </div>
             </div>
@@ -108,8 +103,8 @@ export default function About() {
                       <Award className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">13 Years Sober</h3>
-                      <p className="text-sm text-muted-foreground">January 1, 2013 - Present</p>
+                      <h3 className="font-bold text-lg">In Recovery</h3>
+                      <p className="text-sm text-muted-foreground">Author of "Crooked Lines"</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -128,6 +123,24 @@ export default function About() {
                     <div>
                       <h3 className="font-bold text-lg">Recovery Advocate</h3>
                       <p className="text-sm text-muted-foreground">Speaker, author, and mentor</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">💪</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Health & Fitness Expert</h3>
+                      <p className="text-sm text-muted-foreground">Former competitive bodybuilder and lifelong advocate for physical wellness</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🧩</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Special Needs Parent & Advocate</h3>
+                      <p className="text-sm text-muted-foreground">Navigating and championing neurodiversity in family life</p>
                     </div>
                   </div>
                 </div>
@@ -222,7 +235,7 @@ export default function About() {
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">

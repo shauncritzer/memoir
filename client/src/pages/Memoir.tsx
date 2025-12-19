@@ -52,10 +52,19 @@ export default function Memoir() {
                   autoPlay
                   muted
                   playsInline
+                  preload="auto"
                   className="w-full h-full object-contain"
+                  onLoadedMetadata={(e) => {
+                    // Ensure video plays to the very end
+                    const video = e.currentTarget;
+                    video.currentTime = 0;
+                  }}
                   onEnded={(e) => {
                     // Stay on final frame after animation completes
-                    e.currentTarget.pause();
+                    const video = e.currentTarget;
+                    video.pause();
+                    // Ensure we're at the last frame, not before
+                    video.currentTime = video.duration;
                   }}
                 />
               </div>
