@@ -61,7 +61,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
                   <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">13 Years Sober • Recovery Coach</p>
+                  <p className="text-gray-300 text-sm text-center">Author, Speaker, Entrepreneur</p>
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 2: THE PROBLEM */}
-      <section className="py-20 bg-white">
+      <section className="py-12 bg-white">
         <div className="container max-w-4xl">
           <div className="text-center space-y-8">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
@@ -215,8 +215,8 @@ export default function Home() {
       </section>
 
       {/* SECTION 2.5: SHAUN HEADSHOT */}
-      <section className="py-12 bg-white">
-        <div className="container max-w-2xl">
+      <section className="py-8 bg-white">
+        <div className="container max-w-xl">
           <div className="flex justify-center">
             <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-teal-500 shadow-2xl">
               <img
@@ -230,7 +230,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 3: THE SOLUTION - REWIRED FRAMEWORK */}
-      <section id="rewired" className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <section id="rewired" className="py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="container">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white">
@@ -366,7 +366,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 4: YOUR PATHS TO TRANSFORMATION */}
-      <section className="py-20 bg-white">
+      <section className="py-12 bg-white">
         <div className="container">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
@@ -498,7 +498,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: CREDIBILITY - About Shaun */}
-      <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <section className="py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             {/* Left Side - Image */}
@@ -518,7 +518,7 @@ export default function Home() {
 
               <div className="prose prose-lg prose-invert space-y-4">
                 <p>
-                  I'm Shaun Critzer. <strong className="text-teal-400">13 years in recovery.</strong>
+                  I'm Shaun Critzer. <strong className="text-teal-400">Over a decade in recovery.</strong>
                 </p>
 
                 <p>
@@ -611,7 +611,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 6: START YOUR JOURNEY - Lead Magnet */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-100">
+      <section className="py-12 bg-gradient-to-b from-white to-gray-100">
         <div className="container max-w-3xl">
           <Card className="p-8 md:p-12 shadow-2xl border-2 border-teal-500">
             <div className="text-center space-y-6">
@@ -694,7 +694,7 @@ export default function Home() {
             <div className="space-y-4">
               <h3 className="font-bold text-lg text-white">Shaun Critzer</h3>
               <p className="text-sm">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">
