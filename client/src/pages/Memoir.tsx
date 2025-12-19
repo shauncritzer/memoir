@@ -46,10 +46,17 @@ export default function Memoir() {
             {/* Book Cover */}
             <div className="relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
-                <img
-                  src="/memoir-cover-final-v6.png"
-                  alt="Crooked Lines: Bent, Not Broken - Book Cover"
+                <video
+                  src="/memoir-animated.mp4"
+                  poster="/memoir-cover-final-v6.png"
+                  autoPlay
+                  muted
+                  playsInline
                   className="w-full h-full object-contain"
+                  onEnded={(e) => {
+                    // Stay on final frame after animation completes
+                    e.currentTarget.pause();
+                  }}
                 />
               </div>
               {/* Decorative elements */}
