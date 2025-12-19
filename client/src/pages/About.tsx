@@ -10,16 +10,29 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <Navigation />
 
-      {/* Hero Section */}
+      {/* Hero Image Section */}
+      <section className="relative h-96 md:h-[500px] overflow-hidden">
+        <img
+          src="/pro-creator-portrait (38).png"
+          alt="Shaun Critzer - Recovery Advocate"
+          className="w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 to-gray-900"></div>
+        {/* Optional overlay text */}
+        <div className="absolute bottom-0 left-0 right-0 p-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg">
+            From Champion to Crisis to{" "}
+            <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
+              Comeback
+            </span>
+          </h1>
+        </div>
+      </section>
+
+      {/* Story Content Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">
-              From Champion to Crisis to{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Comeback
-              </span>
-            </h1>
             <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
               <p>
                 I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and 13 years into the greatest transformation of my life.
