@@ -35,7 +35,7 @@ export default function About() {
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
               <p>
-                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and 13 years into the greatest transformation of my life.
+                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and over a decade into the greatest transformation of my life.
               </p>
               <p>
                 At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
@@ -50,7 +50,7 @@ export default function About() {
                 By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
               </p>
               <p>
-                On January 1, 2013, I chose recovery. Not just sobriety—actual healing.
+                Years ago, I chose recovery. Not just sobriety—actual healing.
               </p>
               <p className="font-semibold text-foreground">
                 Today, I help others do the same.
@@ -77,10 +77,10 @@ export default function About() {
                   The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
                 </p>
                 <p>
-                  On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
+                  Years ago, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
                 </p>
                 <p>
-                  Today, I'm 13 years sober. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
+                  Today, I'm over a decade into recovery. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
                 </p>
               </div>
             </div>
@@ -108,8 +108,8 @@ export default function About() {
                       <Award className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">13 Years Sober</h3>
-                      <p className="text-sm text-muted-foreground">January 1, 2013 - Present</p>
+                      <h3 className="font-bold text-lg">Recovery Advocate</h3>
+                      <p className="text-sm text-muted-foreground">2013 - Present</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -222,7 +222,7 @@ export default function About() {
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate. Over a decade in recovery and helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">
