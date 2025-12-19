@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Award, Heart, Users, Briefcase } from "lucide-react";
+import { ArrowRight, Award, Heart, Users, Briefcase, Dumbbell, Puzzle } from "lucide-react";
 import { Link } from "wouter";
 
 export default function About() {
@@ -128,6 +128,24 @@ export default function About() {
                     <div>
                       <h3 className="font-bold text-lg">Recovery Advocate</h3>
                       <p className="text-sm text-muted-foreground">Speaker, author, and mentor</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Dumbbell className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Health & Fitness Expert</h3>
+                      <p className="text-sm text-muted-foreground">Former competitive bodybuilder and lifelong advocate for physical wellness</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Puzzle className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Special Needs Parent & Advocate</h3>
+                      <p className="text-sm text-muted-foreground">Navigating and championing neurodiversity in family life</p>
                     </div>
                   </div>
                 </div>
