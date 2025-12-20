@@ -157,8 +157,8 @@ export default function Home() {
 
       {/* SECTION 2: THE PROBLEM */}
       <section className="py-12 bg-white">
-        <div className="container max-w-4xl">
-          <div className="text-center space-y-8">
+        <div className="container max-w-5xl">
+          <div className="text-center space-y-6">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
               Why Willpower Doesn't Work
             </h2>
@@ -500,23 +500,23 @@ export default function Home() {
       {/* SECTION 5: CREDIBILITY - About Shaun */}
       <section className="py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
             {/* Left Side - Image */}
             <div className="flex items-center justify-center">
               <img
                 src="/family-of-5-fixed.png"
                 alt="Shaun Critzer with family - Recovery and Redemption"
-                className="w-full h-auto max-w-lg object-contain rounded-lg"
+                className="w-full h-auto max-w-md object-contain rounded-lg"
               />
             </div>
 
             {/* Right Side - Story */}
-            <div className="flex flex-col justify-center space-y-6 text-white">
+            <div className="flex flex-col justify-center space-y-4 text-white">
               <h2 className="text-4xl md:text-5xl font-bold">
                 Bent, Not Broken
               </h2>
 
-              <div className="prose prose-lg prose-invert space-y-4">
+              <div className="prose prose-lg prose-invert space-y-3">
                 <p>
                   I'm Shaun Critzer. <strong className="text-teal-400">Over a decade in recovery.</strong>
                 </p>
@@ -562,7 +562,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-6">
+              <div className="grid grid-cols-2 gap-4 pt-4">
                 <Link href="/about">
                   <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
                     Read My Story
