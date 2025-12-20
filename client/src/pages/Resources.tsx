@@ -43,12 +43,12 @@ export default function Resources() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      <section className="pt-12 pb-8 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-            {/* Text on left */}
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-6xl font-bold">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
+            {/* Text on left - Positioned higher */}
+            <div className="space-y-6 pt-4">
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                 Free{" "}
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Recovery Resources
@@ -62,8 +62,8 @@ export default function Resources() {
               </p>
             </div>
 
-            {/* Photo on right - FIXED SIZE */}
-            <div className="flex justify-center">
+            {/* Photo on right - Positioned lower with top margin */}
+            <div className="flex justify-center mt-8 lg:mt-12">
               <img
                 src="/pro-creator-portrait (38).png"
                 alt="Shaun and Shannon"
@@ -179,7 +179,7 @@ export default function Resources() {
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">

@@ -511,7 +511,7 @@ export default function RewiredMethod() {
             <div className="space-y-4">
               <h3 className="font-bold text-lg text-white">Shaun Critzer</h3>
               <p className="text-sm">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">
