@@ -42,35 +42,29 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       <Navigation />
 
-      {/* SECTION 1: HERO - NEW DESIGN */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black py-6 md:py-10 lg:py-12">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left Side - Hero Image (40%) */}
-            <div className="order-2 lg:order-1 flex items-center justify-center">
-              <div className="relative w-full max-w-md">
-                <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-500/10 p-1 overflow-hidden border-2 border-amber-500/50">
-                  <img
-                    src="/pro-creator-portrait (29).png"
-                    alt="Shaun Critzer - Speaker, Author, Recovery Coach"
-                    className="w-full h-full object-cover object-center rounded-xl"
-                  />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 rounded-b-2xl">
-                  <p className="text-white font-semibold text-center">Shaun Critzer</p>
-                  <p className="text-gray-300 text-sm text-center">Author, Speaker, Entrepreneur</p>
-                </div>
-              </div>
+      {/* SECTION 1: HERO - REDESIGNED */}
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+            {/* LEFT: Image */}
+            <div className="flex justify-center lg:justify-start">
+              <img
+                src="/pro-creator-portrait (29).png"
+                alt="Shaun Critzer"
+                className="rounded-lg shadow-2xl max-w-md w-full object-cover"
+              />
             </div>
 
-            {/* Right Side - Headline + Email Capture (60%) */}
-            <div className="order-1 lg:order-2 flex flex-col justify-center space-y-6 text-white">
-              {/* Main Headline */}
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            {/* RIGHT: Content + Form */}
+            <div className="flex flex-col justify-between min-h-full space-y-8">
+
+              {/* Top: Headline + Description */}
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-6 text-white">
                   Break Free From Compulsive Behaviors Through{" "}
                   <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
                     Nervous System Regulation
@@ -78,78 +72,71 @@ export default function Home() {
                   —Not Willpower
                 </h1>
 
-                <p className="text-lg md:text-xl text-gray-300">
+                <p className="text-lg text-gray-300 mb-4">
                   Evidence-based recovery guided by the REWIRED methodology
+                </p>
+
+                <p className="text-gray-400">
+                  Traditional programs focus on willpower. REWIRED teaches you to
+                  regulate your nervous system—the actual root of compulsive behavior.
+                  No shame. No guesswork. Just science-backed tools that work.
                 </p>
               </div>
 
-              {/* Email Capture Box */}
-              <Card className="bg-gray-800/50 border-2 border-amber-500/50 p-5 md:p-6 backdrop-blur-sm">
-                <div className="space-y-4">
-                  {/* Box Headline */}
-                  <h3 className="text-xl md:text-2xl font-bold text-amber-400">
-                    Start Your Transformation Today
-                  </h3>
+              {/* Bottom: Email Capture (elongated) */}
+              <div className="bg-gray-800 border-2 border-amber-500 rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-amber-400 mb-4">
+                  Start Your Transformation Today
+                </h2>
 
-                  {/* Value Props */}
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
-                      <p className="text-white">First 3 chapters of <em>Crooked Lines</em> memoir</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
-                      <p className="text-white">Free access to AI Recovery Coach</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
-                      <p className="text-white">Nervous system regulation toolkit</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-amber-400 mt-1 flex-shrink-0" />
-                      <p className="text-white">5-day email series on breaking compulsive patterns</p>
-                    </div>
-                  </div>
+                <ul className="space-y-3 mb-6 text-gray-300">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-teal-400 mt-1 flex-shrink-0" />
+                    <span>First 3 chapters of <em>Crooked Lines</em> memoir</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-teal-400 mt-1 flex-shrink-0" />
+                    <span>Free access to AI Recovery Coach</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-teal-400 mt-1 flex-shrink-0" />
+                    <span>Nervous system regulation toolkit</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-teal-400 mt-1 flex-shrink-0" />
+                    <span>5-day email series on breaking compulsive patterns</span>
+                  </li>
+                </ul>
 
-                  {/* Email Form */}
-                  <form onSubmit={handleEmailSubmit} className="space-y-3">
-                    <Input
-                      type="email"
-                      placeholder="Enter your email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={isSubmitting}
-                      className="h-12 text-base bg-white text-black border-amber-500 focus:ring-2 focus:ring-amber-500"
-                    />
-                    <Button
-                      type="submit"
-                      size="lg"
-                      disabled={isSubmitting}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold text-lg h-12"
-                    >
-                      {isSubmitting ? "Processing..." : "Get Free Access"}
-                    </Button>
-                    <p className="text-xs text-gray-400 text-center">
-                      No spam. Unsubscribe anytime.
-                    </p>
-                  </form>
+                <form onSubmit={handleEmailSubmit} className="space-y-4">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 focus:border-teal-400 text-white"
+                  />
 
-                  {/* Social Proof */}
-                  <p className="text-sm text-gray-300 text-center">
-                    Join thousands of people rewiring their nervous system
-                  </p>
-                </div>
-              </Card>
-
-              {/* Secondary CTA */}
-              <div className="text-center lg:text-left">
-                <Link href="/products">
-                  <Button variant="link" className="text-amber-400 hover:text-amber-300 p-0 h-auto text-base">
-                    Explore Courses <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-4 rounded-lg transition"
+                  >
+                    {isSubmitting ? "Processing..." : "Get Free Access"}
                   </Button>
-                </Link>
+
+                  <p className="text-sm text-gray-500 text-center mt-3">
+                    No spam. Unsubscribe anytime.
+                  </p>
+                </form>
+
+                <p className="text-sm text-gray-300 text-center mt-4">
+                  Join thousands of people rewiring their nervous system
+                </p>
               </div>
+
             </div>
           </div>
         </div>
@@ -497,116 +484,121 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 5: CREDIBILITY - About Shaun */}
-      <section className="py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
-            {/* Left Side - Image */}
-            <div className="flex items-center justify-center">
+      {/* SECTION 5: BENT, NOT BROKEN - REDESIGNED */}
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
+        <div className="max-w-6xl mx-auto px-4">
+
+          <h2 className="text-4xl lg:text-5xl font-bold text-center mb-12 text-white">
+            Bent, Not Broken
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
+
+            {/* LEFT: Family Photo */}
+            <div className="flex justify-center">
               <img
                 src="/family-of-5-fixed.png"
-                alt="Shaun Critzer with family - Recovery and Redemption"
-                className="w-full h-auto max-w-md object-contain rounded-lg"
+                alt="Shaun Critzer with family"
+                className="rounded-lg shadow-2xl w-full max-w-lg"
               />
             </div>
 
-            {/* Right Side - Story */}
-            <div className="flex flex-col justify-center space-y-4 text-white">
-              <h2 className="text-4xl md:text-5xl font-bold">
-                Bent, Not Broken
-              </h2>
+            {/* RIGHT: Story */}
+            <div className="text-white">
+              <p className="text-xl text-teal-400 mb-4">
+                I'm Shaun Critzer. Over a decade in recovery.
+              </p>
 
-              <div className="prose prose-lg prose-invert space-y-3">
-                <p>
-                  I'm Shaun Critzer. <strong className="text-teal-400">Over a decade in recovery.</strong>
-                </p>
+              <p className="text-lg text-gray-300 mb-4">
+                Former Mr. Teen USA (1998). Co-CEO of Digital Gravity. Author, Speaker,
+                and Recovery Coach specializing in nervous system-based addiction recovery.
+              </p>
 
-                <p>
-                  Former Mr. Teen USA (1998). Co-CEO of Digital Gravity. Author, Speaker, and Recovery Coach specializing in nervous system-based addiction recovery.
-                </p>
+              <p className="text-gray-400 mb-4">
+                I spent years thinking I was broken. That I just needed more willpower.
+                More discipline. More strength.
+              </p>
 
-                <p>
-                  I spent years thinking I was broken. That I just needed more willpower.
-                  More discipline. More strength.
-                </p>
+              <p className="text-amber-500 font-bold text-xl mb-4">
+                I was wrong.
+              </p>
 
-                <p className="text-xl font-bold text-amber-400">
-                  I was wrong.
-                </p>
+              <p className="text-gray-400 mb-6">
+                What I needed was to understand my nervous system. To learn that
+                addiction isn't a character defect—it's dysregulation.
+              </p>
 
-                <p>
-                  What I needed was to understand my nervous system.
-                  To learn that addiction isn't a character defect—it's dysregulation.
-                </p>
+              <p className="text-gray-300 mb-6">
+                I wrote a memoir (<em>Crooked Lines</em>) about my journey from chaos to
+                wholeness. I built REWIRED to help you do the same.
+              </p>
 
-                <p>
-                  I wrote a memoir (<em>Crooked Lines</em>) about my journey from chaos to wholeness.
-                  I built REWIRED to help you do the same.
-                </p>
-
-                <div className="bg-gray-800 border-l-4 border-teal-500 p-6 my-6">
-                  <p className="font-semibold text-teal-400 mb-3">This isn't about:</p>
-                  <ul className="space-y-2">
-                    <li>• Perfection → It's about <strong>progress</strong></li>
-                    <li>• Willpower → It's about <strong>nervous system regulation</strong></li>
-                    <li>• Being "fixed" → It's about being <strong>free</strong></li>
-                  </ul>
-                </div>
-
-                <p className="text-xl font-bold text-white">
-                  You're not broken. You're dysregulated.
-                </p>
-
-                <p className="text-xl font-bold text-teal-400">
-                  And that can change.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <Link href="/about">
-                  <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-black">
-                    Read My Story
-                  </Button>
-                </Link>
-                <Link href="/memoir">
-                  <Button size="lg" className="w-full bg-amber-500 hover:bg-amber-600">
-                    Get the Book
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="flex flex-col gap-3 text-sm text-gray-300 pt-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">📖</span>
-                  <span>Author of "Crooked Lines"</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">🏆</span>
-                  <span>1998 Mr. Teen USA</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">💼</span>
-                  <span>Co-Founder of Digital Gravity</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                  <span>Married to Shannon, father to Landon, Cameron, and Brody</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">🎤</span>
-                  <span>Recovery Advocate</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">🧩</span>
-                  <span>Special Needs Parent/Advocate</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">💪</span>
-                  <span>Health and Fitness Expert</span>
-                </div>
+              <div className="bg-gray-800 border-l-4 border-teal-400 p-6 rounded mb-6">
+                <h3 className="font-bold text-teal-400 mb-3">This isn't about:</h3>
+                <ul className="space-y-2 text-gray-300">
+                  <li>• Perfection → It's about <strong>progress</strong></li>
+                  <li>• Willpower → It's about <strong>nervous system regulation</strong></li>
+                  <li>• Being "fixed" → It's about being <strong>free</strong></li>
+                </ul>
               </div>
             </div>
+
           </div>
+
+          <div className="text-center mb-16">
+            <p className="text-2xl text-white font-bold mb-2">
+              You're not broken. You're dysregulated.
+            </p>
+            <p className="text-xl text-teal-400 mb-8">
+              And that can change.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/about">
+                <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-8 py-6 text-lg">
+                  Read My Story
+                </Button>
+              </Link>
+              <Link href="/memoir">
+                <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-6 text-lg font-bold">
+                  Get the Book
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Credentials */}
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 text-center text-white">
+            <div>
+              <div className="text-3xl mb-2">📖</div>
+              <p className="font-bold">Author of "Crooked Lines"</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">🏆</div>
+              <p className="font-bold">1998 Mr. Teen USA</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">🏢</div>
+              <p className="font-bold">Co-Founder of Digital Gravity</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">👨‍👩‍👧‍👦</div>
+              <p className="font-bold">Married to Shannon, father to Landon, Cameron, and Brody</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">🎤</div>
+              <p className="font-bold">Recovery Advocate</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">🧩</div>
+              <p className="font-bold">Special Needs Parent/Advocate</p>
+            </div>
+            <div className="lg:col-start-2">
+              <div className="text-3xl mb-2">💪</div>
+              <p className="font-bold">Health and Fitness Expert</p>
+            </div>
+          </div>
+
         </div>
       </section>
 

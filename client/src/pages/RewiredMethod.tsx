@@ -286,7 +286,7 @@ export default function RewiredMethod() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       {/* Navigation - Matching Home Page */}
       <Navigation />
 
