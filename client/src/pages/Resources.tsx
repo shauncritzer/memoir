@@ -87,7 +87,7 @@ export default function Resources() {
             {/* RIGHT: Photo */}
             <div className="flex justify-center">
               <img
-                src="/pro-creator-portrait (29).png"
+                src="/shaun-stage-speaking-angle2.png"
                 alt="Shaun Critzer"
                 className="rounded-lg shadow-2xl w-full max-w-md object-cover"
               />

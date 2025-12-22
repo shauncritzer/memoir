@@ -13,7 +13,7 @@ export default function About() {
       {/* Hero Image Section */}
       <section className="relative h-96">
         <img
-          src="/pro-creator-portrait (38).png"
+          src="/couple-smiling-bw.png"
           alt="Shaun and Shannon Critzer"
           className="w-full h-full object-cover object-center"
         />

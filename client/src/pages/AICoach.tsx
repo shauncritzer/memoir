@@ -229,7 +229,7 @@ export default function AICoach() {
     : MAX_ANONYMOUS_MESSAGES - localMessageCount;
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white pt-16">
       {/* Email Capture Modal */}
       <Dialog open={showEmailModal} onOpenChange={setShowEmailModal}>
         <DialogContent className="bg-gradient-to-br from-gray-900 to-black border-yellow-600/50 text-white">
