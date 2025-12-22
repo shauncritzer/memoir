@@ -16,7 +16,7 @@ export default function Memoir() {
 
           {/* Book Cover Animation - Centered */}
           <div className="flex justify-center mb-12">
-            <div className="w-full max-w-xl">
+            <div className="w-full max-w-xl relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
                 <video
                   src="/memoir-animated.mp4"
@@ -43,7 +43,6 @@ export default function Memoir() {
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
               <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
-              </div>
             </div>
           </div>
 
