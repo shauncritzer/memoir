@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Download, Star } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 
 export default function Memoir() {
+  const [videoEnded, setVideoEnded] = useState(false);
+
   return (
     <div className="min-h-screen pt-16">
       {/* Navigation */}
@@ -18,27 +21,30 @@ export default function Memoir() {
           <div className="flex justify-center mb-12">
             <div className="w-full max-w-xl relative">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
-                <video
-                  src="/memoir-animated.mp4"
-                  poster="/memoir-cover-final-v6.png"
-                  autoPlay
-                  muted
-                  playsInline
-                  preload="auto"
-                  className="w-full h-full object-contain"
-                  onLoadedMetadata={(e) => {
-                    // Ensure video plays to the very end
-                    const video = e.currentTarget;
-                    video.currentTime = 0;
-                  }}
-                  onEnded={(e) => {
-                    // Stay on final frame after animation completes
-                    const video = e.currentTarget;
-                    video.pause();
-                    // Ensure we're at the last frame, not before
-                    video.currentTime = video.duration;
-                  }}
-                />
+                {!videoEnded ? (
+                  <video
+                    src="/memoir-animated.mp4"
+                    poster="/memoir-cover-final-v6.png"
+                    autoPlay
+                    muted
+                    playsInline
+                    preload="auto"
+                    className="w-full h-full object-contain"
+                    onLoadedMetadata={(e) => {
+                      const video = e.currentTarget;
+                      video.currentTime = 0;
+                    }}
+                    onEnded={() => {
+                      setVideoEnded(true);
+                    }}
+                  />
+                ) : (
+                  <img
+                    src="/memoir-cover-final-v6.png"
+                    alt="Crooked Lines: Bent, Not Broken - Book Cover"
+                    className="w-full h-full object-contain"
+                  />
+                )}
               </div>
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
