@@ -10,18 +10,19 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <Navigation />
 
-      {/* Hero Image Section */}
-      <section className="relative h-96">
-        <img
-          src="/pro-creator-portrait (38).png"
-          alt="Shaun and Shannon Critzer"
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 to-gray-900"></div>
+      {/* Hero Section - Gradient Background (no image) */}
+      <section className="relative h-96 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80"></div>
 
         {/* Overlay text */}
-        <div className="absolute bottom-8 left-0 right-0 text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
             From Champion to Crisis to{" "}
             <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
               Comeback
@@ -88,7 +89,7 @@ export default function About() {
             <div className="space-y-6">
               <div className="rounded-2xl overflow-hidden">
                 <img 
-                  src="/shaun-shannon-bw.jpg" 
+                  src="/couple-smiling-bw.png" 
                   alt="Shaun and Shannon Critzer" 
                   className="w-full h-auto"
                 />

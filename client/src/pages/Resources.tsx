@@ -46,7 +46,7 @@ export default function Resources() {
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
         <div className="max-w-6xl mx-auto px-4">
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-12">
 
             {/* LEFT: Extended Text */}
             <div className="text-white">
@@ -68,31 +68,34 @@ export default function Resources() {
                 you where you are.
               </p>
 
-              <p className="text-gray-400 mb-6">
+              <p className="text-gray-400">
                 Each tool is grounded in polyvagal theory, trauma-informed care, and
                 evidence-based practices. No pseudoscience. No shame. Just practical
                 strategies that work.
               </p>
-
-              <div className="bg-gray-800 border-l-4 border-teal-400 p-6 rounded">
-                <p className="text-gray-300 italic">
-                  "These aren't just theoretical concepts—they're the exact practices
-                  I used (and still use) to regulate my nervous system daily. I'm sharing
-                  them because they work, and everyone deserves access to tools that heal."
-                </p>
-                <p className="text-teal-400 font-bold mt-3">— Shaun Critzer</p>
-              </div>
             </div>
 
-            {/* RIGHT: Photo */}
-            <div className="flex justify-center">
+            {/* RIGHT: Photo - ENLARGED */}
+            <div className="flex justify-center lg:justify-end">
               <img
                 src="/shaun-stage-speaking-angle2.png"
                 alt="Shaun Critzer"
-                className="rounded-lg shadow-2xl w-full max-w-md object-cover"
+                className="rounded-lg shadow-2xl w-full max-w-lg object-cover"
               />
             </div>
 
+          </div>
+
+          {/* Quote Section - SPREAD OUT HORIZONTALLY */}
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gray-800 border-l-4 border-teal-400 p-8 rounded-lg">
+              <p className="text-gray-300 italic text-lg leading-relaxed">
+                "These aren't just theoretical concepts—they're the exact practices
+                I used (and still use) to regulate my nervous system daily. I'm sharing
+                them because they work, and everyone deserves access to tools that heal."
+              </p>
+              <p className="text-teal-400 font-bold mt-4 text-lg">— Shaun Critzer</p>
+            </div>
           </div>
         </div>
       </section>
