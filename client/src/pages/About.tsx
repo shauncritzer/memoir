@@ -10,8 +10,8 @@ export default function About() {
       {/* Navigation - Same as Home */}
       <Navigation />
 
-      {/* Hero Section - Gradient Background (no image) */}
-      <section className="relative h-96 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
+      {/* Hero Section - Gradient Background */}
+      <section className="relative h-80 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
         {/* Subtle texture overlay */}
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -31,71 +31,78 @@ export default function About() {
         </div>
       </section>
 
-      {/* Story Intro Section */}
-      <section className="py-12 bg-gradient-to-b from-background to-accent/20">
+      {/* Story Intro Section - Text Left, Photo Right */}
+      <section className="py-16 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
-              <p>
-                I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and over a decade into the greatest transformation of my life.
-              </p>
-              <p>
-                At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
-              </p>
-              <p>
-                What no one knew was that beneath the muscle and the medals, I was already running—running from childhood trauma I'd buried so deep I convinced myself it didn't exist.
-              </p>
-              <p>
-                The next 15 years were a descent I never saw coming. Alcohol. Drugs. A marriage that crumbled. Two kids I was losing. Jails. Psych wards. Rock bottoms I didn't know existed.
-              </p>
-              <p>
-                By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
-              </p>
-              <p>
-                Years ago, I chose recovery. Not just sobriety—actual healing.
-              </p>
-              <p className="font-semibold text-foreground">
-                Today, I help others do the same.
-              </p>
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* LEFT: Intro Text */}
+              <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+                <p>
+                  I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and over a decade into the greatest transformation of my life.
+                </p>
+                <p>
+                  At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
+                </p>
+                <p>
+                  What no one knew was that beneath the muscle and the medals, I was already running—running from childhood trauma I'd buried so deep I convinced myself it didn't exist.
+                </p>
+                <p>
+                  The next 15 years were a descent I never saw coming. Alcohol. Drugs. A marriage that crumbled. Two kids I was losing. Jails. Psych wards. Rock bottoms I didn't know existed.
+                </p>
+                <p>
+                  By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
+                </p>
+                <p>
+                  Years ago, I chose recovery. Not just sobriety—actual healing.
+                </p>
+                <p className="font-semibold text-foreground text-xl">
+                  Today, I help others do the same.
+                </p>
+              </div>
+
+              {/* RIGHT: Couple Photo */}
+              <div className="flex justify-center lg:justify-end">
+                <div className="rounded-2xl overflow-hidden shadow-2xl max-w-md">
+                  <img 
+                    src="/couple-smiling-bw.png" 
+                    alt="Shaun and Shannon Critzer" 
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* My Story Section */}
+      {/* My Story Section - Full Width Text */}
       <section className="py-20">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-6 md:gap-12 items-start md:items-center">
-            <div className="space-y-6">
-              <h2 className="text-4xl font-bold">My Story</h2>
-              <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
-                <p>
-                  I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood trauma that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
-                </p>
-                <p>
-                  By my late teens, I discovered alcohol and drugs. They worked—until they didn't. What started as magic turned into self-medication, which then spiraled into misery and full-blown addiction. I got married, had two beautiful children—my son Landon and my daughter Cameron, built a successful career, and maintained the illusion of control. But inside, I was dying.
-                </p>
-                <p>
-                  The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
-                </p>
-                <p>
-                  On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
-                </p>
-                <p>
-                  Today, I'm over a decade into recovery. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
-                </p>
-              </div>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold mb-8">My Story</h2>
+            <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+              <p>
+                I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood trauma that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
+              </p>
+              <p>
+                By my late teens, I discovered alcohol and drugs. They worked—until they didn't. What started as magic turned into self-medication, which then spiraled into misery and full-blown addiction. I got married, had two beautiful children—my son Landon and my daughter Cameron, built a successful career, and maintained the illusion of control. But inside, I was dying.
+              </p>
+              <p>
+                The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
+              </p>
+              <p>
+                On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
+              </p>
+              <p>
+                Today, I'm over a decade into recovery. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
+              </p>
             </div>
-            <div className="space-y-6">
-              <div className="rounded-2xl overflow-hidden">
-                <img 
-                  src="/couple-smiling-bw.png" 
-                  alt="Shaun and Shannon Critzer" 
-                  className="w-full h-auto"
-                />
-              </div>
+
+            {/* Info Cards - Below My Story */}
+            <div className="mt-12">
               <Card className="p-8 bg-gradient-to-br from-primary/10 to-secondary/10">
-                <div className="space-y-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="flex items-start space-x-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <Heart className="h-5 w-5 text-primary" />
@@ -138,7 +145,7 @@ export default function About() {
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">Health & Fitness Expert</h3>
-                      <p className="text-sm text-muted-foreground">Former competitive bodybuilder and lifelong advocate for physical wellness</p>
+                      <p className="text-sm text-muted-foreground">Former competitive bodybuilder</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -146,8 +153,8 @@ export default function About() {
                       <span className="text-xl">🧩</span>
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">Special Needs Parent & Advocate</h3>
-                      <p className="text-sm text-muted-foreground">Navigating and championing neurodiversity in family life</p>
+                      <h3 className="font-bold text-lg">Special Needs Advocate</h3>
+                      <p className="text-sm text-muted-foreground">Championing neurodiversity</p>
                     </div>
                   </div>
                 </div>
