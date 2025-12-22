@@ -6,9 +6,9 @@ import { Link } from "wouter";
 
 export default function Memoir() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
         <div className="container flex h-16 items-center justify-between">
           <Logo />
           <div className="flex items-center space-x-6">
@@ -39,12 +39,13 @@ export default function Memoir() {
         </div>
       </nav>
 
-      {/* Hero Section with Book Cover */}
+      {/* Hero Section with Book Cover - Properly Centered */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Book Cover */}
-            <div className="relative">
+        <div className="max-w-7xl mx-auto px-4">
+
+          {/* Book Cover Animation - Centered */}
+          <div className="flex justify-center mb-12">
+            <div className="w-full max-w-xl">
               <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-white">
                 <video
                   src="/memoir-animated.mp4"
@@ -71,49 +72,53 @@ export default function Memoir() {
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
               <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
-            </div>
-
-            {/* Book Info */}
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                  Crooked Lines:{" "}
-                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Bent, Not Broken
-                  </span>
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 text-amber-500">
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <Star className="h-5 w-5 fill-current" />
-                <span className="text-muted-foreground ml-2">(Coming 2025)</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/resources">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                    <Download className="mr-2 h-5 w-5" />
-                    Download First 3 Chapters Free
-                  </Button>
-                </Link>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-lg px-8"
-                  disabled
-                >
-                  Pre-Order on Amazon (Coming 2025)
-                </Button>
               </div>
             </div>
           </div>
+
+          {/* Book Info - Properly Centered */}
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">
+              Crooked Lines:{" "}
+              <span className="text-teal-400">Bent,</span>{" "}
+              <span className="text-amber-500">Not Broken</span>
+            </h1>
+
+            <p className="text-xl text-gray-600 mb-8">
+              A raw, unflinching memoir about childhood trauma, addiction, rock bottom,
+              and the redemption that comes from choosing recovery one day at a time.
+            </p>
+
+            {/* Stars + Coming 2025 */}
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <div className="flex text-amber-500 text-2xl">
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+                <Star className="h-5 w-5 fill-current" />
+              </div>
+              <span className="text-gray-500">(Coming 2025)</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/resources">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+                  <Download className="mr-2 h-5 w-5" />
+                  Download First 3 Chapters Free
+                </Button>
+              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8"
+                disabled
+              >
+                Pre-Order on Amazon (Coming 2025)
+              </Button>
+            </div>
+          </div>
+
         </div>
       </section>
 

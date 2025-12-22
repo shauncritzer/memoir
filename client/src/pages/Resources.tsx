@@ -38,38 +38,61 @@ export default function Resources() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       {/* Navigation */}
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="pt-12 pb-8 bg-gradient-to-b from-background to-accent/20">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
-            {/* Text on left - Positioned higher */}
-            <div className="space-y-6 pt-4">
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                Free{" "}
-                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Recovery Resources
-                </span>
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Tools, guides, and downloads to support your recovery journey. All free, no strings attached—just enter your email to download.
+      {/* Hero Section - Redesigned */}
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
+        <div className="max-w-6xl mx-auto px-4">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+
+            {/* LEFT: Extended Text */}
+            <div className="text-white">
+              <h2 className="text-4xl font-bold mb-6">Free Recovery Resources</h2>
+
+              <p className="text-xl text-gray-300 mb-4">
+                Tools, guides, and downloads to support your nervous system regulation journey.
               </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Real resources from real recovery. These tools helped Shannon and me navigate our journey from chaos to wholeness. Everything here is free—no strings attached—because healing shouldn't have a paywall.
+
+              <p className="text-gray-400 mb-6">
+                Real resources from real recovery. These tools helped me navigate my
+                journey from chaos to wholeness. Everything here is free—no strings
+                attached—because healing shouldn't have a paywall.
               </p>
+
+              <p className="text-gray-400 mb-6">
+                Whether you're just starting to understand nervous system dysregulation
+                or you've been working on recovery for years, these resources will meet
+                you where you are.
+              </p>
+
+              <p className="text-gray-400 mb-6">
+                Each tool is grounded in polyvagal theory, trauma-informed care, and
+                evidence-based practices. No pseudoscience. No shame. Just practical
+                strategies that work.
+              </p>
+
+              <div className="bg-gray-800 border-l-4 border-teal-400 p-6 rounded">
+                <p className="text-gray-300 italic">
+                  "These aren't just theoretical concepts—they're the exact practices
+                  I used (and still use) to regulate my nervous system daily. I'm sharing
+                  them because they work, and everyone deserves access to tools that heal."
+                </p>
+                <p className="text-teal-400 font-bold mt-3">— Shaun Critzer</p>
+              </div>
             </div>
 
-            {/* Photo on right - Positioned lower with top margin */}
-            <div className="flex justify-center mt-8 lg:mt-12">
+            {/* RIGHT: Photo */}
+            <div className="flex justify-center">
               <img
-                src="/pro-creator-portrait (38).png"
-                alt="Shaun and Shannon"
-                className="w-full max-w-md h-auto object-contain rounded-lg shadow-xl"
+                src="/pro-creator-portrait (29).png"
+                alt="Shaun Critzer"
+                className="rounded-lg shadow-2xl w-full max-w-md object-cover"
               />
             </div>
+
           </div>
         </div>
       </section>

@@ -17,7 +17,7 @@ export function Navigation() {
   ];
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50 shadow-lg">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-3">
           <img 
