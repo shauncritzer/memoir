@@ -533,14 +533,14 @@
 ## Case Study Subdomain - January 2026
 
 ### Case Study Infrastructure
-- [ ] Create case study landing page (casestudy.shauncritzer.com or /case-study route)
-- [ ] Build multi-tab dashboard (Overview, Day 30, Day 60, Day 90, Tools, Lessons)
-- [ ] Add metrics visualization with Chart.js (traffic, email, revenue charts)
-- [ ] Create hypothetical data for visual example to present to Michael
-- [ ] Design transparent numbers section (GA4, ConvertKit, Stripe screenshots)
-- [ ] Build tools & stack breakdown page
-- [ ] Create lessons learned section
-- [ ] Add blueprint/replication guide
+- [x] Create case study landing page (casestudy.shauncritzer.com or /case-study route)
+- [x] Build multi-tab dashboard (Overview, Day 30, Day 60, Day 90, Tools, Lessons)
+- [x] Add metrics visualization with Chart.js (traffic, email, revenue charts)
+- [x] Create hypothetical data for visual example to present to Michael)
+- [x] Design transparent numbers section (GA4, ConvertKit, Stripe screenshots)
+- [x] Build tools & stack breakdown page
+- [x] Create lessons learned section
+- [x] Add blueprint/replication guide
 - [ ] Set up subdomain routing (if using subdomain approach)
 - [ ] Test deployment through GitHub to Railway
 
