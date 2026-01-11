@@ -528,3 +528,37 @@
 - [x] Replace family photo on Resources page (fix moiré pattern on striped shirts)
 - [x] Test AI Coach integration end-to-end
 - [x] Push all changes to GitHub memoir repo (saved as checkpoint 00f78997)
+
+
+## Case Study Subdomain - January 2026
+
+### Case Study Infrastructure
+- [ ] Create case study landing page (casestudy.shauncritzer.com or /case-study route)
+- [ ] Build multi-tab dashboard (Overview, Day 30, Day 60, Day 90, Tools, Lessons)
+- [ ] Add metrics visualization with Chart.js (traffic, email, revenue charts)
+- [ ] Create hypothetical data for visual example to present to Michael
+- [ ] Design transparent numbers section (GA4, ConvertKit, Stripe screenshots)
+- [ ] Build tools & stack breakdown page
+- [ ] Create lessons learned section
+- [ ] Add blueprint/replication guide
+- [ ] Set up subdomain routing (if using subdomain approach)
+- [ ] Test deployment through GitHub to Railway
+
+### Case Study Content
+- [ ] Document Day 0 baseline metrics
+- [ ] Take Day 30 screenshots (GA4, ConvertKit, Stripe)
+- [ ] Write Day 30 lessons learned
+- [ ] Take Day 60 screenshots and update
+- [ ] Write Day 60 lessons learned
+- [ ] Take Day 90 screenshots and update
+- [ ] Write Day 90 final results
+- [ ] Create complete blueprint document
+- [ ] Add CTA to Digital Gravity waitlist
+
+### Integration with Main Offer
+- [ ] Upload HeyGen videos to course platform
+- [ ] Create workbooks for 7-Day Reset
+- [ ] Create workbooks for 30-Day Foundation
+- [ ] Design bonus materials
+- [ ] Add free Crooked Lines book offer for purchasers
+- [ ] Set up automated delivery system for book + bonuses

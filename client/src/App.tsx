@@ -16,6 +16,7 @@ import Members from "./pages/Members";
 import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
+import CaseStudy from "./pages/CaseStudy";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/admin/videos" component={AdminVideos} />
       <Route path="/products" component={Products} />
       <Route path="/ai-coach" component={AICoach} />
+      <Route path="/case-study" component={CaseStudy} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
       <Route path={"/404"} component={NotFound} />
