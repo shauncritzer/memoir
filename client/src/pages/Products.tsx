@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,12 +36,12 @@ export default function Products() {
       name: "Crooked Lines: Bent, Not Broken",
       tagline: "The Memoir",
       price: "$19.99",
-      priceId: "price_1SbFTrC2dOpPzSOOn2zoiXKU", // Crooked Lines memoir
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MEMOIR || "price_1SbOUTC2dOpPzSOOOdxient8",
       description: "A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.",
       features: [
         "13-year recovery journey from rock bottom to redemption",
         "Childhood trauma and its impact on addiction",
-        "Process addictions: porn, affairs, bodybuilding",
+        "Process addictions: compulsive behaviors, affairs, bodybuilding",
         "Nervous system dysregulation explained",
         "Honest account of relapse and resilience",
         "Hope for those who feel broken beyond repair",
@@ -54,7 +55,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$27",
-      priceId: "price_1SbFU2C2dOpPzSOOLt4IGRyn", // 7-Day Reset
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU",
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -73,7 +74,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Transformation",
       price: "$97",
-      priceId: "price_1SbFUCC2dOpPzSOOGwI21lbV", // From Broken to Whole
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokfJUQ",
       description: "A deep dive into trauma healing, inner child work, and building a life worth staying sober for.",
       features: [
         "8 comprehensive modules over 30 days",
@@ -95,7 +96,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: "price_1SbFUMC2dOpPzSOO1zIsha69", // Bent Not Broken Circle
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3jC2dOpPzSOOR7dDuGtY",
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
@@ -114,37 +115,8 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="font-serif text-2xl font-bold text-primary">Shaun Critzer</span>
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium text-primary">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/get-started" className="text-sm font-medium hover:text-primary transition-colors">
-              Get Started
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* Navigation */}
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 px-4">
@@ -215,13 +187,120 @@ export default function Products() {
                         Loading...
                       </>
                     ) : (
-                      `Get ${product.name}`
+                      product.id === "crooked-lines-memoir" ? "Get the Book Now" : `Get ${product.name}`
                     )}
                   </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Comparison Table */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container max-w-6xl mx-auto">
+          <h2 className="font-serif text-3xl font-bold mb-8 text-center">Compare Our Programs</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-gray-300">
+                  <th className="text-left p-4 font-semibold text-gray-600">Feature</th>
+                  <th className="text-center p-4 bg-amber-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">7-Day Reset</div>
+                    <div className="text-sm text-muted-foreground">Recovery Jumpstart</div>
+                  </th>
+                  <th className="text-center p-4 bg-teal-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">30-Day Course</div>
+                    <div className="text-sm text-muted-foreground">From Broken to Whole</div>
+                  </th>
+                  <th className="text-center p-4 bg-purple-50 border-l border-gray-200">
+                    <div className="font-bold text-lg">Monthly Circle</div>
+                    <div className="text-sm text-muted-foreground">Bent Not Broken</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Price</td>
+                  <td className="text-center p-4 bg-amber-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-amber-700">$27</span>
+                  </td>
+                  <td className="text-center p-4 bg-teal-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-teal-700">$97</span>
+                  </td>
+                  <td className="text-center p-4 bg-purple-50/50 border-l border-gray-200">
+                    <span className="text-2xl font-bold text-purple-700">$29/mo</span>
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Best For</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Getting started</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Deep trauma work</td>
+                  <td className="text-center p-4 text-sm border-l border-gray-200">Ongoing support</td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Length</td>
+                  <td className="text-center p-4 border-l border-gray-200">7 days</td>
+                  <td className="text-center p-4 border-l border-gray-200">30 days</td>
+                  <td className="text-center p-4 border-l border-gray-200">Ongoing</td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Community Access</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Live Coaching</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <span className="text-gray-400">✗</span>
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Workbook & Exercises</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b hover:bg-gray-50">
+                  <td className="p-4 font-semibold">Lifetime Access</td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 border-l border-gray-200">
+                    <Check className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="text-center p-4 text-sm text-muted-foreground border-l border-gray-200">
+                    While subscribed
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-center text-muted-foreground mt-6 text-sm">
+            Not sure which is right for you? <Link href="/ai-coach" className="text-primary hover:underline">Ask our AI Coach</Link> for personalized recommendations.
+          </p>
         </div>
       </section>
 
@@ -282,7 +361,7 @@ export default function Products() {
       {/* Footer */}
       <footer className="border-t py-12 px-4 bg-muted/30">
         <div className="container max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div>
               <h3 className="font-serif text-xl font-bold mb-4">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -292,17 +371,20 @@ export default function Products() {
             <div>
               <h4 className="font-semibold mb-4">Navigation</h4>
               <nav className="flex flex-col gap-2 text-sm">
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Home
-                </Link>
                 <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
                   About
                 </Link>
+                <Link href="/memoir" className="text-muted-foreground hover:text-primary transition-colors">
+                  Memoir
+                </Link>
+                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
+                  Products
+                </Link>
+                <Link href="/ai-coach" className="text-muted-foreground hover:text-primary transition-colors">
+                  AI Coach
+                </Link>
                 <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
                   Blog
-                </Link>
-                <Link href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
-                  Resources
                 </Link>
               </nav>
             </div>
@@ -329,6 +411,20 @@ export default function Products() {
                   Find AA Meetings
                 </a>
               </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <nav className="flex flex-col gap-2 text-sm">
+                <Link href="/terms-of-use" className="text-muted-foreground hover:text-primary transition-colors">
+                  Terms of Use
+                </Link>
+                <Link href="/refund-policy" className="text-muted-foreground hover:text-primary transition-colors">
+                  Refund Policy
+                </Link>
+                <Link href="/faqs" className="text-muted-foreground hover:text-primary transition-colors">
+                  FAQs
+                </Link>
+              </nav>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">

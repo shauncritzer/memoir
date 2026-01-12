@@ -184,3 +184,18 @@ export const courseProgress = mysqlTable("course_progress", {
 
 export type CourseProgress = typeof courseProgress.$inferSelect;
 export type InsertCourseProgress = typeof courseProgress.$inferInsert;
+
+/**
+ * AI Coach users table - tracks message counts and access levels
+ */
+export const aiCoachUsers = mysqlTable("ai_coach_users", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  messageCount: int("message_count").default(0).notNull(),
+  hasUnlimitedAccess: int("has_unlimited_access").default(0).notNull(), // 0 = false, 1 = true
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AiCoachUser = typeof aiCoachUsers.$inferSelect;
+export type InsertAiCoachUser = typeof aiCoachUsers.$inferInsert;
