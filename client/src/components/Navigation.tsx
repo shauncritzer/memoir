@@ -9,7 +9,6 @@ export function Navigation() {
   const navLinks = [
     { href: "/about", label: "About" },
     { href: "/memoir", label: "The Memoir" },
-    { href: "/rewired-method", label: "REWIRED Method" },
     { href: "/blog", label: "Blog" },
     { href: "/resources", label: "Resources" },
     { href: "/products", label: "Products" },

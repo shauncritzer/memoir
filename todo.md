@@ -562,3 +562,212 @@
 - [ ] Design bonus materials
 - [ ] Add free Crooked Lines book offer for purchasers
 - [ ] Set up automated delivery system for book + bonuses
+
+## Case Study Mobile Fixes - January 2026
+- [x] Fix tab navigation overlapping content on mobile devices
+- [ ] Test mobile responsiveness across all case study tabs
+- [ ] Verify clickability of all buttons on mobile
+
+## SEO Improvements - January 2026
+- [x] Add proper meta title (30-60 characters)
+- [x] Add meta description (50-160 characters)
+- [x] Add meta keywords
+- [ ] Test SEO improvements with audit tool
+
+## Launch Preparation - January 2026
+
+### Website Fixes
+- [ ] Fix resources page layout (reduce image size, add more content/verbiage)
+- [ ] Add fitness/relationships emphasis to product descriptions
+- [ ] Add "Thriving Sober" guide as 4th free resource
+- [ ] Update product positioning for quality ICP (serious individuals with money)
+
+### Content Completion
+- [ ] Finish HeyGen videos Days 2-7
+- [ ] Create workbooks for 7-Day Reset
+- [ ] Create workbooks for 30-Day Course
+- [ ] Add fitness integration modules to 30-Day Course
+- [ ] Add relationships module to 30-Day Course
+
+### Launch Infrastructure
+- [ ] Set up email sequences for each product
+- [ ] Create social media accounts (Instagram, Facebook, LinkedIn, YouTube)
+- [ ] Develop social media content calendar
+- [ ] Set up Meta ads account and first campaign
+- [ ] Create launch announcement email
+
+### Marketing Materials
+- [ ] Create before/after fitness transformation graphics
+- [ ] Design social media post templates
+- [ ] Write launch announcement copy
+- [ ] Create testimonial collection system
+
+## Transformation Empire Expansion - Tony Robbins Model
+
+### Research & Analysis
+- [ ] Deep dive Tony Robbins product catalog and pricing
+- [ ] Analyze Tony's funnel strategy and customer journey
+- [ ] Study Tony's brand positioning (transformation vs. specific niche)
+- [ ] Document Tony's product ladder (low-ticket to high-ticket)
+- [ ] Analyze blog content strategy and SEO approach
+
+### Product Expansion Strategy
+- [ ] Create product roadmap beyond recovery (fitness, relationships, business, life mastery)
+- [ ] Design product ladder from $0 to $10K+
+- [ ] Map customer journey across multiple product categories
+- [ ] Identify which Tony Robbins-style products to create first
+- [ ] Plan affiliate/partnership strategy for products we don't create
+
+### Brand Evolution
+- [ ] Evolve positioning from "recovery guy" to "transformation guy"
+- [ ] Keep recovery as credibility anchor and entry point
+- [ ] Add fitness, relationships, business, life mastery categories
+- [ ] Design multi-category website architecture
+- [ ] Create content strategy across all transformation pillars
+
+
+## IMMEDIATE LAUNCH TASKS - January 2026 (This Week)
+### Content Review & Creation
+- [ ] Review Living Sober PDF and rename to "Thriving Sober"
+- [ ] Review 7-Day Reset workbook PDF (decide: PDF download or HTML interactive)
+- [ ] Review 30-Day "From Broken to Whole" workbook PDFs (Part 1 & 2)
+- [ ] Copy transformation photos to project assets folder
+- [ ] Create fitness philosophy content (based on upcoming voice recording)
+- [ ] Add nutrition guidance content placeholder
+
+### Website Updates - Resources Page
+- [ ] Reduce couple photo size by 30-40% on resources page
+- [ ] Add intro paragraph to resources page
+- [ ] Add "Thriving Sober" as 4th free resource
+- [ ] Test all resource downloads
+
+### Website Updates - Homepage & Transformation Story
+- [ ] Add before/after transformation photos to homepage hero
+- [ ] Create transformation story section (age 15 skinny/bullied → age 18 champion bodybuilder)
+- [ ] Add recent fitness photos (30s maintenance proof)
+- [ ] Update homepage copy to emphasize Recovery + Fitness + Relationships
+- [ ] Add "Top Teen Bodybuilder in Country, Top 3 in World" credibility
+
+### Website Updates - Product Descriptions
+- [ ] Update 7-Day Reset description (add fitness emphasis)
+- [ ] Update 30-Day Course description (add fitness + relationships modules)
+- [ ] Update Community description (add fitness accountability)
+- [ ] Add transformation positioning to all products
+
+### ConvertKit Integration
+- [ ] Build email capture forms for all lead magnets
+- [ ] Integrate ConvertKit API (V3 key: dZ4CxMb5Zwp-5jy87pwcvQ)
+- [ ] Set up tags for segmentation
+- [ ] Create automation workflows
+- [ ] Test email delivery system
+
+### Community Platform (Built-in)
+- [ ] Build member dashboard with login access
+- [ ] Create community discussion area
+- [ ] Add member directory
+- [ ] Build content delivery system (videos, workbooks, resources)
+- [ ] Add progress tracking features
+
+### Payment Integration
+- [ ] Set up Stripe payment links
+- [ ] Create $97 founding member pricing (first 20 people)
+- [ ] Add $297 full price (after founding members)
+- [ ] Set up $29/mo community membership (first 25 → then $97/mo)
+- [ ] Test complete checkout flow
+
+### 7-Day Reset Landing Page
+- [ ] Create free opt-in landing page
+- [ ] Add email capture form
+- [ ] Create thank you page with next steps
+- [ ] Set up email sequence (7 days)
+- [ ] Test complete funnel
+
+### Final Testing
+- [ ] Test user flow: Homepage → Lead Magnet → Email → Purchase → Community Access
+- [ ] Verify all forms work
+- [ ] Verify all emails send
+- [ ] Verify all payments process
+- [ ] Verify community access grants correctly
+- [ ] Push to GitHub/Railway for deployment
+
+### Launch Day (Friday)
+- [ ] Email personal list
+- [ ] Post on social media
+- [ ] Activate case study page link
+- [ ] Monitor signups and sales
+- [ ] Respond to questions/support requests
+
+
+## Video Production & Course Structure - January 2026
+### REWIRED 7-Day Framework
+- [ ] Finalize REWIRED 7-day structure (R-E-W-I-R-E-D, one letter per day)
+- [ ] Map existing Day 1 content to correct REWIRED day
+- [ ] Create content outline for remaining 6 days
+- [ ] Decide on video production method (alternatives to HeyGen)
+
+### 30-Day Course Structure
+- [ ] Design 30-day module framework
+- [ ] Determine number of modules and structure
+- [ ] Map content progression across 30 days
+- [ ] Decide if 30-day builds on 7-day or stands alone
+
+### Video Production Alternatives
+- [ ] Evaluate InVideo for video creation
+- [ ] Consider screen recording + voiceover approach
+- [ ] Explore simple talking head videos (self-recorded)
+- [ ] Assess slide deck + voiceover option
+- [ ] Decide final video production method
+
+
+## Marketing Strategy & Launch Plan - January 2026
+### Website Repositioning
+- [ ] Update homepage hero section with transformation story
+- [ ] Add fitness + relationships positioning throughout site
+- [ ] Update all product descriptions with new positioning
+- [ ] Create clear program comparison/selection guide
+- [ ] Add social proof section (testimonials placeholder)
+
+### Content Strategy
+- [ ] Define blog content pillars (recovery, fitness, relationships, mindset)
+- [ ] Create content calendar (first 30 days)
+- [ ] Set up blog infrastructure with visual editor
+- [ ] Write first 3-5 blog posts
+- [ ] Implement SEO strategy
+
+### Email Marketing
+- [ ] Design email funnel architecture
+- [ ] Write welcome sequence (7 emails)
+- [ ] Create 7-Day Reset email sequence
+- [ ] Set up ConvertKit integration
+- [ ] Build lead magnet opt-in forms
+
+### Social Media Strategy
+- [ ] Create new business-focused social accounts
+- [ ] Define content strategy per platform
+- [ ] Create first 2 weeks of content
+- [ ] Set up posting schedule
+- [ ] Design profile/cover images
+
+### Paid Ads Strategy
+- [ ] Define ad budget and platform priorities
+- [ ] Create ad creative concepts
+- [ ] Write ad copy variations
+- [ ] Set up tracking pixels
+- [ ] Design landing pages for ads
+
+### Program Launch Sequence
+- [ ] Determine which programs to launch first
+- [ ] Create launch timeline
+- [ ] Build sales/landing pages
+- [ ] Set up payment processing
+- [ ] Create launch email sequence
+
+
+## Website Fixes - January 15, 2026
+- [x] Fix 404 error on REWIRED method page
+- [ ] Fix memoir animation (showing static image instead of animation)
+- [x] Update resources page layout and content
+- [x] Restructure 7-Day Reset product ($27 - 7 videos 6-10min, workbooks, slide PDFs, Thriving Sober book)
+- [x] Restructure 30-Day Program product ($97 - free memoir copy, AI coach access, 30-day program, Thriving Sober book, workbooks, bonuses)
+- [x] Update product descriptions and pricing across site
+- [ ] Push all changes to GitHub memoir repo

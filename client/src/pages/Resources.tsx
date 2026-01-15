@@ -103,11 +103,14 @@ export default function Resources() {
                   Recovery Resources
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground">
-                Tools, guides, and downloads to support your recovery journey. All free, no strings attached—just enter your email to download.
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                Recovery isn't just about stopping—it's about starting. Starting to heal, starting to rebuild, starting to become the person you were meant to be before trauma and addiction took over.
+              </p>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                These free resources are designed to give you practical tools, honest guidance, and hope for your journey. No strings attached—just enter your email to download.
               </p>
             </div>
-            <div className="rounded-2xl overflow-hidden">
+            <div className="rounded-2xl overflow-hidden max-w-md mx-auto lg:mx-0">
               <img 
                 src="/pro-creator-portrait-38.png" 
                 alt="Shaun Critzer and Shannon" 
