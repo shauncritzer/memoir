@@ -387,13 +387,6 @@ export const appRouter = router({
         return getCourseProgress(ctx.user.id, input.productId);
       }),
 
-    getCourseContent: protectedProcedure
-      .input(z.object({ productId: z.string() }))
-      .query(async ({ input }) => {
-        const { getCourseContent } = await import("./db");
-        return getCourseContent(input.productId);
-      }),
-
     markLessonComplete: protectedProcedure
       .input(z.object({
         lessonId: z.number(),
@@ -1230,8 +1223,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               slug: "rewired-relief-toolkit",
               description: "A crisis-focused guide to regulating your nervous system when you need it most.",
               fileUrl: "/rewired-relief-toolkit.pdf",
-              type: "pdf",
-              status: "active",
+              isActive: 1,
             });
           }
 

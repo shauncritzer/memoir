@@ -17,8 +17,6 @@ import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
 import CaseStudy from "./pages/CaseStudy";
-import SevenDayReset from "./pages/SevenDayReset";
-import ThrivingSober from "./pages/ThrivingSober";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -37,8 +35,6 @@ function Router() {
       <Route path="/case-study" component={CaseStudy} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
-      <Route path="/7-day-reset" component={SevenDayReset} />
-      <Route path="/thriving-sober" component={ThrivingSober} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
