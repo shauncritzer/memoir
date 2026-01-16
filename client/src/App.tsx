@@ -17,6 +17,10 @@ import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
 import CaseStudy from "./pages/CaseStudy";
+import RewiredMethod from "./pages/RewiredMethod";
+import SevenDayReset from "./pages/SevenDayReset";
+import ThrivingSober from "./pages/ThrivingSober";
+import Success from "./pages/Success";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -33,6 +37,10 @@ function Router() {
       <Route path="/products" component={Products} />
       <Route path="/ai-coach" component={AICoach} />
       <Route path="/case-study" component={CaseStudy} />
+      <Route path="/rewired-method" component={RewiredMethod} />
+      <Route path="/7-day-reset" component={SevenDayReset} />
+      <Route path="/thriving-sober" component={ThrivingSober} />
+      <Route path="/success" component={Success} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
       <Route path={"/404"} component={NotFound} />

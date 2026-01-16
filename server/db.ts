@@ -646,3 +646,4 @@ export async function grantAiCoachUnlimitedAccess(email: string): Promise<boolea
     return false;
   }
 }
+
