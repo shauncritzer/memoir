@@ -12,13 +12,11 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogEditor from "./pages/BlogEditor";
 import Products from "./pages/Products";
-import RewiredMethod from "./pages/RewiredMethod";
 import Members from "./pages/Members";
 import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
 import CaseStudy from "./pages/CaseStudy";
-import SevenDayReset from "./pages/SevenDayReset";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,8 +25,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/memoir" component={Memoir} />
-        <Route path="/resources" component={Resources} />
-        <Route path="/rewired-method" component={RewiredMethod} />
+      <Route path="/resources" component={Resources} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
@@ -38,7 +35,6 @@ function Router() {
       <Route path="/case-study" component={CaseStudy} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
-      <Route path="/7-day-reset" component={SevenDayReset} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
