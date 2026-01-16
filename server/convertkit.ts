@@ -43,6 +43,7 @@ export const CONVERTKIT_TAGS = {
   REWIRED_INTEREST: 8012741, // TODO: Get correct ID from ConvertKit
   ACTIVE_SUBSCRIBER: 8012742, // TODO: Get correct ID from ConvertKit
   LEAD_MAGNET_DOWNLOADED: 8012743, // TODO: Get correct ID from ConvertKit
+  AI_COACH_USER: 8012744, // TODO: Get correct ID from ConvertKit - Tag for AI Coach email registrations
 };
 
 /**

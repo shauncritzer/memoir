@@ -96,7 +96,7 @@ export default function CaseStudy() {
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-6xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 mb-8 bg-white/80 backdrop-blur">
+            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 bg-white/80 backdrop-blur p-2 h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="day30">Day 30</TabsTrigger>
               <TabsTrigger value="day60">Day 60</TabsTrigger>

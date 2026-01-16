@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Award, Heart, Users, Briefcase } from "lucide-react";
@@ -6,104 +6,119 @@ import { Link } from "wouter";
 
 export default function About() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-16">
       {/* Navigation - Same as Home */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium text-primary">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      {/* Hero Section - Gradient Background */}
+      <section className="relative h-80 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80"></div>
+
+        {/* Overlay text */}
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
+            From Champion to Crisis to{" "}
+            <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">
+              Comeback
+            </span>
+          </h1>
+        </div>
+      </section>
+
+      {/* Story Intro Section - Text Left, Photo Right */}
+      <section className="py-16 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">
-              From Rock Bottom to{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Redemption
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              I'm Shaun Critzer—13 years sober, author, entrepreneur, husband, and father. I've walked through childhood trauma, active addiction, protective orders, psych wards, and rock bottoms I didn't think I'd survive. Today, I help others find the same hope and healing that saved my life.
-            </p>
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* LEFT: Intro Text */}
+              <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+                <p>
+                  I'm Shaun Critzer—husband to Shannon, father to Landon, Cameron, and Brody, entrepreneur, author, and over a decade into the greatest transformation of my life.
+                </p>
+                <p>
+                  At 17, I was crowned Mr. Teen USA, standing on stage as the top teenage bodybuilder in the country with 2 Olympic Gold Medals around my neck. I had discipline. I had drive. I had the world convinced I had it all together.
+                </p>
+                <p>
+                  What no one knew was that beneath the muscle and the medals, I was already running—running from childhood trauma I'd buried so deep I convinced myself it didn't exist.
+                </p>
+                <p>
+                  The next 15 years were a descent I never saw coming. Alcohol. Drugs. A marriage that crumbled. Two kids I was losing. Jails. Psych wards. Rock bottoms I didn't know existed.
+                </p>
+                <p>
+                  By 2012, the champion had become someone I didn't recognize. And I had a choice: keep pretending and die a tragic death, or finally deal with what I'd been running from my entire life.
+                </p>
+                <p>
+                  Years ago, I chose recovery. Not just sobriety—actual healing.
+                </p>
+                <p className="font-semibold text-foreground text-xl">
+                  Today, I help others do the same.
+                </p>
+              </div>
+
+              {/* RIGHT: Couple Photo */}
+              <div className="flex justify-center lg:justify-end">
+                <div className="rounded-2xl overflow-hidden shadow-2xl max-w-md">
+                  <img 
+                    src="/couple-smiling-bw.png" 
+                    alt="Shaun and Shannon Critzer" 
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* My Story Section */}
+      {/* My Story Section - Full Width Text */}
       <section className="py-20">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-              <h2 className="text-4xl font-bold">My Story</h2>
-              <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
-                <p>
-                  I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood sexual abuse that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
-                </p>
-                <p>
-                  By my late teens, I discovered alcohol and prescription pills. They worked—until they didn't. What started as self-medication spiraled into full-blown addiction. I got married, had two beautiful sons (Landon and Cameron), built a successful career, and maintained the illusion of control. But inside, I was dying.
-                </p>
-                <p>
-                  The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
-                </p>
-                <p>
-                  On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
-                </p>
-                <p>
-                  Today, I'm 13 years sober. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and my stepson Brody. I peacefully co-parent with my ex-wife Jennie—something I never thought possible. I run Digital Gravity, helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
-                </p>
-              </div>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold mb-8">My Story</h2>
+            <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+              <p>
+                I grew up in Charlottesville, Virginia, in what looked like a normal middle-class family. But behind closed doors, I experienced childhood trauma that I buried for decades. I built armor through bodybuilding, achievement, and performance—anything to avoid feeling the pain underneath.
+              </p>
+              <p>
+                By my late teens, I discovered alcohol and drugs. They worked—until they didn't. What started as magic turned into self-medication, which then spiraled into misery and full-blown addiction. I got married, had two beautiful children—my son Landon and my daughter Cameron, built a successful career, and maintained the illusion of control. But inside, I was dying.
+              </p>
+              <p>
+                The decade from 2002 to 2012 was my "decade of darkness." DUIs, protective orders, supervised visits with my kids, psychiatric hospitalizations, and suicide attempts. I lost my marriage, my relationship with my children, my self-respect. I hit bottoms I didn't know existed.
+              </p>
+              <p>
+                On January 1, 2013, I got sober for real. Not just white-knuckling—actual recovery. I went to treatment at The Ranch in Tennessee, did EMDR therapy to process my childhood trauma, worked the 12 steps with rigorous honesty, and learned to bring my full, broken self to the table instead of hiding behind armor.
+              </p>
+              <p>
+                Today, I'm over a decade into recovery. I'm remarried to Shannon, who saw me at my worst and chose me anyway. I have a blended family with Landon, Cameron, and Brody. I peacefully co-parent with Jennie, my children's mother—something I never thought possible. I run companies helping people build legitimate online businesses. And I wrote a memoir to show others that broken things can heal.
+              </p>
             </div>
-            <div className="space-y-6">
-              <div className="rounded-2xl overflow-hidden">
-                <img 
-                  src="/shaun-shannon-bw.jpg" 
-                  alt="Shaun and Shannon Critzer" 
-                  className="w-full h-auto"
-                />
-              </div>
+
+            {/* Info Cards - Below My Story */}
+            <div className="mt-12">
               <Card className="p-8 bg-gradient-to-br from-primary/10 to-secondary/10">
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Award className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg">13 Years Sober</h3>
-                      <p className="text-sm text-muted-foreground">January 1, 2013 - Present</p>
-                    </div>
-                  </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="flex items-start space-x-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <Heart className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">Blended Family</h3>
-                      <p className="text-sm text-muted-foreground">Husband to Shannon, father to Landon, Cameron & Brody</p>
+                      <h3 className="font-bold text-lg">Husband & Father</h3>
+                      <p className="text-sm text-muted-foreground">Married to Shannon, father to Landon, Cameron & Brody</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Award className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">In Recovery</h3>
+                      <p className="text-sm text-muted-foreground">Author of "Crooked Lines"</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -124,8 +139,41 @@ export default function About() {
                       <p className="text-sm text-muted-foreground">Speaker, author, and mentor</p>
                     </div>
                   </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">💪</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Health & Fitness Expert</h3>
+                      <p className="text-sm text-muted-foreground">Former competitive bodybuilder</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🧩</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Special Needs Advocate</h3>
+                      <p className="text-sm text-muted-foreground">Championing neurodiversity</p>
+                    </div>
+                  </div>
                 </div>
               </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Family Photo Section */}
+      <section className="py-12">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="rounded-2xl overflow-hidden shadow-2xl">
+              <img 
+                src="/bahamas-family.jpg" 
+                alt="Shaun Critzer and family in the Bahamas" 
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>
@@ -197,11 +245,11 @@ export default function About() {
       {/* Footer - Same as Home */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
+                Author, speaker, and recovery advocate helping others find hope in their own journey.
               </p>
             </div>
             <div className="space-y-4">
@@ -216,19 +264,9 @@ export default function About() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
+                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
                 <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
               </ul>
             </div>
@@ -239,6 +277,14 @@ export default function About() {
                 <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>

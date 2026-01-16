@@ -1205,7 +1205,7 @@ _________________________________________________________________
 - **Bent Not Broken Circle** (Monthly Membership) - Ongoing community, support, and accountability
 - **Weekly blog and videos** at www.shauncritzer.com
 - **1-on-1 Coaching** (limited availability)
-- **Living Sober Bonus Book** (50+ pages of practical recovery tips)
+- **Thriving Sober Bonus Book** (50+ pages of practical recovery tips)
 
 ---
 

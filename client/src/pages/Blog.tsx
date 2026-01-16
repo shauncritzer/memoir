@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,14 @@ import { toast } from "sonner";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
   const subscribeMutation = trpc.email.subscribe.useMutation();
+
+  // Define available categories
+  const categories = ["Trauma", "Recovery", "Neuroscience", "Mental Health", "Addiction"];
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +42,15 @@ export default function Blog() {
     }
   };
 
-  const filteredPosts = posts?.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPosts = posts?.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.category?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = !selectedCategory || post.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return "";
@@ -60,39 +68,7 @@ export default function Blog() {
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors">
-              The Memoir
-            </Link>
-            <Link href="/blog" className="text-sm font-medium text-primary">
-              Blog
-            </Link>
-            <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
-              Resources
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/products">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-background to-accent/20">
@@ -108,14 +84,51 @@ export default function Blog() {
               <p className="text-xl text-muted-foreground">
                 Real talk about trauma, addiction, healing, and building a life worth staying sober for.
               </p>
-              <div className="max-w-md">
+              <div className="space-y-4">
                 <Input
                   type="search"
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
+                  className="w-full max-w-md"
                 />
+
+                {/* Category Filter Pills */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-muted-foreground">Filter by category:</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      variant={selectedCategory === null ? "default" : "outline"}
+                      onClick={() => setSelectedCategory(null)}
+                      className={`text-base px-6 py-3 h-auto ${
+                        selectedCategory === null
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      All Posts
+                    </Button>
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`text-base px-6 py-3 h-auto ${
+                          selectedCategory === category
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
+                        }`}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                  {selectedCategory && (
+                    <p className="text-sm text-muted-foreground">
+                      Showing posts in <span className="font-semibold text-primary">{selectedCategory}</span>
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden">
@@ -216,7 +229,7 @@ export default function Blog() {
       {/* Footer */}
       <footer className="border-t py-12 bg-card">
         <div className="container">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-5 gap-8">
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Shaun Critzer</h3>
               <p className="text-sm text-muted-foreground">
@@ -235,22 +248,8 @@ export default function Blog() {
               <h4 className="font-semibold">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
                 <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
-            <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors">
-              AI Coach
-            </Link>
+                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
                 <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
               </ul>
             </div>
@@ -261,6 +260,14 @@ export default function Blog() {
                 <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
+                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
               </ul>
             </div>
           </div>
