@@ -1,4 +1,4 @@
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, and, or, desc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
@@ -645,4 +645,40 @@ export async function grantAiCoachUnlimitedAccess(email: string): Promise<boolea
     console.error("[Database] Failed to grant unlimited access:", error);
     return false;
   }
+}
+
+/**
+ * Get course content (modules and lessons) for a product
+ */
+export async function getCourseContent(productId: string) {
+  const db = await getDb();
+  if (!db) return { modules: [], lessons: [] };
+
+  const { courseModules, courseLessons } = await import("../drizzle/schema");
+
+  // Get all modules for this product
+  const modules = await db
+    .select()
+    .from(courseModules)
+    .where(eq(courseModules.productId, productId))
+    .orderBy(courseModules.sortOrder);
+
+  // Get all lessons for these modules
+  const moduleIds = modules.map(m => m.id);
+  
+  if (moduleIds.length === 0) {
+    return { modules: [], lessons: [] };
+  }
+
+  const lessons = await db
+    .select()
+    .from(courseLessons)
+    .where(
+      moduleIds.length === 1
+        ? eq(courseLessons.moduleId, moduleIds[0])
+        : or(...moduleIds.map(id => eq(courseLessons.moduleId, id)))
+    )
+    .orderBy(courseLessons.sortOrder);
+
+  return { modules, lessons };
 }

@@ -16,19 +16,19 @@
 ## Tasks to Complete
 
 ### Phase 1: Upload Assets to S3
-- [ ] Upload all 7 Day videos to S3
-- [ ] Upload all 7 Day PDF slide decks to S3
-- [ ] Upload Living Sober PDF to S3
+- [x] Upload all 7 Day videos to S3 (completed 12 hours ago)
+- [x] Upload all 7 Day PDF slide decks to S3 (completed 12 hours ago)
+- [x] Upload Living Sober PDF to S3 (completed 12 hours ago)
 
 ### Phase 2: Create Thriving Sober Page
-- [ ] Convert Living Sober PDF content to attractive HTML page
-- [ ] Title: "Thriving Sober: 50 Suggestions"
-- [ ] Add to navigation and Products page
+- [x] Convert Living Sober PDF content to attractive HTML page
+- [x] Title: "Thriving Sober: 50 Suggestions"
+- [x] Add to navigation and Products page
 
 ### Phase 3: Build Course Delivery System
-- [ ] Create course database schema (modules, lessons, progress tracking)
-- [ ] Seed database with 7-Day Reset course data
-- [ ] Build course member area page with:
+- [x] Create course database schema (modules, lessons, progress tracking)
+- [x] Seed database with 7-Day Reset course data
+- [x] Build course member area page with:
   - Video player (S3/CloudFront streaming)
   - Lesson navigation sidebar
   - Progress tracking (mark lessons complete)
@@ -36,14 +36,14 @@
   - Access control (requires purchase)
 
 ### Phase 4: Create Workbooks
-- [ ] Day 1 workbook (based on RECOGNIZE script + slides)
-- [ ] Day 2 workbook (based on EVALUATE script + slides)
-- [ ] Day 3 workbook (based on WITHDRAW script + slides)
-- [ ] Day 4 workbook (based on IDENTIFY script + slides)
-- [ ] Day 5 workbook (based on REWIRE script + slides)
-- [ ] Day 6 workbook (based on ENGAGE script + slides)
-- [ ] Day 7 workbook (based on DISCOVER script + slides)
-- [ ] Make workbooks downloadable from course page
+- [x] Day 1 workbook (based on RECOGNIZE script + slides)
+- [x] Day 2 workbook (based on EVALUATE script + slides)
+- [x] Day 3 workbook (based on WITHDRAW script + slides)
+- [x] Day 4 workbook (based on IDENTIFY script + slides)
+- [x] Day 5 workbook (based on REWIRE script + slides)
+- [x] Day 6 workbook (based on ENGAGE script + slides)
+- [x] Day 7 workbook (based on DISCOVER script + slides)
+- [x] Make workbooks downloadable from course page
 
 ### Phase 5: Testing & Deployment
 - [ ] Test video playback
