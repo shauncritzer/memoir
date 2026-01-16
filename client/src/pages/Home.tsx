@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, BookOpen, Heart, Users, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Heart, Users, Sparkles, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 export default function Home() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const subscribeMutation = trpc.email.subscribe.useMutation();
 
@@ -47,7 +48,9 @@ export default function Home() {
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Logo />
-          <div className="flex items-center space-x-6">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6">
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
@@ -75,7 +78,50 @@ export default function Home() {
               </Button>
             </Link>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t">
+            <div className="container py-4 flex flex-col space-y-4">
+              <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                About
+              </Link>
+              <Link href="/memoir" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                The Memoir
+              </Link>
+              <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                Blog
+              </Link>
+              <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                Resources
+              </Link>
+              <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                REWIRED Method
+              </Link>
+              <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                Products
+              </Link>
+              <Link href="/ai-coach" className="text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                AI Coach
+              </Link>
+              <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 w-full">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
