@@ -60,6 +60,9 @@ export default function Home() {
             <Link href="/resources" className="text-sm font-medium hover:text-primary transition-colors">
               Resources
             </Link>
+            <Link href="/rewired-method" className="text-sm font-medium hover:text-primary transition-colors">
+              REWIRED Method
+            </Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
