@@ -184,6 +184,17 @@ export default function SevenDayReset() {
                       <div className="pt-4 border-t">
                         <h3 className="font-semibold mb-3">Resources</h3>
                         <div className="space-y-2">
+                          {currentLesson.slidePdfUrl && (
+                            <a
+                              href={currentLesson.slidePdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+                            >
+                              <Download className="w-4 h-4 text-teal-500" />
+                              <span className="font-medium">Download Slideshow (PDF)</span>
+                            </a>
+                          )}
                           {currentLesson.workbookPdfUrl && (
                             <a
                               href={currentLesson.workbookPdfUrl}
@@ -191,19 +202,10 @@ export default function SevenDayReset() {
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
                             >
-                              <Download className="w-4 h-4 text-teal-500" />
-                              <span className="font-medium">Download Slide Deck (PDF)</span>
+                              <Download className="w-4 h-4 text-amber-500" />
+                              <span className="font-medium">Download Workbook (PDF)</span>
                             </a>
                           )}
-                          <a
-                            href={`/workbooks/Day_${currentLesson.lessonNumber}_${currentLesson.title.split(':')[1]?.trim().split(' ')[0]}_Workbook.pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
-                          >
-                            <Download className="w-4 h-4 text-amber-500" />
-                            <span className="font-medium">Download Workbook (PDF)</span>
-                          </a>
                         </div>
                       </div>
                     </div>
