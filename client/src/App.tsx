@@ -16,8 +16,16 @@ import Members from "./pages/Members";
 import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
 import AdminVideos from "./pages/AdminVideos";
-import CaseStudy from "./pages/CaseStudy";
-import RewiredMethod from "./pages/RewiredMethod";
+import AdminMigrate from "./pages/AdminMigrate";
+import SeedDatabase from "./pages/SeedDatabase";
+import AdminContent from "./pages/AdminContent";
+import StripeTest from "./pages/StripeTest";
+import TermsOfUse from "./pages/TermsOfUse";
+import RefundPolicy from "./pages/RefundPolicy";
+import FAQs from "./pages/FAQs";
+import RecoveryToolkit from "./pages/RecoveryToolkit";
+import ReadingGuide from "./pages/ReadingGuide";
+import First3Chapters from "./pages/First3Chapters";
 import SevenDayReset from "./pages/SevenDayReset";
 import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
@@ -43,6 +51,12 @@ function Router() {
       <Route path="/success" component={Success} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
+      <Route path="/7-day-reset" component={SevenDayReset} />
+      <Route path="/thriving-sober" component={ThrivingSober} />
+      <Route path="/success" component={Success} />
+      <Route path="/terms-of-use" component={TermsOfUse} />
+      <Route path="/refund-policy" component={RefundPolicy} />
+      <Route path="/faqs" component={FAQs} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

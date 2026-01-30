@@ -52,20 +52,18 @@ export default function Products() {
     },
     {
       id: "7-day-reset",
-      name: "REWIRED 7-Day Reset",
-      tagline: "Complete Recovery Jumpstart",
-      price: "$27",
+      name: "7-Day REWIRED Reset",
+      tagline: "Recovery Jumpstart",
+      price: "$47",
       priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU",
-      description: "A comprehensive 7-day program with video lessons, workbooks, slide presentations, and practical tools to give you momentum, clarity, and hope in early recovery.",
+      description: "Transform your nervous system in 7 days. Video lessons, interactive workbooks, and proven strategies for lasting change.",
       features: [
-        "7 video lessons (6-10 minutes each) - REWIRED framework",
-        "Interactive workbooks with daily exercises and reflections",
-        "Slide presentation PDFs for each day",
-        "Thriving Sober: 50+ Practical Tips guide",
-        "Daily themes: Recognize, Establish, Work, Integrate, Release, Embrace, Discover",
-        "Emergency resources and crisis contacts",
+        "7 video lessons (5-10 minutes each)",
+        "7 interactive workbooks with exercises",
+        "7 PDF slide decks for visual learning",
+        "BONUS: 50 Ways to Thrive guide",
+        "Nervous system regulation techniques",
         "Lifetime access to all materials",
-        "Immediate access after purchase",
       ],
       ideal: "Perfect for: Early recovery, thinking about getting sober, or needing a reset",
       badge: "Most Popular",
@@ -230,7 +228,7 @@ export default function Products() {
                 <tr className="border-b hover:bg-gray-50">
                   <td className="p-4 font-semibold">Price</td>
                   <td className="text-center p-4 bg-amber-50/50 border-l border-gray-200">
-                    <span className="text-2xl font-bold text-amber-700">$27</span>
+                    <span className="text-2xl font-bold text-amber-700">$47</span>
                   </td>
                   <td className="text-center p-4 bg-teal-50/50 border-l border-gray-200">
                     <span className="text-2xl font-bold text-teal-700">$97</span>
