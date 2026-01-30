@@ -9,7 +9,7 @@ import { Link } from "wouter";
 
 // Sales Page Component (for non-purchasers)
 function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
-  const stripeCheckoutUrl = "https://buy.stripe.com/test_PLACEHOLDER"; // TODO: Replace with actual Stripe link
+  const stripeCheckoutUrl = "https://buy.stripe.com/test_28E3cugPn5ll9sF5V91ZS00";
 
   return (
     <div className="min-h-screen bg-background">
