@@ -29,6 +29,8 @@ import First3Chapters from "./pages/First3Chapters";
 import SevenDayReset from "./pages/SevenDayReset";
 import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
+import CaseStudy from "./pages/CaseStudy";
+import RewiredMethod from "./pages/RewiredMethod";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -51,9 +53,6 @@ function Router() {
       <Route path="/success" component={Success} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
-      <Route path="/7-day-reset" component={SevenDayReset} />
-      <Route path="/thriving-sober" component={ThrivingSober} />
-      <Route path="/success" component={Success} />
       <Route path="/terms-of-use" component={TermsOfUse} />
       <Route path="/refund-policy" component={RefundPolicy} />
       <Route path="/faqs" component={FAQs} />
