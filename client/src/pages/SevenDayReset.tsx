@@ -404,10 +404,13 @@ function CourseMemberArea() {
   const [currentLessonId, setCurrentLessonId] = useState<number | null>(null);
 
   // Get course content
-  const { data: courseData, isLoading: courseLoading } = trpc.members.getCourseContent.useQuery(
+  const { data: courseData, isLoading: courseLoading, error: courseError } = trpc.members.getCourseContent.useQuery(
     { moduleId: 30001 },
     { enabled: true }
   );
+
+  // Debug logging
+  console.log('CourseMemberArea render:', { courseLoading, courseData, courseError, lessonsCount: courseData?.lessons?.length });
 
   // Get user's progress
   const { data: progressData } = trpc.members.getCourseProgress.useQuery(
