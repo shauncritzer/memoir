@@ -406,7 +406,7 @@ function CourseMemberArea() {
   // Get course content
   const { data: courseData, isLoading: courseLoading } = trpc.members.getCourseContent.useQuery(
     { moduleId: 30001 },
-    { enabled: !!user }
+    { enabled: true }
   );
 
   // Get user's progress
