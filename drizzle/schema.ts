@@ -157,6 +157,7 @@ export const courseLessons = mysqlTable("course_lessons", {
   videoProvider: mysqlEnum("video_provider", ["vimeo", "youtube", "other"]).default("vimeo"),
   videoDuration: int("video_duration"), // Duration in seconds
   workbookPdfUrl: varchar("workbook_pdf_url", { length: 512 }), // Optional lesson-specific PDF
+  slidePdfUrl: varchar("slide_pdf_url", { length: 512 }), // Optional slideshow PDF
   sortOrder: int("sort_order").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

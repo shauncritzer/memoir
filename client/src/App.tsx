@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ScrollToTop } from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -16,7 +15,6 @@ import Products from "./pages/Products";
 import Members from "./pages/Members";
 import Course from "./pages/Course";
 import AICoach from "./pages/AICoach";
-import RewiredMethod from "./pages/RewiredMethod";
 import AdminVideos from "./pages/AdminVideos";
 import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
@@ -28,6 +26,11 @@ import FAQs from "./pages/FAQs";
 import RecoveryToolkit from "./pages/RecoveryToolkit";
 import ReadingGuide from "./pages/ReadingGuide";
 import First3Chapters from "./pages/First3Chapters";
+import SevenDayReset from "./pages/SevenDayReset";
+import ThrivingSober from "./pages/ThrivingSober";
+import Success from "./pages/Success";
+import CaseStudy from "./pages/CaseStudy";
+import RewiredMethod from "./pages/RewiredMethod";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -37,20 +40,17 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/memoir" component={Memoir} />
       <Route path="/resources" component={Resources} />
-      <Route path="/recovery-toolkit" component={RecoveryToolkit} />
-      <Route path="/reading-guide" component={ReadingGuide} />
-      <Route path="/first-3-chapters" component={First3Chapters} />
-      <Route path="/rewired-method" component={RewiredMethod} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
       <Route path="/admin/videos" component={AdminVideos} />
-      <Route path="/admin/seed" component={SeedDatabase} />
-      <Route path="/admin/content" component={AdminContent} />
-      <Route path="/admin/migrate" component={AdminMigrate} />
       <Route path="/products" component={Products} />
-      <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
+      <Route path="/case-study" component={CaseStudy} />
+      <Route path="/rewired-method" component={RewiredMethod} />
+      <Route path="/7-day-reset" component={SevenDayReset} />
+      <Route path="/thriving-sober" component={ThrivingSober} />
+      <Route path="/success" component={Success} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
       <Route path="/terms-of-use" component={TermsOfUse} />
@@ -77,7 +77,6 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <ScrollToTop />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
