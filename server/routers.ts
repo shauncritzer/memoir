@@ -368,10 +368,19 @@ export const appRouter = router({
   }),
 
   // Members portal
-  members: router({    getPurchases: protectedProcedure.query(async ({ ctx }) => {
+  members: router({
+    getPurchases: protectedProcedure.query(async ({ ctx }) => {
       const { getUserPurchases } = await import("./db");
       return getUserPurchases(ctx.user.id);
     }),
+
+    getCourseContent: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .query(async ({ input }) => {
+        const { getLessonsByProductId } = await import("./db");
+        const lessons = await getLessonsByProductId(input.moduleId.toString());
+        return { lessons };
+      }),
 
     getCourseAccess: protectedProcedure
       .input(z.object({ productId: z.string() }))

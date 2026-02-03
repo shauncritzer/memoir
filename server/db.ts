@@ -429,6 +429,22 @@ export async function getCourseProgress(userId: number, productId: string) {
   };
 }
 
+export async function getLessonsByProductId(productId: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { lessons } = await import("../drizzle/schema");
+  const { eq } = await import("drizzle-orm");
+  
+  const result = await db
+    .select()
+    .from(lessons)
+    .where(eq(lessons.productId, productId))
+    .orderBy(lessons.dayNumber);
+  
+  return result;
+}
+
 export async function markLessonComplete(userId: number, productId: string, lessonId: number) {
   const db = await getDb();
   if (!db) return { success: false };
