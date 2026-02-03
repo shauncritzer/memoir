@@ -548,25 +548,25 @@ function CourseMemberArea() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {currentLesson.slidePdfUrl && (
+                    {currentLesson.slideshowUrl && (
                       <Button 
                         variant="outline" 
                         className="w-full justify-start"
                         asChild
                       >
-                        <a href={currentLesson.slidePdfUrl} download target="_blank" rel="noopener noreferrer">
+                        <a href={currentLesson.slideshowUrl} download target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-4 w-4" />
                           Download Slideshow (PDF)
                         </a>
                       </Button>
                     )}
-                    {currentLesson.workbookPdfUrl && (
+                    {currentLesson.workbookUrl && (
                       <Button 
                         variant="outline" 
                         className="w-full justify-start"
                         asChild
                       >
-                        <a href={currentLesson.workbookPdfUrl} download target="_blank" rel="noopener noreferrer">
+                        <a href={currentLesson.workbookUrl} download target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-4 w-4" />
                           Download Workbook (PDF)
                         </a>
