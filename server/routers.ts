@@ -374,7 +374,7 @@ export const appRouter = router({
       return getUserPurchases(ctx.user.id);
     }),
 
-    getCourseContent: protectedProcedure
+    getCourseContent: publicProcedure
       .input(z.object({ moduleId: z.number() }))
       .query(async ({ input }) => {
         const { getLessonsByProductId } = await import("./db");
