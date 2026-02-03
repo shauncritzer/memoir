@@ -200,3 +200,21 @@ export const aiCoachUsers = mysqlTable("ai_coach_users", {
 
 export type AiCoachUser = typeof aiCoachUsers.$inferSelect;
 export type InsertAiCoachUser = typeof aiCoachUsers.$inferInsert;
+
+/**
+ * Lessons table - simplified flat structure for 7-Day REWIRED Reset
+ */
+export const lessons = mysqlTable("lessons", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: varchar("product_id", { length: 255 }).notNull(),
+  dayNumber: int("day_number").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  videoUrl: varchar("video_url", { length: 500 }),
+  slideshowUrl: varchar("slideshow_url", { length: 500 }),
+  workbookUrl: varchar("workbook_url", { length: 500 }),
+  durationMinutes: int("duration_minutes"),
+});
+
+export type Lesson = typeof lessons.$inferSelect;
+export type InsertLesson = typeof lessons.$inferInsert;
