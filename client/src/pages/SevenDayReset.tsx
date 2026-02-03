@@ -660,11 +660,13 @@ export default function SevenDayReset() {
     );
   }
 
-  // Show sales page if not logged in or no access
-  if (!user || !hasAccess) {
-    return <SalesPage isLoggedIn={!!user} />;
-  }
-
-  // Show course member area if logged in and has access
+  // TEMPORARY: Always show member area for testing (bypass auth)
+  // TODO: Re-enable authentication after OAuth is configured
   return <CourseMemberArea />;
+  
+  // Original code (commented out for testing):
+  // if (!user || !hasAccess) {
+  //   return <SalesPage isLoggedIn={!!user} />;
+  // }
+  // return <CourseMemberArea />;
 }
