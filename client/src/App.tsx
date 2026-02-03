@@ -28,6 +28,9 @@ import FAQs from "./pages/FAQs";
 import RecoveryToolkit from "./pages/RecoveryToolkit";
 import ReadingGuide from "./pages/ReadingGuide";
 import First3Chapters from "./pages/First3Chapters";
+import SevenDayReset from "./pages/SevenDayReset";
+import ThrivingSober from "./pages/ThrivingSober";
+import Success from "./pages/Success";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -51,6 +54,9 @@ function Router() {
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
+      <Route path="/7-day-reset" component={SevenDayReset} />
+      <Route path="/thriving-sober" component={ThrivingSober} />
+      <Route path="/success" component={Success} />
       <Route path="/members" component={Members} />
       <Route path="/course/:productId" component={Course} />
       <Route path="/terms-of-use" component={TermsOfUse} />
