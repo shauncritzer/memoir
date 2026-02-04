@@ -457,10 +457,10 @@ export const appRouter = router({
     }),
 
     getCourseContent: publicProcedure
-      .input(z.object({ moduleId: z.number() }))
+      .input(z.object({ productId: z.string() }))
       .query(async ({ input }) => {
         const { getLessonsByProductId } = await import("./db");
-        const lessons = await getLessonsByProductId(input.moduleId.toString());
+        const lessons = await getLessonsByProductId(input.productId);
         return { lessons };
       }),
 

@@ -443,7 +443,7 @@ function CourseMemberArea() {
 
   // Get course content
   const { data: courseData, isLoading: courseLoading, error: courseError } = trpc.members.getCourseContent.useQuery(
-    { moduleId: 30001 },
+    { productId: "7-day-reset" },
     { enabled: true }
   );
 
@@ -457,10 +457,10 @@ function CourseMemberArea() {
   );
 
   // Mark lesson complete mutation
+  const trpcUtils = trpc.useUtils();
   const markComplete = trpc.members.markLessonComplete.useMutation({
     onSuccess: () => {
-      // Invalidate progress query to refetch
-      trpc.useUtils().members.getCourseProgress.invalidate();
+      trpcUtils.members.getCourseProgress.invalidate();
     },
   });
 
@@ -476,13 +476,15 @@ function CourseMemberArea() {
   }
 
   const lessons = courseData?.lessons || [];
-  const completedLessons = progressData?.filter(p => p.completed === 1).length || 0;
-  const currentLesson = currentLessonId 
+  const completedLessons = progressData?.completedLessons || 0;
+  const currentLesson = currentLessonId
     ? lessons.find(l => l.id === currentLessonId)
     : lessons[0];
 
   const isLessonComplete = (lessonId: number) => {
-    return progressData?.some(p => p.lessonId === lessonId && p.completed === 1);
+    return progressData?.modules?.some(m =>
+      m.lessons.some(l => l.id === lessonId && l.completed)
+    ) || false;
   };
 
   return (
