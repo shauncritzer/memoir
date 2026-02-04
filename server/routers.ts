@@ -1,9 +1,10 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import {
+  getDb,
   createEmailSubscriber,
   getEmailSubscriberByEmail,
   getActiveleadMagnets,
@@ -19,6 +20,8 @@ import {
 } from "./db";
 import { subscribeForLeadMagnet, subscribeToForm, CONVERTKIT_FORMS, CONVERTKIT_TAGS } from "./convertkit";
 import Stripe from "stripe";
+import { sdk } from "./_core/sdk";
+import { STRIPE_PRICE_TO_PRODUCT_ID } from "./stripe-webhook";
 
 // Initialize Stripe only if API key is available
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -38,6 +41,85 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    loginFromStripeSession: publicProcedure
+      .input(z.object({ sessionId: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!stripe) {
+          throw new Error("Stripe is not configured");
+        }
+
+        // Verify the Stripe checkout session and confirm payment completed
+        const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+        if (session.payment_status !== "paid") {
+          throw new Error("Payment not completed");
+        }
+
+        const customerEmail = session.customer_email || session.customer_details?.email;
+        if (!customerEmail) {
+          throw new Error("No customer email found");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users, purchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        // Find or create user by email (webhook may not have fired yet)
+        let userRows = await db.select().from(users).where(eq(users.email, customerEmail)).limit(1);
+        if (userRows.length === 0) {
+          await db.insert(users).values({
+            email: customerEmail,
+            openId: `stripe_${session.customer || customerEmail}`,
+            name: session.customer_details?.name || customerEmail.split("@")[0],
+            loginMethod: "email",
+            lastSignedIn: new Date(),
+          });
+          userRows = await db.select().from(users).where(eq(users.email, customerEmail)).limit(1);
+        }
+
+        if (userRows.length === 0) throw new Error("Failed to create user");
+        const user = userRows[0];
+
+        // Ensure purchase record exists so course access check passes immediately
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 10 });
+        for (const item of lineItems.data) {
+          const priceId = item.price?.id;
+          if (!priceId) continue;
+          const productInfo = STRIPE_PRICE_TO_PRODUCT_ID[priceId];
+          if (!productInfo) continue;
+
+          const existing = await db.select().from(purchases).where(
+            and(eq(purchases.userId, user.id), eq(purchases.productId, productInfo.productId))
+          ).limit(1);
+
+          if (existing.length === 0) {
+            await db.insert(purchases).values({
+              userId: user.id,
+              productId: productInfo.productId,
+              stripePaymentId: (session.payment_intent || session.id) as string,
+              stripeCustomerId: (session.customer || "") as string,
+              amount: productInfo.amount,
+              status: "completed",
+              purchasedAt: new Date(),
+            });
+          }
+        }
+
+        // Create JWT session token — openId + appId + name are all required by verifySession
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || customerEmail.split("@")[0],
+        });
+
+        // Set the session cookie (same options the OAuth callback uses)
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, {
+          ...cookieOptions,
+          maxAge: ONE_YEAR_MS,
+        });
+
+        return { success: true };
+      }),
   }),
 
   // Email subscription
