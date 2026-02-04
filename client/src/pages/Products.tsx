@@ -237,7 +237,7 @@ export default function Products() {
                 <tr className="border-b hover:bg-gray-50">
                   <td className="p-4 font-semibold">Price</td>
                   <td className="text-center p-4 bg-amber-50/50 border-l border-gray-200">
-                    <span className="text-2xl font-bold text-amber-700">$27</span>
+                    <span className="text-2xl font-bold text-amber-700">$47</span>
                   </td>
                   <td className="text-center p-4 bg-teal-50/50 border-l border-gray-200">
                     <span className="text-2xl font-bold text-teal-700">$97</span>
