@@ -16,7 +16,7 @@ export default function StripeTest() {
     },
     {
       name: "7-Day Reset",
-      priceId: "price_1SYt2tC2dOpPzSOOpg5PW7eU",
+      priceId: "price_1SvLyoC2dOpPzSOO2PDDCoTD",
       expectedMode: "payment"
     },
     {

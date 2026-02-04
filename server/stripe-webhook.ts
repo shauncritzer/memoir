@@ -25,8 +25,8 @@ const stripe = stripeKey ? new Stripe(stripeKey, {
  * Actual Price IDs from Stripe dashboard (via Railway environment variables)
  */
 export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
-  // 7-Day Reset ($27 one-time)
-  "price_1SYt2tC2dOpPzSOOpg5Pw7eU": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
+  // 7-Day Reset ($47 one-time)
+  "price_1SvLyoC2dOpPzSOO2PDDCoTD": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
   
   // From Broken to Whole ($97 one-time)
   "price_1SYt3kC2dOpPzSOOpAokf1UQ": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
@@ -39,7 +39,7 @@ export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
  * Product names for logging
  */
 export const STRIPE_PRICE_TO_PRODUCT_NAME: Record<string, string> = {
-  "price_1SYt2tC2dOpPzSOOpg5Pw7eU": "7-Day Reset",
+  "price_1SvLyoC2dOpPzSOO2PDDCoTD": "7-Day Reset",
   "price_1SYt3kC2dOpPzSOOpAokf1UQ": "From Broken to Whole",
   "price_1SYt3iC2dOpPzSOOR7dbuGtY": "Bent Not Broken Circle Membership",
 };
@@ -230,7 +230,7 @@ export function verifyWebhookSignature(
  * Stripe Price ID to Product ID mapping for database
  */
 export const STRIPE_PRICE_TO_PRODUCT_ID: Record<string, { productId: string; amount: number }> = {
-  "price_1SYt2tC2dOpPzSOOpg5Pw7eU": { productId: "7-day-reset", amount: 2700 },
+  "price_1SvLyoC2dOpPzSOO2PDDCoTD": { productId: "7-day-reset", amount: 4700 },
   "price_1SYt3kC2dOpPzSOOpAokf1UQ": { productId: "from-broken-to-whole", amount: 9700 },
   "price_1SYt3iC2dOpPzSOOR7dbuGtY": { productId: "bent-not-broken-circle", amount: 2900 },
 };

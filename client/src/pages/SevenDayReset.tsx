@@ -23,7 +23,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
   
   const handleEnroll = () => {
     setIsLoading(true);
-    const priceId = import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU";
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SvLyoC2dOpPzSOO2PDDCoTD";
     createCheckoutSession.mutate({ priceId });
   };
 
