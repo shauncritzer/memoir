@@ -1429,6 +1429,117 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to fix resources: ${error.message}`);
         }
       }),
+
+    seedLessons: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        // Simple protection
+        if (input?.secret && input.secret !== "seed-lessons-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { lessons } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          const R2_BASE = "https://pub-7eb786387fdb43ea6c71526b8a61ed1f.r2.dev";
+
+          const lessonData = [
+            {
+              productId: "7-day-reset",
+              dayNumber: 1,
+              title: "RECOGNIZE - Understanding Your Patterns",
+              description: "Learn to identify your behavioral patterns and understand the root causes of your addiction.",
+              videoUrl: `${R2_BASE}/videos/REWIRED%20DAY%201.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_1_RECOGNIZE_-_Understanding_Your_Patterns.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/1_RECOGNIZE_Workbook.pdf`,
+              durationMinutes: 45,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 2,
+              title: "ESTABLISH - Safety & Connection",
+              description: "Build a foundation of safety and connection to support your recovery journey.",
+              videoUrl: `${R2_BASE}/videos/REWIRED_DAY_2.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_2_ESTABLISH_-_Safety_%26_Connection.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/2_ESTABLISH_Workbook.pdf`,
+              durationMinutes: 50,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 3,
+              title: "WORK - Triggers as Teachers",
+              description: "Transform your triggers from obstacles into opportunities for growth and healing.",
+              videoUrl: `${R2_BASE}/videos/Rewired_Day_3.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_3_WORK_-_Triggers_as_Teachers.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/3_WORK_Workbook.pdf`,
+              durationMinutes: 55,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 4,
+              title: "INTEGRATE - Building Sustainable Routines",
+              description: "Create daily routines and habits that support long-term recovery and well-being.",
+              videoUrl: `${R2_BASE}/videos/Rewired_Day_4.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_4_INTEGRATE_-_Building_Sustainable_Routines.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/4_INTEGRATE_Workbook.pdf`,
+              durationMinutes: 48,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 5,
+              title: "RELEASE - Letting Go of Shame",
+              description: "Break free from shame and self-judgment to embrace self-compassion and healing.",
+              videoUrl: `${R2_BASE}/videos/Welcome_everyone._This_is_Day_5_of_The_REWIRED_7-D.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_5_RELEASE_-_Letting_Go_of_Shame%20(1).pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/5_RELEASE_Workbook.pdf`,
+              durationMinutes: 52,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 6,
+              title: "EMBRACE - Your New Identity",
+              description: "Step into your new identity as someone who is healing, growing, and thriving.",
+              videoUrl: `${R2_BASE}/videos/Welcome_everyone._This_is_Day_6_of_The_REWIRED_7-D.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_6_EMBRACE_-_Your_New_Identity.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/6_EMBRACE_Workbook.pdf`,
+              durationMinutes: 47,
+            },
+            {
+              productId: "7-day-reset",
+              dayNumber: 7,
+              title: "DISCOVER - Your Purpose & Path Forward",
+              description: "Find your purpose and create a clear path forward for sustained recovery and growth.",
+              videoUrl: `${R2_BASE}/videos/Welcome_everyone._This_is_Day_7_of_The_REWIRED_7-D.mp4`,
+              slideshowUrl: `${R2_BASE}/slideshows/Day_7_DISCOVER_-_Your_Purpose_%26_Path_Forward.pdf`,
+              workbookUrl: `${R2_BASE}/workbooks/7_DISCOVER_Workbook.pdf`,
+              durationMinutes: 60,
+            },
+          ];
+
+          // Delete existing lessons to avoid duplicates
+          await db.delete(lessons).where(eq(lessons.productId, "7-day-reset"));
+
+          // Insert all lessons
+          for (const lesson of lessonData) {
+            await db.insert(lessons).values(lesson);
+          }
+
+          return {
+            success: true,
+            message: `Successfully seeded ${lessonData.length} lessons for 7-Day REWIRED Reset!`,
+            count: lessonData.length,
+          };
+        } catch (error: any) {
+          console.error("Error seeding lessons:", error);
+          throw new Error(`Failed to seed lessons: ${error.message}`);
+        }
+      }),
   }),
 
   // AI Coach counter system
