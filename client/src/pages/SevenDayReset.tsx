@@ -2,14 +2,30 @@ import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Download, Lock, PlayCircle, Check, ArrowRight } from "lucide-react";
+import { CheckCircle2, Download, Lock, PlayCircle, Check, ArrowRight, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
 // Sales Page Component (for non-purchasers)
 function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
-  const stripeCheckoutUrl = "https://buy.stripe.com/test_28E3cugPn5ll9sF5V91ZS00";
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const createCheckoutSession = trpc.stripe.createCheckoutSession.useMutation({
+    onSuccess: (data: { url: string; sessionId: string }) => {
+      window.location.href = data.url;
+    },
+    onError: (error: { message: string }) => {
+      console.error("Checkout error:", error);
+      setIsLoading(false);
+    },
+  });
+  
+  const handleEnroll = () => {
+    setIsLoading(true);
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU";
+    createCheckoutSession.mutate({ priceId });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,12 +48,20 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
             <Button 
               size="lg" 
               className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-bold text-lg px-8 py-6"
-              asChild
+              onClick={handleEnroll}
+              disabled={isLoading}
             >
-              <a href={stripeCheckoutUrl}>
-                Enroll Now - $47 (Early Bird)
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </a>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Enroll Now - $27
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
             <p className="text-gray-400 text-sm">Regular price: $67</p>
           </div>
@@ -366,11 +390,17 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
           <Button 
             size="lg" 
             className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-bold text-xl px-16 py-8 mb-6"
-            asChild
+            onClick={handleEnroll}
+            disabled={isLoading}
           >
-            <a href={stripeCheckoutUrl}>
-              Enroll in the 7-Day REWIRED Reset - $47
-            </a>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Enroll in the 7-Day REWIRED Reset - $27"
+            )}
           </Button>
           <p className="text-gray-400 mb-2">Lifetime access. 30-day guarantee. Zero shame.</p>
           <p className="text-xl text-white italic">
@@ -663,13 +693,11 @@ export default function SevenDayReset() {
     );
   }
 
-  // TEMPORARY: Always show member area for testing (bypass auth)
-  // TODO: Re-enable authentication after OAuth is configured
-  return <CourseMemberArea />;
+  // Show sales page if not logged in or no access
+  if (!user || !hasAccess) {
+    return <SalesPage isLoggedIn={!!user} />;
+  }
   
-  // Original code (commented out for testing):
-  // if (!user || !hasAccess) {
-  //   return <SalesPage isLoggedIn={!!user} />;
-  // }
-  // return <CourseMemberArea />;
+  // Show course content if user has purchased
+  return <CourseMemberArea />;
 }

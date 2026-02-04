@@ -175,21 +175,33 @@ export default function Products() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => handlePurchase(product.priceId, product.id)}
-                    disabled={loadingProduct === product.id}
-                  >
-                    {loadingProduct === product.id ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      product.id === "crooked-lines-memoir" ? "Get the Book Now" : `Get ${product.name}`
-                    )}
-                  </Button>
+                  {product.id === "7-day-reset" ? (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      asChild
+                    >
+                      <Link href="/7-day-reset">
+                        Learn More & Enroll
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={() => handlePurchase(product.priceId, product.id)}
+                      disabled={loadingProduct === product.id}
+                    >
+                      {loadingProduct === product.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        product.id === "crooked-lines-memoir" ? "Get the Book Now" : `Get ${product.name}`
+                      )}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}
