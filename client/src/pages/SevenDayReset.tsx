@@ -213,17 +213,25 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
           <div className="text-center">
             <p className="text-2xl text-gray-400 mb-2">Total Value: <span className="line-through">$297</span></p>
             <p className="text-4xl font-bold text-[#D4AF37] mb-8">
-              Your Investment Today: $47 <span className="text-xl text-gray-400">(Early Bird)</span>
+              Your Investment Today: $27
             </p>
             <Button 
               size="lg" 
               className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-bold text-lg px-12 py-6"
-              asChild
+              onClick={handleEnroll}
+              disabled={isLoading}
             >
-              <a href={stripeCheckoutUrl}>
-                Enroll in the 7-Day REWIRED Reset
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </a>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Enroll in the 7-Day REWIRED Reset - $27
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
           </div>
         </div>
