@@ -464,7 +464,7 @@ export const appRouter = router({
         return { lessons };
       }),
 
-    getCourseAccess: protectedProcedure
+    checkCourseAccess: protectedProcedure
       .input(z.object({ productId: z.string() }))
       .query(async ({ input, ctx }) => {
         const { checkCourseAccess } = await import("./db");

@@ -8,7 +8,14 @@ import { trpc } from "@/lib/trpc";
 
 export default function Success() {
   const [sessionId] = useState(() => new URLSearchParams(window.location.search).get("session_id"));
-  const loginMutation = trpc.auth.loginFromStripeSession.useMutation();
+  const trpcUtils = trpc.useUtils();
+  const loginMutation = trpc.auth.loginFromStripeSession.useMutation({
+    onSuccess: () => {
+      // Cookie is now set — invalidate the cached auth.me so the next page
+      // doesn't serve the stale null that Navigation cached on page load.
+      trpcUtils.auth.me.invalidate();
+    },
+  });
 
   useEffect(() => {
     if (sessionId) {
