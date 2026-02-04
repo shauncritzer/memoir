@@ -213,7 +213,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
           <div className="text-center">
             <p className="text-2xl text-gray-400 mb-2">Total Value: <span className="line-through">$297</span></p>
             <p className="text-4xl font-bold text-[#D4AF37] mb-8">
-              Your Investment Today: $27
+              Your Investment Today: $47 <span className="text-xl text-gray-400">(Early Bird Special)</span>
             </p>
             <Button 
               size="lg" 
@@ -228,7 +228,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
                 </>
               ) : (
                 <>
-                  Enroll in the 7-Day REWIRED Reset - $27
+                  Enroll in the 7-Day REWIRED Reset - $47
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}

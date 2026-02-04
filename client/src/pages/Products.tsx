@@ -54,7 +54,7 @@ export default function Products() {
       id: "7-day-reset",
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
-      price: "$27",
+      price: "$47",
       priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SYt2tC2dOpPzSOOpg5PW7eU",
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
