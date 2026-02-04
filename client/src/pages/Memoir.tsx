@@ -65,7 +65,7 @@ export default function Memoir() {
               and the redemption that comes from choosing recovery one day at a time.
             </p>
 
-            {/* Stars + Coming 2025 */}
+            {/* Stars + Coming 2026 */}
             <div className="flex items-center justify-center gap-2 mb-8">
               <div className="flex text-amber-500 text-2xl">
                 <Star className="h-5 w-5 fill-current" />
@@ -74,7 +74,7 @@ export default function Memoir() {
                 <Star className="h-5 w-5 fill-current" />
                 <Star className="h-5 w-5 fill-current" />
               </div>
-              <span className="text-gray-500">(Coming 2025)</span>
+              <span className="text-gray-500">(Coming 2026)</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -90,7 +90,7 @@ export default function Memoir() {
                 className="text-lg px-8"
                 disabled
               >
-                Pre-Order on Amazon (Coming 2025)
+                Pre-Order on Amazon (Coming 2026)
               </Button>
             </div>
           </div>
