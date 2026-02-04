@@ -452,7 +452,7 @@ function CourseMemberArea() {
 
   // Get user's progress
   const { data: progressData } = trpc.members.getCourseProgress.useQuery(
-    { moduleId: 30001 },
+    { productId: "7-day-reset" },
     { enabled: !!user }
   );
 
@@ -628,7 +628,7 @@ function CourseMemberArea() {
                           if (currentLesson) {
                             markComplete.mutate({
                               lessonId: currentLesson.id,
-                              productId: "7day-rewired-reset",
+                              productId: "7-day-reset",
                             });
                           }
                         }}
@@ -685,7 +685,7 @@ export default function SevenDayReset() {
 
   // Check if user has access to the course
   const { data: hasAccess, isLoading: accessLoading } = trpc.members.checkCourseAccess.useQuery(
-    { moduleId: 30001 },
+    { productId: "7-day-reset" },
     { enabled: !!user }
   );
 
