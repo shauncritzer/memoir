@@ -58,7 +58,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
                 </>
               ) : (
                 <>
-                  Enroll Now - $27
+                  Enroll Now - $47
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}
@@ -407,7 +407,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
                 Loading...
               </>
             ) : (
-              "Enroll in the 7-Day REWIRED Reset - $27"
+              "Enroll in the 7-Day REWIRED Reset - $47"
             )}
           </Button>
           <p className="text-gray-400 mb-2">Lifetime access. 30-day guarantee. Zero shame.</p>
