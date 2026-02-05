@@ -491,7 +491,7 @@ function CourseMemberArea() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <div className="container py-8">
+      <div className="container pt-20 pb-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">7-Day REWIRED Reset</h1>
