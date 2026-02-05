@@ -3,10 +3,10 @@ import { getDb } from "./server/db";
 /**
  * Seed script to populate the lessons table with 7-Day REWIRED Reset course content
  * All content is already uploaded to Cloudflare R2 bucket "rewired"
- * Public URL base: https://pub-7eb786387fdb43ea6c71526b8a61ed1f.r2.dev/
+ * Public URL base: https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev/
  */
 
-const CLOUDFLARE_R2_BASE = "https://pub-7eb786387fdb43ea6c71526b8a61ed1f.r2.dev";
+const CLOUDFLARE_R2_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev";
 
 const lessons = [
   {
