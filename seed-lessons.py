@@ -29,7 +29,7 @@ except Exception as e:
     exit(1)
 
 # Cloudflare R2 base URL
-R2_BASE = "https://pub-7eb786387fdb43ea6c71526b8a61ed1f.r2.dev"
+R2_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev"
 
 # Lesson data
 lessons = [
