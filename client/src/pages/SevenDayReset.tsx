@@ -491,7 +491,7 @@ function CourseMemberArea() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <div className="container py-8">
+      <div className="container pt-20 pb-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">7-Day REWIRED Reset</h1>
@@ -526,7 +526,7 @@ function CourseMemberArea() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="font-semibold">Day {lesson.lessonNumber}</div>
+                        <div className="font-semibold">Day {lesson.dayNumber}</div>
                         <div className="text-sm opacity-90">{lesson.title}</div>
                       </div>
                       {isLessonComplete(lesson.id) && (
@@ -547,7 +547,7 @@ function CourseMemberArea() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-2xl">
-                      Day {currentLesson.lessonNumber}: {currentLesson.title}
+                      Day {currentLesson.dayNumber}: {currentLesson.title}
                     </CardTitle>
                     {currentLesson.description && (
                       <p className="text-muted-foreground">{currentLesson.description}</p>
@@ -651,7 +651,7 @@ function CourseMemberArea() {
                 </Card>
 
                 {/* Bonus Content Link */}
-                {currentLesson.lessonNumber === 7 && (
+                {currentLesson.dayNumber === 7 && (
                   <Card className="bg-gradient-to-br from-[#1E3A5F] to-gray-900 text-white">
                     <CardHeader>
                       <CardTitle>🎉 Congratulations on Completing the Course!</CardTitle>
