@@ -1455,7 +1455,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 1,
               title: "RECOGNIZE - Understanding Your Patterns",
               description: "Learn to identify your behavioral patterns and understand the root causes of your addiction.",
-              videoUrl: `${R2_BASE}/videos/REWIRED%20DAY%201.mp4`,
+              videoUrl: `${R2_BASE}/videos/REWIRED_DAY_1.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_1_RECOGNIZE_-_Understanding_Your_Patterns.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/1_RECOGNIZE_Workbook.pdf`,
               durationMinutes: 45,
