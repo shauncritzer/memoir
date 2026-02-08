@@ -664,27 +664,29 @@ function CourseMemberArea() {
                   </Card>
                 )}
 
-                {/* Step-by-Step Instructions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ListOrdered className="h-5 w-5" />
-                      Step-by-Step Instructions for Day {currentLesson.dayNumber}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ol className="space-y-2 list-decimal list-inside text-sm">
-                      {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {instruction}
-                        </li>
-                      ))}
-                    </ol>
-                  </CardContent>
-                </Card>
+                {/* Two-column grid: Instructions on left, Resources on right */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Step-by-Step Instructions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ListOrdered className="h-5 w-5" />
+                        Step-by-Step Instructions for Day {currentLesson.dayNumber}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ol className="space-y-2 list-decimal list-inside text-sm">
+                        {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
+                          <li key={index} className="text-muted-foreground">
+                            {instruction}
+                          </li>
+                        ))}
+                      </ol>
+                    </CardContent>
+                  </Card>
 
-                {/* Downloadable Resources */}
-                <Card>
+                  {/* Downloadable Resources */}
+                  <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Download className="h-5 w-5" />
@@ -728,6 +730,7 @@ function CourseMemberArea() {
                     </Button>
                   </CardContent>
                 </Card>
+                </div>
 
                 {/* Mark Complete */}
                 <Card>
