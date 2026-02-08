@@ -537,6 +537,22 @@ function CourseMemberArea() {
                 ))}
               </CardContent>
             </Card>
+
+            {/* How to Use This Course */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>How to Use This Course</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
+                  <li>Watch the video lesson</li>
+                  <li>Download and review the slideshow</li>
+                  <li>Complete the workbook exercises</li>
+                  <li>Mark the lesson complete</li>
+                  <li>Move to the next day</li>
+                </ol>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content Area */}
@@ -578,22 +594,6 @@ function CourseMemberArea() {
                     </CardContent>
                   </Card>
                 )}
-
-                {/* How to Use This Course */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>How to Use This Course</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
-                      <li>Watch the video lesson</li>
-                      <li>Download and review the slideshow</li>
-                      <li>Complete the workbook exercises</li>
-                      <li>Mark the lesson complete</li>
-                      <li>Move to the next day</li>
-                    </ol>
-                  </CardContent>
-                </Card>
 
                 {/* Downloadable Resources */}
                 <Card>
