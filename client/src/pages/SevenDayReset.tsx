@@ -176,7 +176,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
               <CardContent className="text-gray-300 space-y-2">
                 <p>→ Daily exercises to integrate what you're learning</p>
                 <p>→ Reflection prompts that create real breakthroughs</p>
-                <p>→ 15-20 lines of writing space per exercise</p>
+                <p>→ Structured workbook format for deeper insights</p>
                 <p>→ Progress tracking to see how far you've come</p>
               </CardContent>
             </Card>
@@ -667,17 +667,17 @@ function CourseMemberArea() {
                 {/* Two-column grid: Instructions on left, Resources on right */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Step-by-Step Instructions */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                  <Card className="flex flex-col">
+                    <CardHeader className="bg-gradient-to-br from-[#1E3A5F]/5 to-transparent">
+                      <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
                         <ListOrdered className="h-5 w-5" />
                         Step-by-Step Instructions for Day {currentLesson.dayNumber}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <ol className="space-y-2 list-decimal list-inside text-sm">
+                    <CardContent className="flex-1 pt-6">
+                      <ol className="space-y-3 list-decimal list-inside">
                         {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
-                          <li key={index} className="text-muted-foreground">
+                          <li key={index} className="text-muted-foreground leading-relaxed">
                             {instruction}
                           </li>
                         ))}
@@ -686,14 +686,14 @@ function CourseMemberArea() {
                   </Card>
 
                   {/* Downloadable Resources */}
-                  <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <Card className="flex flex-col">
+                  <CardHeader className="bg-gradient-to-br from-[#D4AF37]/5 to-transparent">
+                    <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
                       <Download className="h-5 w-5" />
                       Downloadable Resources
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="flex-1 pt-6 space-y-3">
                     {currentLesson.slideshowUrl && (
                       <Button
                         variant="outline"
