@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Download, Lock, PlayCircle, Check, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, Download, Lock, PlayCircle, Check, ArrowRight, Loader2, ListOrdered } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
@@ -436,6 +436,91 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
   );
 }
 
+// Helper function to get instructions for each day
+function getInstructionsForDay(dayNumber: number): string[] {
+  const instructions: Record<number, string[]> = {
+    1: [
+      "Watch the video lesson (8 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Map out 2-3 of your behavior patterns",
+      "Complete Exercise 2: List your top 5 triggers",
+      "Complete Exercise 3: Describe your rock bottom moment",
+      "Complete the reflection prompt",
+      "Mark the lesson as complete"
+    ],
+    2: [
+      "Watch the video lesson (7 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: List 3-5 safe people you can reach out to",
+      "Complete Exercise 2: List 3-5 safe places where you feel calm",
+      "Complete Exercise 3: Design your daily regulation practices",
+      "Complete the reflection prompt",
+      "Reach out to one person from your safe people list",
+      "Mark the lesson as complete"
+    ],
+    3: [
+      "Watch the video lesson (9 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Map out 2-3 triggers in detail",
+      "Complete Exercise 2: List tools for hyperarousal and hypoarousal",
+      "Complete Exercise 3: Practice the craving surf technique",
+      "Complete the reflection prompt",
+      "Practice one of the five regulation tools (breathwork, grounding, movement)",
+      "Mark the lesson as complete"
+    ],
+    4: [
+      "Watch the video lesson (8 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Design your morning routine",
+      "Complete Exercise 2: Design your evening routine",
+      "Complete Exercise 3: Identify and commit to your keystone habit",
+      "Complete the reflection prompt",
+      "Do your evening routine tonight (even if it's just 5 minutes)",
+      "Mark the lesson as complete"
+    ],
+    5: [
+      "Watch the video lesson (10 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Write your shame inventory and self-forgiveness statements",
+      "Complete Exercise 2: Write a compassion letter to yourself",
+      "Complete Exercise 3: Rewrite your old story into a new story",
+      "Complete the reflection prompt",
+      "Read your compassion letter out loud to yourself",
+      "Mark the lesson as complete"
+    ],
+    6: [
+      "Watch the video lesson (7 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Describe who you are becoming",
+      "Complete Exercise 2: List all evidence that you're changing",
+      "Complete Exercise 3: Write a letter to your future self (1 year from now)",
+      "Complete the reflection prompt",
+      "Celebrate one small win from this week",
+      "Mark the lesson as complete"
+    ],
+    7: [
+      "Watch the video lesson (8 minutes)",
+      "Download and review the slideshow PDF",
+      "Download the workbook PDF",
+      "Complete Exercise 1: Define your top 5 core values",
+      "Complete Exercise 2: Write your one-sentence purpose statement",
+      "Complete Exercise 3: Create your 30-day action plan",
+      "Complete the reflection prompt",
+      "Download your BONUS: 50 Ways to Thrive document",
+      "Mark the lesson as complete",
+      "Celebrate completing the 7-Day REWIRED Reset!"
+    ]
+  };
+  
+  return instructions[dayNumber] || [];
+}
+
 // Course Member Area Component (for purchasers)
 function CourseMemberArea() {
   const { user } = useAuth();
@@ -579,18 +664,21 @@ function CourseMemberArea() {
                   </Card>
                 )}
 
-                {/* How to Use This Course */}
+                {/* Step-by-Step Instructions */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>How to Use This Course</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <ListOrdered className="h-5 w-5" />
+                      Step-by-Step Instructions for Day {currentLesson.dayNumber}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
-                      <li>Watch the video lesson</li>
-                      <li>Download and review the slideshow</li>
-                      <li>Complete the workbook exercises</li>
-                      <li>Mark the lesson complete</li>
-                      <li>Move to the next day</li>
+                    <ol className="space-y-2 list-decimal list-inside text-sm">
+                      {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
+                        <li key={index} className="text-muted-foreground">
+                          {instruction}
+                        </li>
+                      ))}
                     </ol>
                   </CardContent>
                 </Card>
