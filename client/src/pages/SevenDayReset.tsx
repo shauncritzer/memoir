@@ -624,7 +624,30 @@ function CourseMemberArea() {
             </Card>
           </div>
 
-          {/* Main Content Area */}
+          {/* Step-by-Step Instructions (Left Column) */}
+          <div className="lg:col-span-1">
+            {currentLesson && (
+              <Card className="flex flex-col sticky top-24">
+                <CardHeader className="bg-gradient-to-br from-[#1E3A5F]/5 to-transparent">
+                  <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
+                    <ListOrdered className="h-5 w-5" />
+                    Step-by-Step Instructions for Day {currentLesson.dayNumber}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 pt-6">
+                  <ol className="space-y-3 list-decimal list-inside">
+                    {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
+                      <li key={index} className="text-muted-foreground leading-relaxed">
+                        {instruction}
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Main Content Area (Right Column) */}
           <div className="lg:col-span-2 space-y-6">
             {currentLesson && (
               <>
@@ -664,29 +687,8 @@ function CourseMemberArea() {
                   </Card>
                 )}
 
-                {/* Two-column grid: Instructions on left, Resources on right */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Step-by-Step Instructions */}
-                  <Card className="flex flex-col">
-                    <CardHeader className="bg-gradient-to-br from-[#1E3A5F]/5 to-transparent">
-                      <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
-                        <ListOrdered className="h-5 w-5" />
-                        Step-by-Step Instructions for Day {currentLesson.dayNumber}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 pt-6">
-                      <ol className="space-y-3 list-decimal list-inside">
-                        {getInstructionsForDay(currentLesson.dayNumber).map((instruction, index) => (
-                          <li key={index} className="text-muted-foreground leading-relaxed">
-                            {instruction}
-                          </li>
-                        ))}
-                      </ol>
-                    </CardContent>
-                  </Card>
-
-                  {/* Downloadable Resources */}
-                  <Card className="flex flex-col">
+                {/* Downloadable Resources */}
+                <Card className="flex flex-col">
                   <CardHeader className="bg-gradient-to-br from-[#D4AF37]/5 to-transparent">
                     <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
                       <Download className="h-5 w-5" />
@@ -730,12 +732,17 @@ function CourseMemberArea() {
                     </Button>
                   </CardContent>
                 </Card>
-                </div>
+              </>
+            )}
+          </div>
+        </div>
 
-                {/* Mark Complete */}
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
+        {/* Mark Complete - Full Width Centered */}
+        {currentLesson && (
+          <div className="mt-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
                       <div>
                         <h3 className="font-semibold mb-1">Completed this lesson?</h3>
                         <p className="text-sm text-muted-foreground">
@@ -763,13 +770,11 @@ function CourseMemberArea() {
                           "Mark Complete"
                         )}
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
