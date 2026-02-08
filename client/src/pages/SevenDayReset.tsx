@@ -579,6 +579,22 @@ function CourseMemberArea() {
                   </Card>
                 )}
 
+                {/* How to Use This Course */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>How to Use This Course</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ol className="space-y-2 list-decimal list-inside text-muted-foreground">
+                      <li>Watch the video lesson</li>
+                      <li>Download and review the slideshow</li>
+                      <li>Complete the workbook exercises</li>
+                      <li>Mark the lesson complete</li>
+                      <li>Move to the next day</li>
+                    </ol>
+                  </CardContent>
+                </Card>
+
                 {/* Downloadable Resources */}
                 <Card>
                   <CardHeader>
@@ -589,8 +605,8 @@ function CourseMemberArea() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {currentLesson.slideshowUrl && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full justify-start"
                         asChild
                       >
@@ -601,8 +617,8 @@ function CourseMemberArea() {
                       </Button>
                     )}
                     {currentLesson.workbookUrl && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full justify-start"
                         asChild
                       >
@@ -612,6 +628,16 @@ function CourseMemberArea() {
                         </a>
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-gradient-to-r from-[#D4AF37]/10 to-transparent border-[#D4AF37]/30"
+                      asChild
+                    >
+                      <a href="https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev/Thriving/Living_Sober.pdf" download target="_blank" rel="noopener noreferrer">
+                        <Download className="mr-2 h-4 w-4 text-[#D4AF37]" />
+                        <span><span className="text-[#D4AF37] font-semibold">BONUS:</span> 50 Ways to Thrive (PDF)</span>
+                      </a>
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -649,29 +675,6 @@ function CourseMemberArea() {
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Bonus Content Link */}
-                {currentLesson.dayNumber === 7 && (
-                  <Card className="bg-gradient-to-br from-[#1E3A5F] to-gray-900 text-white">
-                    <CardHeader>
-                      <CardTitle>🎉 Congratulations on Completing the Course!</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4">
-                        You've finished all 7 days. Don't forget to access your bonus content:
-                      </p>
-                      <Button 
-                        variant="secondary" 
-                        className="bg-[#D4AF37] hover:bg-[#B8941F] text-black"
-                        asChild
-                      >
-                        <Link href="/thriving-sober">
-                          Access Bonus: 50 Ways to Thrive →
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
               </>
             )}
           </div>
