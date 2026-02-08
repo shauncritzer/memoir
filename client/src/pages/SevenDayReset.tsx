@@ -592,8 +592,9 @@ function CourseMemberArea() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Lesson List Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Left Column: Course Lessons + Instructions */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Course Lessons */}
             <Card>
               <CardHeader>
                 <CardTitle>Course Lessons</CardTitle>
@@ -622,12 +623,10 @@ function CourseMemberArea() {
                 ))}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Step-by-Step Instructions (Left Column) */}
-          <div className="lg:col-span-1">
+            {/* Step-by-Step Instructions */}
             {currentLesson && (
-              <Card className="flex flex-col sticky top-24">
+              <Card className="flex flex-col">
                 <CardHeader className="bg-gradient-to-br from-[#1E3A5F]/5 to-transparent">
                   <CardTitle className="flex items-center gap-2 text-[#1E3A5F]">
                     <ListOrdered className="h-5 w-5" />
