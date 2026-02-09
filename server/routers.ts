@@ -1540,6 +1540,388 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to seed lessons: ${error.message}`);
         }
       }),
+
+    // User Management
+    getAllUsers: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users, purchases } = await import("../drizzle/schema");
+        const { sql, eq } = await import("drizzle-orm");
+
+        // Get all users with purchase count
+        const allUsers = await db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            loginMethod: users.loginMethod,
+            role: users.role,
+            createdAt: users.createdAt,
+            lastSignedIn: users.lastSignedIn,
+          })
+          .from(users)
+          .orderBy(sql`${users.createdAt} DESC`);
+
+        // Get purchase counts for each user
+        const userIds = allUsers.map(u => u.id);
+        const purchaseCounts = await db
+          .select({
+            userId: purchases.userId,
+            count: sql<number>`COUNT(*)`,
+          })
+          .from(purchases)
+          .where(eq(purchases.status, "completed"))
+          .groupBy(purchases.userId);
+
+        const purchaseMap = new Map(purchaseCounts.map(p => [p.userId, Number(p.count)]));
+
+        return allUsers.map(user => ({
+          ...user,
+          purchaseCount: purchaseMap.get(user.id) || 0,
+        }));
+      }),
+
+    getAllPurchases: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const allPurchases = await db
+          .select({
+            id: purchases.id,
+            userId: purchases.userId,
+            userName: users.name,
+            userEmail: users.email,
+            productId: purchases.productId,
+            amount: purchases.amount,
+            status: purchases.status,
+            stripePaymentId: purchases.stripePaymentId,
+            purchasedAt: purchases.purchasedAt,
+          })
+          .from(purchases)
+          .leftJoin(users, sql`${purchases.userId} = ${users.id}`)
+          .orderBy(sql`${purchases.purchasedAt} DESC`);
+
+        return allPurchases;
+      }),
+
+    grantCourseAccess: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        productId: z.string(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        // Check if access already exists
+        const existing = await db
+          .select()
+          .from(purchases)
+          .where(
+            and(
+              eq(purchases.userId, input.userId),
+              eq(purchases.productId, input.productId),
+              eq(purchases.status, "completed")
+            )
+          )
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("User already has access to this course");
+        }
+
+        // Create manual purchase record
+        await db.insert(purchases).values({
+          userId: input.userId,
+          productId: input.productId,
+          amount: 0, // Free/manual grant
+          status: "completed",
+          stripePaymentId: null,
+          stripeCustomerId: null,
+          purchasedAt: new Date(),
+          metadata: JSON.stringify({
+            type: "manual_grant",
+            grantedBy: ctx.user.id,
+            note: input.note || "Manually granted by admin",
+          }),
+        });
+
+        return {
+          success: true,
+          message: `Access granted to ${input.productId}`,
+        };
+      }),
+
+    revokeCourseAccess: protectedProcedure
+      .input(z.object({
+        purchaseId: z.number(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Update purchase status to cancelled
+        await db
+          .update(purchases)
+          .set({
+            status: "cancelled",
+            metadata: JSON.stringify({
+              cancelledBy: ctx.user.id,
+              cancelledAt: new Date(),
+              reason: input.reason || "Revoked by admin",
+            }),
+          })
+          .where(eq(purchases.id, input.purchaseId));
+
+        return {
+          success: true,
+          message: "Access revoked successfully",
+        };
+      }),
+
+    // Blog Post Management
+    getAllBlogPosts: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const posts = await db
+          .select({
+            id: blogPosts.id,
+            title: blogPosts.title,
+            slug: blogPosts.slug,
+            excerpt: blogPosts.excerpt,
+            coverImage: blogPosts.coverImage,
+            category: blogPosts.category,
+            tags: blogPosts.tags,
+            status: blogPosts.status,
+            publishedAt: blogPosts.publishedAt,
+            authorId: blogPosts.authorId,
+            authorName: users.name,
+            viewCount: blogPosts.viewCount,
+            createdAt: blogPosts.createdAt,
+            updatedAt: blogPosts.updatedAt,
+          })
+          .from(blogPosts)
+          .leftJoin(users, sql`${blogPosts.authorId} = ${users.id}`)
+          .orderBy(sql`${blogPosts.createdAt} DESC`);
+
+        return posts;
+      }),
+
+    getBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const post = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (post.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        return post[0];
+      }),
+
+    createBlogPost: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        slug: z.string().min(1),
+        excerpt: z.string().optional(),
+        content: z.string().min(1),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).default("draft"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if slug already exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.slug, input.slug))
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("A blog post with this slug already exists");
+        }
+
+        // Create post
+        await db.insert(blogPosts).values({
+          title: input.title,
+          slug: input.slug,
+          excerpt: input.excerpt || null,
+          content: input.content,
+          coverImage: input.coverImage || null,
+          category: input.category || null,
+          tags: input.tags ? JSON.stringify(input.tags) : null,
+          status: input.status,
+          publishedAt: input.status === "published" ? new Date() : null,
+          authorId: ctx.user.id,
+          viewCount: 0,
+        });
+
+        return {
+          success: true,
+          message: "Blog post created successfully",
+        };
+      }),
+
+    updateBlogPost: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        excerpt: z.string().optional(),
+        content: z.string().min(1).optional(),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if post exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (existing.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        const wasPublished = existing[0].status === "published";
+        const willBePublished = input.status === "published";
+
+        // Build update object
+        const updateData: any = {};
+        if (input.title !== undefined) updateData.title = input.title;
+        if (input.slug !== undefined) updateData.slug = input.slug;
+        if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
+        if (input.content !== undefined) updateData.content = input.content;
+        if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
+        if (input.category !== undefined) updateData.category = input.category;
+        if (input.tags !== undefined) updateData.tags = JSON.stringify(input.tags);
+        if (input.status !== undefined) {
+          updateData.status = input.status;
+          // Set publishedAt when transitioning to published
+          if (!wasPublished && willBePublished) {
+            updateData.publishedAt = new Date();
+          }
+        }
+
+        await db
+          .update(blogPosts)
+          .set(updateData)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post updated successfully",
+        };
+      }),
+
+    deleteBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db
+          .delete(blogPosts)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post deleted successfully",
+        };
+      }),
   }),
 
   // AI Coach counter system
