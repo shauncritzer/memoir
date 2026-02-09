@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Download, Star } from "lucide-react";
@@ -236,6 +237,9 @@ export default function Memoir() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
