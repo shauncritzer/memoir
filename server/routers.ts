@@ -353,9 +353,9 @@ export const appRouter = router({
         status: z.enum(["draft", "published", "archived"]).default("draft"),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can create blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to create blog posts");
         }
         
         const { createBlogPost } = await import("./db");
@@ -392,9 +392,9 @@ export const appRouter = router({
         status: z.enum(["draft", "published", "archived"]).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can update blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to update blog posts");
         }
         
         const { updateBlogPost } = await import("./db");
@@ -427,9 +427,9 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can delete blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to delete blog posts");
         }
         
         const { deleteBlogPost } = await import("./db");
@@ -439,9 +439,9 @@ export const appRouter = router({
     // Get all posts including drafts (admin only)
     listAll: protectedProcedure
       .query(async ({ ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can view all posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to view all posts");
         }
         
         const { getAllBlogPosts } = await import("./db");
