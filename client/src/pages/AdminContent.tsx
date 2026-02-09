@@ -74,10 +74,10 @@ export default function AdminContent() {
               Manage blog posts and product PDFs
             </p>
           </div>
-          <Link href="/admin/seed">
+          <Link href="/admin">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Main Admin
+              Back to Admin Dashboard
             </Button>
           </Link>
         </div>
@@ -229,9 +229,12 @@ export default function AdminContent() {
           )}
         </div>
 
-        <div className="pt-6 border-t">
+        <div className="pt-6 border-t space-y-2">
           <p className="text-xs text-center text-muted-foreground">
-            Need to run database migrations? <Link href="/admin/seed" className="underline">Go to Main Admin</Link>
+            Want to create/edit individual blog posts? <Link href="/admin/blog-editor" className="underline">Go to Blog Editor</Link>
+          </p>
+          <p className="text-xs text-center text-muted-foreground">
+            <Link href="/admin" className="underline">Back to Admin Dashboard</Link>
           </p>
         </div>
       </Card>

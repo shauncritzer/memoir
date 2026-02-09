@@ -151,24 +151,16 @@ export default function BlogEditor() {
     );
   }
 
-  // Check if user is owner
-  const ownerOpenId = import.meta.env.VITE_OWNER_OPEN_ID;
-  if (user.openId !== ownerOpenId) {
+  // Check if user is admin
+  if (user.role !== "admin") {
     return (
       <div className="container max-w-4xl py-12">
         <Card>
           <CardHeader>
             <CardTitle>Unauthorized</CardTitle>
             <CardDescription>
-              Only the site owner can access the blog editor.
+              Only admins can access the blog editor.
             </CardDescription>
-            <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">Debug info:</p>
-              <pre className="text-xs bg-muted p-2 rounded mt-2">
-                Your openId: {user.openId}\n
-                Expected: {ownerOpenId}
-              </pre>
-            </CardContent>
           </CardHeader>
         </Card>
       </div>
