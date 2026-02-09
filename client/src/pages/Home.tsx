@@ -415,7 +415,7 @@ export default function Home() {
                 <p className="font-semibold">Ready to do the work? Start here.</p>
 
                 <div className="bg-white/80 p-4 rounded-lg border border-amber-300">
-                  <p className="font-bold text-amber-900">7-Day REWIRED Reset ($27)</p>
+                  <p className="font-bold text-amber-900">7-Day REWIRED Reset ($47)</p>
                   <ul className="space-y-1 text-sm mt-2">
                     <li>• Learn nervous system basics</li>
                     <li>• Daily video lessons + worksheets</li>
@@ -440,7 +440,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-3xl font-bold text-amber-900 text-center">$27 - $97</p>
+                <p className="text-3xl font-bold text-amber-900 text-center">$47 - $97</p>
                 <Link href="/products">
                   <Button className="w-full bg-amber-500 hover:bg-amber-600 text-lg py-6">
                     Explore Courses
