@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, ShoppingCart, Loader2, CheckCircle2, XCircle, Gift, Ban } from "lucide-react";
+import { Users, ShoppingCart, Loader2, CheckCircle2, XCircle, Gift, Ban, FileText, Eye, Edit } from "lucide-react";
 import { Link } from "wouter";
 
 export default function AdminDashboard() {
@@ -45,6 +46,7 @@ export default function AdminDashboard() {
   // Queries
   const { data: users, isLoading: usersLoading } = trpc.admin.getAllUsers.useQuery();
   const { data: purchases, isLoading: purchasesLoading } = trpc.admin.getAllPurchases.useQuery();
+  const { data: blogPosts, isLoading: blogPostsLoading } = trpc.admin.getAllBlogPosts.useQuery();
 
   // Mutations
   const grantAccess = trpc.admin.grantCourseAccess.useMutation({
@@ -75,6 +77,12 @@ export default function AdminDashboard() {
     (purchase) =>
       purchase.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       purchase.productId?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredBlogPosts = blogPosts?.filter(
+    (post) =>
+      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (date: Date | string | null) => {
@@ -111,7 +119,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="users">
               <Users className="mr-2 h-4 w-4" />
               Users
@@ -119,6 +127,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="purchases">
               <ShoppingCart className="mr-2 h-4 w-4" />
               Purchases
+            </TabsTrigger>
+            <TabsTrigger value="blog">
+              <FileText className="mr-2 h-4 w-4" />
+              Blog Posts
             </TabsTrigger>
           </TabsList>
 
@@ -378,6 +390,109 @@ export default function AdminDashboard() {
                                   </DialogContent>
                                 </Dialog>
                               )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Blog Posts Tab */}
+          <TabsContent value="blog" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>All Blog Posts</CardTitle>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      placeholder="Search posts..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-64"
+                    />
+                    <Link href="/admin/blog-editor">
+                      <Button>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Manage Posts
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {blogPostsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Views</TableHead>
+                          <TableHead>Author</TableHead>
+                          <TableHead>Published</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredBlogPosts?.map((post) => (
+                          <TableRow key={post.id}>
+                            <TableCell className="font-medium max-w-xs truncate">
+                              {post.title}
+                            </TableCell>
+                            <TableCell>
+                              {post.category ? (
+                                <Badge variant="outline">{post.category}</Badge>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  post.status === "published"
+                                    ? "default"
+                                    : post.status === "draft"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {post.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Eye className="h-3 w-3 text-muted-foreground" />
+                                {post.viewCount || 0}
+                              </div>
+                            </TableCell>
+                            <TableCell>{post.authorName || "—"}</TableCell>
+                            <TableCell>
+                              {post.publishedAt ? formatDate(post.publishedAt) : "—"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {post.status === "published" && (
+                                  <Link href={`/blog/${post.slug}`} target="_blank">
+                                    <Button size="sm" variant="ghost">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </Link>
+                                )}
+                                <Link href="/admin/blog-editor">
+                                  <Button size="sm" variant="ghost">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}

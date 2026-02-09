@@ -1712,6 +1712,216 @@ Recovery is possible. But it requires working with your biology, not against it.
           message: "Access revoked successfully",
         };
       }),
+
+    // Blog Post Management
+    getAllBlogPosts: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const posts = await db
+          .select({
+            id: blogPosts.id,
+            title: blogPosts.title,
+            slug: blogPosts.slug,
+            excerpt: blogPosts.excerpt,
+            coverImage: blogPosts.coverImage,
+            category: blogPosts.category,
+            tags: blogPosts.tags,
+            status: blogPosts.status,
+            publishedAt: blogPosts.publishedAt,
+            authorId: blogPosts.authorId,
+            authorName: users.name,
+            viewCount: blogPosts.viewCount,
+            createdAt: blogPosts.createdAt,
+            updatedAt: blogPosts.updatedAt,
+          })
+          .from(blogPosts)
+          .leftJoin(users, sql`${blogPosts.authorId} = ${users.id}`)
+          .orderBy(sql`${blogPosts.createdAt} DESC`);
+
+        return posts;
+      }),
+
+    getBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const post = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (post.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        return post[0];
+      }),
+
+    createBlogPost: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        slug: z.string().min(1),
+        excerpt: z.string().optional(),
+        content: z.string().min(1),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).default("draft"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if slug already exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.slug, input.slug))
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("A blog post with this slug already exists");
+        }
+
+        // Create post
+        await db.insert(blogPosts).values({
+          title: input.title,
+          slug: input.slug,
+          excerpt: input.excerpt || null,
+          content: input.content,
+          coverImage: input.coverImage || null,
+          category: input.category || null,
+          tags: input.tags ? JSON.stringify(input.tags) : null,
+          status: input.status,
+          publishedAt: input.status === "published" ? new Date() : null,
+          authorId: ctx.user.id,
+          viewCount: 0,
+        });
+
+        return {
+          success: true,
+          message: "Blog post created successfully",
+        };
+      }),
+
+    updateBlogPost: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        excerpt: z.string().optional(),
+        content: z.string().min(1).optional(),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if post exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (existing.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        const wasPublished = existing[0].status === "published";
+        const willBePublished = input.status === "published";
+
+        // Build update object
+        const updateData: any = {};
+        if (input.title !== undefined) updateData.title = input.title;
+        if (input.slug !== undefined) updateData.slug = input.slug;
+        if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
+        if (input.content !== undefined) updateData.content = input.content;
+        if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
+        if (input.category !== undefined) updateData.category = input.category;
+        if (input.tags !== undefined) updateData.tags = JSON.stringify(input.tags);
+        if (input.status !== undefined) {
+          updateData.status = input.status;
+          // Set publishedAt when transitioning to published
+          if (!wasPublished && willBePublished) {
+            updateData.publishedAt = new Date();
+          }
+        }
+
+        await db
+          .update(blogPosts)
+          .set(updateData)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post updated successfully",
+        };
+      }),
+
+    deleteBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db
+          .delete(blogPosts)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post deleted successfully",
+        };
+      }),
   }),
 
   // AI Coach counter system
