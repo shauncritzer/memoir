@@ -21,6 +21,7 @@ import AdminVideos from "./pages/AdminVideos";
 import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
 import AdminContent from "./pages/AdminContent";
+import AdminDashboard from "./pages/AdminDashboard";
 import StripeTest from "./pages/StripeTest";
 import TermsOfUse from "./pages/TermsOfUse";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/rewired-method" component={RewiredMethod} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/blog-editor" component={BlogEditor} />
       <Route path="/admin/videos" component={AdminVideos} />
       <Route path="/admin/seed" component={SeedDatabase} />

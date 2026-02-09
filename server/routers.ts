@@ -1540,6 +1540,178 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to seed lessons: ${error.message}`);
         }
       }),
+
+    // User Management
+    getAllUsers: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users, purchases } = await import("../drizzle/schema");
+        const { sql, eq } = await import("drizzle-orm");
+
+        // Get all users with purchase count
+        const allUsers = await db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            loginMethod: users.loginMethod,
+            role: users.role,
+            createdAt: users.createdAt,
+            lastSignedIn: users.lastSignedIn,
+          })
+          .from(users)
+          .orderBy(sql`${users.createdAt} DESC`);
+
+        // Get purchase counts for each user
+        const userIds = allUsers.map(u => u.id);
+        const purchaseCounts = await db
+          .select({
+            userId: purchases.userId,
+            count: sql<number>`COUNT(*)`,
+          })
+          .from(purchases)
+          .where(eq(purchases.status, "completed"))
+          .groupBy(purchases.userId);
+
+        const purchaseMap = new Map(purchaseCounts.map(p => [p.userId, Number(p.count)]));
+
+        return allUsers.map(user => ({
+          ...user,
+          purchaseCount: purchaseMap.get(user.id) || 0,
+        }));
+      }),
+
+    getAllPurchases: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const allPurchases = await db
+          .select({
+            id: purchases.id,
+            userId: purchases.userId,
+            userName: users.name,
+            userEmail: users.email,
+            productId: purchases.productId,
+            amount: purchases.amount,
+            status: purchases.status,
+            stripePaymentId: purchases.stripePaymentId,
+            purchasedAt: purchases.purchasedAt,
+          })
+          .from(purchases)
+          .leftJoin(users, sql`${purchases.userId} = ${users.id}`)
+          .orderBy(sql`${purchases.purchasedAt} DESC`);
+
+        return allPurchases;
+      }),
+
+    grantCourseAccess: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        productId: z.string(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        // Check if access already exists
+        const existing = await db
+          .select()
+          .from(purchases)
+          .where(
+            and(
+              eq(purchases.userId, input.userId),
+              eq(purchases.productId, input.productId),
+              eq(purchases.status, "completed")
+            )
+          )
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("User already has access to this course");
+        }
+
+        // Create manual purchase record
+        await db.insert(purchases).values({
+          userId: input.userId,
+          productId: input.productId,
+          amount: 0, // Free/manual grant
+          status: "completed",
+          stripePaymentId: null,
+          stripeCustomerId: null,
+          purchasedAt: new Date(),
+          metadata: JSON.stringify({
+            type: "manual_grant",
+            grantedBy: ctx.user.id,
+            note: input.note || "Manually granted by admin",
+          }),
+        });
+
+        return {
+          success: true,
+          message: `Access granted to ${input.productId}`,
+        };
+      }),
+
+    revokeCourseAccess: protectedProcedure
+      .input(z.object({
+        purchaseId: z.number(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Update purchase status to cancelled
+        await db
+          .update(purchases)
+          .set({
+            status: "cancelled",
+            metadata: JSON.stringify({
+              cancelledBy: ctx.user.id,
+              cancelledAt: new Date(),
+              reason: input.reason || "Revoked by admin",
+            }),
+          })
+          .where(eq(purchases.id, input.purchaseId));
+
+        return {
+          success: true,
+          message: "Access revoked successfully",
+        };
+      }),
   }),
 
   // AI Coach counter system
