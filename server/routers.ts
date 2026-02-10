@@ -2385,6 +2385,182 @@ Recovery is possible. But it requires working with your biology, not against it.
 
         return stats;
       }),
+
+    // AI-generate content for a queue item or topic
+    generateAiContent: protectedProcedure
+      .input(z.object({
+        queueItemId: z.number().optional(),
+        topic: z.string().optional(),
+        platform: z.string().optional(),
+        platforms: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { generateContentForPlatform, generateContentForPlatforms } = await import("./social/content-generator");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue, blogPosts, ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // If generating for an existing queue item
+        if (input.queueItemId) {
+          const items = await db.select().from(contentQueue).where(eq(contentQueue.id, input.queueItemId)).limit(1);
+          if (items.length === 0) throw new Error("Queue item not found");
+          const item = items[0];
+
+          await db.update(contentQueue).set({ status: "generating" }).where(eq(contentQueue.id, item.id));
+
+          let blogTitle: string | undefined;
+          let blogContent: string | undefined;
+          if (item.sourceBlogPostId) {
+            const posts = await db.select().from(blogPosts).where(eq(blogPosts.id, item.sourceBlogPostId)).limit(1);
+            if (posts.length > 0) { blogTitle = posts[0].title; blogContent = posts[0].content; }
+          }
+
+          let ctaText: string | undefined;
+          let ctaUrl: string | undefined;
+          if (item.ctaOfferId) {
+            const offers = await db.select().from(ctaOffers).where(eq(ctaOffers.id, item.ctaOfferId)).limit(1);
+            if (offers.length > 0) { ctaText = offers[0].ctaText; ctaUrl = offers[0].ctaUrl; }
+          }
+
+          const generated = await generateContentForPlatform({
+            platform: item.platform,
+            sourceBlogTitle: blogTitle,
+            sourceBlogContent: blogContent,
+            ctaText,
+            ctaUrl,
+          });
+
+          await db.update(contentQueue).set({
+            content: generated.content,
+            status: "ready",
+            mediaUrls: JSON.stringify({
+              suggestedMediaType: generated.suggestedMediaType,
+              suggestedMediaPrompt: generated.suggestedMediaPrompt,
+              suggestedTools: generated.suggestedTools,
+              hashtags: generated.hashtags,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+
+          return { success: true, content: generated.content, platform: item.platform };
+        }
+
+        // If generating from a topic for one or more platforms
+        if (input.topic && (input.platform || input.platforms)) {
+          const platforms = input.platforms || [input.platform!];
+          const results = await generateContentForPlatforms({
+            platforms,
+            topic: input.topic,
+          });
+
+          // Insert each generated item into the queue
+          for (const result of results) {
+            await db.insert(contentQueue).values({
+              platform: result.platform,
+              contentType: result.contentType,
+              content: result.content,
+              status: "ready",
+              mediaUrls: JSON.stringify({
+                suggestedMediaType: result.suggestedMediaType,
+                suggestedMediaPrompt: result.suggestedMediaPrompt,
+                suggestedTools: result.suggestedTools,
+                hashtags: result.hashtags,
+              }),
+            });
+          }
+
+          return { success: true, generated: results.length, platforms: results.map(r => r.platform) };
+        }
+
+        throw new Error("Provide either queueItemId or topic + platform(s)");
+      }),
+
+    // Post a queue item immediately
+    postNow: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { postNow } = await import("./social/scheduler");
+        return postNow(input.id);
+      }),
+
+    // Generate a content idea
+    generateIdea: protectedProcedure
+      .input(z.object({ theme: z.string().optional() }).optional())
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { generateContentIdea } = await import("./social/content-generator");
+        return generateContentIdea(input || undefined);
+      }),
+
+    // Smart schedule: auto-assign optimal posting times to ready items
+    smartSchedule: protectedProcedure
+      .input(z.object({
+        itemIds: z.array(z.number()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq, inArray } = await import("drizzle-orm");
+        const { getOptimalPostingTimes } = await import("./social/scheduler");
+
+        const items = await db.select().from(contentQueue)
+          .where(inArray(contentQueue.id, input.itemIds));
+
+        const scheduled = [];
+        for (const item of items) {
+          const times = getOptimalPostingTimes(item.platform, 1);
+          if (times.length > 0) {
+            await db.update(contentQueue).set({
+              scheduledFor: times[0],
+            }).where(eq(contentQueue.id, item.id));
+            scheduled.push({ id: item.id, platform: item.platform, scheduledFor: times[0] });
+          }
+        }
+
+        return { success: true, scheduled };
+      }),
+
+    // Get scheduler status
+    schedulerStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { getSchedulerStatus, isTwitterConfigured } = await import("./social");
+        const status = getSchedulerStatus();
+
+        return {
+          ...status,
+          platforms: {
+            x: { configured: isTwitterConfigured(), label: "X (Twitter)" },
+            instagram: { configured: false, label: "Instagram" },
+            linkedin: { configured: false, label: "LinkedIn" },
+            facebook: { configured: false, label: "Facebook" },
+            youtube: { configured: false, label: "YouTube" },
+            tiktok: { configured: false, label: "TikTok" },
+            podcast: { configured: false, label: "Podcast" },
+          },
+        };
+      }),
+
+    // Verify Twitter connection
+    verifyTwitter: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { verifyTwitterCredentials } = await import("./social/twitter");
+        return verifyTwitterCredentials();
+      }),
   }),
 
   // ============================================================
