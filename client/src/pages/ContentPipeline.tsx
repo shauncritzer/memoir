@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Zap, Target, Users, ArrowLeft, Plus, Trash2, Play, Pause, Eye,
   Send, Clock, CheckCircle2, XCircle, Loader2, BarChart3, Link2,
+  Sparkles, Calendar, Wifi, WifiOff, Lightbulb, Rocket,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -84,6 +85,14 @@ export default function ContentPipeline() {
   const [selectedBlogId, setSelectedBlogId] = useState<number | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
 
+  // === AI Generate from Topic State ===
+  const [aiTopicOpen, setAiTopicOpen] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiTopicPlatforms, setAiTopicPlatforms] = useState<string[]>([]);
+
+  // === Content Preview State ===
+  const [previewItem, setPreviewItem] = useState<any>(null);
+
   // === Queries ===
   const { data: queueItems, isLoading: queueLoading } = trpc.contentPipeline.getQueue.useQuery();
   const { data: queueStats } = trpc.contentPipeline.getQueueStats.useQuery();
@@ -91,6 +100,7 @@ export default function ContentPipeline() {
   const { data: affiliatesData, isLoading: affiliatesLoading } = trpc.affiliate.getAll.useQuery();
   const { data: blogPosts } = trpc.admin.getAllBlogPosts.useQuery();
   const { data: users } = trpc.admin.getAllUsers.useQuery();
+  const { data: schedulerStatus } = trpc.contentPipeline.schedulerStatus.useQuery();
 
   // === Mutations ===
   const addToQueue = trpc.contentPipeline.addToQueue.useMutation({
@@ -120,6 +130,60 @@ export default function ContentPipeline() {
     },
   });
 
+  const generateAiContent = trpc.contentPipeline.generateAiContent.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.contentPipeline.getQueue.invalidate();
+      trpcUtils.contentPipeline.getQueueStats.invalidate();
+      if ("generated" in data) {
+        alert(`Generated content for ${data.generated} platform(s)!`);
+        setAiTopicOpen(false);
+        setAiTopic("");
+        setAiTopicPlatforms([]);
+      } else {
+        alert("Content generated successfully!");
+      }
+    },
+    onError: (err) => alert("Generation failed: " + err.message),
+  });
+
+  const postNow = trpc.contentPipeline.postNow.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.contentPipeline.getQueue.invalidate();
+      trpcUtils.contentPipeline.getQueueStats.invalidate();
+      if (data.success) {
+        alert(`Posted! ${data.url || ""}`);
+      } else {
+        alert(`Post failed: ${data.error}`);
+      }
+    },
+    onError: (err) => alert("Error: " + err.message),
+  });
+
+  const generateIdea = trpc.contentPipeline.generateIdea.useMutation({
+    onSuccess: (data) => {
+      setAiTopic(data.hook + "\n\n" + data.topic);
+      setAiTopicPlatforms(data.platforms);
+      alert(`Idea: "${data.topic}"\nSuggested CTA: ${data.suggestedCta}`);
+    },
+  });
+
+  const smartSchedule = trpc.contentPipeline.smartSchedule.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.contentPipeline.getQueue.invalidate();
+      alert(`Scheduled ${data.scheduled.length} item(s) at optimal times`);
+    },
+  });
+
+  const verifyTwitter = trpc.contentPipeline.verifyTwitter.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        alert(`Twitter connected! Logged in as @${data.username}`);
+      } else {
+        alert(`Twitter connection failed: ${data.error}`);
+      }
+    },
+  });
+
   const createCta = trpc.cta.create.useMutation({
     onSuccess: () => {
       trpcUtils.cta.getAll.invalidate();
@@ -136,6 +200,16 @@ export default function ContentPipeline() {
     onSuccess: () => trpcUtils.cta.getAll.invalidate(),
   });
 
+  const seedCtaOffers = trpc.admin.seedCtaOffers.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.cta.getAll.invalidate();
+      alert(data.message);
+    },
+    onError: (error) => {
+      alert("Error: " + error.message);
+    },
+  });
+
   const createAffiliate = trpc.affiliate.create.useMutation({
     onSuccess: () => {
       trpcUtils.affiliate.getAll.invalidate();
@@ -146,7 +220,7 @@ export default function ContentPipeline() {
 
   // === Helpers ===
   const formatDate = (date: Date | string | null) => {
-    if (!date) return "—";
+    if (!date) return "\u2014";
     return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   };
 
@@ -162,9 +236,26 @@ export default function ContentPipeline() {
     );
   };
 
+  const toggleAiPlatform = (platform: string) => {
+    setAiTopicPlatforms(prev =>
+      prev.includes(platform)
+        ? prev.filter(p => p !== platform)
+        : [...prev, platform]
+    );
+  };
+
   const getStatCount = (status: string) => {
     const stat = queueStats?.find((s: any) => s.status === status);
     return stat?.count || 0;
+  };
+
+  // Get ready items for batch scheduling
+  const readyItems = queueItems?.filter((i: any) => i.status === "ready" && !i.scheduledFor) || [];
+
+  // Parse metrics JSON
+  const parseMetrics = (metrics: string | null) => {
+    if (!metrics) return null;
+    try { return JSON.parse(metrics); } catch { return null; }
   };
 
   return (
@@ -178,13 +269,52 @@ export default function ContentPipeline() {
               Create, schedule, and distribute content across platforms
             </p>
           </div>
-          <Link href="/admin">
-            <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Admin Dashboard
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin">
+              <Button variant="outline">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Admin Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
+
+        {/* Platform Status Bar */}
+        {schedulerStatus && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  {schedulerStatus.running ? (
+                    <Badge className="bg-green-600 text-white"><Wifi className="h-3 w-3 mr-1" /> Scheduler Active</Badge>
+                  ) : (
+                    <Badge variant="destructive"><WifiOff className="h-3 w-3 mr-1" /> Scheduler Stopped</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {Object.entries(schedulerStatus.platforms || {}).map(([key, p]: [string, any]) => (
+                    <Badge
+                      key={key}
+                      variant={p.configured ? "default" : "outline"}
+                      className={p.configured ? "bg-green-700 text-white" : "opacity-50"}
+                    >
+                      {p.configured ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                      {p.label}
+                    </Badge>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => verifyTwitter.mutate()}
+                    disabled={verifyTwitter.isPending}
+                  >
+                    {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X Connection"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -231,12 +361,88 @@ export default function ContentPipeline() {
               <CardHeader>
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <CardTitle>Content Queue</CardTitle>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
+                    {/* AI Generate from Topic */}
+                    <Dialog open={aiTopicOpen} onOpenChange={setAiTopicOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white">
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          AI Generate
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>AI Content Generator</DialogTitle>
+                          <DialogDescription>
+                            Enter a topic or click "Get Idea" and AI will generate platform-optimized content.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <Label>Topic / Prompt</Label>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => generateIdea.mutate()}
+                                disabled={generateIdea.isPending}
+                              >
+                                {generateIdea.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Lightbulb className="h-3 w-3 mr-1" />}
+                                Get Idea
+                              </Button>
+                            </div>
+                            <Textarea
+                              value={aiTopic}
+                              onChange={(e) => setAiTopic(e.target.value)}
+                              placeholder="e.g., Write about how the nervous system responds to stress and why people turn to substances..."
+                              rows={4}
+                            />
+                          </div>
+                          <div>
+                            <Label>Platforms</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {["x", "instagram", "linkedin", "facebook", "youtube", "tiktok"].map((p) => (
+                                <Button
+                                  key={p}
+                                  variant={aiTopicPlatforms.includes(p) ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => toggleAiPlatform(p)}
+                                >
+                                  {platformConfig[p]?.label || p}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            onClick={() => {
+                              if (aiTopic && aiTopicPlatforms.length > 0) {
+                                generateAiContent.mutate({
+                                  topic: aiTopic,
+                                  platforms: aiTopicPlatforms,
+                                });
+                              }
+                            }}
+                            disabled={!aiTopic || aiTopicPlatforms.length === 0 || generateAiContent.isPending}
+                            className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white"
+                          >
+                            {generateAiContent.isPending ? (
+                              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
+                            ) : (
+                              <><Sparkles className="mr-2 h-4 w-4" />Generate for {aiTopicPlatforms.length} Platform(s)</>
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Generate from Blog */}
                     <Dialog open={generateOpen} onOpenChange={setGenerateOpen}>
                       <DialogTrigger asChild>
                         <Button>
                           <Zap className="mr-2 h-4 w-4" />
-                          Generate from Blog Post
+                          From Blog Post
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
@@ -300,6 +506,7 @@ export default function ContentPipeline() {
                       </DialogContent>
                     </Dialog>
 
+                    {/* Add Manually */}
                     <Dialog open={addQueueOpen} onOpenChange={setAddQueueOpen}>
                       <DialogTrigger asChild>
                         <Button variant="outline">
@@ -360,6 +567,25 @@ export default function ContentPipeline() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+
+                    {/* Batch Schedule */}
+                    {readyItems.length > 0 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const ids = readyItems.map((i: any) => i.id);
+                          smartSchedule.mutate({ itemIds: ids });
+                        }}
+                        disabled={smartSchedule.isPending}
+                      >
+                        {smartSchedule.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Calendar className="mr-2 h-4 w-4" />
+                        )}
+                        Auto-Schedule {readyItems.length} Ready
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -372,7 +598,7 @@ export default function ContentPipeline() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Zap className="h-12 w-12 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No content in queue</p>
-                    <p className="text-sm mt-1">Generate from a blog post or add content manually to get started.</p>
+                    <p className="text-sm mt-1">Generate from a blog post, use AI Generate, or add content manually to get started.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -385,60 +611,147 @@ export default function ContentPipeline() {
                           <TableHead>Source</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Scheduled</TableHead>
+                          <TableHead>Metrics</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {queueItems.map((item: any) => (
-                          <TableRow key={item.id}>
-                            <TableCell>
-                              <Badge className={platformConfig[item.platform]?.color || "bg-gray-500 text-white"}>
-                                {platformConfig[item.platform]?.label || item.platform}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="capitalize">{item.contentType}</TableCell>
-                            <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                              {item.content ? item.content.substring(0, 80) + "..." : <em>Pending generation</em>}
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {item.sourceBlogTitle || "Manual"}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={statusConfig[item.status]?.variant || "outline"}>
-                                {statusConfig[item.status]?.label || item.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {formatDate(item.scheduledFor)}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-1">
-                                {item.platformPostUrl && (
-                                  <a href={item.platformPostUrl} target="_blank" rel="noopener noreferrer">
-                                    <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
-                                  </a>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    if (confirm("Delete this queue item?")) {
-                                      deleteQueueItem.mutate({ id: item.id });
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {queueItems.map((item: any) => {
+                          const metrics = parseMetrics(item.metrics);
+                          return (
+                            <TableRow key={item.id}>
+                              <TableCell>
+                                <Badge className={platformConfig[item.platform]?.color || "bg-gray-500 text-white"}>
+                                  {platformConfig[item.platform]?.label || item.platform}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="capitalize">{item.contentType}</TableCell>
+                              <TableCell
+                                className="max-w-xs truncate text-sm text-muted-foreground cursor-pointer hover:text-foreground"
+                                onClick={() => setPreviewItem(item)}
+                              >
+                                {item.content ? item.content.substring(0, 80) + "..." : <em>Pending generation</em>}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {item.sourceBlogTitle || "Manual"}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={statusConfig[item.status]?.variant || "outline"}>
+                                  {statusConfig[item.status]?.label || item.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {formatDate(item.scheduledFor)}
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                {metrics ? (
+                                  <div className="space-y-0.5">
+                                    {metrics.views != null && <div>{metrics.views.toLocaleString()} views</div>}
+                                    {metrics.likes != null && <div>{metrics.likes} likes</div>}
+                                    {metrics.retweets != null && <div>{metrics.retweets} RTs</div>}
+                                  </div>
+                                ) : item.status === "posted" ? (
+                                  <span className="text-muted-foreground">Updating...</span>
+                                ) : "\u2014"}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  {/* AI Generate for pending items */}
+                                  {item.status === "pending" && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => generateAiContent.mutate({ queueItemId: item.id })}
+                                      disabled={generateAiContent.isPending}
+                                      title="Generate content with AI"
+                                    >
+                                      <Sparkles className="h-4 w-4 text-violet-500" />
+                                    </Button>
+                                  )}
+                                  {/* Post Now for ready items on X */}
+                                  {item.status === "ready" && item.platform === "x" && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        if (confirm("Post this to X now?")) {
+                                          postNow.mutate({ id: item.id });
+                                        }
+                                      }}
+                                      disabled={postNow.isPending}
+                                      title="Post to X now"
+                                    >
+                                      <Rocket className="h-4 w-4 text-green-500" />
+                                    </Button>
+                                  )}
+                                  {/* View on platform */}
+                                  {item.platformPostUrl && (
+                                    <a href={item.platformPostUrl} target="_blank" rel="noopener noreferrer">
+                                      <Button variant="ghost" size="sm" title="View on platform">
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </a>
+                                  )}
+                                  {/* Delete */}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      if (confirm("Delete this queue item?")) {
+                                        deleteQueueItem.mutate({ id: item.id });
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Content Preview Dialog */}
+            <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    {previewItem && (
+                      <Badge className={platformConfig[previewItem.platform]?.color || ""}>
+                        {platformConfig[previewItem.platform]?.label || previewItem.platform}
+                      </Badge>
+                    )}
+                    Content Preview
+                  </DialogTitle>
+                </DialogHeader>
+                {previewItem && (
+                  <div className="space-y-4 py-4">
+                    <div className="bg-muted rounded-lg p-4 whitespace-pre-wrap text-sm max-h-[400px] overflow-y-auto">
+                      {previewItem.content?.replace(/\|\|\|TWEET_BREAK\|\|\|/g, "\n---\n") || "No content yet"}
+                    </div>
+                    {previewItem.status === "ready" && previewItem.platform === "x" && (
+                      <Button
+                        onClick={() => {
+                          if (confirm("Post this to X now?")) {
+                            postNow.mutate({ id: previewItem.id });
+                            setPreviewItem(null);
+                          }
+                        }}
+                        className="w-full"
+                      >
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Post to X Now
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* ================= CTA OFFERS TAB ================= */}
@@ -553,7 +866,18 @@ export default function ContentPipeline() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Target className="h-12 w-12 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No CTA offers yet</p>
-                    <p className="text-sm mt-1">Create your first offer to start rotating CTAs across your content.</p>
+                    <p className="text-sm mt-1 mb-4">Seed your products + affiliate tool offers to get started.</p>
+                    <Button
+                      onClick={() => seedCtaOffers.mutate()}
+                      disabled={seedCtaOffers.isPending}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                    >
+                      {seedCtaOffers.isPending ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Seeding Offers...</>
+                      ) : (
+                        <><Zap className="mr-2 h-4 w-4" />Seed Products + Affiliate Offers</>
+                      )}
+                    </Button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -576,7 +900,7 @@ export default function ContentPipeline() {
                         {ctaOffers.map((offer: any) => {
                           const ctr = offer.impressions > 0
                             ? ((offer.clicks / offer.impressions) * 100).toFixed(1) + "%"
-                            : "—";
+                            : "\u2014";
                           return (
                             <TableRow key={offer.id}>
                               <TableCell className="font-medium">{offer.name}</TableCell>
@@ -737,7 +1061,7 @@ export default function ContentPipeline() {
                           <TableRow key={aff.id}>
                             <TableCell>
                               <div>
-                                <p className="font-medium">{aff.userName || "—"}</p>
+                                <p className="font-medium">{aff.userName || "\u2014"}</p>
                                 <p className="text-xs text-muted-foreground">{aff.userEmail}</p>
                               </div>
                             </TableCell>

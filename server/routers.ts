@@ -1541,6 +1541,179 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    // Seed CTA Offers - Load your products + affiliate tool offers
+    seedCtaOffers: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if offers already exist
+        const existing = await db.select().from(ctaOffers);
+        if (existing.length > 0) {
+          return { success: true, message: `CTA offers already seeded (${existing.length} offers exist). Delete them first to re-seed.`, count: existing.length };
+        }
+
+        const offers = [
+          // === YOUR PRODUCTS (highest weight) ===
+          {
+            name: "7-Day REWIRED Reset",
+            description: "Your flagship $7 course - nervous system recovery",
+            ctaText: "Start your healing journey - 7 days for just $7",
+            ctaUrl: "https://shauncritzer.com/7-day-reset",
+            offerType: "course" as const,
+            weight: 40,
+            platforms: JSON.stringify(["all"]),
+            status: "active" as const,
+          },
+          {
+            name: "AI Recovery Coach",
+            description: "Free 3-message trial of AI-powered recovery coaching",
+            ctaText: "Talk to your free AI recovery coach - available 24/7",
+            ctaUrl: "https://shauncritzer.com/ai-coach",
+            offerType: "lead_magnet" as const,
+            weight: 30,
+            platforms: JSON.stringify(["all"]),
+            status: "active" as const,
+          },
+          {
+            name: "REWIRED Relief Toolkit",
+            description: "Free PDF download - crisis-focused recovery toolkit",
+            ctaText: "Download the free REWIRED Relief Toolkit",
+            ctaUrl: "https://shauncritzer.com/recovery-toolkit",
+            offerType: "lead_magnet" as const,
+            weight: 25,
+            platforms: JSON.stringify(["all"]),
+            status: "active" as const,
+          },
+          {
+            name: "Memoir - Bent Not Broken",
+            description: "Your memoir/book",
+            ctaText: "Read the story that started it all - Bent Not Broken",
+            ctaUrl: "https://shauncritzer.com/memoir",
+            offerType: "product" as const,
+            weight: 15,
+            platforms: JSON.stringify(["all"]),
+            status: "active" as const,
+          },
+          // === AFFILIATE TOOLS (lower weight) ===
+          {
+            name: "ElevenLabs",
+            description: "AI voice cloning and text-to-speech for content creators",
+            ctaText: "Clone your voice with AI - create content hands-free",
+            ctaUrl: "https://shauncritzer.com/recommends/elevenlabs",
+            offerType: "affiliate" as const,
+            weight: 8,
+            platforms: JSON.stringify(["x", "linkedin", "youtube"]),
+            status: "active" as const,
+          },
+          {
+            name: "Pictory",
+            description: "AI-powered video creation from scripts and articles",
+            ctaText: "Turn your blog posts into videos in minutes with AI",
+            ctaUrl: "https://shauncritzer.com/recommends/pictory",
+            offerType: "affiliate" as const,
+            weight: 9,
+            platforms: JSON.stringify(["x", "instagram", "youtube"]),
+            status: "active" as const,
+          },
+          {
+            name: "HeyGen",
+            description: "Generate professional avatar videos with AI presenters",
+            ctaText: "Create videos with AI avatars - no camera needed",
+            ctaUrl: "https://shauncritzer.com/recommends/heygen",
+            offerType: "affiliate" as const,
+            weight: 8,
+            platforms: JSON.stringify(["x", "instagram", "youtube", "tiktok"]),
+            status: "active" as const,
+          },
+          {
+            name: "GoHighLevel",
+            description: "Complete CRM, email, SMS, and sales funnel platform",
+            ctaText: "The all-in-one platform to run your entire business",
+            ctaUrl: "https://shauncritzer.com/recommends/gohighlevel",
+            offerType: "affiliate" as const,
+            weight: 10,
+            platforms: JSON.stringify(["x", "linkedin", "facebook"]),
+            status: "active" as const,
+          },
+          {
+            name: "Systeme.io",
+            description: "All-in-one platform for sales funnels and course creation",
+            ctaText: "Build funnels and launch courses - free to start",
+            ctaUrl: "https://shauncritzer.com/recommends/systemeio",
+            offerType: "affiliate" as const,
+            weight: 9,
+            platforms: JSON.stringify(["x", "linkedin", "facebook"]),
+            status: "active" as const,
+          },
+          {
+            name: "Jasper AI",
+            description: "AI-powered copywriting assistant for marketers",
+            ctaText: "Write compelling copy 10x faster with AI",
+            ctaUrl: "https://shauncritzer.com/recommends/jasper",
+            offerType: "affiliate" as const,
+            weight: 7,
+            platforms: JSON.stringify(["x", "linkedin"]),
+            status: "active" as const,
+          },
+          {
+            name: "ConvertKit",
+            description: "Email platform built for creators and online businesses",
+            ctaText: "Email marketing built for creators - free up to 1,000 subs",
+            ctaUrl: "https://shauncritzer.com/recommends/convertkit",
+            offerType: "affiliate" as const,
+            weight: 9,
+            platforms: JSON.stringify(["x", "linkedin", "blog"]),
+            status: "active" as const,
+          },
+          {
+            name: "ThriveCart",
+            description: "Shopping cart and checkout solution for digital products",
+            ctaText: "High-converting checkout pages - lifetime deal available",
+            ctaUrl: "https://shauncritzer.com/recommends/thrivecart",
+            offerType: "affiliate" as const,
+            weight: 8,
+            platforms: JSON.stringify(["x", "linkedin"]),
+            status: "active" as const,
+          },
+          {
+            name: "ClickFunnels",
+            description: "Sales funnel builder for online marketing",
+            ctaText: "Build high-converting sales funnels without coding",
+            ctaUrl: "https://shauncritzer.com/recommends/clickfunnels",
+            offerType: "affiliate" as const,
+            weight: 10,
+            platforms: JSON.stringify(["x", "linkedin", "facebook"]),
+            status: "active" as const,
+          },
+          {
+            name: "Midjourney",
+            description: "Create stunning AI-generated images for any content",
+            ctaText: "Generate scroll-stopping images in seconds with AI",
+            ctaUrl: "https://shauncritzer.com/recommends/midjourney",
+            offerType: "affiliate" as const,
+            weight: 7,
+            platforms: JSON.stringify(["x", "instagram"]),
+            status: "active" as const,
+          },
+        ];
+
+        for (const offer of offers) {
+          await db.insert(ctaOffers).values(offer);
+        }
+
+        return {
+          success: true,
+          message: `Successfully seeded ${offers.length} CTA offers (${offers.filter(o => o.offerType !== "affiliate").length} products + ${offers.filter(o => o.offerType === "affiliate").length} affiliate tools)`,
+          count: offers.length,
+        };
+      }),
+
     // User Management
     getAllUsers: protectedProcedure
       .query(async ({ ctx }) => {
@@ -2211,6 +2384,182 @@ Recovery is possible. But it requires working with your biology, not against it.
           .groupBy(contentQueue.status);
 
         return stats;
+      }),
+
+    // AI-generate content for a queue item or topic
+    generateAiContent: protectedProcedure
+      .input(z.object({
+        queueItemId: z.number().optional(),
+        topic: z.string().optional(),
+        platform: z.string().optional(),
+        platforms: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { generateContentForPlatform, generateContentForPlatforms } = await import("./social/content-generator");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue, blogPosts, ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // If generating for an existing queue item
+        if (input.queueItemId) {
+          const items = await db.select().from(contentQueue).where(eq(contentQueue.id, input.queueItemId)).limit(1);
+          if (items.length === 0) throw new Error("Queue item not found");
+          const item = items[0];
+
+          await db.update(contentQueue).set({ status: "generating" }).where(eq(contentQueue.id, item.id));
+
+          let blogTitle: string | undefined;
+          let blogContent: string | undefined;
+          if (item.sourceBlogPostId) {
+            const posts = await db.select().from(blogPosts).where(eq(blogPosts.id, item.sourceBlogPostId)).limit(1);
+            if (posts.length > 0) { blogTitle = posts[0].title; blogContent = posts[0].content; }
+          }
+
+          let ctaText: string | undefined;
+          let ctaUrl: string | undefined;
+          if (item.ctaOfferId) {
+            const offers = await db.select().from(ctaOffers).where(eq(ctaOffers.id, item.ctaOfferId)).limit(1);
+            if (offers.length > 0) { ctaText = offers[0].ctaText; ctaUrl = offers[0].ctaUrl; }
+          }
+
+          const generated = await generateContentForPlatform({
+            platform: item.platform,
+            sourceBlogTitle: blogTitle,
+            sourceBlogContent: blogContent,
+            ctaText,
+            ctaUrl,
+          });
+
+          await db.update(contentQueue).set({
+            content: generated.content,
+            status: "ready",
+            mediaUrls: JSON.stringify({
+              suggestedMediaType: generated.suggestedMediaType,
+              suggestedMediaPrompt: generated.suggestedMediaPrompt,
+              suggestedTools: generated.suggestedTools,
+              hashtags: generated.hashtags,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+
+          return { success: true, content: generated.content, platform: item.platform };
+        }
+
+        // If generating from a topic for one or more platforms
+        if (input.topic && (input.platform || input.platforms)) {
+          const platforms = input.platforms || [input.platform!];
+          const results = await generateContentForPlatforms({
+            platforms,
+            topic: input.topic,
+          });
+
+          // Insert each generated item into the queue
+          for (const result of results) {
+            await db.insert(contentQueue).values({
+              platform: result.platform,
+              contentType: result.contentType,
+              content: result.content,
+              status: "ready",
+              mediaUrls: JSON.stringify({
+                suggestedMediaType: result.suggestedMediaType,
+                suggestedMediaPrompt: result.suggestedMediaPrompt,
+                suggestedTools: result.suggestedTools,
+                hashtags: result.hashtags,
+              }),
+            });
+          }
+
+          return { success: true, generated: results.length, platforms: results.map(r => r.platform) };
+        }
+
+        throw new Error("Provide either queueItemId or topic + platform(s)");
+      }),
+
+    // Post a queue item immediately
+    postNow: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { postNow } = await import("./social/scheduler");
+        return postNow(input.id);
+      }),
+
+    // Generate a content idea
+    generateIdea: protectedProcedure
+      .input(z.object({ theme: z.string().optional() }).optional())
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { generateContentIdea } = await import("./social/content-generator");
+        return generateContentIdea(input || undefined);
+      }),
+
+    // Smart schedule: auto-assign optimal posting times to ready items
+    smartSchedule: protectedProcedure
+      .input(z.object({
+        itemIds: z.array(z.number()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq, inArray } = await import("drizzle-orm");
+        const { getOptimalPostingTimes } = await import("./social/scheduler");
+
+        const items = await db.select().from(contentQueue)
+          .where(inArray(contentQueue.id, input.itemIds));
+
+        const scheduled = [];
+        for (const item of items) {
+          const times = getOptimalPostingTimes(item.platform, 1);
+          if (times.length > 0) {
+            await db.update(contentQueue).set({
+              scheduledFor: times[0],
+            }).where(eq(contentQueue.id, item.id));
+            scheduled.push({ id: item.id, platform: item.platform, scheduledFor: times[0] });
+          }
+        }
+
+        return { success: true, scheduled };
+      }),
+
+    // Get scheduler status
+    schedulerStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { getSchedulerStatus, isTwitterConfigured } = await import("./social");
+        const status = getSchedulerStatus();
+
+        return {
+          ...status,
+          platforms: {
+            x: { configured: isTwitterConfigured(), label: "X (Twitter)" },
+            instagram: { configured: false, label: "Instagram" },
+            linkedin: { configured: false, label: "LinkedIn" },
+            facebook: { configured: false, label: "Facebook" },
+            youtube: { configured: false, label: "YouTube" },
+            tiktok: { configured: false, label: "TikTok" },
+            podcast: { configured: false, label: "Podcast" },
+          },
+        };
+      }),
+
+    // Verify Twitter connection
+    verifyTwitter: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { verifyTwitterCredentials } = await import("./social/twitter");
+        return verifyTwitterCredentials();
       }),
   }),
 
