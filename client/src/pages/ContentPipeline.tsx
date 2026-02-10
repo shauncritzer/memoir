@@ -136,6 +136,16 @@ export default function ContentPipeline() {
     onSuccess: () => trpcUtils.cta.getAll.invalidate(),
   });
 
+  const seedCtaOffers = trpc.admin.seedCtaOffers.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.cta.getAll.invalidate();
+      alert(data.message);
+    },
+    onError: (error) => {
+      alert("Error: " + error.message);
+    },
+  });
+
   const createAffiliate = trpc.affiliate.create.useMutation({
     onSuccess: () => {
       trpcUtils.affiliate.getAll.invalidate();
@@ -553,7 +563,18 @@ export default function ContentPipeline() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Target className="h-12 w-12 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No CTA offers yet</p>
-                    <p className="text-sm mt-1">Create your first offer to start rotating CTAs across your content.</p>
+                    <p className="text-sm mt-1 mb-4">Seed your products + affiliate tool offers to get started.</p>
+                    <Button
+                      onClick={() => seedCtaOffers.mutate()}
+                      disabled={seedCtaOffers.isPending}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                    >
+                      {seedCtaOffers.isPending ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Seeding Offers...</>
+                      ) : (
+                        <><Zap className="mr-2 h-4 w-4" />Seed Products + Affiliate Offers</>
+                      )}
+                    </Button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
