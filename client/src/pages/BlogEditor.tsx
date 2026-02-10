@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +16,7 @@ const useToast = () => ({
 });
 
 export default function BlogEditor() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const utils = trpc.useUtils();
   
@@ -127,6 +126,15 @@ export default function BlogEditor() {
     }
   };
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="container max-w-4xl py-12">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
   // Check if user is logged in
   if (!user) {
     return (
@@ -135,7 +143,7 @@ export default function BlogEditor() {
           <CardHeader>
             <CardTitle>Please Log In</CardTitle>
             <CardDescription>
-              You must be logged in to access the blog editor. <a href={getLoginUrl()} className="text-primary underline">Click here to log in</a>.
+              You must be logged in to access the blog editor. <a href="/" className="text-primary underline">Go to homepage to log in</a>.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -143,24 +151,16 @@ export default function BlogEditor() {
     );
   }
 
-  // Check if user is owner
-  const ownerOpenId = import.meta.env.VITE_OWNER_OPEN_ID;
-  if (user.openId !== ownerOpenId) {
+  // Check if user is admin
+  if (user.role !== "admin") {
     return (
       <div className="container max-w-4xl py-12">
         <Card>
           <CardHeader>
             <CardTitle>Unauthorized</CardTitle>
             <CardDescription>
-              Only the site owner can access the blog editor.
+              Only admins can access the blog editor.
             </CardDescription>
-            <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">Debug info:</p>
-              <pre className="text-xs bg-muted p-2 rounded mt-2">
-                Your openId: {user.openId}\n
-                Expected: {ownerOpenId}
-              </pre>
-            </CardContent>
           </CardHeader>
         </Card>
       </div>

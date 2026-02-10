@@ -353,9 +353,9 @@ export const appRouter = router({
         status: z.enum(["draft", "published", "archived"]).default("draft"),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can create blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to create blog posts");
         }
         
         const { createBlogPost } = await import("./db");
@@ -392,9 +392,9 @@ export const appRouter = router({
         status: z.enum(["draft", "published", "archived"]).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can update blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to update blog posts");
         }
         
         const { updateBlogPost } = await import("./db");
@@ -427,9 +427,9 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can delete blog posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to delete blog posts");
         }
         
         const { deleteBlogPost } = await import("./db");
@@ -439,9 +439,9 @@ export const appRouter = router({
     // Get all posts including drafts (admin only)
     listAll: protectedProcedure
       .query(async ({ ctx }) => {
-        // Check if user is owner
-        if (ctx.user.openId !== process.env.OWNER_OPEN_ID) {
-          throw new Error("Unauthorized: Only the owner can view all posts");
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required to view all posts");
         }
         
         const { getAllBlogPosts } = await import("./db");
@@ -1540,6 +1540,388 @@ Recovery is possible. But it requires working with your biology, not against it.
           throw new Error(`Failed to seed lessons: ${error.message}`);
         }
       }),
+
+    // User Management
+    getAllUsers: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users, purchases } = await import("../drizzle/schema");
+        const { sql, eq } = await import("drizzle-orm");
+
+        // Get all users with purchase count
+        const allUsers = await db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            loginMethod: users.loginMethod,
+            role: users.role,
+            createdAt: users.createdAt,
+            lastSignedIn: users.lastSignedIn,
+          })
+          .from(users)
+          .orderBy(sql`${users.createdAt} DESC`);
+
+        // Get purchase counts for each user
+        const userIds = allUsers.map(u => u.id);
+        const purchaseCounts = await db
+          .select({
+            userId: purchases.userId,
+            count: sql<number>`COUNT(*)`,
+          })
+          .from(purchases)
+          .where(eq(purchases.status, "completed"))
+          .groupBy(purchases.userId);
+
+        const purchaseMap = new Map(purchaseCounts.map(p => [p.userId, Number(p.count)]));
+
+        return allUsers.map(user => ({
+          ...user,
+          purchaseCount: purchaseMap.get(user.id) || 0,
+        }));
+      }),
+
+    getAllPurchases: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const allPurchases = await db
+          .select({
+            id: purchases.id,
+            userId: purchases.userId,
+            userName: users.name,
+            userEmail: users.email,
+            productId: purchases.productId,
+            amount: purchases.amount,
+            status: purchases.status,
+            stripePaymentId: purchases.stripePaymentId,
+            purchasedAt: purchases.purchasedAt,
+          })
+          .from(purchases)
+          .leftJoin(users, sql`${purchases.userId} = ${users.id}`)
+          .orderBy(sql`${purchases.purchasedAt} DESC`);
+
+        return allPurchases;
+      }),
+
+    grantCourseAccess: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        productId: z.string(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        // Check if access already exists
+        const existing = await db
+          .select()
+          .from(purchases)
+          .where(
+            and(
+              eq(purchases.userId, input.userId),
+              eq(purchases.productId, input.productId),
+              eq(purchases.status, "completed")
+            )
+          )
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("User already has access to this course");
+        }
+
+        // Create manual purchase record
+        await db.insert(purchases).values({
+          userId: input.userId,
+          productId: input.productId,
+          amount: 0, // Free/manual grant
+          status: "completed",
+          stripePaymentId: null,
+          stripeCustomerId: null,
+          purchasedAt: new Date(),
+          metadata: JSON.stringify({
+            type: "manual_grant",
+            grantedBy: ctx.user.id,
+            note: input.note || "Manually granted by admin",
+          }),
+        });
+
+        return {
+          success: true,
+          message: `Access granted to ${input.productId}`,
+        };
+      }),
+
+    revokeCourseAccess: protectedProcedure
+      .input(z.object({
+        purchaseId: z.number(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Update purchase status to cancelled
+        await db
+          .update(purchases)
+          .set({
+            status: "cancelled",
+            metadata: JSON.stringify({
+              cancelledBy: ctx.user.id,
+              cancelledAt: new Date(),
+              reason: input.reason || "Revoked by admin",
+            }),
+          })
+          .where(eq(purchases.id, input.purchaseId));
+
+        return {
+          success: true,
+          message: "Access revoked successfully",
+        };
+      }),
+
+    // Blog Post Management
+    getAllBlogPosts: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts, users } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const posts = await db
+          .select({
+            id: blogPosts.id,
+            title: blogPosts.title,
+            slug: blogPosts.slug,
+            excerpt: blogPosts.excerpt,
+            coverImage: blogPosts.coverImage,
+            category: blogPosts.category,
+            tags: blogPosts.tags,
+            status: blogPosts.status,
+            publishedAt: blogPosts.publishedAt,
+            authorId: blogPosts.authorId,
+            authorName: users.name,
+            viewCount: blogPosts.viewCount,
+            createdAt: blogPosts.createdAt,
+            updatedAt: blogPosts.updatedAt,
+          })
+          .from(blogPosts)
+          .leftJoin(users, sql`${blogPosts.authorId} = ${users.id}`)
+          .orderBy(sql`${blogPosts.createdAt} DESC`);
+
+        return posts;
+      }),
+
+    getBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const post = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (post.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        return post[0];
+      }),
+
+    createBlogPost: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        slug: z.string().min(1),
+        excerpt: z.string().optional(),
+        content: z.string().min(1),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).default("draft"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if slug already exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.slug, input.slug))
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("A blog post with this slug already exists");
+        }
+
+        // Create post
+        await db.insert(blogPosts).values({
+          title: input.title,
+          slug: input.slug,
+          excerpt: input.excerpt || null,
+          content: input.content,
+          coverImage: input.coverImage || null,
+          category: input.category || null,
+          tags: input.tags ? JSON.stringify(input.tags) : null,
+          status: input.status,
+          publishedAt: input.status === "published" ? new Date() : null,
+          authorId: ctx.user.id,
+          viewCount: 0,
+        });
+
+        return {
+          success: true,
+          message: "Blog post created successfully",
+        };
+      }),
+
+    updateBlogPost: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        excerpt: z.string().optional(),
+        content: z.string().min(1).optional(),
+        coverImage: z.string().optional(),
+        category: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        status: z.enum(["draft", "published", "archived"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if post exists
+        const existing = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, input.id))
+          .limit(1);
+
+        if (existing.length === 0) {
+          throw new Error("Blog post not found");
+        }
+
+        const wasPublished = existing[0].status === "published";
+        const willBePublished = input.status === "published";
+
+        // Build update object
+        const updateData: any = {};
+        if (input.title !== undefined) updateData.title = input.title;
+        if (input.slug !== undefined) updateData.slug = input.slug;
+        if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
+        if (input.content !== undefined) updateData.content = input.content;
+        if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
+        if (input.category !== undefined) updateData.category = input.category;
+        if (input.tags !== undefined) updateData.tags = JSON.stringify(input.tags);
+        if (input.status !== undefined) {
+          updateData.status = input.status;
+          // Set publishedAt when transitioning to published
+          if (!wasPublished && willBePublished) {
+            updateData.publishedAt = new Date();
+          }
+        }
+
+        await db
+          .update(blogPosts)
+          .set(updateData)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post updated successfully",
+        };
+      }),
+
+    deleteBlogPost: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if user is admin
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db
+          .delete(blogPosts)
+          .where(eq(blogPosts.id, input.id));
+
+        return {
+          success: true,
+          message: "Blog post deleted successfully",
+        };
+      }),
   }),
 
   // AI Coach counter system
@@ -1612,6 +1994,524 @@ Recovery is possible. But it requires working with your biology, not against it.
           success: true,
           messageCount: user.messageCount,
           hasUnlimitedAccess: user.hasUnlimitedAccess === 1,
+        };
+      }),
+  }),
+
+  // ============================================================
+  // CONTENT PIPELINE - Agentic Content Creation & Distribution
+  // ============================================================
+  contentPipeline: router({
+    // Get all content queue items with filtering
+    getQueue: protectedProcedure
+      .input(z.object({
+        status: z.enum(["pending", "generating", "ready", "posting", "posted", "failed"]).optional(),
+        platform: z.string().optional(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue, blogPosts, ctaOffers } = await import("../drizzle/schema");
+        const { desc, eq, and, sql } = await import("drizzle-orm");
+
+        const conditions = [];
+        if (input?.status) conditions.push(eq(contentQueue.status, input.status));
+        if (input?.platform) conditions.push(eq(contentQueue.platform, input.platform));
+
+        const items = await db
+          .select({
+            id: contentQueue.id,
+            platform: contentQueue.platform,
+            contentType: contentQueue.contentType,
+            content: contentQueue.content,
+            mediaUrls: contentQueue.mediaUrls,
+            scheduledFor: contentQueue.scheduledFor,
+            status: contentQueue.status,
+            errorMessage: contentQueue.errorMessage,
+            platformPostUrl: contentQueue.platformPostUrl,
+            metrics: contentQueue.metrics,
+            ctaOfferId: contentQueue.ctaOfferId,
+            createdAt: contentQueue.createdAt,
+            postedAt: contentQueue.postedAt,
+            sourceBlogTitle: blogPosts.title,
+          })
+          .from(contentQueue)
+          .leftJoin(blogPosts, eq(contentQueue.sourceBlogPostId, blogPosts.id))
+          .where(conditions.length > 0 ? and(...conditions) : undefined)
+          .orderBy(desc(contentQueue.createdAt))
+          .limit(input?.limit || 50)
+          .offset(input?.offset || 0);
+
+        return items;
+      }),
+
+    // Add item to content queue
+    addToQueue: protectedProcedure
+      .input(z.object({
+        sourceBlogPostId: z.number().optional(),
+        platform: z.string(),
+        contentType: z.string(),
+        content: z.string().optional(),
+        scheduledFor: z.string().optional(), // ISO date string
+        ctaOfferId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+
+        await db.insert(contentQueue).values({
+          sourceBlogPostId: input.sourceBlogPostId,
+          platform: input.platform,
+          contentType: input.contentType,
+          content: input.content,
+          scheduledFor: input.scheduledFor ? new Date(input.scheduledFor) : undefined,
+          ctaOfferId: input.ctaOfferId,
+          status: input.content ? "ready" : "pending",
+        });
+
+        return { success: true };
+      }),
+
+    // Update queue item (edit content, reschedule, etc.)
+    updateQueueItem: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        content: z.string().optional(),
+        scheduledFor: z.string().optional(),
+        status: z.enum(["pending", "generating", "ready", "posting", "posted", "failed"]).optional(),
+        ctaOfferId: z.number().optional(),
+        mediaUrls: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const updates: any = {};
+        if (input.content !== undefined) updates.content = input.content;
+        if (input.scheduledFor !== undefined) updates.scheduledFor = new Date(input.scheduledFor);
+        if (input.status !== undefined) updates.status = input.status;
+        if (input.ctaOfferId !== undefined) updates.ctaOfferId = input.ctaOfferId;
+        if (input.mediaUrls !== undefined) updates.mediaUrls = JSON.stringify(input.mediaUrls);
+
+        await db.update(contentQueue).set(updates).where(eq(contentQueue.id, input.id));
+        return { success: true };
+      }),
+
+    // Delete queue item
+    deleteQueueItem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.delete(contentQueue).where(eq(contentQueue.id, input.id));
+        return { success: true };
+      }),
+
+    // Generate content from a blog post for multiple platforms
+    generateFromBlogPost: protectedProcedure
+      .input(z.object({
+        blogPostId: z.number(),
+        platforms: z.array(z.string()), // ["x", "instagram", "linkedin", "facebook"]
+        attachCta: z.boolean().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts, contentQueue, ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Get the blog post
+        const posts = await db.select().from(blogPosts).where(eq(blogPosts.id, input.blogPostId)).limit(1);
+        if (posts.length === 0) throw new Error("Blog post not found");
+        const post = posts[0];
+
+        // Get a random active CTA offer if requested
+        let ctaOffer = null;
+        if (input.attachCta) {
+          const activeOffers = await db.select().from(ctaOffers).where(eq(ctaOffers.status, "active"));
+          if (activeOffers.length > 0) {
+            // Weighted random selection
+            const totalWeight = activeOffers.reduce((sum, o) => sum + o.weight, 0);
+            let random = Math.random() * totalWeight;
+            for (const offer of activeOffers) {
+              random -= offer.weight;
+              if (random <= 0) { ctaOffer = offer; break; }
+            }
+          }
+        }
+
+        // Content type mapping per platform
+        const platformContentTypes: Record<string, string> = {
+          x: "thread",
+          instagram: "post",
+          linkedin: "article",
+          facebook: "post",
+          youtube: "video",
+          tiktok: "reel",
+          podcast: "audio",
+        };
+
+        // Create queue items for each platform (content will be generated later by AI agent)
+        const created = [];
+        for (const platform of input.platforms) {
+          await db.insert(contentQueue).values({
+            sourceBlogPostId: post.id,
+            platform,
+            contentType: platformContentTypes[platform] || "post",
+            content: null, // Will be generated by AI
+            ctaOfferId: ctaOffer?.id,
+            status: "pending",
+          });
+          created.push(platform);
+        }
+
+        return { success: true, platforms: created, blogPostTitle: post.title };
+      }),
+
+    // Get queue stats for dashboard
+    getQueueStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const stats = await db
+          .select({
+            status: contentQueue.status,
+            count: sql<number>`COUNT(*)`,
+          })
+          .from(contentQueue)
+          .groupBy(contentQueue.status);
+
+        return stats;
+      }),
+  }),
+
+  // ============================================================
+  // CTA OFFERS - Rotation & Monetization
+  // ============================================================
+  cta: router({
+    // Get all CTA offers (admin)
+    getAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { desc } = await import("drizzle-orm");
+
+        return db.select().from(ctaOffers).orderBy(desc(ctaOffers.createdAt));
+      }),
+
+    // Get active CTA for a platform (public - used by frontend components)
+    getActiveForPlatform: publicProcedure
+      .input(z.object({ platform: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        const activeOffers = await db
+          .select()
+          .from(ctaOffers)
+          .where(eq(ctaOffers.status, "active"));
+
+        // Filter by platform
+        const platformOffers = activeOffers.filter(o => {
+          try {
+            const platforms = o.platforms ? JSON.parse(o.platforms) : [];
+            return platforms.includes(input.platform) || platforms.includes("all");
+          } catch { return false; }
+        });
+
+        if (platformOffers.length === 0) return null;
+
+        // Weighted random selection
+        const totalWeight = platformOffers.reduce((sum, o) => sum + o.weight, 0);
+        let random = Math.random() * totalWeight;
+        for (const offer of platformOffers) {
+          random -= offer.weight;
+          if (random <= 0) {
+            // Increment impression count
+            await db.update(ctaOffers)
+              .set({ impressions: sql`${ctaOffers.impressions} + 1` })
+              .where(eq(ctaOffers.id, offer.id));
+            return offer;
+          }
+        }
+        return platformOffers[0];
+      }),
+
+    // Create CTA offer
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        ctaText: z.string().min(1),
+        ctaUrl: z.string().min(1),
+        offerType: z.enum(["product", "affiliate", "lead_magnet", "course"]),
+        stripePriceId: z.string().optional(),
+        affiliateUrl: z.string().optional(),
+        weight: z.number().min(1).max(100).default(50),
+        platforms: z.array(z.string()).default(["all"]),
+        imageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+
+        await db.insert(ctaOffers).values({
+          name: input.name,
+          description: input.description,
+          ctaText: input.ctaText,
+          ctaUrl: input.ctaUrl,
+          offerType: input.offerType,
+          stripePriceId: input.stripePriceId,
+          affiliateUrl: input.affiliateUrl,
+          weight: input.weight,
+          platforms: JSON.stringify(input.platforms),
+          imageUrl: input.imageUrl,
+        });
+
+        return { success: true };
+      }),
+
+    // Update CTA offer
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        ctaText: z.string().optional(),
+        ctaUrl: z.string().optional(),
+        offerType: z.enum(["product", "affiliate", "lead_magnet", "course"]).optional(),
+        weight: z.number().min(1).max(100).optional(),
+        platforms: z.array(z.string()).optional(),
+        imageUrl: z.string().optional(),
+        status: z.enum(["active", "paused"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const { id, ...updates } = input;
+        const setValues: any = {};
+        if (updates.name !== undefined) setValues.name = updates.name;
+        if (updates.description !== undefined) setValues.description = updates.description;
+        if (updates.ctaText !== undefined) setValues.ctaText = updates.ctaText;
+        if (updates.ctaUrl !== undefined) setValues.ctaUrl = updates.ctaUrl;
+        if (updates.offerType !== undefined) setValues.offerType = updates.offerType;
+        if (updates.weight !== undefined) setValues.weight = updates.weight;
+        if (updates.platforms !== undefined) setValues.platforms = JSON.stringify(updates.platforms);
+        if (updates.imageUrl !== undefined) setValues.imageUrl = updates.imageUrl;
+        if (updates.status !== undefined) setValues.status = updates.status;
+
+        await db.update(ctaOffers).set(setValues).where(eq(ctaOffers.id, id));
+        return { success: true };
+      }),
+
+    // Delete CTA offer
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.delete(ctaOffers).where(eq(ctaOffers.id, input.id));
+        return { success: true };
+      }),
+
+    // Track CTA click (public)
+    trackClick: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { success: false };
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        await db.update(ctaOffers)
+          .set({ clicks: sql`${ctaOffers.clicks} + 1` })
+          .where(eq(ctaOffers.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  // ============================================================
+  // AFFILIATE SYSTEM
+  // ============================================================
+  affiliate: router({
+    // Get all affiliates (admin)
+    getAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates, users } = await import("../drizzle/schema");
+        const { eq, desc } = await import("drizzle-orm");
+
+        return db
+          .select({
+            id: affiliates.id,
+            referralCode: affiliates.referralCode,
+            commissionRate: affiliates.commissionRate,
+            payoutEmail: affiliates.payoutEmail,
+            totalReferrals: affiliates.totalReferrals,
+            totalEarnings: affiliates.totalEarnings,
+            pendingPayout: affiliates.pendingPayout,
+            status: affiliates.status,
+            createdAt: affiliates.createdAt,
+            userName: users.name,
+            userEmail: users.email,
+          })
+          .from(affiliates)
+          .leftJoin(users, eq(affiliates.userId, users.id))
+          .orderBy(desc(affiliates.createdAt));
+      }),
+
+    // Create affiliate
+    create: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        referralCode: z.string().min(3).max(50),
+        commissionRate: z.number().min(1).max(100).default(30),
+        payoutEmail: z.string().email().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates } = await import("../drizzle/schema");
+
+        await db.insert(affiliates).values({
+          userId: input.userId,
+          referralCode: input.referralCode.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+          commissionRate: input.commissionRate,
+          payoutEmail: input.payoutEmail,
+        });
+
+        return { success: true };
+      }),
+
+    // Track referral click (public - called when someone visits with ?ref=code)
+    trackReferral: publicProcedure
+      .input(z.object({
+        referralCode: z.string(),
+        landingPage: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return { success: false };
+
+        const { affiliates, affiliateReferrals } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        // Find affiliate by code
+        const affiliateRows = await db
+          .select()
+          .from(affiliates)
+          .where(eq(affiliates.referralCode, input.referralCode))
+          .limit(1);
+
+        if (affiliateRows.length === 0) return { success: false, error: "Invalid referral code" };
+        const affiliate = affiliateRows[0];
+
+        // Record the referral
+        await db.insert(affiliateReferrals).values({
+          affiliateId: affiliate.id,
+          visitorIp: (ctx.req as any)?.ip || "unknown",
+          landingPage: input.landingPage,
+        });
+
+        // Update total referrals count
+        await db.update(affiliates)
+          .set({ totalReferrals: sql`${affiliates.totalReferrals} + 1` })
+          .where(eq(affiliates.id, affiliate.id));
+
+        return { success: true, affiliateId: affiliate.id };
+      }),
+
+    // Get affiliate dashboard stats (for the affiliate themselves)
+    getMyStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates, affiliateReferrals } = await import("../drizzle/schema");
+        const { eq, sql, desc } = await import("drizzle-orm");
+
+        const myAffiliate = await db
+          .select()
+          .from(affiliates)
+          .where(eq(affiliates.userId, ctx.user.id))
+          .limit(1);
+
+        if (myAffiliate.length === 0) return null;
+
+        const affiliate = myAffiliate[0];
+
+        // Get recent referrals
+        const recentReferrals = await db
+          .select()
+          .from(affiliateReferrals)
+          .where(eq(affiliateReferrals.affiliateId, affiliate.id))
+          .orderBy(desc(affiliateReferrals.createdAt))
+          .limit(20);
+
+        return {
+          ...affiliate,
+          recentReferrals,
         };
       }),
   }),
