@@ -11,7 +11,7 @@ export default function TermsOfUse() {
       <Navigation />
 
       {/* Content */}
-      <main className="flex-1 py-12">
+      <main className="flex-1 pt-24 pb-12">
         <div className="container max-w-4xl">
           <article className="prose prose-invert prose-yellow max-w-none">
             <h1 className="text-4xl font-bold text-yellow-500 mb-4">Terms of Use</h1>
