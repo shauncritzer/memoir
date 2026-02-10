@@ -22,6 +22,7 @@ import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
 import AdminContent from "./pages/AdminContent";
 import AdminDashboard from "./pages/AdminDashboard";
+import ContentPipeline from "./pages/ContentPipeline";
 import StripeTest from "./pages/StripeTest";
 import TermsOfUse from "./pages/TermsOfUse";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/admin/videos" component={AdminVideos} />
       <Route path="/admin/seed" component={SeedDatabase} />
       <Route path="/admin/content" component={AdminContent} />
+      <Route path="/admin/pipeline" component={ContentPipeline} />
       <Route path="/admin/migrate" component={AdminMigrate} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />

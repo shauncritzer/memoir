@@ -112,9 +112,14 @@ export default function AdminDashboard() {
               Manage users, purchases, and course access
             </p>
           </div>
-          <Link href="/admin/content">
-            <Button variant="outline">Content Admin →</Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin/pipeline">
+              <Button variant="default">Content Pipeline →</Button>
+            </Link>
+            <Link href="/admin/content">
+              <Button variant="outline">Seed/Migrate →</Button>
+            </Link>
+          </div>
         </div>
 
         {/* Tabs */}
