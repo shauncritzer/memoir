@@ -1997,6 +1997,524 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
   }),
+
+  // ============================================================
+  // CONTENT PIPELINE - Agentic Content Creation & Distribution
+  // ============================================================
+  contentPipeline: router({
+    // Get all content queue items with filtering
+    getQueue: protectedProcedure
+      .input(z.object({
+        status: z.enum(["pending", "generating", "ready", "posting", "posted", "failed"]).optional(),
+        platform: z.string().optional(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue, blogPosts, ctaOffers } = await import("../drizzle/schema");
+        const { desc, eq, and, sql } = await import("drizzle-orm");
+
+        const conditions = [];
+        if (input?.status) conditions.push(eq(contentQueue.status, input.status));
+        if (input?.platform) conditions.push(eq(contentQueue.platform, input.platform));
+
+        const items = await db
+          .select({
+            id: contentQueue.id,
+            platform: contentQueue.platform,
+            contentType: contentQueue.contentType,
+            content: contentQueue.content,
+            mediaUrls: contentQueue.mediaUrls,
+            scheduledFor: contentQueue.scheduledFor,
+            status: contentQueue.status,
+            errorMessage: contentQueue.errorMessage,
+            platformPostUrl: contentQueue.platformPostUrl,
+            metrics: contentQueue.metrics,
+            ctaOfferId: contentQueue.ctaOfferId,
+            createdAt: contentQueue.createdAt,
+            postedAt: contentQueue.postedAt,
+            sourceBlogTitle: blogPosts.title,
+          })
+          .from(contentQueue)
+          .leftJoin(blogPosts, eq(contentQueue.sourceBlogPostId, blogPosts.id))
+          .where(conditions.length > 0 ? and(...conditions) : undefined)
+          .orderBy(desc(contentQueue.createdAt))
+          .limit(input?.limit || 50)
+          .offset(input?.offset || 0);
+
+        return items;
+      }),
+
+    // Add item to content queue
+    addToQueue: protectedProcedure
+      .input(z.object({
+        sourceBlogPostId: z.number().optional(),
+        platform: z.string(),
+        contentType: z.string(),
+        content: z.string().optional(),
+        scheduledFor: z.string().optional(), // ISO date string
+        ctaOfferId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+
+        await db.insert(contentQueue).values({
+          sourceBlogPostId: input.sourceBlogPostId,
+          platform: input.platform,
+          contentType: input.contentType,
+          content: input.content,
+          scheduledFor: input.scheduledFor ? new Date(input.scheduledFor) : undefined,
+          ctaOfferId: input.ctaOfferId,
+          status: input.content ? "ready" : "pending",
+        });
+
+        return { success: true };
+      }),
+
+    // Update queue item (edit content, reschedule, etc.)
+    updateQueueItem: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        content: z.string().optional(),
+        scheduledFor: z.string().optional(),
+        status: z.enum(["pending", "generating", "ready", "posting", "posted", "failed"]).optional(),
+        ctaOfferId: z.number().optional(),
+        mediaUrls: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const updates: any = {};
+        if (input.content !== undefined) updates.content = input.content;
+        if (input.scheduledFor !== undefined) updates.scheduledFor = new Date(input.scheduledFor);
+        if (input.status !== undefined) updates.status = input.status;
+        if (input.ctaOfferId !== undefined) updates.ctaOfferId = input.ctaOfferId;
+        if (input.mediaUrls !== undefined) updates.mediaUrls = JSON.stringify(input.mediaUrls);
+
+        await db.update(contentQueue).set(updates).where(eq(contentQueue.id, input.id));
+        return { success: true };
+      }),
+
+    // Delete queue item
+    deleteQueueItem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.delete(contentQueue).where(eq(contentQueue.id, input.id));
+        return { success: true };
+      }),
+
+    // Generate content from a blog post for multiple platforms
+    generateFromBlogPost: protectedProcedure
+      .input(z.object({
+        blogPostId: z.number(),
+        platforms: z.array(z.string()), // ["x", "instagram", "linkedin", "facebook"]
+        attachCta: z.boolean().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts, contentQueue, ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Get the blog post
+        const posts = await db.select().from(blogPosts).where(eq(blogPosts.id, input.blogPostId)).limit(1);
+        if (posts.length === 0) throw new Error("Blog post not found");
+        const post = posts[0];
+
+        // Get a random active CTA offer if requested
+        let ctaOffer = null;
+        if (input.attachCta) {
+          const activeOffers = await db.select().from(ctaOffers).where(eq(ctaOffers.status, "active"));
+          if (activeOffers.length > 0) {
+            // Weighted random selection
+            const totalWeight = activeOffers.reduce((sum, o) => sum + o.weight, 0);
+            let random = Math.random() * totalWeight;
+            for (const offer of activeOffers) {
+              random -= offer.weight;
+              if (random <= 0) { ctaOffer = offer; break; }
+            }
+          }
+        }
+
+        // Content type mapping per platform
+        const platformContentTypes: Record<string, string> = {
+          x: "thread",
+          instagram: "post",
+          linkedin: "article",
+          facebook: "post",
+          youtube: "video",
+          tiktok: "reel",
+          podcast: "audio",
+        };
+
+        // Create queue items for each platform (content will be generated later by AI agent)
+        const created = [];
+        for (const platform of input.platforms) {
+          await db.insert(contentQueue).values({
+            sourceBlogPostId: post.id,
+            platform,
+            contentType: platformContentTypes[platform] || "post",
+            content: null, // Will be generated by AI
+            ctaOfferId: ctaOffer?.id,
+            status: "pending",
+          });
+          created.push(platform);
+        }
+
+        return { success: true, platforms: created, blogPostTitle: post.title };
+      }),
+
+    // Get queue stats for dashboard
+    getQueueStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { contentQueue } = await import("../drizzle/schema");
+        const { sql } = await import("drizzle-orm");
+
+        const stats = await db
+          .select({
+            status: contentQueue.status,
+            count: sql<number>`COUNT(*)`,
+          })
+          .from(contentQueue)
+          .groupBy(contentQueue.status);
+
+        return stats;
+      }),
+  }),
+
+  // ============================================================
+  // CTA OFFERS - Rotation & Monetization
+  // ============================================================
+  cta: router({
+    // Get all CTA offers (admin)
+    getAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { desc } = await import("drizzle-orm");
+
+        return db.select().from(ctaOffers).orderBy(desc(ctaOffers.createdAt));
+      }),
+
+    // Get active CTA for a platform (public - used by frontend components)
+    getActiveForPlatform: publicProcedure
+      .input(z.object({ platform: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        const activeOffers = await db
+          .select()
+          .from(ctaOffers)
+          .where(eq(ctaOffers.status, "active"));
+
+        // Filter by platform
+        const platformOffers = activeOffers.filter(o => {
+          try {
+            const platforms = o.platforms ? JSON.parse(o.platforms) : [];
+            return platforms.includes(input.platform) || platforms.includes("all");
+          } catch { return false; }
+        });
+
+        if (platformOffers.length === 0) return null;
+
+        // Weighted random selection
+        const totalWeight = platformOffers.reduce((sum, o) => sum + o.weight, 0);
+        let random = Math.random() * totalWeight;
+        for (const offer of platformOffers) {
+          random -= offer.weight;
+          if (random <= 0) {
+            // Increment impression count
+            await db.update(ctaOffers)
+              .set({ impressions: sql`${ctaOffers.impressions} + 1` })
+              .where(eq(ctaOffers.id, offer.id));
+            return offer;
+          }
+        }
+        return platformOffers[0];
+      }),
+
+    // Create CTA offer
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        ctaText: z.string().min(1),
+        ctaUrl: z.string().min(1),
+        offerType: z.enum(["product", "affiliate", "lead_magnet", "course"]),
+        stripePriceId: z.string().optional(),
+        affiliateUrl: z.string().optional(),
+        weight: z.number().min(1).max(100).default(50),
+        platforms: z.array(z.string()).default(["all"]),
+        imageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+
+        await db.insert(ctaOffers).values({
+          name: input.name,
+          description: input.description,
+          ctaText: input.ctaText,
+          ctaUrl: input.ctaUrl,
+          offerType: input.offerType,
+          stripePriceId: input.stripePriceId,
+          affiliateUrl: input.affiliateUrl,
+          weight: input.weight,
+          platforms: JSON.stringify(input.platforms),
+          imageUrl: input.imageUrl,
+        });
+
+        return { success: true };
+      }),
+
+    // Update CTA offer
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        ctaText: z.string().optional(),
+        ctaUrl: z.string().optional(),
+        offerType: z.enum(["product", "affiliate", "lead_magnet", "course"]).optional(),
+        weight: z.number().min(1).max(100).optional(),
+        platforms: z.array(z.string()).optional(),
+        imageUrl: z.string().optional(),
+        status: z.enum(["active", "paused"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const { id, ...updates } = input;
+        const setValues: any = {};
+        if (updates.name !== undefined) setValues.name = updates.name;
+        if (updates.description !== undefined) setValues.description = updates.description;
+        if (updates.ctaText !== undefined) setValues.ctaText = updates.ctaText;
+        if (updates.ctaUrl !== undefined) setValues.ctaUrl = updates.ctaUrl;
+        if (updates.offerType !== undefined) setValues.offerType = updates.offerType;
+        if (updates.weight !== undefined) setValues.weight = updates.weight;
+        if (updates.platforms !== undefined) setValues.platforms = JSON.stringify(updates.platforms);
+        if (updates.imageUrl !== undefined) setValues.imageUrl = updates.imageUrl;
+        if (updates.status !== undefined) setValues.status = updates.status;
+
+        await db.update(ctaOffers).set(setValues).where(eq(ctaOffers.id, id));
+        return { success: true };
+      }),
+
+    // Delete CTA offer
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.delete(ctaOffers).where(eq(ctaOffers.id, input.id));
+        return { success: true };
+      }),
+
+    // Track CTA click (public)
+    trackClick: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { success: false };
+
+        const { ctaOffers } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        await db.update(ctaOffers)
+          .set({ clicks: sql`${ctaOffers.clicks} + 1` })
+          .where(eq(ctaOffers.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  // ============================================================
+  // AFFILIATE SYSTEM
+  // ============================================================
+  affiliate: router({
+    // Get all affiliates (admin)
+    getAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates, users } = await import("../drizzle/schema");
+        const { eq, desc } = await import("drizzle-orm");
+
+        return db
+          .select({
+            id: affiliates.id,
+            referralCode: affiliates.referralCode,
+            commissionRate: affiliates.commissionRate,
+            payoutEmail: affiliates.payoutEmail,
+            totalReferrals: affiliates.totalReferrals,
+            totalEarnings: affiliates.totalEarnings,
+            pendingPayout: affiliates.pendingPayout,
+            status: affiliates.status,
+            createdAt: affiliates.createdAt,
+            userName: users.name,
+            userEmail: users.email,
+          })
+          .from(affiliates)
+          .leftJoin(users, eq(affiliates.userId, users.id))
+          .orderBy(desc(affiliates.createdAt));
+      }),
+
+    // Create affiliate
+    create: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        referralCode: z.string().min(3).max(50),
+        commissionRate: z.number().min(1).max(100).default(30),
+        payoutEmail: z.string().email().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates } = await import("../drizzle/schema");
+
+        await db.insert(affiliates).values({
+          userId: input.userId,
+          referralCode: input.referralCode.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+          commissionRate: input.commissionRate,
+          payoutEmail: input.payoutEmail,
+        });
+
+        return { success: true };
+      }),
+
+    // Track referral click (public - called when someone visits with ?ref=code)
+    trackReferral: publicProcedure
+      .input(z.object({
+        referralCode: z.string(),
+        landingPage: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return { success: false };
+
+        const { affiliates, affiliateReferrals } = await import("../drizzle/schema");
+        const { eq, sql } = await import("drizzle-orm");
+
+        // Find affiliate by code
+        const affiliateRows = await db
+          .select()
+          .from(affiliates)
+          .where(eq(affiliates.referralCode, input.referralCode))
+          .limit(1);
+
+        if (affiliateRows.length === 0) return { success: false, error: "Invalid referral code" };
+        const affiliate = affiliateRows[0];
+
+        // Record the referral
+        await db.insert(affiliateReferrals).values({
+          affiliateId: affiliate.id,
+          visitorIp: (ctx.req as any)?.ip || "unknown",
+          landingPage: input.landingPage,
+        });
+
+        // Update total referrals count
+        await db.update(affiliates)
+          .set({ totalReferrals: sql`${affiliates.totalReferrals} + 1` })
+          .where(eq(affiliates.id, affiliate.id));
+
+        return { success: true, affiliateId: affiliate.id };
+      }),
+
+    // Get affiliate dashboard stats (for the affiliate themselves)
+    getMyStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { affiliates, affiliateReferrals } = await import("../drizzle/schema");
+        const { eq, sql, desc } = await import("drizzle-orm");
+
+        const myAffiliate = await db
+          .select()
+          .from(affiliates)
+          .where(eq(affiliates.userId, ctx.user.id))
+          .limit(1);
+
+        if (myAffiliate.length === 0) return null;
+
+        const affiliate = myAffiliate[0];
+
+        // Get recent referrals
+        const recentReferrals = await db
+          .select()
+          .from(affiliateReferrals)
+          .where(eq(affiliateReferrals.affiliateId, affiliate.id))
+          .orderBy(desc(affiliateReferrals.createdAt))
+          .limit(20);
+
+        return {
+          ...affiliate,
+          recentReferrals,
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

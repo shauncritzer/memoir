@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -218,3 +218,193 @@ export const lessons = mysqlTable("lessons", {
 
 export type Lesson = typeof lessons.$inferSelect;
 export type InsertLesson = typeof lessons.$inferInsert;
+
+// ============================================================
+// CONTENT PIPELINE - Agentic Content Creation & Distribution
+// ============================================================
+
+/**
+ * Content queue - items waiting to be generated/posted
+ * A blog post generates multiple queue items (X thread, IG post, etc.)
+ */
+export const contentQueue = mysqlTable("content_queue", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Link to source blog post (optional - content can be standalone) */
+  sourceBlogPostId: int("source_blog_post_id").references(() => blogPosts.id),
+  /** Platform: x, instagram, linkedin, facebook, youtube, tiktok, podcast */
+  platform: varchar("platform", { length: 50 }).notNull(),
+  /** Type of content for this platform */
+  contentType: varchar("content_type", { length: 50 }).notNull(), // thread, reel, post, article, video, audio
+  /** The actual content/copy to post */
+  content: text("content"),
+  /** Generated media URLs (images, video, audio) - JSON array */
+  mediaUrls: text("media_urls"), // JSON: ["https://..."]
+  /** Scheduling */
+  scheduledFor: timestamp("scheduled_for"),
+  /** Processing status */
+  status: mysqlEnum("status", ["pending", "generating", "ready", "posting", "posted", "failed"]).default("pending").notNull(),
+  /** Error message if failed */
+  errorMessage: text("error_message"),
+  /** Platform post ID after successful posting */
+  platformPostId: varchar("platform_post_id", { length: 255 }),
+  /** Platform post URL */
+  platformPostUrl: varchar("platform_post_url", { length: 512 }),
+  /** Engagement metrics (updated periodically) - JSON */
+  metrics: text("metrics"), // JSON: { likes, shares, comments, views, clicks }
+  /** Which CTA offer was attached to this post */
+  ctaOfferId: int("cta_offer_id").references(() => ctaOffers.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+  postedAt: timestamp("posted_at"),
+});
+
+export type ContentQueueItem = typeof contentQueue.$inferSelect;
+export type InsertContentQueueItem = typeof contentQueue.$inferInsert;
+
+/**
+ * CTA Offers - Rotating calls-to-action for monetization
+ */
+export const ctaOffers = mysqlTable("cta_offers", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Display name */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Short description */
+  description: text("description"),
+  /** The actual CTA text shown to users */
+  ctaText: varchar("cta_text", { length: 500 }).notNull(),
+  /** Where the CTA links to */
+  ctaUrl: varchar("cta_url", { length: 512 }).notNull(),
+  /** Type: product, affiliate, lead_magnet, course */
+  offerType: mysqlEnum("offer_type", ["product", "affiliate", "lead_magnet", "course"]).notNull(),
+  /** Stripe price ID if applicable */
+  stripePriceId: varchar("stripe_price_id", { length: 255 }),
+  /** Affiliate program link if applicable */
+  affiliateUrl: varchar("affiliate_url", { length: 512 }),
+  /** Rotation weight (higher = shown more often) */
+  weight: int("weight").default(50).notNull(),
+  /** Which platforms to show this on - JSON array */
+  platforms: text("platforms"), // JSON: ["x", "instagram", "blog"]
+  /** Image URL for the offer */
+  imageUrl: varchar("image_url", { length: 512 }),
+  /** Active or paused */
+  status: mysqlEnum("status", ["active", "paused"]).default("active").notNull(),
+  /** Tracking: impressions and clicks */
+  impressions: int("impressions").default(0).notNull(),
+  clicks: int("clicks").default(0).notNull(),
+  conversions: int("conversions").default(0).notNull(),
+  revenue: int("revenue").default(0).notNull(), // cents
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CtaOffer = typeof ctaOffers.$inferSelect;
+export type InsertCtaOffer = typeof ctaOffers.$inferInsert;
+
+/**
+ * Social accounts - Connected social media accounts
+ */
+export const socialAccounts = mysqlTable("social_accounts", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Owner user */
+  userId: int("user_id").notNull().references(() => users.id),
+  /** Platform name */
+  platform: varchar("platform", { length: 50 }).notNull(),
+  /** Account username/handle on the platform */
+  accountName: varchar("account_name", { length: 255 }),
+  /** OAuth access token (encrypted in production) */
+  accessToken: text("access_token"),
+  /** OAuth refresh token */
+  refreshToken: text("refresh_token"),
+  /** Token expiry */
+  tokenExpiresAt: timestamp("token_expires_at"),
+  /** Platform-specific account/page ID */
+  platformAccountId: varchar("platform_account_id", { length: 255 }),
+  /** Status */
+  status: mysqlEnum("status", ["connected", "disconnected", "expired"]).default("connected").notNull(),
+  /** Account metadata - JSON */
+  metadata: text("metadata"), // JSON: { followers, bio, etc. }
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+export type InsertSocialAccount = typeof socialAccounts.$inferInsert;
+
+// ============================================================
+// AFFILIATE SYSTEM
+// ============================================================
+
+/**
+ * Affiliates - People who promote your products for commission
+ */
+export const affiliates = mysqlTable("affiliates", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Link to user account */
+  userId: int("user_id").notNull().references(() => users.id),
+  /** Unique referral code (e.g., "shaun", "coach-mike") */
+  referralCode: varchar("referral_code", { length: 100 }).notNull().unique(),
+  /** Commission rate as percentage (e.g., 30 = 30%) */
+  commissionRate: int("commission_rate").default(30).notNull(),
+  /** Payment method/details */
+  payoutEmail: varchar("payout_email", { length: 320 }),
+  payoutMethod: mysqlEnum("payout_method", ["paypal", "stripe", "bank_transfer"]).default("paypal"),
+  /** Stats */
+  totalReferrals: int("total_referrals").default(0).notNull(),
+  totalEarnings: int("total_earnings").default(0).notNull(), // cents
+  pendingPayout: int("pending_payout").default(0).notNull(), // cents
+  /** Status */
+  status: mysqlEnum("status", ["active", "paused", "banned"]).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Affiliate = typeof affiliates.$inferSelect;
+export type InsertAffiliate = typeof affiliates.$inferInsert;
+
+/**
+ * Affiliate referrals - Tracks each click/visit from affiliate links
+ */
+export const affiliateReferrals = mysqlTable("affiliate_referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  affiliateId: int("affiliate_id").notNull().references(() => affiliates.id),
+  /** Visitor fingerprint for attribution */
+  visitorIp: varchar("visitor_ip", { length: 45 }),
+  /** Which page they landed on */
+  landingPage: varchar("landing_page", { length: 512 }),
+  /** Did they convert? */
+  converted: int("converted").default(0).notNull(),
+  /** Link to purchase if converted */
+  purchaseId: int("purchase_id").references(() => purchases.id),
+  /** Commission earned on this referral (cents) */
+  commissionAmount: int("commission_amount").default(0),
+  /** Status */
+  status: mysqlEnum("status", ["clicked", "converted", "paid"]).default("clicked").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AffiliateReferral = typeof affiliateReferrals.$inferSelect;
+export type InsertAffiliateReferral = typeof affiliateReferrals.$inferInsert;
+
+/**
+ * Content templates - Reusable templates for generating platform-specific content
+ */
+export const contentTemplates = mysqlTable("content_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Template name */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Which platform this template is for */
+  platform: varchar("platform", { length: 50 }).notNull(),
+  /** Content type */
+  contentType: varchar("content_type", { length: 50 }).notNull(),
+  /** The prompt/template with {{variables}} */
+  template: text("template").notNull(),
+  /** Example output */
+  exampleOutput: text("example_output"),
+  /** Is this the default template for this platform+type combo */
+  isDefault: int("is_default").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ContentTemplate = typeof contentTemplates.$inferSelect;
+export type InsertContentTemplate = typeof contentTemplates.$inferInsert;
