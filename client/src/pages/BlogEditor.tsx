@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save, X } from "lucide-react";
-// Simple toast alternative
+import { Pencil, Trash2, Plus, Save, X, Sparkles, Loader2, Wand2 } from "lucide-react";
+
 const useToast = () => ({
-  toast: ({ title, description, variant }: { title: string; description?: string; variant?: string }) => {
+  toast: ({ title, description }: { title: string; description?: string; variant?: string }) => {
     alert(`${title}${description ? '\n' + description : ''}`);
   }
 });
@@ -19,7 +19,7 @@ export default function BlogEditor() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const utils = trpc.useUtils();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -32,12 +32,17 @@ export default function BlogEditor() {
     status: "draft" as "draft" | "published" | "archived",
   });
 
-  // Fetch all posts (including drafts)
+  // AI generation state
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiCategory, setAiCategory] = useState("");
+  const [aiTone, setAiTone] = useState("");
+  const [aiLength, setAiLength] = useState<"short" | "medium" | "long">("medium");
+
   const { data: posts, isLoading } = trpc.blog.listAll.useQuery(undefined, {
     enabled: !!user,
   });
 
-  // Mutations
   const createMutation = trpc.blog.create.useMutation({
     onSuccess: () => {
       toast({ title: "Blog post created successfully!" });
@@ -70,16 +75,28 @@ export default function BlogEditor() {
     },
   });
 
+  const aiGenerateMutation = trpc.blog.aiGenerate.useMutation({
+    onSuccess: (data) => {
+      setFormData({
+        title: data.title,
+        content: data.content,
+        excerpt: data.excerpt,
+        coverImage: "",
+        category: data.category,
+        tags: data.tags.join(", "),
+        status: "draft",
+      });
+      setIsEditing(true);
+      setShowAiPanel(false);
+      toast({ title: "Blog post generated! Review and edit before publishing." });
+    },
+    onError: (error) => {
+      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
+    },
+  });
+
   const resetForm = () => {
-    setFormData({
-      title: "",
-      content: "",
-      excerpt: "",
-      coverImage: "",
-      category: "",
-      tags: "",
-      status: "draft",
-    });
+    setFormData({ title: "", content: "", excerpt: "", coverImage: "", category: "", tags: "", status: "draft" });
     setIsEditing(false);
     setEditingPost(null);
   };
@@ -100,23 +117,11 @@ export default function BlogEditor() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const tags = formData.tags
-      .split(",")
-      .map(t => t.trim())
-      .filter(Boolean);
-
+    const tags = formData.tags.split(",").map(t => t.trim()).filter(Boolean);
     if (editingPost) {
-      updateMutation.mutate({
-        id: editingPost.id,
-        ...formData,
-        tags,
-      });
+      updateMutation.mutate({ id: editingPost.id, ...formData, tags });
     } else {
-      createMutation.mutate({
-        ...formData,
-        tags,
-      });
+      createMutation.mutate({ ...formData, tags });
     }
   };
 
@@ -126,43 +131,32 @@ export default function BlogEditor() {
     }
   };
 
-  // Loading state
+  const handleAiGenerate = () => {
+    if (!aiTopic.trim()) return;
+    aiGenerateMutation.mutate({
+      topic: aiTopic,
+      category: aiCategory || undefined,
+      tone: aiTone || undefined,
+      length: aiLength,
+    });
+  };
+
   if (authLoading) {
-    return (
-      <div className="container max-w-4xl py-12">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <div className="container max-w-4xl py-12"><p className="text-muted-foreground">Loading...</p></div>;
   }
 
-  // Check if user is logged in
   if (!user) {
     return (
       <div className="container max-w-4xl py-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>Please Log In</CardTitle>
-            <CardDescription>
-              You must be logged in to access the blog editor. <a href="/" className="text-primary underline">Go to homepage to log in</a>.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <Card><CardHeader><CardTitle>Please Log In</CardTitle><CardDescription>You must be logged in to access the blog editor. <a href="/" className="text-primary underline">Go to homepage to log in</a>.</CardDescription></CardHeader></Card>
       </div>
     );
   }
 
-  // Check if user is admin
   if (user.role !== "admin") {
     return (
       <div className="container max-w-4xl py-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>Unauthorized</CardTitle>
-            <CardDescription>
-              Only admins can access the blog editor.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <Card><CardHeader><CardTitle>Unauthorized</CardTitle><CardDescription>Only admins can access the blog editor.</CardDescription></CardHeader></Card>
       </div>
     );
   }
@@ -171,10 +165,54 @@ export default function BlogEditor() {
     <div className="container max-w-6xl py-12">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Blog Editor</h1>
-        <p className="text-muted-foreground">
-          Create, edit, and manage your blog posts
-        </p>
+        <p className="text-muted-foreground">Create, edit, and manage your blog posts</p>
       </div>
+
+      {/* AI Generation Panel */}
+      {showAiPanel && (
+        <Card className="mb-8 border-purple-500/30 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-500" />
+                <CardTitle>AI Blog Generator</CardTitle>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setShowAiPanel(false)}><X className="h-4 w-4" /></Button>
+            </div>
+            <CardDescription>Describe a topic and AI will write a full blog post in Shaun's voice. You can edit everything before publishing.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Topic / Prompt *</label>
+              <Textarea value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} placeholder="e.g., Why relapse doesn't mean failure — and what your nervous system is actually telling you" rows={3} />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Category</label>
+                <Input value={aiCategory} onChange={(e) => setAiCategory(e.target.value)} placeholder="e.g., Recovery, Mindset" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tone Adjustment</label>
+                <Input value={aiTone} onChange={(e) => setAiTone(e.target.value)} placeholder="e.g., More personal, Science-heavy" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Length</label>
+                <Select value={aiLength} onValueChange={(v: "short" | "medium" | "long") => setAiLength(v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short (600-800 words)</SelectItem>
+                    <SelectItem value="medium">Medium (1200-1500 words)</SelectItem>
+                    <SelectItem value="long">Long (2000-2500 words)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button onClick={handleAiGenerate} disabled={!aiTopic.trim() || aiGenerateMutation.isPending} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+              {aiGenerateMutation.isPending ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating Blog Post...</>) : (<><Wand2 className="h-4 w-4 mr-2" />Generate Blog Post</>)}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Editor Form */}
       {isEditing ? (
@@ -183,90 +221,43 @@ export default function BlogEditor() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>{editingPost ? "Edit Post" : "New Post"}</CardTitle>
-                <CardDescription>
-                  {editingPost ? "Update your blog post" : "Create a new blog post"}
-                </CardDescription>
+                <CardDescription>{editingPost ? "Update your blog post" : "Create a new blog post"}</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={resetForm}>
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </Button>
+              <Button variant="ghost" size="sm" onClick={resetForm}><X className="h-4 w-4 mr-2" />Cancel</Button>
             </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Title</label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Enter post title"
-                  required
-                />
+                <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Enter post title" required />
               </div>
-
               <div>
                 <label className="text-sm font-medium mb-2 block">Excerpt</label>
-                <Textarea
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  placeholder="Brief summary (optional)"
-                  rows={2}
-                />
+                <Textarea value={formData.excerpt} onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })} placeholder="Brief summary (optional)" rows={2} />
               </div>
-
               <div>
                 <label className="text-sm font-medium mb-2 block">Content (Markdown supported)</label>
-                <Textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Write your blog post content here..."
-                  rows={15}
-                  required
-                  className="font-mono text-sm"
-                />
+                <Textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} placeholder="Write your blog post content here..." rows={15} required className="font-mono text-sm" />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Category</label>
-                  <Input
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="e.g., Recovery, Personal Story"
-                  />
+                  <Input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="e.g., Recovery, Personal Story" />
                 </div>
-
                 <div>
                   <label className="text-sm font-medium mb-2 block">Tags (comma-separated)</label>
-                  <Input
-                    value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    placeholder="e.g., addiction, hope, recovery"
-                  />
+                  <Input value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g., addiction, hope, recovery" />
                 </div>
               </div>
-
               <div>
                 <label className="text-sm font-medium mb-2 block">Cover Image URL</label>
-                <Input
-                  value={formData.coverImage}
-                  onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                  placeholder="https://example.com/image.jpg (optional)"
-                />
+                <Input value={formData.coverImage} onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })} placeholder="https://example.com/image.jpg (optional)" />
               </div>
-
               <div>
                 <label className="text-sm font-medium mb-2 block">Status</label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: "draft" | "published" | "archived") =>
-                    setFormData({ ...formData, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={formData.status} onValueChange={(value: "draft" | "published" | "archived") => setFormData({ ...formData, status: value })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="published">Published</SelectItem>
@@ -274,38 +265,31 @@ export default function BlogEditor() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="flex gap-2">
                 <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {editingPost ? "Update Post" : "Create Post"}
+                  <Save className="h-4 w-4 mr-2" />{editingPost ? "Update Post" : "Create Post"}
                 </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
+                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
               </div>
             </form>
           </CardContent>
         </Card>
       ) : (
-        <Button onClick={() => setIsEditing(true)} className="mb-8">
-          <Plus className="h-4 w-4 mr-2" />
-          New Blog Post
-        </Button>
+        <div className="flex gap-3 mb-8">
+          <Button onClick={() => setIsEditing(true)}><Plus className="h-4 w-4 mr-2" />New Blog Post</Button>
+          <Button onClick={() => setShowAiPanel(!showAiPanel)} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+            <Sparkles className="h-4 w-4 mr-2" />AI Generate Post
+          </Button>
+        </div>
       )}
 
       {/* Posts List */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">All Posts</h2>
-        
         {isLoading ? (
           <p className="text-muted-foreground">Loading posts...</p>
         ) : !posts || posts.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              No blog posts yet. Create your first post above!
-            </CardContent>
-          </Card>
+          <Card><CardContent className="py-8 text-center text-muted-foreground">No blog posts yet. Create your first post above!</CardContent></Card>
         ) : (
           posts.map((post: any) => (
             <Card key={post.id}>
@@ -314,39 +298,18 @@ export default function BlogEditor() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle>{post.title}</CardTitle>
-                      <Badge variant={post.status === "published" ? "default" : "secondary"}>
-                        {post.status}
-                      </Badge>
+                      <Badge variant={post.status === "published" ? "default" : "secondary"}>{post.status}</Badge>
                     </div>
-                    {post.excerpt && (
-                      <CardDescription>{post.excerpt}</CardDescription>
-                    )}
+                    {post.excerpt && <CardDescription>{post.excerpt}</CardDescription>}
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span>{post.viewCount} views</span>
-                      <span>
-                        {post.publishedAt
-                          ? new Date(post.publishedAt).toLocaleDateString()
-                          : "Not published"}
-                      </span>
+                      <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "Not published"}</span>
                       {post.category && <span className="text-primary">{post.category}</span>}
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(post)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(post.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(post)}><Pencil className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDelete(post.id)} disabled={deleteMutation.isPending}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
               </CardHeader>

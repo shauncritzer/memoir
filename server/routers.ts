@@ -447,6 +447,83 @@ export const appRouter = router({
         const { getAllBlogPosts } = await import("./db");
         return getAllBlogPosts();
       }),
+
+    // AI-generate a full blog post from a topic/prompt
+    aiGenerate: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        category: z.string().optional(),
+        tone: z.string().optional(),
+        length: z.enum(["short", "medium", "long"]).default("medium"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { invokeLLM } = await import("./_core/llm");
+        const wordTarget = input.length === "short" ? "600-800" : input.length === "long" ? "2000-2500" : "1200-1500";
+
+        const prompt = `You are writing a blog post for Shaun Critzer, a recovery coach and author of "Bent, Not Broken".
+
+His brand voice: Real, raw, hopeful, non-judgmental. He talks TO people not AT them. He uses his own story to connect. Key themes: addiction recovery, nervous system regulation, neuroplasticity, the message that compulsive behaviors are nervous system responses (not moral failures), and practical transformation.
+
+Products he may reference naturally:
+- 7-Day REWIRED Reset ($47) - Quick-start program
+- From Broken to Whole course ($97) - Deep-dive 8-module course
+- Bent Not Broken Circle ($29/mo) - Monthly membership community
+
+TASK: Write a ${wordTarget}-word blog post about: "${input.topic}"
+${input.category ? `Category: ${input.category}` : ""}
+${input.tone ? `Tone adjustment: ${input.tone}` : ""}
+
+RESPOND IN THIS EXACT JSON FORMAT (no markdown fences):
+{
+  "title": "Compelling blog post title",
+  "excerpt": "2-3 sentence compelling excerpt/summary for preview cards",
+  "content": "Full blog post content in Markdown format. Use ## for subheadings, **bold** for emphasis, > for pull quotes. Include personal anecdotes in Shaun's voice. End with a reflection or call to action.",
+  "category": "Suggested category",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "suggestedCoverImagePrompt": "A description for AI image generation for the cover image"
+}`;
+
+        const result = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a world-class blog writer specializing in recovery, wellness, and personal transformation content. Always respond with valid JSON." },
+            { role: "user", content: prompt },
+          ],
+        });
+
+        const responseText = typeof result.choices[0].message.content === "string"
+          ? result.choices[0].message.content
+          : Array.isArray(result.choices[0].message.content)
+            ? result.choices[0].message.content.map((c: any) => "text" in c ? c.text : "").join("")
+            : "";
+
+        let cleanJson = responseText.trim();
+        if (cleanJson.startsWith("```")) {
+          cleanJson = cleanJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+        }
+
+        try {
+          const parsed = JSON.parse(cleanJson);
+          return {
+            title: parsed.title || "Untitled",
+            excerpt: parsed.excerpt || "",
+            content: parsed.content || "",
+            category: parsed.category || input.category || "Recovery",
+            tags: parsed.tags || [],
+            suggestedCoverImagePrompt: parsed.suggestedCoverImagePrompt || "",
+          };
+        } catch {
+          return {
+            title: input.topic,
+            excerpt: "",
+            content: responseText,
+            category: input.category || "Recovery",
+            tags: [],
+            suggestedCoverImagePrompt: "",
+          };
+        }
+      }),
   }),
 
   // Members portal
@@ -1712,6 +1789,39 @@ Recovery is possible. But it requires working with your biology, not against it.
           message: `Successfully seeded ${offers.length} CTA offers (${offers.filter(o => o.offerType !== "affiliate").length} products + ${offers.filter(o => o.offerType === "affiliate").length} affiliate tools)`,
           count: offers.length,
         };
+      }),
+
+    // Setup missing database tables (run once, idempotent)
+    setupTables: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { sql } = await import("drizzle-orm");
+        const created: string[] = [];
+
+        const tables = [
+          { name: "lessons", sql: sql`CREATE TABLE IF NOT EXISTS lessons (id INT AUTO_INCREMENT PRIMARY KEY, product_id VARCHAR(255) NOT NULL, day_number INT NOT NULL, title VARCHAR(255) NOT NULL, description TEXT, video_url VARCHAR(500), slideshow_url VARCHAR(500), workbook_url VARCHAR(500), duration_minutes INT)` },
+          { name: "cta_offers", sql: sql`CREATE TABLE IF NOT EXISTS cta_offers (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, cta_text VARCHAR(500) NOT NULL, cta_url VARCHAR(512) NOT NULL, offer_type ENUM('product','affiliate','lead_magnet','course') NOT NULL, stripe_price_id VARCHAR(255), affiliate_url VARCHAR(512), weight INT NOT NULL DEFAULT 50, platforms TEXT, image_url VARCHAR(512), status ENUM('active','paused') NOT NULL DEFAULT 'active', impressions INT NOT NULL DEFAULT 0, clicks INT NOT NULL DEFAULT 0, conversions INT NOT NULL DEFAULT 0, revenue INT NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "content_queue", sql: sql`CREATE TABLE IF NOT EXISTS content_queue (id INT AUTO_INCREMENT PRIMARY KEY, source_blog_post_id INT, platform VARCHAR(50) NOT NULL, content_type VARCHAR(50) NOT NULL, content TEXT, media_urls TEXT, scheduled_for TIMESTAMP NULL, status ENUM('pending','generating','ready','posting','posted','failed') NOT NULL DEFAULT 'pending', error_message TEXT, platform_post_id VARCHAR(255), platform_post_url VARCHAR(512), metrics TEXT, cta_offer_id INT, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, posted_at TIMESTAMP NULL)` },
+          { name: "social_accounts", sql: sql`CREATE TABLE IF NOT EXISTS social_accounts (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, platform VARCHAR(50) NOT NULL, account_name VARCHAR(255), access_token TEXT, refresh_token TEXT, token_expires_at TIMESTAMP NULL, platform_account_id VARCHAR(255), status ENUM('connected','disconnected','expired') NOT NULL DEFAULT 'connected', metadata TEXT, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "affiliates", sql: sql`CREATE TABLE IF NOT EXISTS affiliates (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, referral_code VARCHAR(100) NOT NULL UNIQUE, commission_rate INT NOT NULL DEFAULT 30, payout_email VARCHAR(320), payout_method ENUM('paypal','stripe','bank_transfer') DEFAULT 'paypal', total_referrals INT NOT NULL DEFAULT 0, total_earnings INT NOT NULL DEFAULT 0, pending_payout INT NOT NULL DEFAULT 0, status ENUM('active','paused','banned') NOT NULL DEFAULT 'active', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "affiliate_referrals", sql: sql`CREATE TABLE IF NOT EXISTS affiliate_referrals (id INT AUTO_INCREMENT PRIMARY KEY, affiliate_id INT NOT NULL, visitor_ip VARCHAR(45), landing_page VARCHAR(512), converted INT NOT NULL DEFAULT 0, purchase_id INT, commission_amount INT DEFAULT 0, status ENUM('clicked','converted','paid') NOT NULL DEFAULT 'clicked', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)` },
+          { name: "content_templates", sql: sql`CREATE TABLE IF NOT EXISTS content_templates (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, platform VARCHAR(50) NOT NULL, content_type VARCHAR(50) NOT NULL, template TEXT NOT NULL, example_output TEXT, is_default INT NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+        ];
+
+        for (const t of tables) {
+          try {
+            await db.execute(t.sql);
+            created.push(t.name);
+          } catch (err: any) {
+            created.push(`${t.name} (ERROR: ${err.message})`);
+          }
+        }
+
+        return { success: true, message: `Tables setup complete`, tables: created };
       }),
 
     // User Management
