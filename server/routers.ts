@@ -443,9 +443,86 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new Error("Unauthorized: Admin access required to view all posts");
         }
-        
+
         const { getAllBlogPosts } = await import("./db");
         return getAllBlogPosts();
+      }),
+
+    // AI-generate a full blog post from a topic/prompt
+    aiGenerate: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        category: z.string().optional(),
+        tone: z.string().optional(),
+        length: z.enum(["short", "medium", "long"]).default("medium"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { invokeLLM } = await import("./_core/llm");
+        const wordTarget = input.length === "short" ? "600-800" : input.length === "long" ? "2000-2500" : "1200-1500";
+
+        const prompt = `You are writing a blog post for Shaun Critzer, a recovery coach and author of "Bent, Not Broken".
+
+His brand voice: Real, raw, hopeful, non-judgmental. He talks TO people not AT them. He uses his own story to connect. Key themes: addiction recovery, nervous system regulation, neuroplasticity, the message that compulsive behaviors are nervous system responses (not moral failures), and practical transformation.
+
+Products he may reference naturally:
+- 7-Day REWIRED Reset ($47) - Quick-start program
+- From Broken to Whole course ($97) - Deep-dive 8-module course
+- Bent Not Broken Circle ($29/mo) - Monthly membership community
+
+TASK: Write a ${wordTarget}-word blog post about: "${input.topic}"
+${input.category ? `Category: ${input.category}` : ""}
+${input.tone ? `Tone adjustment: ${input.tone}` : ""}
+
+RESPOND IN THIS EXACT JSON FORMAT (no markdown fences):
+{
+  "title": "Compelling blog post title",
+  "excerpt": "2-3 sentence compelling excerpt/summary for preview cards",
+  "content": "Full blog post content in Markdown format. Use ## for subheadings, **bold** for emphasis, > for pull quotes. Include personal anecdotes in Shaun's voice. End with a reflection or call to action.",
+  "category": "Suggested category",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "suggestedCoverImagePrompt": "A description for AI image generation for the cover image"
+}`;
+
+        const result = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a world-class blog writer specializing in recovery, wellness, and personal transformation content. Always respond with valid JSON." },
+            { role: "user", content: prompt },
+          ],
+        });
+
+        const responseText = typeof result.choices[0].message.content === "string"
+          ? result.choices[0].message.content
+          : Array.isArray(result.choices[0].message.content)
+            ? result.choices[0].message.content.map((c: any) => "text" in c ? c.text : "").join("")
+            : "";
+
+        let cleanJson = responseText.trim();
+        if (cleanJson.startsWith("```")) {
+          cleanJson = cleanJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+        }
+
+        try {
+          const parsed = JSON.parse(cleanJson);
+          return {
+            title: parsed.title || "Untitled",
+            excerpt: parsed.excerpt || "",
+            content: parsed.content || "",
+            category: parsed.category || input.category || "Recovery",
+            tags: parsed.tags || [],
+            suggestedCoverImagePrompt: parsed.suggestedCoverImagePrompt || "",
+          };
+        } catch {
+          return {
+            title: input.topic,
+            excerpt: "",
+            content: responseText,
+            category: input.category || "Recovery",
+            tags: [],
+            suggestedCoverImagePrompt: "",
+          };
+        }
       }),
   }),
 
@@ -2537,15 +2614,16 @@ Recovery is possible. But it requires working with your biology, not against it.
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
 
         const { getSchedulerStatus, isTwitterConfigured } = await import("./social");
+        const { isFacebookConfigured, isInstagramConfigured } = await import("./social/meta");
         const status = getSchedulerStatus();
 
         return {
           ...status,
           platforms: {
             x: { configured: isTwitterConfigured(), label: "X (Twitter)" },
-            instagram: { configured: false, label: "Instagram" },
+            facebook: { configured: isFacebookConfigured(), label: "Facebook" },
+            instagram: { configured: isInstagramConfigured(), label: "Instagram" },
             linkedin: { configured: false, label: "LinkedIn" },
-            facebook: { configured: false, label: "Facebook" },
             youtube: { configured: false, label: "YouTube" },
             tiktok: { configured: false, label: "TikTok" },
             podcast: { configured: false, label: "Podcast" },
@@ -2560,6 +2638,34 @@ Recovery is possible. But it requires working with your biology, not against it.
 
         const { verifyTwitterCredentials } = await import("./social/twitter");
         return verifyTwitterCredentials();
+      }),
+
+    // Verify Facebook connection
+    verifyFacebook: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { verifyFacebookCredentials } = await import("./social/meta");
+        return verifyFacebookCredentials();
+      }),
+
+    // Verify Instagram connection
+    verifyInstagram: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { verifyInstagramCredentials } = await import("./social/meta");
+        return verifyInstagramCredentials();
+      }),
+
+    // Exchange short-lived Meta token for long-lived one
+    exchangeMetaToken: protectedProcedure
+      .input(z.object({ shortLivedToken: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { exchangeForLongLivedToken } = await import("./social/meta");
+        return exchangeForLongLivedToken(input.shortLivedToken);
       }),
   }),
 
