@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save, X, Sparkles, Loader2, Wand2 } from "lucide-react";
-
+import { Pencil, Trash2, Plus, Save, X } from "lucide-react";
 // Simple toast alternative
 const useToast = () => ({
-  toast: ({ title, description }: { title: string; description?: string; variant?: string }) => {
+  toast: ({ title, description, variant }: { title: string; description?: string; variant?: string }) => {
     alert(`${title}${description ? '\n' + description : ''}`);
   }
 });
@@ -20,7 +19,7 @@ export default function BlogEditor() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const utils = trpc.useUtils();
-
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -32,14 +31,6 @@ export default function BlogEditor() {
     tags: "",
     status: "draft" as "draft" | "published" | "archived",
   });
-
-  // AI generation state
-  const [showAiPanel, setShowAiPanel] = useState(false);
-  const [aiTopic, setAiTopic] = useState("");
-  const [aiCategory, setAiCategory] = useState("");
-  const [aiTone, setAiTone] = useState("");
-  const [aiLength, setAiLength] = useState<"short" | "medium" | "long">("medium");
-  const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch all posts (including drafts)
   const { data: posts, isLoading } = trpc.blog.listAll.useQuery(undefined, {
@@ -79,28 +70,6 @@ export default function BlogEditor() {
     },
   });
 
-  const aiGenerateMutation = trpc.blog.aiGenerate.useMutation({
-    onSuccess: (data) => {
-      setFormData({
-        title: data.title,
-        content: data.content,
-        excerpt: data.excerpt,
-        coverImage: "",
-        category: data.category,
-        tags: data.tags.join(", "),
-        status: "draft",
-      });
-      setIsEditing(true);
-      setShowAiPanel(false);
-      setIsGenerating(false);
-      toast({ title: "Blog post generated! Review and edit before publishing." });
-    },
-    onError: (error) => {
-      setIsGenerating(false);
-      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
-    },
-  });
-
   const resetForm = () => {
     setFormData({
       title: "",
@@ -131,7 +100,7 @@ export default function BlogEditor() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     const tags = formData.tags
       .split(",")
       .map(t => t.trim())
@@ -157,17 +126,6 @@ export default function BlogEditor() {
     }
   };
 
-  const handleAiGenerate = () => {
-    if (!aiTopic.trim()) return;
-    setIsGenerating(true);
-    aiGenerateMutation.mutate({
-      topic: aiTopic,
-      category: aiCategory || undefined,
-      tone: aiTone || undefined,
-      length: aiLength,
-    });
-  };
-
   // Loading state
   if (authLoading) {
     return (
@@ -177,6 +135,7 @@ export default function BlogEditor() {
     );
   }
 
+  // Check if user is logged in
   if (!user) {
     return (
       <div className="container max-w-4xl py-12">
@@ -192,13 +151,16 @@ export default function BlogEditor() {
     );
   }
 
+  // Check if user is admin
   if (user.role !== "admin") {
     return (
       <div className="container max-w-4xl py-12">
         <Card>
           <CardHeader>
             <CardTitle>Unauthorized</CardTitle>
-            <CardDescription>Only admins can access the blog editor.</CardDescription>
+            <CardDescription>
+              Only admins can access the blog editor.
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -213,85 +175,6 @@ export default function BlogEditor() {
           Create, edit, and manage your blog posts
         </p>
       </div>
-
-      {/* AI Generation Panel */}
-      {showAiPanel && (
-        <Card className="mb-8 border-purple-500/30 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                <CardTitle>AI Blog Generator</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setShowAiPanel(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription>
-              Describe a topic and AI will write a full blog post in Shaun's voice. You can edit everything before publishing.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Topic / Prompt *</label>
-              <Textarea
-                value={aiTopic}
-                onChange={(e) => setAiTopic(e.target.value)}
-                placeholder="e.g., Why relapse doesn't mean failure — and what your nervous system is actually telling you"
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Category</label>
-                <Input
-                  value={aiCategory}
-                  onChange={(e) => setAiCategory(e.target.value)}
-                  placeholder="e.g., Recovery, Mindset"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tone Adjustment</label>
-                <Input
-                  value={aiTone}
-                  onChange={(e) => setAiTone(e.target.value)}
-                  placeholder="e.g., More personal, Science-heavy"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Length</label>
-                <Select value={aiLength} onValueChange={(v: "short" | "medium" | "long") => setAiLength(v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="short">Short (600-800 words)</SelectItem>
-                    <SelectItem value="medium">Medium (1200-1500 words)</SelectItem>
-                    <SelectItem value="long">Long (2000-2500 words)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button
-              onClick={handleAiGenerate}
-              disabled={!aiTopic.trim() || isGenerating}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating Blog Post...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="h-4 w-4 mr-2" />
-                  Generate Blog Post
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Editor Form */}
       {isEditing ? (
@@ -405,25 +288,16 @@ export default function BlogEditor() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex gap-3 mb-8">
-          <Button onClick={() => setIsEditing(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Blog Post
-          </Button>
-          <Button
-            onClick={() => setShowAiPanel(!showAiPanel)}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Generate Post
-          </Button>
-        </div>
+        <Button onClick={() => setIsEditing(true)} className="mb-8">
+          <Plus className="h-4 w-4 mr-2" />
+          New Blog Post
+        </Button>
       )}
 
       {/* Posts List */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">All Posts</h2>
-
+        
         {isLoading ? (
           <p className="text-muted-foreground">Loading posts...</p>
         ) : !posts || posts.length === 0 ? (
