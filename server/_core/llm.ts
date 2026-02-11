@@ -333,8 +333,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   payload.max_tokens = 32768;
 
-  // Only add thinking for Forge/Gemini providers
-  if (provider.name !== "OpenAI") {
+  // Only add thinking for Forge provider (not supported by Google or OpenAI directly)
+  if (provider.name === "Forge") {
     payload.thinking = {
       "budget_tokens": 128
     };
