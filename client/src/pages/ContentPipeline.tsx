@@ -200,6 +200,15 @@ export default function ContentPipeline() {
     onSuccess: () => trpcUtils.cta.getAll.invalidate(),
   });
 
+  const setupTables = trpc.admin.setupTables.useMutation({
+    onSuccess: (data) => {
+      alert(`${data.message}\nTables: ${data.tables.join(", ")}`);
+    },
+    onError: (error) => {
+      alert("Setup Tables Error: " + error.message);
+    },
+  });
+
   const seedCtaOffers = trpc.admin.seedCtaOffers.useMutation({
     onSuccess: (data) => {
       trpcUtils.cta.getAll.invalidate();
@@ -309,6 +318,15 @@ export default function ContentPipeline() {
                     disabled={verifyTwitter.isPending}
                   >
                     {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X Connection"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setupTables.mutate()}
+                    disabled={setupTables.isPending}
+                    className="border-orange-400 text-orange-600 hover:bg-orange-50"
+                  >
+                    {setupTables.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Setup Tables"}
                   </Button>
                 </div>
               </div>
@@ -866,18 +884,32 @@ export default function ContentPipeline() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Target className="h-12 w-12 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No CTA offers yet</p>
-                    <p className="text-sm mt-1 mb-4">Seed your products + affiliate tool offers to get started.</p>
-                    <Button
-                      onClick={() => seedCtaOffers.mutate()}
-                      disabled={seedCtaOffers.isPending}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-                    >
-                      {seedCtaOffers.isPending ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Seeding Offers...</>
-                      ) : (
-                        <><Zap className="mr-2 h-4 w-4" />Seed Products + Affiliate Offers</>
-                      )}
-                    </Button>
+                    <p className="text-sm mt-1 mb-4">First setup tables, then seed your products + affiliate tool offers.</p>
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        onClick={() => setupTables.mutate()}
+                        disabled={setupTables.isPending}
+                        variant="outline"
+                        className="border-purple-400 text-purple-600 hover:bg-purple-50"
+                      >
+                        {setupTables.isPending ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Setting up tables...</>
+                        ) : (
+                          <><Rocket className="mr-2 h-4 w-4" />1. Setup Tables</>
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => seedCtaOffers.mutate()}
+                        disabled={seedCtaOffers.isPending}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                      >
+                        {seedCtaOffers.isPending ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Seeding Offers...</>
+                        ) : (
+                          <><Zap className="mr-2 h-4 w-4" />2. Seed Products + Affiliate Offers</>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
