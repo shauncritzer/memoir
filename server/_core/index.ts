@@ -8,7 +8,6 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook, verifyWebhookSignature } from "../stripe-webhook";
-import { startScheduler } from "../social/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -98,10 +97,37 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
+  // Health check endpoint - responds before any DB or scheduler dependency
+  app.get("/api/health", async (_req, res) => {
+    const health: Record<string, any> = { status: "ok", timestamp: new Date().toISOString() };
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (db) {
+        const { sql } = await import("drizzle-orm");
+        await db.execute(sql`SELECT 1`);
+        health.database = "connected";
+      } else {
+        health.database = "not configured";
+      }
+    } catch (err: any) {
+      health.database = `error: ${err.message}`;
+    }
+    res.json(health);
+  });
+
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
-    // Start the social media content pipeline scheduler
-    startScheduler();
+    // Start the social media content pipeline scheduler (non-blocking, can't crash server)
+    try {
+      import("../social/scheduler").then(({ startScheduler }) => {
+        startScheduler();
+      }).catch((err) => {
+        console.error("[Scheduler] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[Scheduler] Import failed (non-fatal):", err.message);
+    }
   });
 }
 
