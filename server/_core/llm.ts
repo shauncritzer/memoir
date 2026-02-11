@@ -209,15 +209,50 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
+type LLMProvider = {
+  apiUrl: string;
+  apiKey: string;
+  model: string;
+  name: string;
+};
 
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+const resolveProvider = (): LLMProvider => {
+  // Priority 1: Forge (Manus dev environment)
+  if (ENV.forgeApiKey) {
+    const baseUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+      ? ENV.forgeApiUrl.replace(/\/$/, "")
+      : "https://forge.manus.im";
+    return {
+      apiUrl: `${baseUrl}/v1/chat/completions`,
+      apiKey: ENV.forgeApiKey,
+      model: "gemini-2.5-flash",
+      name: "Forge",
+    };
   }
+
+  // Priority 2: Google Gemini (via OpenAI-compatible endpoint)
+  if (ENV.googleApiKey) {
+    return {
+      apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      apiKey: ENV.googleApiKey,
+      model: "gemini-2.5-flash",
+      name: "Google Gemini",
+    };
+  }
+
+  // Priority 3: OpenAI directly
+  if (ENV.openaiApiKey) {
+    return {
+      apiUrl: "https://api.openai.com/v1/chat/completions",
+      apiKey: ENV.openaiApiKey,
+      model: "gpt-4o-mini",
+      name: "OpenAI",
+    };
+  }
+
+  throw new Error(
+    "No AI API key configured. Set one of: GOOGLE_API_KEY (recommended, free tier), OPENAI_API_KEY, or BUILT_IN_FORGE_API_KEY in Railway environment variables."
+  );
 };
 
 const normalizeResponseFormat = ({
@@ -266,7 +301,7 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const provider = resolveProvider();
 
   const {
     messages,
@@ -280,7 +315,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: provider.model,
     messages: messages.map(normalizeMessage),
   };
 
@@ -296,9 +331,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
+  payload.max_tokens = 32768;
+
+  // Only add thinking for Forge/Gemini providers
+  if (provider.name !== "OpenAI") {
+    payload.thinking = {
+      "budget_tokens": 128
+    };
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -312,11 +351,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(provider.apiUrl, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${provider.apiKey}`,
     },
     body: JSON.stringify(payload),
   });
@@ -324,7 +363,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+      `LLM invoke failed (${provider.name}): ${response.status} ${response.statusText} – ${errorText}`
     );
   }
 
