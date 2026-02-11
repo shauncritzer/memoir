@@ -674,22 +674,26 @@ export default function ContentPipeline() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex gap-1">
-                                  {/* AI Generate for pending items */}
-                                  {item.status === "pending" && (
+                                  {/* Generate content for pending/failed items */}
+                                  {(item.status === "pending" || item.status === "failed") && (
                                     <Button
-                                      variant="ghost"
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => generateAiContent.mutate({ queueItemId: item.id })}
                                       disabled={generateAiContent.isPending}
-                                      title="Generate content with AI"
+                                      className="text-violet-600 border-violet-300 hover:bg-violet-50"
                                     >
-                                      <Sparkles className="h-4 w-4 text-violet-500" />
+                                      {generateAiContent.isPending ? (
+                                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Generating...</>
+                                      ) : (
+                                        <><Sparkles className="h-3 w-3 mr-1" />Generate</>
+                                      )}
                                     </Button>
                                   )}
                                   {/* Post Now for ready items on X */}
                                   {item.status === "ready" && item.platform === "x" && (
                                     <Button
-                                      variant="ghost"
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => {
                                         if (confirm("Post this to X now?")) {
@@ -697,9 +701,13 @@ export default function ContentPipeline() {
                                         }
                                       }}
                                       disabled={postNow.isPending}
-                                      title="Post to X now"
+                                      className="text-green-600 border-green-300 hover:bg-green-50"
                                     >
-                                      <Rocket className="h-4 w-4 text-green-500" />
+                                      {postNow.isPending ? (
+                                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Posting...</>
+                                      ) : (
+                                        <><Rocket className="h-3 w-3 mr-1" />Post Now</>
+                                      )}
                                     </Button>
                                   )}
                                   {/* View on platform */}
