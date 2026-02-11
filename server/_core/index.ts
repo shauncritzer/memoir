@@ -75,6 +75,36 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Health check endpoint - MUST be before static file catch-all
+  app.get("/api/health", async (_req, res) => {
+    const health: Record<string, any> = { status: "ok", timestamp: new Date().toISOString() };
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (db) {
+        const { sql } = await import("drizzle-orm");
+        await db.execute(sql`SELECT 1`);
+        health.database = "connected";
+
+        // Check if key tables exist
+        try {
+          const result = await db.execute(sql`SHOW TABLES`);
+          health.tables = (result as any)[0]?.map?.((r: any) => Object.values(r)[0]) || "unknown";
+        } catch { health.tables = "could not list"; }
+      } else {
+        health.database = "not configured (no DATABASE_URL)";
+      }
+    } catch (err: any) {
+      health.database = `error: ${err.message}`;
+    }
+    health.env = {
+      NODE_ENV: process.env.NODE_ENV || "not set",
+      hasDbUrl: !!process.env.DATABASE_URL,
+      hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+    };
+    res.json(health);
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
@@ -96,25 +126,6 @@ async function startServer() {
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
-
-  // Health check endpoint - responds before any DB or scheduler dependency
-  app.get("/api/health", async (_req, res) => {
-    const health: Record<string, any> = { status: "ok", timestamp: new Date().toISOString() };
-    try {
-      const { getDb } = await import("../db");
-      const db = await getDb();
-      if (db) {
-        const { sql } = await import("drizzle-orm");
-        await db.execute(sql`SELECT 1`);
-        health.database = "connected";
-      } else {
-        health.database = "not configured";
-      }
-    } catch (err: any) {
-      health.database = `error: ${err.message}`;
-    }
-    res.json(health);
-  });
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
