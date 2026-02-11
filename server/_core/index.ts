@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook, verifyWebhookSignature } from "../stripe-webhook";
 import { startScheduler } from "../social/scheduler";
+import { runAutoMigrations } from "../db-migrate";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -97,6 +98,9 @@ async function startServer() {
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
+
+  // Run auto-migrations before starting the server listener
+  await runAutoMigrations();
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);

@@ -1,6 +1,8 @@
 import cron from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
+import { postToFacebook, getFacebookPostMetrics } from "./meta";
+import { postToInstagram, getInstagramMediaMetrics } from "./meta";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -147,7 +149,7 @@ async function postContentItem(item: {
     .where(eq(contentQueue.id, item.id));
 
   try {
-    let result: { success: boolean; tweetId?: string; tweetUrl?: string; error?: string } = {
+    let result: { success: boolean; postId?: string; postUrl?: string; error?: string } = {
       success: false,
       error: "Platform not yet supported",
     };
@@ -156,25 +158,54 @@ async function postContentItem(item: {
       case "x": {
         if (item.contentType === "thread" && item.content.includes("|||TWEET_BREAK|||")) {
           const tweets = item.content.split("|||TWEET_BREAK|||").map(t => t.trim()).filter(Boolean);
-          result = await postThread(tweets);
+          const tweetResult = await postThread(tweets);
+          result = { success: tweetResult.success, postId: tweetResult.tweetId, postUrl: tweetResult.tweetUrl, error: tweetResult.error };
         } else {
-          // For single tweet, truncate to 280 chars if needed
           const tweetText = item.content.length > 280
             ? item.content.substring(0, 277) + "..."
             : item.content;
-          result = await postTweet(tweetText);
+          const tweetResult = await postTweet(tweetText);
+          result = { success: tweetResult.success, postId: tweetResult.tweetId, postUrl: tweetResult.tweetUrl, error: tweetResult.error };
         }
         break;
       }
-      // Future platforms will be added here
-      case "instagram":
+      case "facebook": {
+        const fbResult = await postToFacebook(item.content);
+        result = { success: fbResult.success, postId: fbResult.postId, postUrl: fbResult.postUrl, error: fbResult.error };
+        break;
+      }
+      case "instagram": {
+        // Instagram requires an image - parse media URLs from metadata
+        let imageUrl = "";
+        if (item.mediaUrls) {
+          try {
+            const mediaData = JSON.parse(item.mediaUrls);
+            if (Array.isArray(mediaData)) {
+              imageUrl = mediaData[0] || "";
+            } else if (mediaData.imageUrl) {
+              imageUrl = mediaData.imageUrl;
+            }
+          } catch {}
+        }
+
+        if (!imageUrl) {
+          // Instagram requires an image - keep as ready for manual posting
+          result = { success: false, error: "Instagram requires an image URL. Add an image and try again, or post manually." };
+          await db.update(contentQueue)
+            .set({ status: "ready", errorMessage: result.error })
+            .where(eq(contentQueue.id, item.id));
+          return;
+        }
+
+        const igResult = await postToInstagram(item.content, imageUrl);
+        result = { success: igResult.success, postId: igResult.postId, postUrl: igResult.postUrl, error: igResult.error };
+        break;
+      }
       case "linkedin":
-      case "facebook":
       case "youtube":
       case "tiktok":
       case "podcast": {
         result = { success: false, error: `${item.platform} posting not yet implemented - content is ready for manual posting` };
-        // Don't mark as failed - keep as ready so user can manually post
         await db.update(contentQueue)
           .set({ status: "ready", errorMessage: result.error })
           .where(eq(contentQueue.id, item.id));
@@ -185,12 +216,12 @@ async function postContentItem(item: {
     if (result.success) {
       await db.update(contentQueue).set({
         status: "posted",
-        platformPostId: result.tweetId,
-        platformPostUrl: result.tweetUrl,
+        platformPostId: result.postId,
+        platformPostUrl: result.postUrl,
         postedAt: new Date(),
         errorMessage: null,
       }).where(eq(contentQueue.id, item.id));
-      console.log(`[Scheduler] Posted to ${item.platform}: ${result.tweetUrl}`);
+      console.log(`[Scheduler] Posted to ${item.platform}: ${result.postUrl}`);
     } else {
       await db.update(contentQueue).set({
         status: "failed",
@@ -215,33 +246,72 @@ async function updateEngagementMetrics() {
   const { contentQueue } = await import("../../drizzle/schema");
   const { eq, and, isNotNull } = await import("drizzle-orm");
 
-  // Get posted X items with a platformPostId
+  // Get all posted items with a platformPostId
   const postedItems = await db
     .select()
     .from(contentQueue)
     .where(
       and(
         eq(contentQueue.status, "posted"),
-        eq(contentQueue.platform, "x"),
         isNotNull(contentQueue.platformPostId),
       )
     )
-    .limit(10);
+    .limit(20);
 
   for (const item of postedItems) {
     if (!item.platformPostId) continue;
 
-    const metrics = await getTweetMetrics(item.platformPostId);
-    if (metrics) {
-      await db.update(contentQueue).set({
-        metrics: JSON.stringify({
-          likes: metrics.like_count,
-          retweets: metrics.retweet_count,
-          replies: metrics.reply_count,
-          views: metrics.impression_count,
-          quotes: metrics.quote_count,
-        }),
-      }).where(eq(contentQueue.id, item.id));
+    try {
+      let metricsData: Record<string, number> | null = null;
+
+      switch (item.platform) {
+        case "x": {
+          const tweetMetrics = await getTweetMetrics(item.platformPostId);
+          if (tweetMetrics) {
+            metricsData = {
+              likes: tweetMetrics.like_count || 0,
+              retweets: tweetMetrics.retweet_count || 0,
+              replies: tweetMetrics.reply_count || 0,
+              views: tweetMetrics.impression_count || 0,
+              quotes: tweetMetrics.quote_count || 0,
+            };
+          }
+          break;
+        }
+        case "facebook": {
+          const fbMetrics = await getFacebookPostMetrics(item.platformPostId);
+          if (fbMetrics) {
+            metricsData = {
+              likes: fbMetrics.likes,
+              comments: fbMetrics.comments,
+              shares: fbMetrics.shares,
+            };
+          }
+          break;
+        }
+        case "instagram": {
+          const igMetrics = await getInstagramMediaMetrics(item.platformPostId);
+          if (igMetrics) {
+            metricsData = {
+              impressions: igMetrics.impressions,
+              reach: igMetrics.reach,
+              likes: igMetrics.likes,
+              comments: igMetrics.comments,
+              shares: igMetrics.shares,
+              saved: igMetrics.saved,
+            };
+          }
+          break;
+        }
+      }
+
+      if (metricsData) {
+        await db.update(contentQueue).set({
+          metrics: JSON.stringify(metricsData),
+        }).where(eq(contentQueue.id, item.id));
+      }
+    } catch (err: any) {
+      console.error(`[Scheduler] Metrics update failed for ${item.platform} #${item.id}:`, err.message);
     }
   }
 }
@@ -305,9 +375,9 @@ export function getOptimalPostingTimes(platform: string, postsPerDay: number = 1
 
 // Track scheduler state
 let schedulerRunning = false;
-let contentGenTask: cron.ScheduledTask | null = null;
-let postingTask: cron.ScheduledTask | null = null;
-let metricsTask: cron.ScheduledTask | null = null;
+let contentGenTask: ReturnType<typeof cron.schedule> | null = null;
+let postingTask: ReturnType<typeof cron.schedule> | null = null;
+let metricsTask: ReturnType<typeof cron.schedule> | null = null;
 
 /** Start the content scheduler */
 export function startScheduler() {

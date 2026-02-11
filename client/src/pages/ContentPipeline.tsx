@@ -184,6 +184,26 @@ export default function ContentPipeline() {
     },
   });
 
+  const verifyFacebook = trpc.contentPipeline.verifyFacebook.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        alert(`Facebook connected! Page: ${data.pageName}`);
+      } else {
+        alert(`Facebook connection failed: ${data.error}`);
+      }
+    },
+  });
+
+  const verifyInstagram = trpc.contentPipeline.verifyInstagram.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        alert(`Instagram connected! Account: @${data.username}`);
+      } else {
+        alert(`Instagram connection failed: ${data.error}`);
+      }
+    },
+  });
+
   const createCta = trpc.cta.create.useMutation({
     onSuccess: () => {
       trpcUtils.cta.getAll.invalidate();
@@ -308,7 +328,23 @@ export default function ContentPipeline() {
                     onClick={() => verifyTwitter.mutate()}
                     disabled={verifyTwitter.isPending}
                   >
-                    {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X Connection"}
+                    {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => verifyFacebook.mutate()}
+                    disabled={verifyFacebook.isPending}
+                  >
+                    {verifyFacebook.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test FB"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => verifyInstagram.mutate()}
+                    disabled={verifyInstagram.isPending}
+                  >
+                    {verifyInstagram.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test IG"}
                   </Button>
                 </div>
               </div>
