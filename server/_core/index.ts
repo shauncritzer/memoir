@@ -78,28 +78,42 @@ async function startServer() {
   // Health check endpoint - MUST be before static file catch-all
   app.get("/api/health", async (_req, res) => {
     const health: Record<string, any> = { status: "ok", timestamp: new Date().toISOString() };
-    try {
-      const { getDb } = await import("../db");
-      const db = await getDb();
-      if (db) {
-        const { sql } = await import("drizzle-orm");
-        await db.execute(sql`SELECT 1`);
-        health.database = "connected";
 
-        // Check if key tables exist
-        try {
-          const result = await db.execute(sql`SHOW TABLES`);
-          health.tables = (result as any)[0]?.map?.((r: any) => Object.values(r)[0]) || "unknown";
-        } catch { health.tables = "could not list"; }
-      } else {
-        health.database = "not configured (no DATABASE_URL)";
-      }
+    // Parse DATABASE_URL to show host/port (without password)
+    const dbUrl = process.env.DATABASE_URL || "";
+    try {
+      const parsed = new URL(dbUrl);
+      health.dbHost = parsed.hostname;
+      health.dbPort = parsed.port || "3306";
+      health.dbName = parsed.pathname?.replace("/", "") || "unknown";
+      health.dbUser = parsed.username || "unknown";
+    } catch {
+      health.dbHost = "could not parse DATABASE_URL";
+    }
+
+    // Try raw mysql2 connection directly
+    try {
+      const mysql = await import("mysql2/promise");
+      const conn = await mysql.default.createConnection(dbUrl);
+      const [rows] = await conn.execute("SELECT 1 as test");
+      health.database = "connected";
+      health.rawQuery = rows;
+
+      // List tables
+      const [tables] = await conn.execute("SHOW TABLES");
+      health.tables = (tables as any[]).map((r: any) => Object.values(r)[0]);
+
+      await conn.end();
     } catch (err: any) {
       health.database = `error: ${err.message}`;
+      health.dbErrorCode = err.code || "unknown";
+      health.dbErrorErrno = err.errno || "unknown";
     }
+
     health.env = {
       NODE_ENV: process.env.NODE_ENV || "not set",
       hasDbUrl: !!process.env.DATABASE_URL,
+      dbUrlLength: dbUrl.length,
       hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
     };
     res.json(health);
