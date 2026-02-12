@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
+import { postToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -166,10 +167,46 @@ async function postContentItem(item: {
         }
         break;
       }
-      // Future platforms will be added here
-      case "instagram":
+      case "facebook": {
+        const fbResult = await postToFacebookPage(item.content);
+        result = {
+          success: fbResult.success,
+          tweetId: fbResult.postId,
+          tweetUrl: fbResult.postUrl,
+          error: fbResult.error,
+        };
+        break;
+      }
+      case "instagram": {
+        // Instagram requires an image URL — check mediaUrls for one
+        let imageUrl = "";
+        if (item.mediaUrls) {
+          try {
+            const media = JSON.parse(item.mediaUrls);
+            imageUrl = media.imageUrl || media.image_url || "";
+          } catch {}
+        }
+        if (imageUrl) {
+          const igResult = await postToInstagram(item.content, imageUrl);
+          result = {
+            success: igResult.success,
+            tweetId: igResult.postId,
+            tweetUrl: igResult.postUrl,
+            error: igResult.error,
+          };
+        } else {
+          const igResult = await postTextToInstagram(item.content);
+          result = {
+            success: igResult.success,
+            tweetId: igResult.postId,
+            tweetUrl: igResult.postUrl,
+            error: igResult.error,
+          };
+        }
+        break;
+      }
+      // Future platforms
       case "linkedin":
-      case "facebook":
       case "youtube":
       case "tiktok":
       case "podcast": {
@@ -215,14 +252,15 @@ async function updateEngagementMetrics() {
   const { contentQueue } = await import("../../drizzle/schema");
   const { eq, and, isNotNull } = await import("drizzle-orm");
 
-  // Get posted X items with a platformPostId
+  // Get posted items with a platformPostId (X and Facebook)
+  const { or } = await import("drizzle-orm");
   const postedItems = await db
     .select()
     .from(contentQueue)
     .where(
       and(
         eq(contentQueue.status, "posted"),
-        eq(contentQueue.platform, "x"),
+        or(eq(contentQueue.platform, "x"), eq(contentQueue.platform, "facebook")),
         isNotNull(contentQueue.platformPostId),
       )
     )
@@ -231,17 +269,31 @@ async function updateEngagementMetrics() {
   for (const item of postedItems) {
     if (!item.platformPostId) continue;
 
-    const metrics = await getTweetMetrics(item.platformPostId);
-    if (metrics) {
-      await db.update(contentQueue).set({
-        metrics: JSON.stringify({
-          likes: metrics.like_count,
-          retweets: metrics.retweet_count,
-          replies: metrics.reply_count,
-          views: metrics.impression_count,
-          quotes: metrics.quote_count,
-        }),
-      }).where(eq(contentQueue.id, item.id));
+    if (item.platform === "x") {
+      const metrics = await getTweetMetrics(item.platformPostId);
+      if (metrics) {
+        await db.update(contentQueue).set({
+          metrics: JSON.stringify({
+            likes: metrics.like_count,
+            retweets: metrics.retweet_count,
+            replies: metrics.reply_count,
+            views: metrics.impression_count,
+            quotes: metrics.quote_count,
+          }),
+        }).where(eq(contentQueue.id, item.id));
+      }
+    } else if (item.platform === "facebook") {
+      const fbMetrics = await getFacebookPostMetrics(item.platformPostId);
+      if (fbMetrics) {
+        await db.update(contentQueue).set({
+          metrics: JSON.stringify({
+            likes: fbMetrics.likes,
+            comments: fbMetrics.comments,
+            shares: fbMetrics.shares,
+            reach: fbMetrics.reach,
+          }),
+        }).where(eq(contentQueue.id, item.id));
+      }
     }
   }
 }
