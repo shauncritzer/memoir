@@ -198,6 +198,28 @@ export default function ContentPipeline() {
     },
   });
 
+  const [tokenExchangeOpen, setTokenExchangeOpen] = useState(false);
+  const [metaAppId, setMetaAppId] = useState("");
+  const [metaAppSecret, setMetaAppSecret] = useState("");
+  const exchangeMetaToken = trpc.contentPipeline.exchangeMetaToken.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.token) {
+        const tokenPreview = data.token.substring(0, 20) + "...";
+        const msg = `Token exchange successful!\n\n${data.note}\n\nToken preview: ${tokenPreview}\n\nThe full token has been copied to your clipboard. Update META_PAGE_ACCESS_TOKEN in Railway with this value.`;
+        navigator.clipboard.writeText(data.token).catch(() => {});
+        alert(msg);
+        setTokenExchangeOpen(false);
+        setMetaAppId("");
+        setMetaAppSecret("");
+      } else {
+        alert(`Token exchange failed: ${data.error}`);
+      }
+    },
+    onError: (error) => {
+      alert("Token exchange error: " + error.message);
+    },
+  });
+
   const createCta = trpc.cta.create.useMutation({
     onSuccess: () => {
       trpcUtils.cta.getAll.invalidate();
@@ -342,6 +364,41 @@ export default function ContentPipeline() {
                   >
                     {verifyMeta.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test FB/IG"}
                   </Button>
+                  <Dialog open={tokenExchangeOpen} onOpenChange={setTokenExchangeOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="border-green-400 text-green-600 hover:bg-green-50">
+                        Extend Token
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Extend Meta Page Access Token</DialogTitle>
+                        <DialogDescription>
+                          Convert your short-lived token (~1 hour) to a never-expiring Page Access Token.
+                          You'll need your Facebook App ID and App Secret from developers.facebook.com &gt; Your App &gt; Settings &gt; Basic.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div>
+                          <Label>Facebook App ID</Label>
+                          <Input placeholder="e.g. 123456789012345" value={metaAppId} onChange={e => setMetaAppId(e.target.value)} />
+                        </div>
+                        <div>
+                          <Label>Facebook App Secret</Label>
+                          <Input type="password" placeholder="e.g. abc123def456..." value={metaAppSecret} onChange={e => setMetaAppSecret(e.target.value)} />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          onClick={() => exchangeMetaToken.mutate({ appId: metaAppId, appSecret: metaAppSecret })}
+                          disabled={!metaAppId || !metaAppSecret || exchangeMetaToken.isPending}
+                        >
+                          {exchangeMetaToken.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          Exchange Token
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   <Button
                     size="sm"
                     variant="outline"

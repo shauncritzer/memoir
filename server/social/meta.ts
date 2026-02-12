@@ -271,6 +271,64 @@ export async function verifyMetaConnection(): Promise<{
   return result;
 }
 
+// ─── Token Exchange ──────────────────────────────────────────────────────
+
+/** Exchange a short-lived token for a long-lived one (60 days) */
+export async function exchangeForLongLivedToken(
+  shortLivedToken: string,
+  appId: string,
+  appSecret: string
+): Promise<{ success: boolean; longLivedToken?: string; expiresIn?: number; error?: string }> {
+  try {
+    const response = await fetch(
+      `${GRAPH_API}/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(shortLivedToken)}`
+    );
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      return {
+        success: false,
+        error: `Token exchange failed: ${data.error?.message || JSON.stringify(data)}`,
+      };
+    }
+
+    return {
+      success: true,
+      longLivedToken: data.access_token,
+      expiresIn: data.expires_in, // seconds (typically 5184000 = 60 days)
+    };
+  } catch (err: any) {
+    return { success: false, error: `Token exchange error: ${err.message}` };
+  }
+}
+
+/** Get a long-lived Page Access Token (never expires) from a long-lived User Token */
+export async function getLongLivedPageToken(
+  longLivedUserToken: string,
+  pageId: string
+): Promise<{ success: boolean; pageToken?: string; error?: string }> {
+  try {
+    const response = await fetch(
+      `${GRAPH_API}/${pageId}?fields=access_token&access_token=${encodeURIComponent(longLivedUserToken)}`
+    );
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      return {
+        success: false,
+        error: `Page token fetch failed: ${data.error?.message || JSON.stringify(data)}`,
+      };
+    }
+
+    return {
+      success: true,
+      pageToken: data.access_token, // This is a never-expiring Page Access Token
+    };
+  } catch (err: any) {
+    return { success: false, error: `Page token error: ${err.message}` };
+  }
+}
+
 // ─── Metrics ──────────────────────────────────────────────────────────────
 
 /** Get engagement metrics for a Facebook post */

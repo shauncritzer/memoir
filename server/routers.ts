@@ -2679,6 +2679,56 @@ Recovery is possible. But it requires working with your biology, not against it.
         const { verifyMetaConnection } = await import("./social/meta");
         return verifyMetaConnection();
       }),
+
+    exchangeMetaToken: protectedProcedure
+      .input(z.object({
+        appId: z.string(),
+        appSecret: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { exchangeForLongLivedToken, getLongLivedPageToken } = await import("./social/meta");
+
+        // Step 1: Exchange current short-lived token for long-lived user token
+        const currentToken = process.env.META_PAGE_ACCESS_TOKEN;
+        if (!currentToken) throw new Error("META_PAGE_ACCESS_TOKEN not set");
+
+        const exchangeResult = await exchangeForLongLivedToken(currentToken, input.appId, input.appSecret);
+        if (!exchangeResult.success || !exchangeResult.longLivedToken) {
+          return { success: false, error: exchangeResult.error };
+        }
+
+        // Step 2: Get never-expiring page token from the long-lived user token
+        const pageId = process.env.META_PAGE_ID;
+        if (!pageId) {
+          // If no page ID, just return the long-lived user token
+          return {
+            success: true,
+            token: exchangeResult.longLivedToken,
+            expiresIn: exchangeResult.expiresIn,
+            note: "Long-lived USER token (60 days). Set META_PAGE_ID to get a never-expiring page token.",
+          };
+        }
+
+        const pageResult = await getLongLivedPageToken(exchangeResult.longLivedToken, pageId);
+        if (!pageResult.success || !pageResult.pageToken) {
+          // Fall back to the long-lived user token
+          return {
+            success: true,
+            token: exchangeResult.longLivedToken,
+            expiresIn: exchangeResult.expiresIn,
+            note: "Long-lived USER token (60 days). Could not get page token: " + pageResult.error,
+          };
+        }
+
+        return {
+          success: true,
+          token: pageResult.pageToken,
+          expiresIn: null, // Never expires
+          note: "Never-expiring Page Access Token. Update META_PAGE_ACCESS_TOKEN in Railway with this value.",
+        };
+      }),
   }),
 
   // ============================================================
