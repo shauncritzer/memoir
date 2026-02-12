@@ -2646,16 +2646,16 @@ Recovery is possible. But it requires working with your biology, not against it.
       .query(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
 
-        const { getSchedulerStatus, isTwitterConfigured } = await import("./social");
+        const { getSchedulerStatus, isTwitterConfigured, isFacebookConfigured, isInstagramConfigured } = await import("./social");
         const status = getSchedulerStatus();
 
         return {
           ...status,
           platforms: {
             x: { configured: isTwitterConfigured(), label: "X (Twitter)" },
-            instagram: { configured: false, label: "Instagram" },
+            instagram: { configured: isInstagramConfigured(), label: "Instagram" },
             linkedin: { configured: false, label: "LinkedIn" },
-            facebook: { configured: false, label: "Facebook" },
+            facebook: { configured: isFacebookConfigured(), label: "Facebook" },
             youtube: { configured: false, label: "YouTube" },
             tiktok: { configured: false, label: "TikTok" },
             podcast: { configured: false, label: "Podcast" },
@@ -2670,6 +2670,14 @@ Recovery is possible. But it requires working with your biology, not against it.
 
         const { verifyTwitterCredentials } = await import("./social/twitter");
         return verifyTwitterCredentials();
+      }),
+
+    verifyMeta: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { verifyMetaConnection } = await import("./social/meta");
+        return verifyMetaConnection();
       }),
   }),
 

@@ -184,6 +184,20 @@ export default function ContentPipeline() {
     },
   });
 
+  const verifyMeta = trpc.contentPipeline.verifyMeta.useMutation({
+    onSuccess: (data) => {
+      const parts: string[] = [];
+      if (data.facebook) parts.push(`Facebook: ${data.facebook.pageName} (${data.facebook.followers || 0} followers)`);
+      if (data.instagram) parts.push(`Instagram: @${data.instagram.username} (${data.instagram.followers || 0} followers)`);
+      if (data.success) {
+        alert(`Meta connected!\n${parts.join("\n")}`);
+      } else {
+        alert(`Meta connection failed: ${data.error}`);
+      }
+      trpcUtils.contentPipeline.schedulerStatus.invalidate();
+    },
+  });
+
   const createCta = trpc.cta.create.useMutation({
     onSuccess: () => {
       trpcUtils.cta.getAll.invalidate();
@@ -317,7 +331,16 @@ export default function ContentPipeline() {
                     onClick={() => verifyTwitter.mutate()}
                     disabled={verifyTwitter.isPending}
                   >
-                    {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X Connection"}
+                    {verifyTwitter.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test X"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => verifyMeta.mutate()}
+                    disabled={verifyMeta.isPending}
+                    className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                  >
+                    {verifyMeta.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Test FB/IG"}
                   </Button>
                   <Button
                     size="sm"
@@ -690,13 +713,13 @@ export default function ContentPipeline() {
                                       )}
                                     </Button>
                                   )}
-                                  {/* Post Now for ready items on X */}
-                                  {item.status === "ready" && item.platform === "x" && (
+                                  {/* Post Now for ready items on supported platforms */}
+                                  {item.status === "ready" && ["x", "facebook", "instagram"].includes(item.platform) && (
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => {
-                                        if (confirm("Post this to X now?")) {
+                                        if (confirm(`Post this to ${platformConfig[item.platform]?.label || item.platform} now?`)) {
                                           postNow.mutate({ id: item.id });
                                         }
                                       }}
@@ -763,7 +786,7 @@ export default function ContentPipeline() {
                     {previewItem.status === "ready" && previewItem.platform === "x" && (
                       <Button
                         onClick={() => {
-                          if (confirm("Post this to X now?")) {
+                          if (confirm(`Post this to ${platformConfig[item.platform]?.label || item.platform} now?`)) {
                             postNow.mutate({ id: previewItem.id });
                             setPreviewItem(null);
                           }
