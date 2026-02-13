@@ -2545,6 +2545,24 @@ Recovery is possible. But it requires working with your biology, not against it.
             ctaUrl,
           });
 
+          // Auto-generate image with DALL-E 3 if OpenAI is configured
+          let imageUrl: string | undefined;
+          if (generated.suggestedMediaType !== "none" && generated.suggestedMediaPrompt) {
+            try {
+              const { generatePostImage } = await import("./social/image-generator");
+              const imgResult = await generatePostImage({
+                content: generated.content,
+                platform: item.platform,
+                suggestedMediaPrompt: generated.suggestedMediaPrompt,
+              });
+              if (imgResult.success && imgResult.imageUrl) {
+                imageUrl = imgResult.imageUrl;
+              }
+            } catch (err) {
+              console.warn("[ContentPipeline] Image generation failed, continuing without image:", err);
+            }
+          }
+
           await db.update(contentQueue).set({
             content: generated.content,
             status: "ready",
@@ -2553,10 +2571,11 @@ Recovery is possible. But it requires working with your biology, not against it.
               suggestedMediaPrompt: generated.suggestedMediaPrompt,
               suggestedTools: generated.suggestedTools,
               hashtags: generated.hashtags,
+              generatedImageUrl: imageUrl,
             }),
           }).where(eq(contentQueue.id, item.id));
 
-          return { success: true, content: generated.content, platform: item.platform };
+          return { success: true, content: generated.content, platform: item.platform, imageUrl };
         }
 
         // If generating from a topic for one or more platforms
@@ -2567,8 +2586,25 @@ Recovery is possible. But it requires working with your biology, not against it.
             topic: input.topic,
           });
 
-          // Insert each generated item into the queue
+          // Insert each generated item into the queue with auto-generated images
           for (const result of results) {
+            let imageUrl: string | undefined;
+            if (result.suggestedMediaType !== "none" && result.suggestedMediaPrompt) {
+              try {
+                const { generatePostImage } = await import("./social/image-generator");
+                const imgResult = await generatePostImage({
+                  content: result.content,
+                  platform: result.platform,
+                  suggestedMediaPrompt: result.suggestedMediaPrompt,
+                });
+                if (imgResult.success && imgResult.imageUrl) {
+                  imageUrl = imgResult.imageUrl;
+                }
+              } catch (err) {
+                console.warn("[ContentPipeline] Image generation failed:", err);
+              }
+            }
+
             await db.insert(contentQueue).values({
               platform: result.platform,
               contentType: result.contentType,
@@ -2579,6 +2615,7 @@ Recovery is possible. But it requires working with your biology, not against it.
                 suggestedMediaPrompt: result.suggestedMediaPrompt,
                 suggestedTools: result.suggestedTools,
                 hashtags: result.hashtags,
+                generatedImageUrl: imageUrl,
               }),
             });
           }

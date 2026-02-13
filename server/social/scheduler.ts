@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
-import { postToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
+import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -52,7 +52,7 @@ async function processContentGeneration() {
         }
       }
 
-      // Get CTA offer if linked
+      // Get CTA offer - use linked one or auto-select via weighted rotation
       let ctaText: string | undefined;
       let ctaUrl: string | undefined;
       if (item.ctaOfferId) {
@@ -61,6 +61,31 @@ async function processContentGeneration() {
         if (offers.length > 0) {
           ctaText = offers[0].ctaText;
           ctaUrl = offers[0].ctaUrl;
+        }
+      } else {
+        // Auto-select a CTA offer via weighted rotation
+        const activeOffers = await db.select().from(ctaOffers)
+          .where(eq(ctaOffers.status, "active"));
+        if (activeOffers.length > 0) {
+          const platformOffers = activeOffers.filter(o => {
+            try {
+              const platforms = o.platforms ? JSON.parse(o.platforms) : [];
+              return platforms.includes(item.platform) || platforms.includes("all");
+            } catch { return false; }
+          });
+          const pool = platformOffers.length > 0 ? platformOffers : activeOffers;
+          const totalWeight = pool.reduce((sum, o) => sum + o.weight, 0);
+          let random = Math.random() * totalWeight;
+          for (const offer of pool) {
+            random -= offer.weight;
+            if (random <= 0) {
+              ctaText = offer.ctaText;
+              ctaUrl = offer.ctaUrl;
+              // Link the CTA to the queue item
+              await db.update(contentQueue).set({ ctaOfferId: offer.id }).where(eq(contentQueue.id, item.id));
+              break;
+            }
+          }
         }
       }
 
@@ -73,16 +98,34 @@ async function processContentGeneration() {
         ctaUrl,
       });
 
-      // Update the queue item with generated content
+      // Auto-generate image with DALL-E 3 if configured
+      let generatedImageUrl: string | undefined;
+      if (generated.suggestedMediaType !== "none" && generated.suggestedMediaPrompt) {
+        try {
+          const { generatePostImage } = await import("./image-generator");
+          const imgResult = await generatePostImage({
+            content: generated.content,
+            platform: item.platform,
+            suggestedMediaPrompt: generated.suggestedMediaPrompt,
+          });
+          if (imgResult.success && imgResult.imageUrl) {
+            generatedImageUrl = imgResult.imageUrl;
+          }
+        } catch (err) {
+          console.warn(`[Scheduler] Image generation failed for queue item #${item.id}:`, err);
+        }
+      }
+
+      // Update the queue item with generated content + image
       await db.update(contentQueue).set({
         content: generated.content,
         status: "ready",
-        // Store suggested media info in mediaUrls as metadata
         mediaUrls: JSON.stringify({
           suggestedMediaType: generated.suggestedMediaType,
           suggestedMediaPrompt: generated.suggestedMediaPrompt,
           suggestedTools: generated.suggestedTools,
           hashtags: generated.hashtags,
+          generatedImageUrl,
         }),
       }).where(eq(contentQueue.id, item.id));
 
@@ -168,7 +211,17 @@ async function postContentItem(item: {
         break;
       }
       case "facebook": {
-        const fbResult = await postToFacebookPage(item.content);
+        // Check for generated image to post as a link/photo post
+        let fbImageUrl = "";
+        if (item.mediaUrls) {
+          try {
+            const media = JSON.parse(item.mediaUrls);
+            fbImageUrl = media.generatedImageUrl || media.imageUrl || "";
+          } catch {}
+        }
+        const fbResult = fbImageUrl
+          ? await postLinkToFacebookPage(item.content, fbImageUrl)
+          : await postToFacebookPage(item.content);
         result = {
           success: fbResult.success,
           tweetId: fbResult.postId,
@@ -178,12 +231,12 @@ async function postContentItem(item: {
         break;
       }
       case "instagram": {
-        // Instagram requires an image URL — check mediaUrls for one
+        // Instagram requires an image URL — check mediaUrls for generated or provided image
         let imageUrl = "";
         if (item.mediaUrls) {
           try {
             const media = JSON.parse(item.mediaUrls);
-            imageUrl = media.imageUrl || media.image_url || "";
+            imageUrl = media.generatedImageUrl || media.imageUrl || media.image_url || "";
           } catch {}
         }
         if (imageUrl) {
