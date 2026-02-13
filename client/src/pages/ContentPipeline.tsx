@@ -50,6 +50,7 @@ export default function ContentPipeline() {
 
   // === Content Queue State ===
   const [queueFilter, setQueueFilter] = useState<string>("");
+  const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const [addQueueOpen, setAddQueueOpen] = useState(false);
   const [newQueueItem, setNewQueueItem] = useState({
     platform: "",
@@ -759,11 +760,14 @@ export default function ContentPipeline() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => generateAiContent.mutate({ queueItemId: item.id })}
-                                      disabled={generateAiContent.isPending}
+                                      onClick={() => {
+                                        setGeneratingItemId(item.id);
+                                        generateAiContent.mutate({ queueItemId: item.id });
+                                      }}
+                                      disabled={generatingItemId === item.id && generateAiContent.isPending}
                                       className="text-violet-600 border-violet-300 hover:bg-violet-50"
                                     >
-                                      {generateAiContent.isPending ? (
+                                      {generatingItemId === item.id && generateAiContent.isPending ? (
                                         <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Generating...</>
                                       ) : (
                                         <><Sparkles className="h-3 w-3 mr-1" />Generate</>
