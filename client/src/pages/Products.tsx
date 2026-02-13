@@ -49,6 +49,7 @@ export default function Products() {
       ideal: "Perfect for: Anyone seeking hope, understanding addiction's roots, or supporting a loved one",
       badge: "The Foundation",
       badgeVariant: "secondary" as const,
+      comingSoon: true,
     },
     {
       id: "7-day-reset",
@@ -90,6 +91,7 @@ export default function Products() {
       ideal: "Perfect for: Those with sobriety who want to heal the root causes of addiction",
       badge: "Best Value",
       badgeVariant: "secondary" as const,
+      comingSoon: true,
     },
     {
       id: "bent-not-broken-circle",
@@ -110,6 +112,7 @@ export default function Products() {
       ideal: "Perfect for: Those committed to long-term recovery and community",
       badge: "Community",
       badgeVariant: "outline" as const,
+      comingSoon: true,
     },
   ];
 
@@ -184,6 +187,15 @@ export default function Products() {
                       <Link href="/7-day-reset">
                         Learn More & Enroll
                       </Link>
+                    </Button>
+                  ) : product.comingSoon ? (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      variant="outline"
+                      disabled
+                    >
+                      Coming Soon
                     </Button>
                   ) : (
                     <Button
@@ -440,7 +452,7 @@ export default function Products() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© 2025 Shaun Critzer. All rights reserved.</p>
+            <p>© 2026 Shaun Critzer. All rights reserved.</p>
           </div>
         </div>
       </footer>
