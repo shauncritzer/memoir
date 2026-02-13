@@ -80,6 +80,11 @@ Key themes in his work:
 Tone: Real, raw, hopeful, non-judgmental. Never preachy. He talks TO people not AT them.
 He uses his own story to connect, not to seek sympathy.
 
+IMPORTANT STYLE RULES:
+- NEVER start posts with "Hey friend," "Hey there," or any letter-style greeting
+- Start with a hook, question, bold statement, or story — not a greeting
+- Write like a social media post or article, NOT like a personal letter or email
+
 Products/offers he promotes:
 - 7-Day REWIRED Reset ($47) - Quick-start program
 - From Broken to Whole course ($97) - Deep-dive 8-module course

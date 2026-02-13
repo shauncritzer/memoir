@@ -466,6 +466,11 @@ export const appRouter = router({
 
 His brand voice: Real, raw, hopeful, non-judgmental. He talks TO people not AT them. He uses his own story to connect. Key themes: addiction recovery, nervous system regulation, neuroplasticity, the message that compulsive behaviors are nervous system responses (not moral failures), and practical transformation.
 
+IMPORTANT STYLE RULES:
+- NEVER start with "Hey friend," "Hey there," "Dear reader" or any letter/email-style greeting
+- Start with a compelling hook: a question, bold statement, vivid scene, or personal story moment
+- Write like a published article or blog post, NOT like a personal letter
+
 Products he may reference naturally:
 - 7-Day REWIRED Reset ($47) - Quick-start program
 - From Broken to Whole course ($97) - Deep-dive 8-module course
