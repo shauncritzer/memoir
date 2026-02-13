@@ -71,7 +71,7 @@ export default function Blog() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-accent/20">
+      <section className="pt-28 pb-20 bg-gradient-to-b from-background to-accent/20">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">

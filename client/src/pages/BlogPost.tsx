@@ -65,7 +65,7 @@ export default function BlogPost() {
       <Navigation />
 
       {/* Article */}
-      <article className="py-12">
+      <article className="pt-24 pb-12">
         <div className="container max-w-4xl">
           {/* Back Button */}
           <Link href="/blog">
