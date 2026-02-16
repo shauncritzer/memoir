@@ -119,6 +119,78 @@ async function startServer() {
     res.json(health);
   });
 
+  // Bootstrap first admin account - POST /api/admin/bootstrap
+  // Creates account + promotes to admin in one step using ADMIN_SECRET
+  app.post("/api/admin/bootstrap", async (req, res) => {
+    try {
+      const { secret, email, password, name } = req.body;
+      const adminSecret = process.env.ADMIN_SECRET;
+
+      if (!adminSecret || secret !== adminSecret) {
+        return res.status(403).json({ error: "Invalid admin secret" });
+      }
+      if (!email || !password || !name) {
+        return res.status(400).json({ error: "email, password, and name are required" });
+      }
+      if (password.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters" });
+      }
+
+      const { drizzle } = await import("drizzle-orm/mysql2");
+      const { users } = await import("../../drizzle/schema");
+      const { eq, sql } = await import("drizzle-orm");
+      const { scrypt, randomBytes } = await import("crypto");
+      const { promisify } = await import("util");
+      const scryptAsync = promisify(scrypt);
+
+      const db = drizzle(process.env.DATABASE_URL!);
+
+      // Ensure passwordHash column exists
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN passwordHash VARCHAR(256) NULL`);
+      } catch (e: any) {
+        if (!e.message?.includes("Duplicate column")) throw e;
+      }
+
+      // Hash password
+      const salt = randomBytes(16).toString("hex");
+      const buf = await scryptAsync(password, salt, 64) as Buffer;
+      const hash = `${salt}:${buf.toString("hex")}`;
+
+      // Check if user exists
+      const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
+
+      if (existing.length > 0) {
+        // Promote existing user to admin + set password
+        await db.update(users).set({
+          role: "admin",
+          passwordHash: hash,
+          name,
+          lastSignedIn: new Date(),
+        }).where(eq(users.id, existing[0].id));
+
+        return res.json({ success: true, message: `Existing user ${email} promoted to admin` });
+      }
+
+      // Create new admin user
+      const openId = `email_${Date.now()}_${randomBytes(8).toString("hex")}`;
+      await db.insert(users).values({
+        openId,
+        email,
+        name,
+        passwordHash: hash,
+        loginMethod: "email",
+        role: "admin",
+        lastSignedIn: new Date(),
+      });
+
+      return res.json({ success: true, message: `Admin account created for ${email}` });
+    } catch (err: any) {
+      console.error("[Bootstrap] Error:", err);
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

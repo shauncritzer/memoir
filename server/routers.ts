@@ -53,7 +53,15 @@ export const appRouter = router({
         if (!db) throw new Error("Database not available");
 
         const { users } = await import("../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { eq, sql } = await import("drizzle-orm");
+
+        // Ensure passwordHash column exists (auto-migrate)
+        try {
+          await db.execute(sql`ALTER TABLE users ADD COLUMN passwordHash VARCHAR(256) NULL`);
+        } catch (e: any) {
+          // Ignore if column already exists
+          if (!e.message?.includes("Duplicate column")) throw e;
+        }
 
         // Check if email already taken
         const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
