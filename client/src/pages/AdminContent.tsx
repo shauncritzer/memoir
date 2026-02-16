@@ -61,7 +61,7 @@ export default function AdminContent() {
   const handleFixResources = () => {
     setResourceStatus("loading");
     setResourceMessage("");
-    fixResourcesMutation.mutate({ secret: "fix-resources-2025" });
+    fixResourcesMutation.mutate({});
   };
 
   return (

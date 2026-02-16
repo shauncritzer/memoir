@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import RewiredRelief from "@/components/RewiredRelief";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -503,6 +504,9 @@ export default function RewiredMethod() {
           </div>
         </div>
       </section>
+
+      {/* REWIRED Relief Floating Button & Modal */}
+      <RewiredRelief />
 
       {/* Footer - Matching Home Page */}
       <footer className="border-t py-12 bg-gray-900 text-gray-300">

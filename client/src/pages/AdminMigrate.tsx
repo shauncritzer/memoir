@@ -12,7 +12,7 @@ export default function AdminMigrate() {
 
   const handleMigrate = async () => {
     try {
-      const result = await migrateMutation.mutateAsync({ secret: "migrate-ai-coach-2025" });
+      const result = await migrateMutation.mutateAsync({});
       setMigrationResult(result);
 
       if (result.success) {

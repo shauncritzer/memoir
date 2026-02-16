@@ -609,7 +609,7 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown fences):
       }).optional())
       .mutation(async ({ input }) => {
         // Simple protection - optional secret key
-        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "seed-blog-posts-2025") {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET) {
           throw new Error("Unauthorized: Invalid secret key");
         }
 
@@ -1190,7 +1190,7 @@ Recovery is possible. But it requires working with your biology, not against it.
       }).optional())
       .mutation(async ({ input }) => {
         // Simple protection - optional secret key
-        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "fix-pdfs-2025") {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET) {
           throw new Error("Unauthorized: Invalid secret key");
         }
 
@@ -1417,7 +1417,7 @@ Recovery is possible. But it requires working with your biology, not against it.
       }).optional())
       .mutation(async ({ input }) => {
         // Simple protection - optional secret key
-        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "migrate-ai-coach-2025") {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET) {
           throw new Error("Unauthorized: Invalid secret key");
         }
 
