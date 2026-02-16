@@ -41,6 +41,117 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+
+    register: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+        name: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Check if email already taken
+        const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (existing.length > 0) {
+          // If user exists but has no password (Stripe-created), let them set one
+          if (!existing[0].passwordHash) {
+            const { scrypt, randomBytes } = await import("crypto");
+            const { promisify } = await import("util");
+            const scryptAsync = promisify(scrypt);
+            const salt = randomBytes(16).toString("hex");
+            const buf = await scryptAsync(input.password, salt, 64) as Buffer;
+            const hash = `${salt}:${buf.toString("hex")}`;
+
+            await db.update(users).set({
+              passwordHash: hash,
+              name: input.name,
+              lastSignedIn: new Date(),
+            }).where(eq(users.id, existing[0].id));
+
+            const sessionToken = await sdk.createSessionToken(existing[0].openId, { name: input.name });
+            const cookieOptions = getSessionCookieOptions(ctx.req);
+            ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+            return { success: true };
+          }
+          throw new Error("An account with this email already exists. Please log in instead.");
+        }
+
+        // Hash password
+        const { scrypt, randomBytes } = await import("crypto");
+        const { promisify } = await import("util");
+        const scryptAsync = promisify(scrypt);
+        const salt = randomBytes(16).toString("hex");
+        const buf = await scryptAsync(input.password, salt, 64) as Buffer;
+        const hash = `${salt}:${buf.toString("hex")}`;
+
+        // Create user
+        const openId = `email_${Date.now()}_${randomBytes(8).toString("hex")}`;
+        await db.insert(users).values({
+          openId,
+          email: input.email,
+          name: input.name,
+          passwordHash: hash,
+          loginMethod: "email",
+          lastSignedIn: new Date(),
+        });
+
+        const userRows = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (userRows.length === 0) throw new Error("Failed to create account");
+
+        const sessionToken = await sdk.createSessionToken(openId, { name: input.name });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true };
+      }),
+
+    loginWithPassword: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const userRows = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (userRows.length === 0) {
+          throw new Error("No account found with this email. Please create an account first.");
+        }
+
+        const user = userRows[0];
+        if (!user.passwordHash) {
+          throw new Error("This account was created via purchase. Please use 'Create Account' to set a password.");
+        }
+
+        // Verify password
+        const { scrypt, timingSafeEqual } = await import("crypto");
+        const { promisify } = await import("util");
+        const scryptAsync = promisify(scrypt);
+        const [salt, key] = user.passwordHash.split(":");
+        const buf = await scryptAsync(input.password, salt, 64) as Buffer;
+        const keyBuf = Buffer.from(key, "hex");
+
+        if (!timingSafeEqual(buf, keyBuf)) {
+          throw new Error("Incorrect password. Please try again.");
+        }
+
+        // Update last signed in
+        await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+
+        const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true };
+      }),
+
     loginFromStripeSession: publicProcedure
       .input(z.object({ sessionId: z.string() }))
       .mutation(async ({ input, ctx }) => {
@@ -1823,6 +1934,18 @@ Recovery is possible. But it requires working with your biology, not against it.
             created.push(t.name);
           } catch (err: any) {
             created.push(`${t.name} (ERROR: ${err.message})`);
+          }
+        }
+
+        // Add passwordHash column to users table if it doesn't exist
+        try {
+          await db.execute(sql`ALTER TABLE users ADD COLUMN passwordHash VARCHAR(256) NULL`);
+          created.push("users.passwordHash (added)");
+        } catch (err: any) {
+          if (err.message?.includes("Duplicate column")) {
+            created.push("users.passwordHash (already exists)");
+          } else {
+            created.push(`users.passwordHash (ERROR: ${err.message})`);
           }
         }
 

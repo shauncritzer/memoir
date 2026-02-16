@@ -2,7 +2,6 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { getLoginUrl } from "@/lib/auth";
 import { trpc } from "@/lib/trpc";
 import { BookOpen, CheckCircle2, Clock, Lock, PlayCircle } from "lucide-react";
 import { Link } from "wouter";
@@ -37,13 +36,14 @@ export default function Members() {
               Please log in to access your purchased courses and products.
             </p>
           </div>
-          <Button 
-            size="lg" 
-            className="w-full bg-primary hover:bg-primary/90"
-            onClick={() => window.location.href = getLoginUrl()}
-          >
-            Log In to Continue
-          </Button>
+          <Link href="/login">
+            <Button
+              size="lg"
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              Log In to Continue
+            </Button>
+          </Link>
           <div className="text-center">
             <Link href="/products">
               <Button variant="link" className="text-sm">

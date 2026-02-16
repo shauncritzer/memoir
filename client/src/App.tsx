@@ -34,6 +34,7 @@ import SevenDayReset from "./pages/SevenDayReset";
 import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
 import Contact from "./pages/Contact";
+import Login from "./pages/Login";
 import { AdminRoute } from "./components/AdminRoute";
 
 function Router() {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/admin/content">{() => <AdminRoute component={AdminContent} />}</Route>
       <Route path="/admin/pipeline">{() => <AdminRoute component={ContentPipeline} />}</Route>
       <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
+      <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
