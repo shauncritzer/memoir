@@ -1907,6 +1907,33 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
 
+    // Promote current logged-in user to admin (requires ADMIN_SECRET)
+    promoteToAdmin: protectedProcedure
+      .input(z.object({
+        secret: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const adminSecret = process.env.ADMIN_SECRET;
+        if (!adminSecret || input.secret !== adminSecret) {
+          throw new Error("Unauthorized: Invalid admin secret");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.update(users)
+          .set({ role: "admin" })
+          .where(eq(users.id, ctx.user.id));
+
+        return {
+          success: true,
+          message: `User ${ctx.user.email || ctx.user.name || ctx.user.id} promoted to admin`,
+        };
+      }),
+
     // Setup missing database tables (run once, idempotent)
     setupTables: protectedProcedure
       .mutation(async ({ ctx }) => {
