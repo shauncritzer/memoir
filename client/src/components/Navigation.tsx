@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 type NavItem = {
   label: string;
@@ -159,6 +161,14 @@ function MobileAccordion({ item, onClose }: { item: NavItem; onClose: () => void
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { user, isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+      window.location.href = "/";
+    },
+  });
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -182,11 +192,38 @@ export function Navigation() {
           {navItems.map((item) => (
             <DesktopDropdown key={item.label} item={item} />
           ))}
-          <Link href="/products">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 px-6">
-              Get Started
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <div className="flex items-center space-x-3">
+              <Link href="/members">
+                <Button variant="ghost" size="sm" className="text-sm font-medium">
+                  <User className="h-4 w-4 mr-1" />
+                  {user?.name?.split(" ")[0] || "Dashboard"}
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                className="text-sm"
+              >
+                <LogOut className="h-3.5 w-3.5 mr-1" />
+                Log Out
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="text-sm font-medium">
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/products">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 px-6">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -214,11 +251,40 @@ export function Navigation() {
                 onClose={() => setMobileMenuOpen(false)}
               />
             ))}
-            <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full bg-primary hover:bg-primary/90 mt-4">
-                Get Started
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="space-y-2 pt-4 border-t mt-4">
+                <Link href="/members" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    <User className="h-4 w-4 mr-2" />
+                    My Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  className="w-full text-muted-foreground"
+                  onClick={() => {
+                    logoutMutation.mutate();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Log Out
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2 pt-4 border-t mt-4">
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full bg-primary hover:bg-primary/90">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

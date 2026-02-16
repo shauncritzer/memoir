@@ -60,7 +60,7 @@ export default function SeedDatabase() {
   const handleMigrate = () => {
     setMigrateStatus("loading");
     setMigrateMessage("");
-    migrateMutation.mutate({ secret: "migrate-ai-coach-2025" });
+    migrateMutation.mutate({});
   };
 
   return (

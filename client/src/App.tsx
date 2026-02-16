@@ -34,9 +34,10 @@ import SevenDayReset from "./pages/SevenDayReset";
 import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
 import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import { AdminRoute } from "./components/AdminRoute";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -49,13 +50,15 @@ function Router() {
       <Route path="/rewired-method" component={RewiredMethod} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/blog-editor" component={BlogEditor} />
-      <Route path="/admin/videos" component={AdminVideos} />
-      <Route path="/admin/seed" component={SeedDatabase} />
-      <Route path="/admin/content" component={AdminContent} />
-      <Route path="/admin/pipeline" component={ContentPipeline} />
-      <Route path="/admin/migrate" component={AdminMigrate} />
+      {/* Admin routes - require authenticated admin */}
+      <Route path="/admin">{() => <AdminRoute component={AdminDashboard} />}</Route>
+      <Route path="/admin/blog-editor">{() => <AdminRoute component={BlogEditor} />}</Route>
+      <Route path="/admin/videos">{() => <AdminRoute component={AdminVideos} />}</Route>
+      <Route path="/admin/seed">{() => <AdminRoute component={SeedDatabase} />}</Route>
+      <Route path="/admin/content">{() => <AdminRoute component={AdminContent} />}</Route>
+      <Route path="/admin/pipeline">{() => <AdminRoute component={ContentPipeline} />}</Route>
+      <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
+      <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
       <Route path="/ai-coach" component={AICoach} />
