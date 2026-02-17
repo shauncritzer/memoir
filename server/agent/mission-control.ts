@@ -14,6 +14,7 @@
  *   - PassiveAffiliate.ai (SaaS) - platform development, users
  */
 
+import cron from "node-cron";
 import { getDb } from "../db";
 import { invokeLLM } from "../_core/llm";
 
@@ -86,9 +87,6 @@ const BUSINESSES: BusinessContext[] = [
 
 // ─── Monitor Functions ─────────────────────────────────────────────────────
 
-/**
- * Check content pipeline health - are posts going out? Any failures?
- */
 async function monitorContentPipeline(): Promise<AgentAlert[]> {
   const alerts: AgentAlert[] = [];
   const db = await getDb();
@@ -97,11 +95,10 @@ async function monitorContentPipeline(): Promise<AgentAlert[]> {
   try {
     const { sql } = await import("drizzle-orm");
 
-    // Check for failed posts in last 24 hours
     const [failedRows] = await db.execute(
       sql`SELECT COUNT(*) as cnt FROM content_queue WHERE status = 'failed' AND updated_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)`
-    );
-    const failedCount = (failedRows as any)?.[0]?.cnt || 0;
+    ) as any;
+    const failedCount = failedRows?.[0]?.cnt || 0;
 
     if (failedCount > 0) {
       alerts.push({
@@ -115,11 +112,10 @@ async function monitorContentPipeline(): Promise<AgentAlert[]> {
       });
     }
 
-    // Check if no content has been posted in 48 hours
     const [recentPosts] = await db.execute(
       sql`SELECT COUNT(*) as cnt FROM content_queue WHERE status = 'posted' AND posted_at > DATE_SUB(NOW(), INTERVAL 48 HOUR)`
-    );
-    const recentCount = (recentPosts as any)?.[0]?.cnt || 0;
+    ) as any;
+    const recentCount = recentPosts?.[0]?.cnt || 0;
 
     if (recentCount === 0) {
       alerts.push({
@@ -133,11 +129,10 @@ async function monitorContentPipeline(): Promise<AgentAlert[]> {
       });
     }
 
-    // Check content queue depth - do we have content ready to go?
     const [readyRows] = await db.execute(
       sql`SELECT COUNT(*) as cnt FROM content_queue WHERE status = 'ready'`
-    );
-    const readyCount = (readyRows as any)?.[0]?.cnt || 0;
+    ) as any;
+    const readyCount = readyRows?.[0]?.cnt || 0;
 
     if (readyCount < 5) {
       alerts.push({
@@ -157,9 +152,6 @@ async function monitorContentPipeline(): Promise<AgentAlert[]> {
   return alerts;
 }
 
-/**
- * Check social media engagement metrics
- */
 async function monitorEngagement(): Promise<{ alerts: AgentAlert[]; kpi: KPISnapshot | null }> {
   const alerts: AgentAlert[] = [];
   const db = await getDb();
@@ -168,7 +160,6 @@ async function monitorEngagement(): Promise<{ alerts: AgentAlert[]; kpi: KPISnap
   try {
     const { sql } = await import("drizzle-orm");
 
-    // Get posting stats by platform for last 7 days
     const [platformStats] = await db.execute(
       sql`SELECT platform, COUNT(*) as total_posts,
           SUM(CASE WHEN status = 'posted' THEN 1 ELSE 0 END) as successful,
@@ -176,7 +167,7 @@ async function monitorEngagement(): Promise<{ alerts: AgentAlert[]; kpi: KPISnap
           FROM content_queue
           WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
           GROUP BY platform`
-    );
+    ) as any;
 
     const metrics: Record<string, number | string> = {};
     const trends: Record<string, "up" | "down" | "stable"> = {};
@@ -184,20 +175,18 @@ async function monitorEngagement(): Promise<{ alerts: AgentAlert[]; kpi: KPISnap
     for (const row of (platformStats as any[]) || []) {
       metrics[`${row.platform}_posts`] = row.successful || 0;
       metrics[`${row.platform}_failed`] = row.failed || 0;
-      trends[`${row.platform}_posts`] = "stable"; // TODO: compare with previous period
+      trends[`${row.platform}_posts`] = "stable";
     }
 
-    // Get user signups in last 7 days
     const [userStats] = await db.execute(
       sql`SELECT COUNT(*) as cnt FROM users WHERE createdAt > DATE_SUB(NOW(), INTERVAL 7 DAY)`
-    );
-    metrics.new_users_7d = (userStats as any)?.[0]?.cnt || 0;
+    ) as any;
+    metrics.new_users_7d = userStats?.[0]?.cnt || 0;
 
-    // Get blog views
     const [blogStats] = await db.execute(
       sql`SELECT SUM(views) as total_views FROM blog_posts WHERE updated_at > DATE_SUB(NOW(), INTERVAL 7 DAY)`
-    );
-    metrics.blog_views_7d = (blogStats as any)?.[0]?.total_views || 0;
+    ) as any;
+    metrics.blog_views_7d = blogStats?.[0]?.total_views || 0;
 
     const kpi: KPISnapshot = {
       business: "memoir",
@@ -214,13 +203,9 @@ async function monitorEngagement(): Promise<{ alerts: AgentAlert[]; kpi: KPISnap
   }
 }
 
-/**
- * Check system health - database, API connections, etc.
- */
 async function monitorSystemHealth(): Promise<AgentAlert[]> {
   const alerts: AgentAlert[] = [];
 
-  // Check database connection
   const db = await getDb();
   if (!db) {
     alerts.push({
@@ -235,7 +220,6 @@ async function monitorSystemHealth(): Promise<AgentAlert[]> {
     return alerts;
   }
 
-  // Check if social credentials are configured
   const socialChecks = [
     { name: "Twitter/X", keys: ["TWITTER_CONSUMER_KEY", "TWITTER_ACCESS_TOKEN"] },
     { name: "Facebook", keys: ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID"] },
@@ -262,11 +246,8 @@ async function monitorSystemHealth(): Promise<AgentAlert[]> {
 
 // ─── AI Analysis ───────────────────────────────────────────────────────────
 
-/**
- * Generate an AI-powered weekly briefing from KPIs and alerts
- */
 async function generateWeeklyBriefing(kpis: KPISnapshot[], alerts: AgentAlert[]): Promise<string> {
-  const prompt = `You are the AI operations manager for Shaun Critzer's businesses.
+  const promptText = `You are the AI operations manager for Shaun Critzer's businesses.
 Generate a brief, actionable weekly report based on this data.
 
 KPIs:
@@ -287,8 +268,11 @@ Format as:
 Keep it concise and direct. Shaun is a busy founder - give him the 60-second version.`;
 
   try {
-    const result = await invokeLLM(prompt);
-    return result;
+    const result = await invokeLLM({
+      messages: [{ role: "user", content: promptText }],
+      maxTokens: 1000,
+    });
+    return result.choices?.[0]?.message?.content as string || "No briefing generated";
   } catch (err: any) {
     return `## Weekly Briefing - ${new Date().toLocaleDateString()}\n\n*AI analysis unavailable: ${err.message}*\n\nRaw metrics: ${JSON.stringify(kpis)}`;
   }
@@ -296,10 +280,6 @@ Keep it concise and direct. Shaun is a busy founder - give him the 60-second ver
 
 // ─── Main Agent Loop ───────────────────────────────────────────────────────
 
-/**
- * Run one cycle of the mission control agent
- * Called by the cron scheduler every 30 minutes
- */
 export async function runAgentCycle(): Promise<AgentState> {
   if (state.isRunning) {
     console.log("[MissionControl] Agent cycle already running, skipping");
@@ -312,7 +292,6 @@ export async function runAgentCycle(): Promise<AgentState> {
   try {
     const allAlerts: AgentAlert[] = [];
 
-    // Run all monitors in parallel
     const [contentAlerts, engagementResult, healthAlerts] = await Promise.all([
       monitorContentPipeline(),
       monitorEngagement(),
@@ -321,25 +300,21 @@ export async function runAgentCycle(): Promise<AgentState> {
 
     allAlerts.push(...contentAlerts, ...engagementResult.alerts, ...healthAlerts);
 
-    // Update state
     state.alerts = allAlerts;
     if (engagementResult.kpi) {
       state.kpis = [engagementResult.kpi];
     }
     state.lastRun = new Date();
 
-    // Log summary
     const criticalCount = allAlerts.filter(a => a.severity === "critical").length;
     const warningCount = allAlerts.filter(a => a.severity === "warning").length;
     console.log(`[MissionControl] Cycle complete: ${criticalCount} critical, ${warningCount} warnings, ${allAlerts.length} total alerts`);
 
-    // Generate weekly report if it's been 7+ days
     if (!state.lastReport || (Date.now() - state.lastReport.getTime()) > 7 * 24 * 60 * 60 * 1000) {
       console.log("[MissionControl] Generating weekly briefing...");
       try {
-        const briefing = await generateWeeklyBriefing(state.kpis, state.alerts);
+        await generateWeeklyBriefing(state.kpis, state.alerts);
         console.log("[MissionControl] Weekly briefing generated");
-        // TODO: Store briefing in DB and/or send via email
         state.lastReport = new Date();
       } catch (err: any) {
         console.error("[MissionControl] Briefing generation failed:", err.message);
@@ -354,28 +329,18 @@ export async function runAgentCycle(): Promise<AgentState> {
   return state;
 }
 
-/**
- * Get current agent state (for admin dashboard)
- */
 export function getAgentState(): AgentState {
   return { ...state };
 }
 
-/**
- * Get active businesses
- */
 export function getBusinesses(): BusinessContext[] {
   return BUSINESSES;
 }
 
-/**
- * Start the mission control agent on a cron schedule
- */
 export function startMissionControl(): void {
   console.log("[MissionControl] Starting autonomous agent...");
 
-  // Run monitoring every 30 minutes
-  const monitorJob = cron.schedule("*/30 * * * *", async () => {
+  cron.schedule("*/30 * * * *", async () => {
     try {
       await runAgentCycle();
     } catch (err: any) {
@@ -383,7 +348,6 @@ export function startMissionControl(): void {
     }
   });
 
-  // Run initial cycle after 60 seconds (let server fully start)
   setTimeout(async () => {
     try {
       await runAgentCycle();

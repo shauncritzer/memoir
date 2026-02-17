@@ -267,7 +267,7 @@ async function postContentItem(item: {
             .where(eq(contentQueue.id, item.id));
           return;
         }
-        const linkedInContent = typeof parsed === "string" ? parsed : (parsed.content || parsed.text || JSON.stringify(parsed));
+        const linkedInContent = item.content || "";
         const liResult = await postToLinkedIn(linkedInContent);
         result = {
           success: liResult.success,
