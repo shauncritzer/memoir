@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
 import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
+import { postToLinkedIn, isLinkedInConfigured, getLinkedInPostMetrics } from "./linkedin";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -258,8 +259,25 @@ async function postContentItem(item: {
         }
         break;
       }
+      case "linkedin": {
+        if (!isLinkedInConfigured()) {
+          result = { success: false, error: "LinkedIn credentials not configured" };
+          await db.update(contentQueue)
+            .set({ status: "ready", errorMessage: result.error })
+            .where(eq(contentQueue.id, item.id));
+          return;
+        }
+        const linkedInContent = typeof parsed === "string" ? parsed : (parsed.content || parsed.text || JSON.stringify(parsed));
+        const liResult = await postToLinkedIn(linkedInContent);
+        result = {
+          success: liResult.success,
+          tweetId: liResult.postId,
+          tweetUrl: liResult.postUrl,
+          error: liResult.error,
+        };
+        break;
+      }
       // Future platforms
-      case "linkedin":
       case "youtube":
       case "tiktok":
       case "podcast": {

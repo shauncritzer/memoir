@@ -1915,6 +1915,30 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
 
+    // Mission Control agent status
+    agentStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        try {
+          const { getAgentState, getBusinesses, runAgentCycle } = await import("../agent/mission-control");
+          return {
+            state: getAgentState(),
+            businesses: getBusinesses(),
+          };
+        } catch (err: any) {
+          return { state: null, businesses: [], error: err.message };
+        }
+      }),
+
+    // Manually trigger a mission control cycle
+    runAgentCycle: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { runAgentCycle } = await import("../agent/mission-control");
+        const result = await runAgentCycle();
+        return result;
+      }),
+
     // Promote current logged-in user to admin (requires ADMIN_SECRET)
     promoteToAdmin: protectedProcedure
       .input(z.object({
