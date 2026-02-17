@@ -75,6 +75,18 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // TikTok domain verification - serves verification file from env var
+  // Set TIKTOK_VERIFICATION_CODE in Railway, e.g. "tiktok-developers-site-verification=XXXXX"
+  app.get("/tiktok-*.txt", (req, res) => {
+    const code = process.env.TIKTOK_VERIFICATION_CODE;
+    if (code) {
+      res.type("text/plain").send(code);
+    } else {
+      res.status(404).send("Not found");
+    }
+  });
+
   // Health check endpoint - MUST be before static file catch-all
   app.get("/api/health", async (_req, res) => {
     const health: Record<string, any> = { status: "ok", timestamp: new Date().toISOString() };
@@ -224,6 +236,17 @@ async function startServer() {
       });
     } catch (err: any) {
       console.error("[Scheduler] Import failed (non-fatal):", err.message);
+    }
+
+    // Start Mission Control autonomous agent (non-blocking)
+    try {
+      import("../agent/mission-control").then(({ startMissionControl }) => {
+        startMissionControl();
+      }).catch((err) => {
+        console.error("[MissionControl] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[MissionControl] Import failed (non-fatal):", err.message);
     }
   });
 }
