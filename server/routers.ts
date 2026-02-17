@@ -53,7 +53,15 @@ export const appRouter = router({
         if (!db) throw new Error("Database not available");
 
         const { users } = await import("../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { eq, sql } = await import("drizzle-orm");
+
+        // Ensure passwordHash column exists (auto-migrate)
+        try {
+          await db.execute(sql`ALTER TABLE users ADD COLUMN passwordHash VARCHAR(256) NULL`);
+        } catch (e: any) {
+          // Ignore if column already exists
+          if (!e.message?.includes("Duplicate column")) throw e;
+        }
 
         // Check if email already taken
         const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
@@ -1904,6 +1912,33 @@ Recovery is possible. But it requires working with your biology, not against it.
           success: true,
           message: `Successfully seeded ${offers.length} CTA offers (${offers.filter(o => o.offerType !== "affiliate").length} products + ${offers.filter(o => o.offerType === "affiliate").length} affiliate tools)`,
           count: offers.length,
+        };
+      }),
+
+    // Promote current logged-in user to admin (requires ADMIN_SECRET)
+    promoteToAdmin: protectedProcedure
+      .input(z.object({
+        secret: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const adminSecret = process.env.ADMIN_SECRET;
+        if (!adminSecret || input.secret !== adminSecret) {
+          throw new Error("Unauthorized: Invalid admin secret");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db.update(users)
+          .set({ role: "admin" })
+          .where(eq(users.id, ctx.user.id));
+
+        return {
+          success: true,
+          message: `User ${ctx.user.email || ctx.user.name || ctx.user.id} promoted to admin`,
         };
       }),
 
