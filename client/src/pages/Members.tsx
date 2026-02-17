@@ -135,7 +135,8 @@ export default function Members() {
 
           {/* Purchased Products Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {purchases.map((purchase) => {
+            {/* Deduplicate purchases by productId - show each product once */}
+            {Array.from(new Map(purchases.map(p => [p.productId, p])).values()).map((purchase) => {
               const productInfo = getProductInfo(purchase.productId);
               
               return (

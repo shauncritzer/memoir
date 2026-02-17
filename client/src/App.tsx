@@ -26,6 +26,7 @@ import ContentPipeline from "./pages/ContentPipeline";
 import StripeTest from "./pages/StripeTest";
 import TermsOfUse from "./pages/TermsOfUse";
 import RefundPolicy from "./pages/RefundPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import FAQs from "./pages/FAQs";
 import RecoveryToolkit from "./pages/RecoveryToolkit";
 import ReadingGuide from "./pages/ReadingGuide";
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/course/:productId" component={Course} />
       <Route path="/terms-of-use" component={TermsOfUse} />
       <Route path="/refund-policy" component={RefundPolicy} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/faqs" component={FAQs} />
       <Route path="/contact" component={Contact} />
       <Route path={"/404"} component={NotFound} />
