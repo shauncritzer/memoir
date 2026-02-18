@@ -203,6 +203,26 @@ async function startServer() {
     }
   });
 
+  // HeyGen webhook - receives video completion notifications
+  app.post("/api/heygen/webhook", async (req, res) => {
+    try {
+      const { event_type, event_data } = req.body;
+      console.log(`[HeyGen Webhook] Event: ${event_type}`, event_data?.video_id);
+
+      if (event_type === "avatar_video.success" && event_data?.video_id) {
+        // Video completed - could auto-trigger YouTube upload here
+        console.log(`[HeyGen Webhook] Video completed: ${event_data.video_id}, URL: ${event_data.url}`);
+      } else if (event_type === "avatar_video.fail") {
+        console.error(`[HeyGen Webhook] Video failed: ${event_data?.video_id}`);
+      }
+
+      res.json({ received: true });
+    } catch (err: any) {
+      console.error("[HeyGen Webhook] Error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // YouTube OAuth flow - connect YouTube account
   app.get("/api/youtube/connect", (_req, res) => {
     try {

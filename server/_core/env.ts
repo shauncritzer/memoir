@@ -14,4 +14,9 @@ export const ENV = {
   youtubeClientSecret: process.env.YOUTUBE_CLIENT_SECRET ?? "",
   youtubeRedirectUri: process.env.YOUTUBE_REDIRECT_URI ?? "",
   youtubeRefreshToken: process.env.YOUTUBE_REFRESH_TOKEN ?? "",
+  // ElevenLabs
+  elevenlabsApiKey: process.env.ELEVENLABS_API_KEY ?? "",
+  elevenlabsVoiceId: process.env.ELEVENLABS_VOICE_ID ?? "",
+  // HeyGen
+  heygenApiKey: process.env.HEYGEN_API_KEY ?? "",
 };

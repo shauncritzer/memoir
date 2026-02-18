@@ -2011,6 +2011,152 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    // ─── ElevenLabs Endpoints ─────────────────────────────────────────────
+
+    elevenlabsStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        try {
+          const { isElevenLabsConfigured, listVoices, getUsageInfo } = await import("./social/elevenlabs");
+          const configured = isElevenLabsConfigured();
+          const voices = configured ? await listVoices() : [];
+          const usage = configured ? await getUsageInfo() : null;
+          return { configured, voices, usage };
+        } catch (err: any) {
+          return { configured: false, voices: [], usage: null, error: err.message };
+        }
+      }),
+
+    elevenlabsTTS: protectedProcedure
+      .input(z.object({
+        text: z.string().min(1).max(5000),
+        voiceId: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { textToSpeech } = await import("./social/elevenlabs");
+        const result = await textToSpeech({ text: input.text, voiceId: input.voiceId });
+        if (!result.success || !result.audioBuffer) {
+          return { success: false, error: result.error };
+        }
+        // Return base64 audio
+        return {
+          success: true,
+          audioBase64: result.audioBuffer.toString("base64"),
+          contentType: result.contentType,
+        };
+      }),
+
+    elevenlabsBlogToPodcast: protectedProcedure
+      .input(z.object({
+        blogPostId: z.number(),
+        voiceId: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { blogPosts } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const posts = await db.select().from(blogPosts).where(eq(blogPosts.id, input.blogPostId)).limit(1);
+        if (posts.length === 0) throw new Error("Blog post not found");
+
+        const post = posts[0];
+        const { blogToPodcast } = await import("./social/elevenlabs");
+        const result = await blogToPodcast({
+          title: post.title,
+          content: post.content || "",
+          voiceId: input.voiceId,
+        });
+
+        if (!result.success || !result.audioBuffer) {
+          return { success: false, error: result.error };
+        }
+
+        return {
+          success: true,
+          audioBase64: result.audioBuffer.toString("base64"),
+          contentType: result.contentType,
+          title: `Podcast: ${post.title}`,
+          sizeBytes: result.audioBuffer.length,
+        };
+      }),
+
+    // ─── HeyGen Endpoints ─────────────────────────────────────────────────
+
+    heygenStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        try {
+          const { isHeyGenConfigured, listAvatars, getRemainingCredits } = await import("./social/heygen");
+          const configured = isHeyGenConfigured();
+          const avatars = configured ? await listAvatars() : [];
+          const credits = configured ? await getRemainingCredits() : null;
+          return { configured, avatars: avatars.slice(0, 20), credits };
+        } catch (err: any) {
+          return { configured: false, avatars: [], credits: null, error: err.message };
+        }
+      }),
+
+    heygenCreateVideo: protectedProcedure
+      .input(z.object({
+        script: z.string().min(1),
+        title: z.string(),
+        description: z.string().optional(),
+        avatarId: z.string().optional(),
+        voiceId: z.string().optional(),
+        aspectRatio: z.enum(["16:9", "9:16", "1:1"]).optional(),
+        uploadToYouTube: z.boolean().optional(),
+        youTubeTags: z.array(z.string()).optional(),
+        isShort: z.boolean().optional(),
+        queueItemId: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { scriptToVideo } = await import("./social/heygen");
+        const result = await scriptToVideo({
+          script: input.script,
+          title: input.title,
+          description: input.description,
+          avatarId: input.avatarId,
+          voiceId: input.voiceId,
+          aspectRatio: input.aspectRatio,
+          uploadToYouTube: input.uploadToYouTube,
+          youTubeTags: input.youTubeTags,
+          isShort: input.isShort,
+        });
+
+        // If linked to a queue item and YouTube upload succeeded, update it
+        if (result.youtubeVideoId && input.queueItemId) {
+          const db = await getDb();
+          if (db) {
+            const { contentQueue } = await import("../drizzle/schema");
+            const { eq } = await import("drizzle-orm");
+            await db.update(contentQueue).set({
+              status: "posted",
+              platformPostId: result.youtubeVideoId,
+              platformPostUrl: result.youtubeVideoUrl,
+              postedAt: new Date(),
+              errorMessage: null,
+            }).where(eq(contentQueue.id, input.queueItemId));
+          }
+        }
+
+        return result;
+      }),
+
+    heygenVideoStatus: protectedProcedure
+      .input(z.object({ videoId: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getVideoStatus } = await import("./social/heygen");
+        return getVideoStatus(input.videoId);
+      }),
+
     // Promote current logged-in user to admin (requires ADMIN_SECRET)
     promoteToAdmin: protectedProcedure
       .input(z.object({
