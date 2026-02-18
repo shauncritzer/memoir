@@ -10,7 +10,7 @@ export default function ThrivingSober() {
 
   // Check if user has access to the course
   const { data: hasAccess, isLoading: accessLoading } = trpc.members.checkCourseAccess.useQuery(
-    { moduleId: 30001 },
+    { productId: "thriving-sober" },
     { enabled: !!user }
   );
 

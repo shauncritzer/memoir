@@ -1515,7 +1515,8 @@ Recovery is possible. But it requires working with your biology, not against it.
               slug: "rewired-relief-toolkit",
               description: "A crisis-focused guide to regulating your nervous system when you need it most.",
               fileUrl: "/rewired-relief-toolkit.pdf",
-              isActive: 1,
+              type: "pdf",
+              status: "active",
             });
           }
 
@@ -1920,7 +1921,7 @@ Recovery is possible. But it requires working with your biology, not against it.
       .query(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
         try {
-          const { getAgentState, getBusinesses, runAgentCycle } = await import("../agent/mission-control");
+          const { getAgentState, getBusinesses, runAgentCycle } = await import("./agent/mission-control");
           return {
             state: getAgentState(),
             businesses: getBusinesses(),
@@ -1934,7 +1935,7 @@ Recovery is possible. But it requires working with your biology, not against it.
     runAgentCycle: protectedProcedure
       .mutation(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
-        const { runAgentCycle } = await import("../agent/mission-control");
+        const { runAgentCycle } = await import("./agent/mission-control");
         const result = await runAgentCycle();
         return result;
       }),

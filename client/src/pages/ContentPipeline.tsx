@@ -847,7 +847,7 @@ export default function ContentPipeline() {
                     {previewItem.status === "ready" && previewItem.platform === "x" && (
                       <Button
                         onClick={() => {
-                          if (confirm(`Post this to ${platformConfig[item.platform]?.label || item.platform} now?`)) {
+                          if (confirm(`Post this to ${platformConfig[previewItem.platform]?.label || previewItem.platform} now?`)) {
                             postNow.mutate({ id: previewItem.id });
                             setPreviewItem(null);
                           }
