@@ -328,9 +328,11 @@ export default function RewiredMethod() {
             </p>
             
             <div className="mt-12">
-              <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600">
-                Start Your Journey
-              </Button>
+              <Link href="/7-day-reset">
+                <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600">
+                  Start Your Journey
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
