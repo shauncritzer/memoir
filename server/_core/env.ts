@@ -9,4 +9,9 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
   googleApiKey: process.env.GOOGLE_API_KEY ?? "",
+  // YouTube
+  youtubeClientId: process.env.YOUTUBE_CLIENT_ID ?? "",
+  youtubeClientSecret: process.env.YOUTUBE_CLIENT_SECRET ?? "",
+  youtubeRedirectUri: process.env.YOUTUBE_REDIRECT_URI ?? "",
+  youtubeRefreshToken: process.env.YOUTUBE_REFRESH_TOKEN ?? "",
 };

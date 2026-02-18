@@ -3,6 +3,7 @@ import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
 import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
 import { postToLinkedIn, isLinkedInConfigured, getLinkedInPostMetrics } from "./linkedin";
+import { isYouTubeConfigured, getVideoMetrics as getYouTubeVideoMetrics } from "./youtube";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -277,8 +278,22 @@ async function postContentItem(item: {
         };
         break;
       }
+      case "youtube": {
+        // YouTube posts are video scripts — auto-posting requires a video file
+        // Content is generated as a script/description, video must be uploaded manually
+        // or generated via HeyGen/Pictory integration (future)
+        if (!isYouTubeConfigured()) {
+          result = { success: false, error: "YouTube credentials not configured - visit /api/youtube/connect to authorize" };
+        } else {
+          result = { success: false, error: "YouTube content ready — video upload required. Use admin panel to upload video with this script." };
+        }
+        // Keep as ready so user can manually upload
+        await db.update(contentQueue)
+          .set({ status: "ready", errorMessage: result.error })
+          .where(eq(contentQueue.id, item.id));
+        return;
+      }
       // Future platforms
-      case "youtube":
       case "tiktok":
       case "podcast": {
         result = { success: false, error: `${item.platform} posting not yet implemented - content is ready for manual posting` };
@@ -331,7 +346,7 @@ async function updateEngagementMetrics() {
     .where(
       and(
         eq(contentQueue.status, "posted"),
-        or(eq(contentQueue.platform, "x"), eq(contentQueue.platform, "facebook")),
+        or(eq(contentQueue.platform, "x"), eq(contentQueue.platform, "facebook"), eq(contentQueue.platform, "youtube")),
         isNotNull(contentQueue.platformPostId),
       )
     )
@@ -362,6 +377,18 @@ async function updateEngagementMetrics() {
             comments: fbMetrics.comments,
             shares: fbMetrics.shares,
             reach: fbMetrics.reach,
+          }),
+        }).where(eq(contentQueue.id, item.id));
+      }
+    } else if (item.platform === "youtube") {
+      const ytMetrics = await getYouTubeVideoMetrics(item.platformPostId);
+      if (ytMetrics) {
+        await db.update(contentQueue).set({
+          metrics: JSON.stringify({
+            views: ytMetrics.views,
+            likes: ytMetrics.likes,
+            comments: ytMetrics.comments,
+            favorites: ytMetrics.favorites,
           }),
         }).where(eq(contentQueue.id, item.id));
       }
