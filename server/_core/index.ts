@@ -203,6 +203,45 @@ async function startServer() {
     }
   });
 
+  // YouTube OAuth flow - connect YouTube account
+  app.get("/api/youtube/connect", (_req, res) => {
+    try {
+      const { getYouTubeAuthUrl } = require("../social/youtube");
+      res.redirect(getYouTubeAuthUrl());
+    } catch (err: any) {
+      res.status(500).json({ error: "YouTube not configured: " + err.message });
+    }
+  });
+
+  app.get("/api/youtube/callback", async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      if (!code) return res.status(400).send("No authorization code");
+
+      const { exchangeYouTubeCode, getChannelInfo } = await import("../social/youtube");
+      const tokens = await exchangeYouTubeCode(code);
+
+      // Get channel info to confirm connection
+      const channel = await getChannelInfo();
+
+      // Display the refresh token so the user can save it to Railway env vars
+      res.send(`
+        <html><body style="font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px;">
+          <h1 style="color: green;">YouTube Connected!</h1>
+          ${channel ? `<p>Channel: <strong>${channel.title}</strong> (${channel.subscriberCount} subscribers)</p>` : ""}
+          <h2>Save this refresh token to Railway:</h2>
+          <p style="background: #f0f0f0; padding: 12px; border-radius: 8px; word-break: break-all; font-family: monospace; font-size: 14px;">
+            YOUTUBE_REFRESH_TOKEN=${tokens.refreshToken}
+          </p>
+          <p>Go to Railway → memoir service → Variables → Add the above variable, then redeploy.</p>
+          <p><a href="/admin/content-pipeline">Back to Content Pipeline →</a></p>
+        </body></html>
+      `);
+    } catch (err: any) {
+      res.status(500).send(`YouTube OAuth error: ${err.message}`);
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

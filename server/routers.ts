@@ -1940,6 +1940,77 @@ Recovery is possible. But it requires working with your biology, not against it.
         return result;
       }),
 
+    // YouTube integration status and admin endpoints
+    youtubeStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        try {
+          const { isYouTubeConfigured, getChannelInfo } = await import("./social/youtube");
+          const configured = isYouTubeConfigured();
+          const channel = configured ? await getChannelInfo() : null;
+          return { configured, channel, connectUrl: "/api/youtube/connect" };
+        } catch (err: any) {
+          return { configured: false, channel: null, connectUrl: "/api/youtube/connect", error: err.message };
+        }
+      }),
+
+    youtubeUpload: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        description: z.string(),
+        tags: z.array(z.string()).optional(),
+        isShort: z.boolean().optional(),
+        privacyStatus: z.enum(["public", "unlisted", "private"]).optional(),
+        videoBase64: z.string(), // Base64-encoded video data
+        mimeType: z.string().optional(),
+        queueItemId: z.number().optional(), // Link to content queue item
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { uploadVideo } = await import("./social/youtube");
+        const videoBuffer = Buffer.from(input.videoBase64, "base64");
+
+        const result = await uploadVideo({
+          title: input.title,
+          description: input.description,
+          tags: input.tags,
+          isShort: input.isShort,
+          privacyStatus: input.privacyStatus,
+          videoBuffer,
+          mimeType: input.mimeType,
+        });
+
+        // If linked to a queue item, update it
+        if (result.success && input.queueItemId) {
+          const db = await getDb();
+          if (db) {
+            const { contentQueue } = await import("../drizzle/schema");
+            const { eq } = await import("drizzle-orm");
+            await db.update(contentQueue).set({
+              status: "posted",
+              platformPostId: result.videoId,
+              platformPostUrl: result.videoUrl,
+              postedAt: new Date(),
+              errorMessage: null,
+            }).where(eq(contentQueue.id, input.queueItemId));
+          }
+        }
+
+        return result;
+      }),
+
+    youtubeRecentUploads: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        try {
+          const { getRecentUploads } = await import("./social/youtube");
+          return await getRecentUploads(10);
+        } catch (err: any) {
+          return [];
+        }
+      }),
+
     // Promote current logged-in user to admin (requires ADMIN_SECRET)
     promoteToAdmin: protectedProcedure
       .input(z.object({
