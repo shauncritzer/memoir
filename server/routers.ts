@@ -2226,6 +2226,24 @@ Recovery is possible. But it requires working with your biology, not against it.
           }
         }
 
+        // Ensure content_queue columns are large enough (fixes "Data too long" errors)
+        // If table was created by earlier migrations with VARCHAR, upgrade to MEDIUMTEXT
+        const columnUpgrades = [
+          { desc: "content_queue.content → MEDIUMTEXT", sql: sql`ALTER TABLE content_queue MODIFY COLUMN content MEDIUMTEXT` },
+          { desc: "content_queue.media_urls → MEDIUMTEXT", sql: sql`ALTER TABLE content_queue MODIFY COLUMN media_urls MEDIUMTEXT` },
+          { desc: "content_queue.error_message → MEDIUMTEXT", sql: sql`ALTER TABLE content_queue MODIFY COLUMN error_message MEDIUMTEXT` },
+          { desc: "content_queue.metrics → MEDIUMTEXT", sql: sql`ALTER TABLE content_queue MODIFY COLUMN metrics MEDIUMTEXT` },
+        ];
+
+        for (const upgrade of columnUpgrades) {
+          try {
+            await db.execute(upgrade.sql);
+            created.push(upgrade.desc);
+          } catch (err: any) {
+            created.push(`${upgrade.desc} (${err.message})`);
+          }
+        }
+
         return { success: true, message: `Tables setup complete`, tables: created };
       }),
 
@@ -2968,17 +2986,39 @@ Recovery is possible. But it requires working with your biology, not against it.
             }
           }
 
-          await db.update(contentQueue).set({
-            content: generated.content,
-            status: "ready",
-            mediaUrls: JSON.stringify({
-              suggestedMediaType: generated.suggestedMediaType,
-              suggestedMediaPrompt: generated.suggestedMediaPrompt,
-              suggestedTools: generated.suggestedTools,
-              hashtags: generated.hashtags,
-              generatedImageUrl: imageUrl,
-            }),
-          }).where(eq(contentQueue.id, item.id));
+          const mediaJson = JSON.stringify({
+            suggestedMediaType: generated.suggestedMediaType,
+            suggestedMediaPrompt: generated.suggestedMediaPrompt,
+            suggestedTools: generated.suggestedTools,
+            hashtags: generated.hashtags,
+            generatedImageUrl: imageUrl,
+          });
+
+          try {
+            await db.update(contentQueue).set({
+              content: generated.content,
+              status: "ready",
+              mediaUrls: mediaJson,
+            }).where(eq(contentQueue.id, item.id));
+          } catch (dbErr: any) {
+            console.error(`[ContentPipeline] DB update failed for queue item #${item.id}:`, dbErr.message);
+            console.error(`[ContentPipeline] content length: ${generated.content?.length}, mediaUrls length: ${mediaJson.length}`);
+            // Try to at least save the content without media
+            try {
+              await db.update(contentQueue).set({
+                content: generated.content,
+                status: "ready",
+                errorMessage: `Media save failed: ${dbErr.message}`,
+              }).where(eq(contentQueue.id, item.id));
+            } catch {
+              // If even this fails, mark as failed
+              await db.update(contentQueue).set({
+                status: "failed",
+                errorMessage: `DB update failed: ${dbErr.message}`,
+              }).where(eq(contentQueue.id, item.id));
+            }
+            throw new Error(`Content generated but DB save failed: ${dbErr.message}. Run "Setup Tables" from admin to fix column types.`);
+          }
 
           return { success: true, content: generated.content, platform: item.platform, imageUrl };
         }
