@@ -1,4 +1,4 @@
-import cron from "node-cron";
+import cron, { type ScheduledTask } from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
 import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
@@ -428,9 +428,9 @@ export function getOptimalPostingTimes(platform: string, postsPerDay: number = 1
 
 // Track scheduler state
 let schedulerRunning = false;
-let contentGenTask: cron.ScheduledTask | null = null;
-let postingTask: cron.ScheduledTask | null = null;
-let metricsTask: cron.ScheduledTask | null = null;
+let contentGenTask: ScheduledTask | null = null;
+let postingTask: ScheduledTask | null = null;
+let metricsTask: ScheduledTask | null = null;
 
 /** Start the content scheduler */
 export function startScheduler() {

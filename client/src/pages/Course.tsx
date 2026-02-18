@@ -12,7 +12,7 @@ export default function Course() {
   const { productId } = useParams<{ productId: string }>();
   const { user, isLoading: authLoading } = useAuth();
   
-  const { data: hasAccess, isLoading: accessLoading } = trpc.members.getCourseAccess.useQuery(
+  const { data: hasAccess, isLoading: accessLoading } = trpc.members.checkCourseAccess.useQuery(
     { productId: productId || "" },
     { enabled: !!user && !!productId }
   );
