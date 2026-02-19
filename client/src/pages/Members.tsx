@@ -135,21 +135,31 @@ export default function Members() {
 
           {/* Purchased Products Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Deduplicate purchases by productId - show each product once */}
-            {Array.from(new Map(purchases.map(p => [p.productId, p])).values()).map((purchase) => {
-              const productInfo = getProductInfo(purchase.productId);
-              
+            {/* Deduplicate purchases by productId - show each known product once */}
+            {Array.from(new Map(purchases.map(p => [p.productId, p])).values())
+              .filter((purchase) => getProductInfo(purchase.productId) !== null)
+              .map((purchase) => {
+              const productInfo = getProductInfo(purchase.productId)!;
+
               return (
                 <Card key={purchase.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <PlayCircle className="h-16 w-16 text-primary" />
+                  <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center relative overflow-hidden">
+                    {productInfo.image ? (
+                      <img
+                        src={productInfo.image}
+                        alt={productInfo.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : null}
+                    <PlayCircle className="h-16 w-16 text-primary relative z-10 drop-shadow-lg" />
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="space-y-2">
                       <h3 className="text-xl font-bold">{productInfo.title}</h3>
                       <p className="text-sm text-muted-foreground">{productInfo.description}</p>
                     </div>
-                    
+
                     {/* Progress Bar */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
@@ -157,7 +167,7 @@ export default function Members() {
                         <span className="font-medium">{purchase.progress || 0}%</span>
                       </div>
                       <div className="h-2 bg-accent rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-primary transition-all duration-300"
                           style={{ width: `${purchase.progress || 0}%` }}
                         ></div>
@@ -165,16 +175,18 @@ export default function Members() {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <BookOpen className="h-4 w-4" />
-                        <span>{productInfo.moduleCount} modules</span>
+                    {productInfo.moduleCount > 0 && (
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="h-4 w-4" />
+                          <span>{productInfo.moduleCount} modules</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{productInfo.duration}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{productInfo.duration}</span>
-                      </div>
-                    </div>
+                    )}
 
                     {/* Action Button */}
                     <Link href={`/course/${purchase.productId}`}>
@@ -214,18 +226,27 @@ export default function Members() {
 
 // Helper function to get product info
 function getProductInfo(productId: string) {
-  const products: Record<string, { title: string; description: string; moduleCount: number; duration: string }> = {
+  const products: Record<string, { title: string; description: string; moduleCount: number; duration: string; image?: string }> = {
     "7-day-reset": {
       title: "7-Day Reset",
       description: "Build your foundation for lasting recovery in just one week.",
       moduleCount: 7,
       duration: "7 days",
+      image: "/images/7-day-reset-hero.jpg",
     },
     "from-broken-to-whole": {
       title: "From Broken to Whole",
       description: "30-day deep healing journey addressing trauma and addiction.",
       moduleCount: 8,
       duration: "30 days",
+      image: "/images/from-broken-to-whole-hero.jpg",
+    },
+    "thriving-sober": {
+      title: "Thriving Sober",
+      description: "Build a fulfilling life beyond recovery with purpose and connection.",
+      moduleCount: 6,
+      duration: "6 weeks",
+      image: "/images/thriving-sober-hero.jpg",
     },
     "bent-not-broken-circle": {
       title: "Bent Not Broken Circle",
@@ -241,10 +262,5 @@ function getProductInfo(productId: string) {
     },
   };
 
-  return products[productId] || {
-    title: productId,
-    description: "Recovery product",
-    moduleCount: 0,
-    duration: "N/A",
-  };
+  return products[productId] || null;
 }
