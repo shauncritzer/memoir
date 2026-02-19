@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -110,20 +111,9 @@ export default function Course() {
   
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/members" className="text-sm font-medium hover:text-primary transition-colors">
-              ← Back to Dashboard
-            </Link>
-            <span className="text-sm text-muted-foreground">{user.name}</span>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
-      <div className="container py-8">
+      <div className="container pt-24 pb-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Course Sidebar */}
           <div className="lg:col-span-1">
