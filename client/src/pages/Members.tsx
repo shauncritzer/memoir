@@ -156,7 +156,7 @@ export default function Members() {
                     )}
 
                     {/* Action Button */}
-                    <Link href={`/course/${purchase.productId}`}>
+                    <Link href={productInfo.href}>
                       <Button className="w-full bg-primary hover:bg-primary/90">
                         {purchase.progress && purchase.progress > 0 ? "Continue Learning" : "Start Course"}
                       </Button>
@@ -193,13 +193,14 @@ export default function Members() {
 
 // Helper function to get product info
 function getProductInfo(productId: string) {
-  const products: Record<string, { title: string; description: string; moduleCount: number; duration: string; image?: string }> = {
+  const products: Record<string, { title: string; description: string; moduleCount: number; duration: string; image?: string; href: string }> = {
     "7-day-reset": {
       title: "7-Day Reset",
       description: "Build your foundation for lasting recovery in just one week.",
       moduleCount: 7,
       duration: "7 days",
       image: "/images/7-day-reset-hero.jpg",
+      href: "/7-day-reset",
     },
     "from-broken-to-whole": {
       title: "From Broken to Whole",
@@ -207,6 +208,7 @@ function getProductInfo(productId: string) {
       moduleCount: 8,
       duration: "30 days",
       image: "/images/from-broken-to-whole-hero.jpg",
+      href: "/products",
     },
     "thriving-sober": {
       title: "Thriving Sober",
@@ -214,18 +216,21 @@ function getProductInfo(productId: string) {
       moduleCount: 6,
       duration: "6 weeks",
       image: "/images/thriving-sober-hero.jpg",
+      href: "/products",
     },
     "bent-not-broken-circle": {
       title: "Bent Not Broken Circle",
       description: "Monthly membership with unlimited course access and live coaching.",
       moduleCount: 0,
       duration: "Ongoing",
+      href: "/products",
     },
     "crooked-lines-memoir": {
       title: "Crooked Lines: Bent, Not Broken",
       description: "The complete memoir + bonus materials.",
       moduleCount: 0,
       duration: "Book",
+      href: "/memoir",
     },
   };
 
