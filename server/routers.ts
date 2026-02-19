@@ -2203,6 +2203,9 @@ Recovery is possible. But it requires working with your biology, not against it.
           { name: "affiliates", sql: sql`CREATE TABLE IF NOT EXISTS affiliates (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, referral_code VARCHAR(100) NOT NULL UNIQUE, commission_rate INT NOT NULL DEFAULT 30, payout_email VARCHAR(320), payout_method ENUM('paypal','stripe','bank_transfer') DEFAULT 'paypal', total_referrals INT NOT NULL DEFAULT 0, total_earnings INT NOT NULL DEFAULT 0, pending_payout INT NOT NULL DEFAULT 0, status ENUM('active','paused','banned') NOT NULL DEFAULT 'active', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
           { name: "affiliate_referrals", sql: sql`CREATE TABLE IF NOT EXISTS affiliate_referrals (id INT AUTO_INCREMENT PRIMARY KEY, affiliate_id INT NOT NULL, visitor_ip VARCHAR(45), landing_page VARCHAR(512), converted INT NOT NULL DEFAULT 0, purchase_id INT, commission_amount INT DEFAULT 0, status ENUM('clicked','converted','paid') NOT NULL DEFAULT 'clicked', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)` },
           { name: "content_templates", sql: sql`CREATE TABLE IF NOT EXISTS content_templates (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, platform VARCHAR(50) NOT NULL, content_type VARCHAR(50) NOT NULL, template TEXT NOT NULL, example_output TEXT, is_default INT NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "course_modules", sql: sql`CREATE TABLE IF NOT EXISTS course_modules (id INT AUTO_INCREMENT PRIMARY KEY, product_id VARCHAR(100) NOT NULL, module_number INT NOT NULL, title VARCHAR(255) NOT NULL, description TEXT, unlock_day INT NOT NULL, workbook_pdf_url VARCHAR(512), sort_order INT NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "course_lessons", sql: sql`CREATE TABLE IF NOT EXISTS course_lessons (id INT AUTO_INCREMENT PRIMARY KEY, module_id INT NOT NULL, lesson_number INT NOT NULL, title VARCHAR(255) NOT NULL, description TEXT, video_url VARCHAR(512), video_provider ENUM('vimeo','youtube','other') DEFAULT 'vimeo', video_duration INT, workbook_pdf_url VARCHAR(512), slide_pdf_url VARCHAR(512), sort_order INT NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
+          { name: "course_progress", sql: sql`CREATE TABLE IF NOT EXISTS course_progress (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, product_id VARCHAR(100) NOT NULL, lesson_id INT NOT NULL, completed INT NOT NULL DEFAULT 0, completed_at TIMESTAMP NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)` },
         ];
 
         for (const t of tables) {
@@ -2242,6 +2245,40 @@ Recovery is possible. But it requires working with your biology, not against it.
           } catch (err: any) {
             created.push(`${upgrade.desc} (${err.message})`);
           }
+        }
+
+        // Seed 7-Day Reset course if no modules exist
+        try {
+          const [existing] = await db.execute(sql`SELECT COUNT(*) as cnt FROM course_modules WHERE product_id = '7-day-reset'`);
+          const count = (existing as any)?.[0]?.cnt || (existing as any)?.cnt || 0;
+          if (Number(count) === 0) {
+            const modules = [
+              { num: 1, title: "Day 1: Understanding Your Nervous System", desc: "Learn how trauma rewires the brain and why compulsive behaviors are survival responses, not moral failures.", day: 1 },
+              { num: 2, title: "Day 2: The Power of Breath", desc: "Master breathwork techniques that activate your parasympathetic nervous system and reduce cravings.", day: 2 },
+              { num: 3, title: "Day 3: Mindful Movement", desc: "Discover how intentional movement rewires neural pathways and releases stored trauma.", day: 3 },
+              { num: 4, title: "Day 4: Nutrition for Recovery", desc: "Understand the gut-brain connection and how nutrition supports neuroplasticity and healing.", day: 4 },
+              { num: 5, title: "Day 5: Building Connection", desc: "Break the isolation cycle and build authentic relationships that support lasting recovery.", day: 5 },
+              { num: 6, title: "Day 6: Finding Purpose", desc: "Align your recovery with a deeper sense of meaning and contribution.", day: 6 },
+              { num: 7, title: "Day 7: Your REWIRED Blueprint", desc: "Create your personalized daily practice combining all 5 pillars for lasting transformation.", day: 7 },
+            ];
+            for (const m of modules) {
+              await db.execute(sql`INSERT INTO course_modules (product_id, module_number, title, description, unlock_day, sort_order) VALUES ('7-day-reset', ${m.num}, ${m.title}, ${m.desc}, ${m.day}, ${m.num})`);
+            }
+            // Get inserted module IDs and add lessons
+            const [insertedModules] = await db.execute(sql`SELECT id, module_number FROM course_modules WHERE product_id = '7-day-reset' ORDER BY sort_order`);
+            const moduleRows = insertedModules as unknown as any[];
+            if (Array.isArray(moduleRows)) {
+              for (const mod of moduleRows) {
+                await db.execute(sql`INSERT INTO course_lessons (module_id, lesson_number, title, description, sort_order) VALUES (${mod.id}, 1, ${`Day ${mod.module_number} - Video Lesson`}, ${'Watch the full lesson video for this day.'}, 1)`);
+                await db.execute(sql`INSERT INTO course_lessons (module_id, lesson_number, title, description, sort_order) VALUES (${mod.id}, 2, ${`Day ${mod.module_number} - Practice Exercise`}, ${'Complete the guided practice exercise.'}, 2)`);
+              }
+            }
+            created.push("7-day-reset course seeded (7 modules, 14 lessons)");
+          } else {
+            created.push("7-day-reset course (already exists)");
+          }
+        } catch (err: any) {
+          created.push(`7-day-reset seed (${err.message})`);
         }
 
         return { success: true, message: `Tables setup complete`, tables: created };
@@ -3129,6 +3166,8 @@ Recovery is possible. But it requires working with your biology, not against it.
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
 
         const { getSchedulerStatus, isTwitterConfigured, isFacebookConfigured, isInstagramConfigured } = await import("./social");
+        const { isYouTubeConfigured } = await import("./social/youtube");
+        const { isLinkedInConfigured } = await import("./social/linkedin");
         const status = getSchedulerStatus();
 
         return {
@@ -3136,9 +3175,9 @@ Recovery is possible. But it requires working with your biology, not against it.
           platforms: {
             x: { configured: isTwitterConfigured(), label: "X (Twitter)" },
             instagram: { configured: isInstagramConfigured(), label: "Instagram" },
-            linkedin: { configured: false, label: "LinkedIn" },
+            linkedin: { configured: isLinkedInConfigured(), label: "LinkedIn" },
             facebook: { configured: isFacebookConfigured(), label: "Facebook" },
-            youtube: { configured: false, label: "YouTube" },
+            youtube: { configured: isYouTubeConfigured(), label: "YouTube" },
             tiktok: { configured: false, label: "TikTok" },
             podcast: { configured: false, label: "Podcast" },
           },
