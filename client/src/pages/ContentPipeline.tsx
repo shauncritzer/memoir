@@ -544,7 +544,7 @@ export default function ContentPipeline() {
                           From Blog Post
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-xl">
                         <DialogHeader>
                           <DialogTitle>Generate Content from Blog Post</DialogTitle>
                           <DialogDescription>
@@ -775,7 +775,7 @@ export default function ContentPipeline() {
                                     </Button>
                                   )}
                                   {/* Post Now for ready items on supported platforms */}
-                                  {item.status === "ready" && ["x", "facebook", "instagram"].includes(item.platform) && (
+                                  {item.status === "ready" && ["x", "facebook", "instagram", "linkedin", "youtube"].includes(item.platform) && (
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -844,7 +844,7 @@ export default function ContentPipeline() {
                     <div className="bg-muted rounded-lg p-4 whitespace-pre-wrap text-sm max-h-[400px] overflow-y-auto">
                       {previewItem.content?.replace(/\|\|\|TWEET_BREAK\|\|\|/g, "\n---\n") || "No content yet"}
                     </div>
-                    {previewItem.status === "ready" && previewItem.platform === "x" && (
+                    {previewItem.status === "ready" && ["x", "facebook", "instagram", "linkedin", "youtube"].includes(previewItem.platform) && (
                       <Button
                         onClick={() => {
                           if (confirm(`Post this to ${platformConfig[previewItem.platform]?.label || previewItem.platform} now?`)) {
@@ -855,7 +855,7 @@ export default function ContentPipeline() {
                         className="w-full"
                       >
                         <Rocket className="mr-2 h-4 w-4" />
-                        Post to X Now
+                        Post to {platformConfig[previewItem.platform]?.label || previewItem.platform} Now
                       </Button>
                     )}
                   </div>

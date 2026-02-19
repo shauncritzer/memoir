@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -60,27 +61,10 @@ export default function Members() {
   if (!purchases || purchases.length === 0) {
     return (
       <div className="min-h-screen">
-        {/* Navigation */}
-        <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container flex h-16 items-center justify-between">
-            <Logo />
-            <div className="flex items-center space-x-6">
-              <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
-                Home
-              </Link>
-              <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-                Products
-              </Link>
-              <Link href="/members" className="text-sm font-medium text-primary">
-                My Dashboard
-              </Link>
-              <span className="text-sm text-muted-foreground">{user.name}</span>
-            </div>
-          </div>
-        </nav>
+        <Navigation />
 
         {/* Empty State */}
-        <div className="container py-20">
+        <div className="container pt-28 pb-20">
           <div className="max-w-2xl mx-auto text-center space-y-8">
             <BookOpen className="h-24 w-24 text-muted-foreground/50 mx-auto" />
             <div className="space-y-4">
@@ -103,27 +87,10 @@ export default function Members() {
   // Show member dashboard with purchased products
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent/10">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
-              Products
-            </Link>
-            <Link href="/members" className="text-sm font-medium text-primary">
-              My Dashboard
-            </Link>
-            <span className="text-sm text-muted-foreground">{user.name}</span>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Dashboard Content */}
-      <div className="container py-12">
+      <div className="container pt-28 pb-12">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Welcome Header */}
           <div className="space-y-2">
