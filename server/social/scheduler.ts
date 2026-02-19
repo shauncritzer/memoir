@@ -3,7 +3,8 @@ import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
 import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
 import { postToLinkedIn, isLinkedInConfigured, getLinkedInPostMetrics } from "./linkedin";
-import { isYouTubeConfigured, getVideoMetrics as getYouTubeVideoMetrics } from "./youtube";
+import { isYouTubeConfigured, getVideoMetrics as getYouTubeVideoMetrics, uploadVideo as uploadYouTubeVideo } from "./youtube";
+import { isHeyGenConfigured, scriptToVideo } from "./heygen";
 import { generateContentForPlatform } from "./content-generator";
 
 /** Add time jitter to avoid exact posting times (+-5 minutes) */
@@ -279,19 +280,55 @@ async function postContentItem(item: {
         break;
       }
       case "youtube": {
-        // YouTube posts are video scripts — auto-posting requires a video file
-        // Content is generated as a script/description, video must be uploaded manually
-        // or generated via HeyGen/Pictory integration (future)
         if (!isYouTubeConfigured()) {
           result = { success: false, error: "YouTube credentials not configured - visit /api/youtube/connect to authorize" };
-        } else {
-          result = { success: false, error: "YouTube content ready — video upload required. Use admin panel to upload video with this script." };
+          await db.update(contentQueue)
+            .set({ status: "ready", errorMessage: result.error })
+            .where(eq(contentQueue.id, item.id));
+          return;
         }
-        // Keep as ready so user can manually upload
-        await db.update(contentQueue)
-          .set({ status: "ready", errorMessage: result.error })
-          .where(eq(contentQueue.id, item.id));
-        return;
+
+        // Parse media metadata for hashtags/title
+        let mediaData: any = {};
+        try { mediaData = item.mediaUrls ? JSON.parse(item.mediaUrls) : {}; } catch {}
+        const hashtags = mediaData.hashtags || "";
+        const tags = hashtags.split(/[#,\s]+/).filter((t: string) => t.length > 0);
+
+        // Try HeyGen → YouTube pipeline if HeyGen is configured
+        if (isHeyGenConfigured()) {
+          try {
+            const scriptContent = item.content || "";
+            const videoTitle = scriptContent.substring(0, 80).split("\n")[0] || "Recovery Journey";
+            const pipelineResult = await scriptToVideo({
+              script: scriptContent.substring(0, 3000),
+              title: videoTitle,
+              description: scriptContent + "\n\n" + hashtags,
+              uploadToYouTube: true,
+              youTubeTags: tags.slice(0, 15),
+            });
+
+            if (pipelineResult.youtubeVideoId) {
+              result = {
+                success: true,
+                tweetId: pipelineResult.youtubeVideoId,
+                tweetUrl: pipelineResult.youtubeVideoUrl,
+              };
+              break;
+            } else {
+              result = { success: false, error: pipelineResult.error || "HeyGen video generation failed" };
+            }
+          } catch (err: any) {
+            console.error(`[Scheduler] HeyGen→YouTube pipeline failed:`, err.message);
+            result = { success: false, error: `HeyGen pipeline error: ${err.message}` };
+          }
+        } else {
+          result = { success: false, error: "YouTube content ready — video upload required. Configure HeyGen for auto video generation, or use admin panel to upload manually." };
+          await db.update(contentQueue)
+            .set({ status: "ready", errorMessage: result.error })
+            .where(eq(contentQueue.id, item.id));
+          return;
+        }
+        break;
       }
       // Future platforms
       case "tiktok":
