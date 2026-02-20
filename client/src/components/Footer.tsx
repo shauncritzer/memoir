@@ -19,7 +19,7 @@ export function Footer() {
   return (
     <footer className="border-t border-yellow-600/20 bg-black py-12">
       <div className="container">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-5 gap-8">
           <div className="space-y-4">
             <Logo />
             <p className="text-sm text-gray-400">
@@ -64,6 +64,50 @@ export function Footer() {
           </div>
 
           <div>
+            <h3 className="font-semibold mb-4 text-yellow-500">Connect</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://www.youtube.com/@ShaunCritzer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors inline-flex items-center gap-1"
+                >
+                  YouTube <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/shauncritzer/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors inline-flex items-center gap-1"
+                >
+                  Instagram <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.facebook.com/shauncritzer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors inline-flex items-center gap-1"
+                >
+                  Facebook <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:shaun@passiveaffiliate.com"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors"
+                >
+                  Contact Us
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
             <h3 className="font-semibold mb-4 text-yellow-500">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
@@ -77,13 +121,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/faqs" className="text-gray-400 hover:text-yellow-500 transition-colors">
-                  FAQs
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-yellow-500 transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 hover:text-yellow-500 transition-colors">
-                  Contact
+                <Link href="/faqs" className="text-gray-400 hover:text-yellow-500 transition-colors">
+                  FAQs
                 </Link>
               </li>
             </ul>
@@ -113,7 +157,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-yellow-600/20 text-center text-sm text-gray-400">
-          <p>© 2025 Shaun Critzer. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
         </div>
       </div>
     </footer>

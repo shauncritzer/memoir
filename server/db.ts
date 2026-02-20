@@ -290,11 +290,14 @@ export async function getUserPurchases(userId: number) {
   
   const { purchases, courseProgress } = await import("../drizzle/schema");
   
-  // Get all purchases for user
+  // Get all active purchases for user (exclude cancelled/refunded)
   const userPurchases = await db
     .select()
     .from(purchases)
-    .where(eq(purchases.userId, userId))
+    .where(and(
+      eq(purchases.userId, userId),
+      eq(purchases.status, "completed")
+    ))
     .orderBy(desc(purchases.purchasedAt));
   
   // Calculate progress for each purchase

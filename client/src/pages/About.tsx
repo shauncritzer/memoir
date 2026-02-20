@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Award, Heart, Users, Briefcase } from "lucide-react";
@@ -231,68 +232,22 @@ export default function About() {
               Now I'm being that person for you. Through my memoir, courses, community, and content, I'm showing others that recovery isn't just about not drinking—it's about becoming whole. It's about processing trauma, building authentic relationships, and creating a life worth staying sober for.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                Read My Story <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
-                Work With Me
-              </Button>
+              <Link href="/memoir">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+                  Read My Story <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/7-day-reset">
+                <Button size="lg" variant="outline" className="text-lg px-8">
+                  Work With Me
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer - Same as Home */}
-      <footer className="border-t py-12 bg-card">
-        <div className="container">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">Shaun Critzer</h3>
-              <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate helping others find hope in their own journey.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">The Memoir</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/memoir" className="hover:text-primary transition-colors">About the Book</Link></li>
-                <li><Link href="/memoir/excerpt" className="hover:text-primary transition-colors">Read an Excerpt</Link></li>
-                <li><Link href="/memoir/reviews" className="hover:text-primary transition-colors">Reviews</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/resources" className="hover:text-primary transition-colors">Free Downloads</Link></li>
-                <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-                <li><Link href="/ai-coach" className="hover:text-primary transition-colors">AI Coach</Link></li>
-                <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
-                <li><Link href="/community" className="hover:text-primary transition-colors">Community</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Connect</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">YouTube</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
-                <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link></li>
-                <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link></li>
-                <li><Link href="/faqs" className="hover:text-primary transition-colors">FAQs</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

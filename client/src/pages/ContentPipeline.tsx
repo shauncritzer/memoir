@@ -469,7 +469,7 @@ export default function ContentPipeline() {
                           AI Generate
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-lg">
+                      <DialogContent className="max-w-2xl">
                         <DialogHeader>
                           <DialogTitle>AI Content Generator</DialogTitle>
                           <DialogDescription>
@@ -544,7 +544,7 @@ export default function ContentPipeline() {
                           From Blog Post
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-xl">
+                      <DialogContent className="max-w-2xl">
                         <DialogHeader>
                           <DialogTitle>Generate Content from Blog Post</DialogTitle>
                           <DialogDescription>

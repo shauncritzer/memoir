@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -383,79 +384,7 @@ export default function Products() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 px-4 bg-muted/30">
-        <div className="container max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div>
-              <h3 className="font-serif text-xl font-bold mb-4">Shaun Critzer</h3>
-              <p className="text-sm text-muted-foreground">
-                13 years sober. Helping others find hope, healing, and wholeness in recovery.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Navigation</h4>
-              <nav className="flex flex-col gap-2 text-sm">
-                <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  About
-                </Link>
-                <Link href="/memoir" className="text-muted-foreground hover:text-primary transition-colors">
-                  Memoir
-                </Link>
-                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
-                  Products
-                </Link>
-                <Link href="/ai-coach" className="text-muted-foreground hover:text-primary transition-colors">
-                  AI Coach
-                </Link>
-                <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
-              </nav>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Products</h4>
-              <nav className="flex flex-col gap-2 text-sm">
-                <a href="#7-day-reset" className="text-muted-foreground hover:text-primary transition-colors">
-                  7-Day Reset
-                </a>
-                <a href="#from-broken-to-whole" className="text-muted-foreground hover:text-primary transition-colors">
-                  From Broken to Whole
-                </a>
-                <a href="#bent-not-broken-circle" className="text-muted-foreground hover:text-primary transition-colors">
-                  Bent Not Broken Circle
-                </a>
-              </nav>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                <p>Crisis Hotline: 988</p>
-                <p>SAMHSA: 1-800-662-4357</p>
-                <a href="https://www.aa.org" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                  Find AA Meetings
-                </a>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <nav className="flex flex-col gap-2 text-sm">
-                <Link href="/terms-of-use" className="text-muted-foreground hover:text-primary transition-colors">
-                  Terms of Use
-                </Link>
-                <Link href="/refund-policy" className="text-muted-foreground hover:text-primary transition-colors">
-                  Refund Policy
-                </Link>
-                <Link href="/faqs" className="text-muted-foreground hover:text-primary transition-colors">
-                  FAQs
-                </Link>
-              </nav>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© 2026 Shaun Critzer. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

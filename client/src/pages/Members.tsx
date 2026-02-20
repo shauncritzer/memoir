@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -187,6 +188,7 @@ export default function Members() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

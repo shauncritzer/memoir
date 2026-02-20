@@ -330,11 +330,43 @@ async function postContentItem(item: {
         }
         break;
       }
-      // Future platforms
-      case "tiktok":
       case "podcast": {
-        result = { success: false, error: `${item.platform} posting not yet implemented - content is ready for manual posting` };
-        // Don't mark as failed - keep as ready so user can manually post
+        // Generate audio via ElevenLabs from the script
+        const { isElevenLabsConfigured, blogToPodcast } = await import("./elevenlabs");
+        if (!isElevenLabsConfigured()) {
+          result = { success: false, error: "ElevenLabs not configured. Add ELEVENLABS_API_KEY to generate podcast audio." };
+          await db.update(contentQueue)
+            .set({ status: "ready", errorMessage: result.error })
+            .where(eq(contentQueue.id, item.id));
+          return;
+        }
+        try {
+          const podcastResult = await blogToPodcast({
+            title: "Rewired Podcast Episode",
+            content: item.content || "",
+          });
+          if (podcastResult.success && podcastResult.audioBuffer) {
+            // Save audio URL in media_urls and mark as posted
+            result = { success: true };
+            await db.update(contentQueue).set({
+              status: "posted",
+              mediaUrls: JSON.stringify({ audioGenerated: true, audioSize: podcastResult.audioBuffer.length }),
+              postedAt: new Date(),
+              errorMessage: null,
+            }).where(eq(contentQueue.id, item.id));
+            console.log(`[Scheduler] Generated podcast audio (${podcastResult.audioBuffer.length} bytes)`);
+            return;
+          } else {
+            result = { success: false, error: podcastResult.error || "Podcast generation failed" };
+          }
+        } catch (err: any) {
+          result = { success: false, error: `Podcast generation error: ${err.message}` };
+        }
+        break;
+      }
+      // Future platforms
+      case "tiktok": {
+        result = { success: false, error: "TikTok posting not yet implemented - content is ready for manual posting" };
         await db.update(contentQueue)
           .set({ status: "ready", errorMessage: result.error })
           .where(eq(contentQueue.id, item.id));

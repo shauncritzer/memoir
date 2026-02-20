@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -680,54 +681,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 bg-gray-900 text-gray-300">
-        <div className="container">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg text-white">Shaun Critzer</h3>
-              <p className="text-sm">
-                Author, speaker, and recovery advocate helping others find hope in their own journey.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold text-white">Programs</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/products" className="hover:text-teal-400 transition-colors">Courses</Link></li>
-                <li><Link href="/ai-coach" className="hover:text-teal-400 transition-colors">AI Coach</Link></li>
-                <li><Link href="/memoir" className="hover:text-teal-400 transition-colors">The Memoir</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold text-white">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/resources" className="hover:text-teal-400 transition-colors">Free Downloads</Link></li>
-                <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
-                <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold text-white">Connect</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">YouTube</a></li>
-                <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Instagram</a></li>
-                <li><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">Facebook</a></li>
-                <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold text-white">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/terms-of-use" className="hover:text-teal-400 transition-colors">Terms of Use</Link></li>
-                <li><Link href="/refund-policy" className="hover:text-teal-400 transition-colors">Refund Policy</Link></li>
-                <li><Link href="/faqs" className="hover:text-teal-400 transition-colors">FAQs</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t border-gray-700 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
