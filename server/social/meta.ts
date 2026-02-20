@@ -114,6 +114,51 @@ export async function postLinkToFacebookPage(message: string, link: string): Pro
   }
 }
 
+/** Post a photo with message to a Facebook Page (downloads image and uploads as multipart) */
+export async function postPhotoToFacebookPage(message: string, imageUrl: string): Promise<MetaPostResult> {
+  const { pageAccessToken, pageId } = getMetaCredentials();
+  if (!pageAccessToken || !pageId) {
+    return { success: false, error: "Facebook credentials not configured" };
+  }
+
+  try {
+    // Step 1: Download the image (DALL-E URLs expire within ~1 hour)
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      return { success: false, error: `Failed to download image: ${imageResponse.status}` };
+    }
+    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+    // Step 2: Upload to Facebook Photos API via multipart form-data
+    const formData = new FormData();
+    formData.append("source", new Blob([imageBuffer], { type: "image/png" }), "image.png");
+    formData.append("message", message);
+    formData.append("access_token", pageAccessToken);
+
+    const response = await fetch(`${GRAPH_API}/${pageId}/photos`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: `Facebook photo upload error: ${data.error?.message || JSON.stringify(data)}`,
+      };
+    }
+
+    return {
+      success: true,
+      postId: data.post_id || data.id,
+      postUrl: `https://www.facebook.com/${data.post_id || data.id}`,
+    };
+  } catch (err: any) {
+    return { success: false, error: `Facebook photo post failed: ${err.message}` };
+  }
+}
+
 // ─── Instagram Content Publishing ─────────────────────────────────────────
 // Instagram Publishing API requires a 2-step process:
 // Step 1: Create a media container
