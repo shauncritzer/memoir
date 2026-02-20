@@ -130,6 +130,11 @@ export async function postToInstagram(caption: string, imageUrl: string): Promis
     return { success: false, error: "Instagram requires an image URL to post" };
   }
 
+  // Instagram captions max 2200 chars - truncate if needed
+  if (caption.length > 2200) {
+    caption = caption.substring(0, 2197) + "...";
+  }
+
   try {
     // Step 1: Create media container
     const containerResponse = await fetch(`${GRAPH_API}/${igUserId}/media`, {

@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1123,47 +1124,7 @@ I am committed to my recovery. I will call someone before I use.`;
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 bg-card">
-        <div className="container">
-          <div className="grid md:grid-cols-5 gap-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">Shaun Critzer</h3>
-              <p className="text-sm text-muted-foreground">
-                Author, speaker, and recovery advocate. 13 years sober and helping others find hope in their own journey.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">The Memoir</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/memoir" className="hover:text-primary transition-colors">About the Book</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/resources" className="hover:text-primary transition-colors">Free Downloads</a></li>
-                <li><a href="/products" className="hover:text-primary transition-colors">Products</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Connect</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/about" className="hover:text-primary transition-colors">About</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</a></li>
-                <li><a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Shaun Critzer. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

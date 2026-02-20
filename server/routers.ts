@@ -3088,6 +3088,7 @@ Recovery is possible. But it requires working with your biology, not against it.
             }
 
             await db.insert(contentQueue).values({
+              sourceBlogPostId: null,
               platform: result.platform,
               contentType: result.contentType,
               content: result.content,

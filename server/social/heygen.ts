@@ -136,6 +136,7 @@ export async function createVideo(opts: {
       payload.video_inputs[0].voice = {
         type: "text",
         input_text: script,
+        voice_id: "en-US-default",
       };
     }
 

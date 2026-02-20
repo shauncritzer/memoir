@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Lock } from "lucide-react";
@@ -165,6 +166,7 @@ export default function ThrivingSober() {
           </Card>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

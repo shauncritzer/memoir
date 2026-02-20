@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Download, Lock, PlayCircle, Check, ArrowRight, Loader2, ListOrdered } from "lucide-react";
@@ -418,20 +419,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black py-8 border-t border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 text-center text-gray-400">
-          <p className="mb-2">
-            Questions? Email: <a href="mailto:support@shauncritzer.com" className="text-[#D4AF37] hover:underline">support@shauncritzer.com</a>
-          </p>
-          {isLoggedIn && (
-            <p className="mb-2">
-              Already purchased? <Link href="/7-day-reset" className="text-[#D4AF37] hover:underline">Access your course here →</Link>
-            </p>
-          )}
-          <p className="text-sm">© 2026 Shaun Critzer. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
