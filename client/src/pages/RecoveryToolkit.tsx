@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, Download, Calendar, Save, History } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Calendar, Save, History, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
@@ -232,6 +232,119 @@ I am committed to my recovery. I will call someone before I use.`;
     a.download = 'emergency-recovery-card.txt';
     a.click();
     toast.success("Emergency card downloaded!");
+  };
+
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
+  const generateJournalHtml = () => {
+    const triggeredEmotions = Object.entries(emotionalTriggers).filter(([, v]) => v).map(([k]) => k);
+    const achievedList = milestones.filter(m => m.achieved);
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:40px 20px;color:#333;line-height:1.6}
+h1{color:#0d9488;border-bottom:3px solid #0d9488;padding-bottom:10px}
+h2{color:#0d9488;margin-top:30px}
+.section{background:#f8f9fa;padding:20px;border-radius:8px;margin:15px 0;border-left:4px solid #0d9488}
+.label{font-weight:bold;color:#555}
+.cta{background:linear-gradient(135deg,#0d9488,#0891b2);color:white;padding:25px;border-radius:12px;text-align:center;margin-top:40px}
+.cta a{color:white;font-size:18px;text-decoration:underline}
+</style></head><body>
+<h1>My Recovery Journal</h1>
+<p><em>Generated ${new Date().toLocaleDateString()} from shauncritzer.com/recovery-toolkit</em></p>
+
+<h2>Daily Check-In (${checkInDate})</h2>
+<div class="section">
+<p><span class="label">Got enough sleep:</span> ${morningCheckboxes.enoughSleep ? "Yes" : "No"}</p>
+<p><span class="label">Feel physically safe:</span> ${morningCheckboxes.physicallySafe ? "Yes" : "No"}</p>
+${morningFields.gratitude ? `<p><span class="label">Gratitude:</span> ${morningFields.gratitude}</p>` : ""}
+${morningFields.recoveryAction ? `<p><span class="label">Recovery action:</span> ${morningFields.recoveryAction}</p>` : ""}
+${morningFields.reachOutTo ? `<p><span class="label">Reach out to:</span> ${morningFields.reachOutTo}</p>` : ""}
+${morningFields.intention ? `<p><span class="label">Today's intention:</span> ${morningFields.intention}</p>` : ""}
+${eveningFields.wentWell ? `<p><span class="label">What went well:</span> ${eveningFields.wentWell}</p>` : ""}
+${eveningFields.challenged ? `<p><span class="label">What challenged me:</span> ${eveningFields.challenged}</p>` : ""}
+${eveningFields.gratefulFor ? `<p><span class="label">Grateful for:</span> ${eveningFields.gratefulFor}</p>` : ""}
+${eveningFields.learned ? `<p><span class="label">What I learned:</span> ${eveningFields.learned}</p>` : ""}
+</div>
+
+${peopleTriggers.some(t => t) || placeTriggers.some(t => t) || triggeredEmotions.length > 0 ? `
+<h2>My Trigger Plan</h2>
+<div class="section">
+${peopleTriggers.filter(t => t).length > 0 ? `<p><span class="label">People triggers:</span> ${peopleTriggers.filter(t => t).join(", ")}</p>` : ""}
+${placeTriggers.filter(t => t).length > 0 ? `<p><span class="label">Place triggers:</span> ${placeTriggers.filter(t => t).join(", ")}</p>` : ""}
+${triggeredEmotions.length > 0 ? `<p><span class="label">Emotional triggers:</span> ${triggeredEmotions.join(", ")}</p>` : ""}
+${actionPlan.people ? `<p><span class="label">People action plan:</span> ${actionPlan.people}</p>` : ""}
+${actionPlan.places ? `<p><span class="label">Places action plan:</span> ${actionPlan.places}</p>` : ""}
+${actionPlan.emotions ? `<p><span class="label">Emotions action plan:</span> ${actionPlan.emotions}</p>` : ""}
+</div>` : ""}
+
+${gratitudeItems.some(i => i) ? `
+<h2>Gratitude Practice</h2>
+<div class="section">
+<ol>${gratitudeItems.filter(i => i).map(i => `<li>${i}</li>`).join("")}</ol>
+${gratitudePerson ? `<p><span class="label">Person I'm grateful for:</span> ${gratitudePerson}</p>` : ""}
+${gratitudeRecovery ? `<p><span class="label">Recovery gratitude:</span> ${gratitudeRecovery}</p>` : ""}
+</div>` : ""}
+
+${amendsName ? `
+<h2>Amends Planning</h2>
+<div class="section">
+<p><span class="label">Person:</span> ${amendsName}</p>
+${amendsHarm ? `<p><span class="label">What happened:</span> ${amendsHarm}</p>` : ""}
+${amendsAffected ? `<p><span class="label">How it affected them:</span> ${amendsAffected}</p>` : ""}
+${amendsWhatToSay ? `<p><span class="label">What I want to say:</span> ${amendsWhatToSay}</p>` : ""}
+</div>` : ""}
+
+${innerChildLetter || innerChildPromise ? `
+<h2>Inner Child Exercise</h2>
+<div class="section">
+${innerChildLetter ? `<p><span class="label">Letter to my younger self:</span><br/>${innerChildLetter}</p>` : ""}
+${innerChildPromise ? `<p><span class="label">My promise:</span><br/>${innerChildPromise}</p>` : ""}
+</div>` : ""}
+
+${achievedList.length > 0 ? `
+<h2>Milestones Achieved</h2>
+<div class="section">
+${achievedList.map(m => `<p>✅ <strong>${m.milestone}</strong>${m.date ? ` — ${m.date}` : ""}${m.celebration ? ` — ${m.celebration}` : ""}</p>`).join("")}
+</div>` : ""}
+
+<div class="cta">
+<h2 style="color:white;margin-top:0">Ready for the Next Step?</h2>
+<p>You're doing incredible work. Take your recovery to the next level with the <strong>7-Day REWIRED Reset</strong> — a structured program designed to build lasting change.</p>
+<p><a href="https://shauncritzer.com/7-day-reset">Start the 7-Day REWIRED Reset →</a></p>
+<p style="font-size:14px;margin-top:15px">Questions? Email <a href="mailto:shaun@passiveaffiliate.com">shaun@passiveaffiliate.com</a></p>
+</div>
+
+<p style="text-align:center;color:#999;font-size:12px;margin-top:40px">© ${new Date().getFullYear()} Shaun Critzer — shauncritzer.com</p>
+</body></html>`;
+  };
+
+  const downloadJournal = () => {
+    const html = generateJournalHtml();
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `recovery-journal-${new Date().toISOString().split("T")[0]}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Recovery journal downloaded!", { description: "Open the HTML file in any browser to view or print." });
+  };
+
+  const emailJournal = async () => {
+    if (!email) {
+      toast.error("Email not available", { description: "Please reload the page and enter your email again." });
+      return;
+    }
+    setIsSendingEmail(true);
+    try {
+      await downloadMutation.mutateAsync({ slug: "recovery-toolkit", email });
+      downloadJournal();
+      toast.success("Check your inbox!", { description: "We've sent you a follow-up email with next steps. Your journal has also been downloaded." });
+    } catch {
+      downloadJournal();
+      toast.success("Journal downloaded!", { description: "We couldn't send the email, but your journal file has been downloaded." });
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const toggleSection = (index: number) => {
@@ -1120,6 +1233,29 @@ I am committed to my recovery. I will call someone before I use.`;
             </Card>
 
           </div>
+        </div>
+      </section>
+
+      {/* Download / Email My Journal CTA */}
+      <section className="py-12 bg-gradient-to-r from-primary/10 to-secondary/10">
+        <div className="container max-w-2xl text-center space-y-6">
+          <h2 className="text-3xl font-bold">Save Your Recovery Journal</h2>
+          <p className="text-muted-foreground text-lg">
+            Download a beautiful copy of everything you've written today — your check-ins, triggers, gratitude, and milestones. Keep it, print it, or share it with your sponsor.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button onClick={downloadJournal} size="lg" variant="outline" className="gap-2">
+              <Download className="h-5 w-5" />
+              Download Journal
+            </Button>
+            <Button onClick={emailJournal} size="lg" className="gap-2 bg-primary hover:bg-primary/90" disabled={isSendingEmail}>
+              <Mail className="h-5 w-5" />
+              {isSendingEmail ? "Sending..." : "Email Me a Copy"}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Your journal includes a link to the <strong>7-Day REWIRED Reset</strong> — the perfect next step in your recovery journey.
+          </p>
         </div>
       </section>
 

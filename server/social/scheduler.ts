@@ -1,7 +1,7 @@
 import cron, { type ScheduledTask } from "node-cron";
 import { getDb } from "../db";
 import { postTweet, postThread, getTweetMetrics } from "./twitter";
-import { postToFacebookPage, postLinkToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
+import { postToFacebookPage, postLinkToFacebookPage, postPhotoToFacebookPage, postToInstagram, postTextToInstagram, getFacebookPostMetrics } from "./meta";
 import { postToLinkedIn, isLinkedInConfigured, getLinkedInPostMetrics } from "./linkedin";
 import { isYouTubeConfigured, getVideoMetrics as getYouTubeVideoMetrics, uploadVideo as uploadYouTubeVideo } from "./youtube";
 import { isHeyGenConfigured, scriptToVideo } from "./heygen";
@@ -214,7 +214,7 @@ async function postContentItem(item: {
         break;
       }
       case "facebook": {
-        // Check for generated image to post as a link/photo post
+        // Check for generated image to upload as a photo post
         let fbImageUrl = "";
         if (item.mediaUrls) {
           try {
@@ -222,8 +222,10 @@ async function postContentItem(item: {
             fbImageUrl = media.generatedImageUrl || media.imageUrl || "";
           } catch {}
         }
+        // Use postPhotoToFacebookPage to download + upload the image permanently
+        // (DALL-E URLs expire in ~1 hour, so we can't just pass the URL as a link)
         const fbResult = fbImageUrl
-          ? await postLinkToFacebookPage(item.content, fbImageUrl)
+          ? await postPhotoToFacebookPage(item.content, fbImageUrl)
           : await postToFacebookPage(item.content);
         result = {
           success: fbResult.success,

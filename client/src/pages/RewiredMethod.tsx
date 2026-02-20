@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { ChevronDown, ChevronUp, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 interface RewiredStep {
   letter: string;
@@ -264,6 +265,8 @@ export default function RewiredMethod() {
     toast.success("Feedback received!");
   };
 
+  const downloadMutation = trpc.leadMagnets.download.useMutation();
+
   const handleDownloadPDF = async () => {
     if (!email) {
       toast.error("Please enter your email to download your personalized PDF");
@@ -273,13 +276,61 @@ export default function RewiredMethod() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement backend endpoint to generate PDF with user responses
-      // and send email
-      toast.success("Your personalized REWIRED journey PDF has been sent to your email!");
-      
-      // Clear form
-      setEmail("");
-      setResponses({});
+      // Subscribe to ConvertKit (triggers email sequence)
+      try {
+        await downloadMutation.mutateAsync({ slug: "recovery-toolkit", email });
+      } catch { /* Don't block download if CK fails */ }
+
+      // Generate and download the HTML document
+      const completedSteps = rewiredSteps.filter((_, i) => responses[i]?.trim());
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:40px 20px;color:#333;line-height:1.7}
+h1{color:#0d9488;text-align:center;font-size:32px}
+h2{color:#0d9488;margin-top:30px;border-bottom:2px solid #e5e7eb;padding-bottom:8px}
+.step{background:#f8f9fa;padding:20px;border-radius:10px;margin:15px 0;border-left:4px solid #0d9488}
+.letter{display:inline-block;width:36px;height:36px;background:#0d9488;color:white;text-align:center;line-height:36px;border-radius:50%;font-weight:bold;margin-right:10px}
+.lie{background:#fef2f2;padding:12px;border-radius:6px;border-left:3px solid #ef4444;margin:8px 0}
+.truth{background:#f0fdf4;padding:12px;border-radius:6px;border-left:3px solid #22c55e;margin:8px 0}
+.response{background:white;padding:15px;border-radius:6px;border:1px solid #e5e7eb;margin-top:10px}
+.ai{background:#eff6ff;padding:15px;border-radius:6px;border:1px solid #bfdbfe;margin-top:8px;font-style:italic}
+.cta{background:linear-gradient(135deg,#0d9488,#0891b2);color:white;padding:30px;border-radius:12px;text-align:center;margin-top:40px}
+.cta a{color:white;font-size:18px}
+</style></head><body>
+<h1>My REWIRED Journey</h1>
+<p style="text-align:center;color:#666"><em>A personal reflection by ${email} — ${new Date().toLocaleDateString()}</em></p>
+<p style="text-align:center;color:#666">Completed ${completedSteps.length} of 7 REWIRED steps</p>
+
+${rewiredSteps.map((step, i) => `
+<h2><span class="letter">${step.letter}</span> ${step.title}</h2>
+<div class="step">
+<div class="lie"><strong>The Lie:</strong> ${step.lie}</div>
+<div class="truth"><strong>The Truth:</strong> ${step.truth}</div>
+<p style="margin-top:12px">${step.content.substring(0, 300)}...</p>
+<p><strong>Reflection:</strong> ${step.prompt}</p>
+${responses[i] ? `<div class="response"><strong>My Response:</strong><br/>${responses[i]}</div>` : '<p style="color:#999"><em>Not yet completed</em></p>'}
+${aiResponses[i] ? `<div class="ai"><strong>Feedback:</strong><br/>${aiResponses[i]}</div>` : ""}
+</div>`).join("")}
+
+<div class="cta">
+<h2 style="color:white;margin-top:0">Take the Next Step</h2>
+<p>You've started rewiring your thinking. Now take it deeper with the <strong>7-Day REWIRED Reset</strong> — a structured daily program with video lessons, workbooks, and guided exercises.</p>
+<p><a href="https://shauncritzer.com/7-day-reset">Start the 7-Day REWIRED Reset →</a></p>
+<p style="font-size:14px;margin-top:15px">Questions? Email <a href="mailto:shaun@passiveaffiliate.com">shaun@passiveaffiliate.com</a></p>
+</div>
+<p style="text-align:center;color:#999;font-size:12px;margin-top:40px">© ${new Date().getFullYear()} Shaun Critzer — shauncritzer.com</p>
+</body></html>`;
+
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `my-rewired-journey-${new Date().toISOString().split("T")[0]}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("Your REWIRED Journey PDF has been downloaded!", {
+        description: "Check your inbox for additional resources and next steps.",
+      });
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     } finally {
