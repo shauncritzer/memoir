@@ -36,6 +36,7 @@ import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import BookLaunch from "./pages/BookLaunch";
 import { AdminRoute } from "./components/AdminRoute";
 
 function Router() {
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/memoir" component={Memoir} />
+      <Route path="/book" component={BookLaunch} />
       <Route path="/resources" component={Resources} />
       <Route path="/recovery-toolkit" component={RecoveryToolkit} />
       <Route path="/reading-guide" component={ReadingGuide} />
