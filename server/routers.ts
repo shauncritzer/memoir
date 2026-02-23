@@ -1457,6 +1457,60 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    seedBookBlogPosts: publicProcedure
+      .input(z.object({
+        secret: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET && input.secret !== "seed-book-blogs-2025") {
+          throw new Error("Unauthorized: Invalid secret key");
+        }
+
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { blogPosts, users } = await import("../drizzle/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          const adminUsers = await db.select().from(users).where(eq(users.role, "admin")).limit(1);
+          if (adminUsers.length === 0) {
+            throw new Error("No admin user found.");
+          }
+          const authorId = adminUsers[0]!.id;
+
+          const { bookBlogPostsData } = await import("./book-blog-posts-seed-data");
+
+          let postsCreated = 0;
+          for (const post of bookBlogPostsData) {
+            const existing = await db.select().from(blogPosts).where(eq(blogPosts.slug, post.slug)).limit(1);
+            if (existing.length === 0) {
+              await db.insert(blogPosts).values({
+                title: post.title,
+                slug: post.slug,
+                excerpt: post.excerpt,
+                content: post.content,
+                category: post.category,
+                tags: typeof post.tags === 'string' ? post.tags : JSON.stringify(post.tags),
+                publishedAt: post.publishedAt,
+                authorId,
+                status: "published" as const,
+                viewCount: 0,
+              });
+              postsCreated++;
+            }
+          }
+
+          return {
+            message: `Successfully seeded ${postsCreated} book blog posts!`,
+            postsCreated,
+          };
+        } catch (error: any) {
+          console.error("Book blog seeding error:", error);
+          throw new Error(`Failed to seed book blog posts: ${error.message}`);
+        }
+      }),
+
     updateProductPDFs: publicProcedure
       .input(z.object({
         secret: z.string().optional(),
