@@ -23,6 +23,7 @@ import SeedDatabase from "./pages/SeedDatabase";
 import AdminContent from "./pages/AdminContent";
 import AdminDashboard from "./pages/AdminDashboard";
 import ContentPipeline from "./pages/ContentPipeline";
+import MissionControl from "./pages/MissionControl";
 import StripeTest from "./pages/StripeTest";
 import TermsOfUse from "./pages/TermsOfUse";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/admin/seed">{() => <AdminRoute component={SeedDatabase} />}</Route>
       <Route path="/admin/content">{() => <AdminRoute component={AdminContent} />}</Route>
       <Route path="/admin/pipeline">{() => <AdminRoute component={ContentPipeline} />}</Route>
+      <Route path="/admin/mission-control">{() => <AdminRoute component={MissionControl} />}</Route>
       <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
       <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />

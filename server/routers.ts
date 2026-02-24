@@ -3608,6 +3608,116 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
   }),
+
+  // ─── Mission Control Agent ────────────────────────────────────────────────
+  agent: router({
+    /** Get current agent state (last run, alerts, pending count) */
+    getState: protectedProcedure.query(async () => {
+      const { getAgentState } = await import("./agent/mission-control");
+      return getAgentState();
+    }),
+
+    /** Get all businesses (active + paused + setup) */
+    getBusinesses: protectedProcedure.query(async () => {
+      const { getAllBusinesses } = await import("./agent/mission-control");
+      return getAllBusinesses();
+    }),
+
+    /** Get pending actions awaiting approval */
+    getPendingActions: protectedProcedure.query(async () => {
+      const { getPendingActions } = await import("./agent/mission-control");
+      return getPendingActions();
+    }),
+
+    /** Get recent action history */
+    getRecentActions: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        const { getRecentActions } = await import("./agent/mission-control");
+        return getRecentActions(input?.limit || 50);
+      }),
+
+    /** Approve a proposed action */
+    approveAction: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { approveAction } = await import("./agent/mission-control");
+        const success = await approveAction(input.actionId);
+        return { success };
+      }),
+
+    /** Deny a proposed action */
+    denyAction: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { denyAction } = await import("./agent/mission-control");
+        const success = await denyAction(input.actionId);
+        return { success };
+      }),
+
+    /** Get reports (daily briefings, ideas, alerts) */
+    getReports: protectedProcedure
+      .input(z.object({
+        type: z.string().optional(),
+        limit: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const { getReports } = await import("./agent/mission-control");
+        return getReports(input?.type, input?.limit || 20);
+      }),
+
+    /** Mark a report as read */
+    markReportRead: protectedProcedure
+      .input(z.object({ reportId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { markReportRead } = await import("./agent/mission-control");
+        const success = await markReportRead(input.reportId);
+        return { success };
+      }),
+
+    /** Manually trigger an agent cycle */
+    runCycle: protectedProcedure.mutation(async () => {
+      const { runAgentCycle } = await import("./agent/mission-control");
+      const state = await runAgentCycle();
+      return state;
+    }),
+
+    /** Update a business profile */
+    updateBusiness: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        domain: z.string().optional(),
+        brandVoice: z.string().optional(),
+        targetAudience: z.string().optional(),
+        dailyBudget: z.number().optional(),
+        monthlyBudget: z.number().optional(),
+        status: z.enum(["active", "paused", "setup"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        const { sql } = await import("drizzle-orm");
+
+        // Use individual parameterized updates to avoid SQL injection
+        if (input.name !== undefined)
+          await db.execute(sql`UPDATE businesses SET name = ${input.name} WHERE id = ${input.id}`);
+        if (input.domain !== undefined)
+          await db.execute(sql`UPDATE businesses SET domain = ${input.domain} WHERE id = ${input.id}`);
+        if (input.brandVoice !== undefined)
+          await db.execute(sql`UPDATE businesses SET brand_voice = ${input.brandVoice} WHERE id = ${input.id}`);
+        if (input.targetAudience !== undefined)
+          await db.execute(sql`UPDATE businesses SET target_audience = ${input.targetAudience} WHERE id = ${input.id}`);
+        if (input.dailyBudget !== undefined)
+          await db.execute(sql`UPDATE businesses SET daily_budget = ${input.dailyBudget} WHERE id = ${input.id}`);
+        if (input.monthlyBudget !== undefined)
+          await db.execute(sql`UPDATE businesses SET monthly_budget = ${input.monthlyBudget} WHERE id = ${input.id}`);
+        if (input.status !== undefined)
+          await db.execute(sql`UPDATE businesses SET status = ${input.status} WHERE id = ${input.id}`);
+
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

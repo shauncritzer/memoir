@@ -113,6 +113,9 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Link href="/admin/mission-control">
+              <Button variant="default" className="bg-purple-700 hover:bg-purple-600">Mission Control →</Button>
+            </Link>
             <Link href="/admin/pipeline">
               <Button variant="default">Content Pipeline →</Button>
             </Link>
