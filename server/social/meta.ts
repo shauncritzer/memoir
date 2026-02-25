@@ -203,7 +203,37 @@ export async function postToInstagram(caption: string, imageUrl: string): Promis
 
     const containerId = containerData.id;
 
-    // Step 2: Publish the container
+    // Step 2: Wait for the media container to be ready before publishing
+    // Instagram processes the image asynchronously — publishing too early gives "Media ID is not available"
+    let containerReady = false;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between checks
+      try {
+        const statusResponse = await fetch(
+          `${GRAPH_API}/${containerId}?fields=status_code&access_token=${pageAccessToken}`
+        );
+        const statusData = await statusResponse.json();
+        if (statusData.status_code === "FINISHED") {
+          containerReady = true;
+          break;
+        }
+        if (statusData.status_code === "ERROR") {
+          return {
+            success: false,
+            error: `Instagram container processing failed: ${statusData.status_code}`,
+          };
+        }
+        // IN_PROGRESS — keep waiting
+      } catch {
+        // Status check failed, continue waiting
+      }
+    }
+
+    if (!containerReady) {
+      return { success: false, error: "Instagram container still processing after 20s — try again" };
+    }
+
+    // Step 3: Publish the container
     const publishResponse = await fetch(`${GRAPH_API}/${igUserId}/media_publish`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -5,6 +5,7 @@ import { Logo } from "@/components/Logo";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Database, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminMigrate() {
   const [migrationResult, setMigrationResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -46,8 +47,11 @@ export default function AdminMigrate() {
       </nav>
 
       {/* Content */}
-      <section className="flex-1 flex items-center justify-center py-12">
-        <div className="container max-w-2xl">
+      <section className="flex-1 py-12">
+        <div className="container max-w-2xl mx-auto">
+          <AdminNav />
+        </div>
+        <div className="container max-w-2xl mx-auto">
           <Card className="bg-gradient-to-br from-yellow-900/20 to-black border-yellow-600/30 text-white">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">

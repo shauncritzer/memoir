@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus, Save, X, Sparkles, Loader2, Wand2 } from "lucide-react";
+import AdminNav from "@/components/AdminNav";
 
 const useToast = () => ({
   toast: ({ title, description }: { title: string; description?: string; variant?: string }) => {
@@ -163,6 +164,7 @@ export default function BlogEditor() {
 
   return (
     <div className="container max-w-6xl py-12">
+      <AdminNav />
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Blog Editor</h1>
         <p className="text-muted-foreground">Create, edit, and manage your blog posts</p>

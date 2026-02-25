@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Loader2, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminContent() {
   const [blogStatus, setBlogStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -65,8 +66,11 @@ export default function AdminContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
-      <Card className="max-w-3xl w-full p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
+      <div className="max-w-3xl mx-auto">
+        <AdminNav />
+      </div>
+      <Card className="max-w-3xl mx-auto w-full p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="text-center space-y-2 flex-1">
             <h1 className="text-3xl font-bold">Content Admin</h1>

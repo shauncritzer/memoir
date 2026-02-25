@@ -22,6 +22,7 @@ import {
   Sparkles, Calendar, Wifi, WifiOff, Lightbulb, Rocket,
 } from "lucide-react";
 import { Link } from "wouter";
+import AdminNav from "@/components/AdminNav";
 
 // Platform icons/colors
 const platformConfig: Record<string, { label: string; color: string }> = {
@@ -307,6 +308,7 @@ export default function ContentPipeline() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-6">
+        <AdminNav />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -314,14 +316,6 @@ export default function ContentPipeline() {
             <p className="text-muted-foreground mt-2">
               Create, schedule, and distribute content across platforms
             </p>
-          </div>
-          <div className="flex gap-2">
-            <Link href="/admin">
-              <Button variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Admin Dashboard
-              </Button>
-            </Link>
           </div>
         </div>
 
@@ -700,127 +694,107 @@ export default function ContentPipeline() {
                     <p className="text-sm mt-1">Generate from a blog post, use AI Generate, or add content manually to get started.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Platform</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Content Preview</TableHead>
-                          <TableHead>Source</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Scheduled</TableHead>
-                          <TableHead>Metrics</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {queueItems.map((item: any) => {
-                          const metrics = parseMetrics(item.metrics);
-                          return (
-                            <TableRow key={item.id}>
-                              <TableCell>
-                                <Badge className={platformConfig[item.platform]?.color || "bg-gray-500 text-white"}>
-                                  {platformConfig[item.platform]?.label || item.platform}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="capitalize">{item.contentType}</TableCell>
-                              <TableCell
-                                className="max-w-xs truncate text-sm text-muted-foreground cursor-pointer hover:text-foreground"
-                                onClick={() => setPreviewItem(item)}
+                  <div className="space-y-2">
+                    {queueItems.map((item: any) => {
+                      const metrics = parseMetrics(item.metrics);
+                      return (
+                        <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50">
+                          {/* Platform badge */}
+                          <Badge className={`shrink-0 ${platformConfig[item.platform]?.color || "bg-gray-500 text-white"}`}>
+                            {platformConfig[item.platform]?.label || item.platform}
+                          </Badge>
+                          {/* Content preview - click to expand */}
+                          <div
+                            className="flex-1 min-w-0 cursor-pointer"
+                            onClick={() => setPreviewItem(item)}
+                          >
+                            <p className="text-sm truncate">
+                              {item.content ? item.content.substring(0, 100) + (item.content.length > 100 ? "..." : "") : <em className="text-muted-foreground">Pending generation</em>}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                              <span>{item.sourceBlogTitle || "Manual"}</span>
+                              <span>·</span>
+                              <span className="capitalize">{item.contentType}</span>
+                              {item.scheduledFor && (
+                                <><span>·</span><span>{formatDate(item.scheduledFor)}</span></>
+                              )}
+                              {metrics && (
+                                <>
+                                  <span>·</span>
+                                  {metrics.likes != null && <span>{metrics.likes} likes</span>}
+                                  {metrics.views != null && <span>{metrics.views.toLocaleString()} views</span>}
+                                </>
+                              )}
+                              {!metrics && item.status === "posted" && (
+                                <><span>·</span><span>Updating...</span></>
+                              )}
+                            </div>
+                          </div>
+                          {/* Status */}
+                          <Badge variant={statusConfig[item.status]?.variant || "outline"} className="shrink-0">
+                            {statusConfig[item.status]?.label || item.status}
+                          </Badge>
+                          {/* Actions - always visible */}
+                          <div className="flex gap-1 shrink-0">
+                            {(item.status === "pending" || item.status === "failed") && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setGeneratingItemId(item.id);
+                                  generateAiContent.mutate({ queueItemId: item.id });
+                                }}
+                                disabled={generatingItemId === item.id && generateAiContent.isPending}
+                                className="text-violet-600 border-violet-300 hover:bg-violet-50"
                               >
-                                {item.content ? item.content.substring(0, 80) + "..." : <em>Pending generation</em>}
-                              </TableCell>
-                              <TableCell className="text-sm">
-                                {item.sourceBlogTitle || "Manual"}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={statusConfig[item.status]?.variant || "outline"}>
-                                  {statusConfig[item.status]?.label || item.status}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-sm">
-                                {formatDate(item.scheduledFor)}
-                              </TableCell>
-                              <TableCell className="text-xs">
-                                {metrics ? (
-                                  <div className="space-y-0.5">
-                                    {metrics.views != null && <div>{metrics.views.toLocaleString()} views</div>}
-                                    {metrics.likes != null && <div>{metrics.likes} likes</div>}
-                                    {metrics.retweets != null && <div>{metrics.retweets} RTs</div>}
-                                  </div>
-                                ) : item.status === "posted" ? (
-                                  <span className="text-muted-foreground">Updating...</span>
-                                ) : "\u2014"}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-1">
-                                  {/* Generate content for pending/failed items */}
-                                  {(item.status === "pending" || item.status === "failed") && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setGeneratingItemId(item.id);
-                                        generateAiContent.mutate({ queueItemId: item.id });
-                                      }}
-                                      disabled={generatingItemId === item.id && generateAiContent.isPending}
-                                      className="text-violet-600 border-violet-300 hover:bg-violet-50"
-                                    >
-                                      {generatingItemId === item.id && generateAiContent.isPending ? (
-                                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Generating...</>
-                                      ) : (
-                                        <><Sparkles className="h-3 w-3 mr-1" />Generate</>
-                                      )}
-                                    </Button>
-                                  )}
-                                  {/* Post Now for ready items on supported platforms */}
-                                  {item.status === "ready" && ["x", "facebook", "instagram", "linkedin", "youtube"].includes(item.platform) && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        if (confirm(`Post this to ${platformConfig[item.platform]?.label || item.platform} now?`)) {
-                                          postNow.mutate({ id: item.id });
-                                        }
-                                      }}
-                                      disabled={postNow.isPending}
-                                      className="text-green-600 border-green-300 hover:bg-green-50"
-                                    >
-                                      {postNow.isPending ? (
-                                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Posting...</>
-                                      ) : (
-                                        <><Rocket className="h-3 w-3 mr-1" />Post Now</>
-                                      )}
-                                    </Button>
-                                  )}
-                                  {/* View on platform */}
-                                  {item.platformPostUrl && (
-                                    <a href={item.platformPostUrl} target="_blank" rel="noopener noreferrer">
-                                      <Button variant="ghost" size="sm" title="View on platform">
-                                        <Eye className="h-4 w-4" />
-                                      </Button>
-                                    </a>
-                                  )}
-                                  {/* Delete */}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      if (confirm("Delete this queue item?")) {
-                                        deleteQueueItem.mutate({ id: item.id });
-                                      }
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                                {generatingItemId === item.id && generateAiContent.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Sparkles className="h-3 w-3" />
+                                )}
+                              </Button>
+                            )}
+                            {item.status === "ready" && ["x", "facebook", "instagram", "linkedin", "youtube"].includes(item.platform) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm(`Post this to ${platformConfig[item.platform]?.label || item.platform} now?`)) {
+                                    postNow.mutate({ id: item.id });
+                                  }
+                                }}
+                                disabled={postNow.isPending}
+                                className="text-green-600 border-green-300 hover:bg-green-50"
+                              >
+                                {postNow.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Rocket className="h-3 w-3" />
+                                )}
+                              </Button>
+                            )}
+                            {item.platformPostUrl && (
+                              <a href={item.platformPostUrl} target="_blank" rel="noopener noreferrer">
+                                <Button variant="ghost" size="sm" title="View on platform">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </a>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm("Delete this queue item?")) {
+                                  deleteQueueItem.mutate({ id: item.id });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -1028,7 +1002,11 @@ export default function ContentPipeline() {
                           return (
                             <TableRow key={offer.id}>
                               <TableCell className="font-medium">{offer.name}</TableCell>
-                              <TableCell className="max-w-xs truncate text-sm">{offer.ctaText}</TableCell>
+                              <TableCell className="max-w-xs truncate text-sm">
+                                <a href={offer.ctaUrl} target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">
+                                  {offer.ctaText}
+                                </a>
+                              </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="capitalize">{offer.offerType.replace("_", " ")}</Badge>
                               </TableCell>
@@ -1044,6 +1022,11 @@ export default function ContentPipeline() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex gap-1">
+                                  <a href={offer.ctaUrl} target="_blank" rel="noopener noreferrer">
+                                    <Button variant="ghost" size="sm" title={`Test: ${offer.ctaUrl}`}>
+                                      <Link2 className="h-4 w-4 text-blue-500" />
+                                    </Button>
+                                  </a>
                                   <Button
                                     variant="ghost"
                                     size="sm"
