@@ -92,13 +92,14 @@ async function processContentGeneration() {
         }
       }
 
-      // Generate content
+      // Generate content (business-aware: defaults to sober-strong for now)
       const generated = await generateContentForPlatform({
         platform: item.platform,
         sourceBlogTitle: blogTitle,
         sourceBlogContent: blogContent,
         ctaText,
         ctaUrl,
+        businessSlug: "sober-strong",
       });
 
       // Auto-generate image with DALL-E 3 if configured
@@ -241,7 +242,21 @@ async function postContentItem(item: {
         if (item.mediaUrls) {
           try {
             const media = JSON.parse(item.mediaUrls);
-            imageUrl = media.generatedImageUrl || media.imageUrl || media.image_url || "";
+            const rawUrl = media.generatedImageUrl || media.imageUrl || media.image_url || "";
+            if (rawUrl) {
+              // Cache the image on our server to avoid DALL-E URL expiration
+              // Instagram fetches the URL server-side, so it must be publicly accessible
+              try {
+                const { cacheImageForInstagram } = await import("./image-proxy");
+                const cachedUrl = await cacheImageForInstagram(rawUrl);
+                imageUrl = cachedUrl || rawUrl; // Fall back to raw URL if caching fails
+                if (cachedUrl) {
+                  console.log(`[Scheduler] Instagram: cached image → ${cachedUrl}`);
+                }
+              } catch {
+                imageUrl = rawUrl; // Fall back if image-proxy not available
+              }
+            }
           } catch {}
         }
         if (imageUrl) {

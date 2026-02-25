@@ -65,7 +65,7 @@ export default function MissionControl() {
   const state = agentState.data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
+    <div className="dark min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
       {/* Header */}
       <div className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -150,14 +150,14 @@ export default function MissionControl() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-gray-900 border border-gray-800 mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="approvals">
+            <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="approvals" className="text-gray-300 data-[state=active]:text-white">
               Approvals {(pendingActions.data?.length || 0) > 0 && `(${pendingActions.data?.length})`}
             </TabsTrigger>
-            <TabsTrigger value="businesses">Businesses</TabsTrigger>
-            <TabsTrigger value="briefings">Briefings</TabsTrigger>
-            <TabsTrigger value="ideas">Ideas</TabsTrigger>
-            <TabsTrigger value="history">Action History</TabsTrigger>
+            <TabsTrigger value="businesses" className="text-gray-300 data-[state=active]:text-white">Businesses</TabsTrigger>
+            <TabsTrigger value="briefings" className="text-gray-300 data-[state=active]:text-white">Briefings</TabsTrigger>
+            <TabsTrigger value="ideas" className="text-gray-300 data-[state=active]:text-white">Ideas</TabsTrigger>
+            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-white">Action History</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -166,7 +166,7 @@ export default function MissionControl() {
               {/* Latest Briefing */}
               <Card className="bg-gray-900/50 border-gray-800 md:col-span-2">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <FileText className="h-5 w-5 text-blue-400" />
                     Latest Briefing
                   </CardTitle>
@@ -197,7 +197,7 @@ export default function MissionControl() {
               {/* Active Alerts */}
               <Card className="bg-gray-900/50 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <AlertTriangle className="h-5 w-5 text-yellow-400" />
                     Active Alerts
                   </CardTitle>
@@ -228,7 +228,7 @@ export default function MissionControl() {
                           >
                             {alert.severity}
                           </Badge>
-                          <span className="text-sm font-medium">{alert.title}</span>
+                          <span className="text-sm font-medium text-gray-100">{alert.title}</span>
                         </div>
                         <p className="text-xs text-gray-400">{alert.message}</p>
                         {alert.suggestedAction && (
@@ -245,11 +245,11 @@ export default function MissionControl() {
               {/* Risk Tier Legend */}
               <Card className="bg-gray-900/50 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Shield className="h-5 w-5 text-green-400" />
                     Risk Tiers
                   </CardTitle>
-                  <CardDescription>How the agent handles different action types</CardDescription>
+                  <CardDescription className="text-gray-400">How the agent handles different action types</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {[
@@ -261,7 +261,7 @@ export default function MissionControl() {
                     <div key={t.tier} className={`p-2 rounded border ${t.color} bg-gray-800/30`}>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className={t.color}>Tier {t.tier}</Badge>
-                        <span className="text-sm font-medium">{t.label}</span>
+                        <span className="text-sm font-medium text-gray-100">{t.label}</span>
                       </div>
                       <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
                     </div>
@@ -275,8 +275,8 @@ export default function MissionControl() {
           <TabsContent value="approvals">
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
-                <CardTitle>Pending Approvals</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-white">Pending Approvals</CardTitle>
+                <CardDescription className="text-gray-400">
                   Actions the agent wants to take but needs your approval first
                 </CardDescription>
               </CardHeader>
@@ -299,7 +299,7 @@ export default function MissionControl() {
                               </Badge>
                             )}
                           </div>
-                          <h4 className="font-medium mb-1">{action.title}</h4>
+                          <h4 className="font-medium mb-1 text-gray-100">{action.title}</h4>
                           <p className="text-sm text-gray-400">{action.description}</p>
                           {action.cost_estimate > 0 && (
                             <p className="text-sm text-yellow-400 mt-1">
@@ -349,7 +349,7 @@ export default function MissionControl() {
                 <Card key={biz.id} className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{biz.name}</CardTitle>
+                      <CardTitle className="text-lg text-white">{biz.name}</CardTitle>
                       <Badge
                         className={
                           biz.status === "active"
@@ -362,7 +362,7 @@ export default function MissionControl() {
                         {biz.status}
                       </Badge>
                     </div>
-                    <CardDescription>{biz.domain || "No domain"}</CardDescription>
+                    <CardDescription className="text-gray-400">{biz.domain || "No domain"}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
@@ -405,7 +405,7 @@ export default function MissionControl() {
                 <Card key={report.id} className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-white">
                         <FileText className="h-5 w-5 text-blue-400" />
                         {report.title}
                       </CardTitle>
@@ -420,7 +420,7 @@ export default function MissionControl() {
                         </Button>
                       )}
                     </div>
-                    <CardDescription>{new Date(report.created_at).toLocaleString()}</CardDescription>
+                    <CardDescription className="text-gray-400">{new Date(report.created_at).toLocaleString()}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap">
@@ -453,11 +453,11 @@ export default function MissionControl() {
               {ideas.data?.map((report: any) => (
                 <Card key={report.id} className="bg-gray-900/50 border-gray-800">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Lightbulb className="h-5 w-5 text-yellow-400" />
                       {report.title}
                     </CardTitle>
-                    <CardDescription>{new Date(report.created_at).toLocaleString()}</CardDescription>
+                    <CardDescription className="text-gray-400">{new Date(report.created_at).toLocaleString()}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap">
@@ -481,8 +481,8 @@ export default function MissionControl() {
           <TabsContent value="history">
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
-                <CardTitle>Action History</CardTitle>
-                <CardDescription>Everything the agent has done or proposed</CardDescription>
+                <CardTitle className="text-white">Action History</CardTitle>
+                <CardDescription className="text-gray-400">Everything the agent has done or proposed</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentActions.data?.length ? (
@@ -505,7 +505,7 @@ export default function MissionControl() {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium truncate">{action.title}</span>
+                            <span className="text-sm font-medium truncate text-gray-100">{action.title}</span>
                             <Badge variant="outline" className="text-xs border-gray-600 shrink-0">
                               {action.category}
                             </Badge>

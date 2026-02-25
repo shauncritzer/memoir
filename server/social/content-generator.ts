@@ -1,4 +1,5 @@
 import { invokeLLM } from "../_core/llm";
+import { getDb } from "../db";
 
 /** Platform-specific content constraints and formatting rules */
 const PLATFORM_RULES: Record<string, {
@@ -59,8 +60,8 @@ const PLATFORM_RULES: Record<string, {
   },
 };
 
-/** Shaun's brand voice and context */
-const BRAND_CONTEXT = `
+/** Fallback brand context for Sober Strong (used if DB not available) */
+const DEFAULT_BRAND_CONTEXT = `
 You are writing content for Shaun Critzer, a recovery coach, author of the memoir "Bent, Not Broken",
 and founder of RewiredCourse. His brand focuses on:
 
@@ -92,6 +93,56 @@ Products/offers he promotes:
 - Free lead magnets (PDFs, guides)
 `;
 
+/**
+ * Load brand context from the businesses table.
+ * Falls back to the default Sober Strong context if DB is unavailable.
+ */
+async function getBrandContext(businessSlug?: string): Promise<string> {
+  const slug = businessSlug || "sober-strong";
+
+  try {
+    const db = await getDb();
+    if (!db) return DEFAULT_BRAND_CONTEXT;
+
+    const { sql } = await import("drizzle-orm");
+    const [rows] = await db.execute(
+      sql`SELECT name, brand_voice, target_audience, products FROM businesses WHERE slug = ${slug} LIMIT 1`
+    ) as any;
+
+    const biz = (rows as any[])?.[0];
+    if (!biz || !biz.brand_voice) return DEFAULT_BRAND_CONTEXT;
+
+    let products = "";
+    try {
+      const parsed = JSON.parse(biz.products || "[]");
+      if (parsed.length > 0) {
+        products = "\n\nProducts/offers to promote:\n" + parsed.map((p: any) =>
+          `- ${p.name}${p.price ? ` ($${(p.price / 100).toFixed(0)})` : " (Free)"}${p.description ? ` - ${p.description}` : ""}`
+        ).join("\n");
+      }
+    } catch {}
+
+    return `
+You are writing content for ${biz.name}.
+
+BRAND VOICE & STYLE:
+${biz.brand_voice}
+
+TARGET AUDIENCE:
+${biz.target_audience || "General audience"}
+${products}
+
+IMPORTANT STYLE RULES:
+- NEVER start posts with "Hey friend," "Hey there," or any letter-style greeting
+- Start with a hook, question, bold statement, or story — not a greeting
+- Write like a social media post or article, NOT like a personal letter or email
+`;
+  } catch (err: any) {
+    console.warn("[ContentGenerator] Failed to load brand context from DB:", err.message);
+    return DEFAULT_BRAND_CONTEXT;
+  }
+}
+
 export type GeneratedContent = {
   platform: string;
   contentType: string;
@@ -110,13 +161,17 @@ export async function generateContentForPlatform(opts: {
   topic?: string;
   ctaText?: string;
   ctaUrl?: string;
+  businessSlug?: string;
 }): Promise<GeneratedContent> {
-  const { platform, sourceBlogTitle, sourceBlogContent, topic, ctaText, ctaUrl } = opts;
+  const { platform, sourceBlogTitle, sourceBlogContent, topic, ctaText, ctaUrl, businessSlug } = opts;
   const rules = PLATFORM_RULES[platform];
 
   if (!rules) {
     throw new Error(`Unknown platform: ${platform}`);
   }
+
+  // Load brand context from DB based on business
+  const brandContext = await getBrandContext(businessSlug);
 
   const sourceContext = sourceBlogContent
     ? `\n\nSOURCE BLOG POST:\nTitle: "${sourceBlogTitle}"\nContent:\n${sourceBlogContent.substring(0, 4000)}`
@@ -128,7 +183,7 @@ export async function generateContentForPlatform(opts: {
     ? `\n\nCTA TO INCLUDE: "${ctaText}" linking to ${ctaUrl}`
     : "";
 
-  const prompt = `${BRAND_CONTEXT}
+  const prompt = `${brandContext}
 
 TASK: Generate a ${rules.contentType} for ${platform.toUpperCase()}.
 ${sourceContext}
@@ -152,7 +207,7 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, no code fences):
 TOOL OPTIONS for suggestedTools: canva, midjourney, dalle, heygen, elevenlabs, pictory, capcut
 
 IMPORTANT:
-- Write as Shaun, first person
+- Write in first person as the brand
 - Be authentic, not corporate
 - The content must be ready to post as-is
 - For X threads, each tweet MUST be under 280 characters
@@ -160,7 +215,7 @@ IMPORTANT:
 
   const result = await invokeLLM({
     messages: [
-      { role: "system", content: "You are a world-class social media content strategist who specializes in recovery and wellness content. You always respond with valid JSON." },
+      { role: "system", content: "You are a world-class social media content strategist. You always respond with valid JSON." },
       { role: "user", content: prompt },
     ],
   });
@@ -209,6 +264,7 @@ export async function generateContentForPlatforms(opts: {
   topic?: string;
   ctaText?: string;
   ctaUrl?: string;
+  businessSlug?: string;
 }): Promise<GeneratedContent[]> {
   const results = await Promise.allSettled(
     opts.platforms.map(platform =>
@@ -219,6 +275,7 @@ export async function generateContentForPlatforms(opts: {
         topic: opts.topic,
         ctaText: opts.ctaText,
         ctaUrl: opts.ctaUrl,
+        businessSlug: opts.businessSlug,
       })
     )
   );
@@ -229,15 +286,17 @@ export async function generateContentForPlatforms(opts: {
 }
 
 /** Generate a standalone content idea (no source blog post needed) */
-export async function generateContentIdea(opts?: { theme?: string }): Promise<{
+export async function generateContentIdea(opts?: { theme?: string; businessSlug?: string }): Promise<{
   topic: string;
   hook: string;
   platforms: string[];
   suggestedCta: string;
 }> {
-  const prompt = `${BRAND_CONTEXT}
+  const brandContext = await getBrandContext(opts?.businessSlug);
 
-Generate a fresh content idea for Shaun's social media. ${opts?.theme ? `Theme: ${opts.theme}` : "Pick a topic from his key themes that would resonate with people in early recovery or considering getting help."}
+  const prompt = `${brandContext}
+
+Generate a fresh content idea for social media. ${opts?.theme ? `Theme: ${opts.theme}` : "Pick a topic from the brand's key themes that would resonate with the target audience."}
 
 RESPOND IN THIS EXACT JSON FORMAT (no markdown, no code fences):
 {
@@ -247,7 +306,7 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, no code fences):
   "suggestedCta": "Which product/offer fits this topic best"
 }
 
-The idea should be something that could go viral in the recovery/wellness community.`;
+The idea should be something that could go viral with this audience.`;
 
   const result = await invokeLLM({
     messages: [
@@ -269,10 +328,10 @@ The idea should be something that could go viral in the recovery/wellness commun
     return JSON.parse(cleanJson);
   } catch {
     return {
-      topic: "Recovery is not linear - and that's okay",
-      hook: "I relapsed 3 times before it stuck. Here's what finally changed...",
+      topic: "Your story matters - share it authentically",
+      hook: "The thing that makes you different is the thing that makes you powerful...",
       platforms: ["x", "instagram", "linkedin"],
-      suggestedCta: "7-Day REWIRED Reset",
+      suggestedCta: "Check out our latest content",
     };
   }
 }
