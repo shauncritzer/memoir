@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminVideos() {
   const { user, isLoading: authLoading } = useAuth();
@@ -107,6 +108,7 @@ export default function AdminVideos() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
+          <AdminNav />
           <h1 className="text-4xl font-bold mb-2">Admin: Video Management</h1>
           <p className="text-gray-600 mb-8">
             Upload Vimeo URLs for each course lesson after generating videos in HeyGen

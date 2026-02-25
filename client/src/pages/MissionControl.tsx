@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminNav from "@/components/AdminNav";
 
 export default function MissionControl() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -105,6 +106,7 @@ export default function MissionControl() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <AdminNav />
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card className="bg-gray-900/50 border-gray-800">

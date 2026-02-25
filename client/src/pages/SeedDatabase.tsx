@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import AdminNav from "@/components/AdminNav";
 
 export default function SeedDatabase() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -64,8 +65,11 @@ export default function SeedDatabase() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
+      <div className="max-w-2xl mx-auto">
+        <AdminNav />
+      </div>
+      <Card className="max-w-2xl mx-auto w-full p-8 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Database Admin</h1>
           <p className="text-muted-foreground">

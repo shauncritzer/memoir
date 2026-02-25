@@ -259,6 +259,38 @@ async function postContentItem(item: {
             }
           } catch {}
         }
+        // If no image URL, try to auto-generate one via OpenAI
+        if (!imageUrl) {
+          try {
+            const { invokeLLM } = await import("../_core/llm");
+            const prompt = await invokeLLM(
+              `Create a short DALL-E image prompt (under 50 words) for an inspirational Instagram post about: "${item.content?.substring(0, 200)}". The image should be warm, hopeful, recovery-themed. Return ONLY the prompt text.`,
+              { maxTokens: 100 }
+            );
+            if (prompt && process.env.OPENAI_API_KEY) {
+              const openaiResp = await fetch("https://api.openai.com/v1/images/generations", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "dall-e-3", prompt: prompt.substring(0, 1000), n: 1, size: "1024x1024" }),
+              });
+              const openaiData = await openaiResp.json();
+              const dalleUrl = openaiData.data?.[0]?.url;
+              if (dalleUrl) {
+                // Cache for Instagram
+                try {
+                  const { cacheImageForInstagram } = await import("./image-proxy");
+                  imageUrl = await cacheImageForInstagram(dalleUrl) || dalleUrl;
+                  console.log(`[Scheduler] Instagram: auto-generated image for text-only post`);
+                } catch {
+                  imageUrl = dalleUrl;
+                }
+              }
+            }
+          } catch (err: any) {
+            console.warn(`[Scheduler] Instagram auto-image generation failed:`, err.message);
+          }
+        }
+
         if (imageUrl) {
           const igResult = await postToInstagram(item.content, imageUrl);
           result = {

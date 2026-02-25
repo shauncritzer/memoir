@@ -33,6 +33,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, ShoppingCart, Loader2, CheckCircle2, XCircle, Gift, Ban, FileText, Eye, Edit } from "lucide-react";
 import { Link } from "wouter";
+import AdminNav from "@/components/AdminNav";
 
 export default function AdminDashboard() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -104,6 +105,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-6">
+        <AdminNav />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -111,17 +113,6 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground mt-2">
               Manage users, purchases, and course access
             </p>
-          </div>
-          <div className="flex gap-2">
-            <Link href="/admin/mission-control">
-              <Button variant="default" className="bg-purple-700 hover:bg-purple-600">Mission Control →</Button>
-            </Link>
-            <Link href="/admin/pipeline">
-              <Button variant="default">Content Pipeline →</Button>
-            </Link>
-            <Link href="/admin/content">
-              <Button variant="outline">Seed/Migrate →</Button>
-            </Link>
           </div>
         </div>
 

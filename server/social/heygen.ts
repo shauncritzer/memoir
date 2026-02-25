@@ -110,12 +110,27 @@ export async function createVideo(opts: {
 
     const { width, height } = dimensions[aspectRatio] || dimensions["16:9"];
 
+    // Resolve avatar ID: use provided, env var, or first available
+    let resolvedAvatarId = avatarId || process.env.HEYGEN_AVATAR_ID || "";
+    if (!resolvedAvatarId) {
+      try {
+        const avatars = await listAvatars();
+        if (avatars.length > 0) {
+          resolvedAvatarId = avatars[0].avatar_id;
+          console.log(`[HeyGen] Using first available avatar: ${resolvedAvatarId} (${avatars[0].avatar_name})`);
+        }
+      } catch {}
+    }
+    if (!resolvedAvatarId) {
+      return { success: false, error: "No HeyGen avatar available. Set HEYGEN_AVATAR_ID env var or ensure your account has avatars." };
+    }
+
     const payload: any = {
       video_inputs: [
         {
           character: {
             type: "avatar",
-            avatar_id: avatarId || "default",
+            avatar_id: resolvedAvatarId,
             avatar_style: "normal",
           },
           voice: voiceId
