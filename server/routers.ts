@@ -3194,6 +3194,15 @@ Recovery is possible. But it requires working with your biology, not against it.
         return verifyTwitterCredentials();
       }),
 
+    /** Full Twitter/X diagnostic — checks credentials, auth, permissions */
+    diagnoseTwitter: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { diagnoseTwitter } = await import("./social/twitter");
+        return diagnoseTwitter();
+      }),
+
     verifyMeta: protectedProcedure
       .mutation(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");

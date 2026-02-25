@@ -76,6 +76,14 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
 
+  // Image proxy for Instagram (DALL-E URLs expire, IG needs a public URL to fetch)
+  try {
+    const { registerImageProxy } = require("../social/image-proxy");
+    registerImageProxy(app);
+  } catch (err: any) {
+    console.warn("[Server] Image proxy registration failed (non-fatal):", err.message);
+  }
+
   // TikTok domain verification - serves verification file from env var
   // Set TIKTOK_VERIFICATION_CODE in Railway, e.g. "tiktok-developers-site-verification=XXXXX"
   app.get("/tiktok-*.txt", (req, res) => {

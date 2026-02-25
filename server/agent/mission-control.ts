@@ -183,19 +183,20 @@ Key themes: "You're not broken, you're bent", neuroplasticity, 5 pillars (mindfu
       'active'
     )`);
 
-    // Seed Critzer's Cabinets
+    // Seed Critzer's Cabinets (currently email-only, AI design + ecomm site in progress)
     await db.execute(sql`INSERT INTO businesses (slug, name, domain, business_type, brand_voice, target_audience, products, status) VALUES (
       'critzer-cabinets',
       ${"Critzer's Cabinets"},
       'critzerscabinets.com',
       'services',
-      ${"Professional, reliable, family-owned pride. Quality craftsmanship with personal attention. Local community focused. Warm but business-like. Emphasize custom work, attention to detail, and decades of experience."},
-      ${"Homeowners doing kitchen/bath remodels, contractors needing cabinet subcontractor, real estate investors flipping properties. Local area focus."},
+      ${"Professional, reliable, family-owned pride. Quality craftsmanship with personal attention. Local community focused. Warm but business-like. Emphasize custom work, attention to detail, and decades of experience. Currently transitioning to AI-powered design tools and ecommerce — website is being built with integrated AI cabinet design and online ordering."},
+      ${"Homeowners doing kitchen/bath remodels, contractors needing cabinet subcontractor, real estate investors flipping properties. Local area focus. Growing to serve online customers via AI design tool."},
       ${JSON.stringify([
         { name: "Custom Kitchen Cabinets", price: 0, description: "Quote-based" },
         { name: "Bathroom Vanities", price: 0, description: "Quote-based" },
         { name: "Cabinet Refacing", price: 0, description: "Quote-based" },
-        { name: "Free Consultation", price: 0, url: "/contact" },
+        { name: "AI Cabinet Design", price: 0, description: "Coming soon — AI-powered design visualization", url: "/design" },
+        { name: "Free Consultation", price: 0, url: "mailto:contact@critzerscabinets.com", description: "Email for quotes" },
       ])},
       'active'
     )`);
@@ -389,13 +390,34 @@ async function monitorContentPipeline(business: BusinessProfile): Promise<AgentA
         severity: "info",
         businessSlug: business.slug,
         title: "Content queue running low",
-        message: `Only ${readyCount} posts queued. Agent recommends generating more content to maintain consistent posting.`,
+        message: `Only ${readyCount} posts queued. Auto-generating content to maintain posting cadence.`,
         actionRequired: false,
         suggestedAction: "Auto-generate content from recent topics",
         riskTier: 1,
         category: "content",
         timestamp: new Date(),
       });
+
+      // Auto-generate content (tier 1 = auto-execute) — pick a platform that needs content
+      // Rate limit: max 1 auto-generation per 6 hours
+      const [recentAutoGen] = await db.execute(
+        sql`SELECT COUNT(*) as cnt FROM agent_actions
+            WHERE category = 'content' AND title LIKE 'Auto-generate%'
+            AND created_at > DATE_SUB(NOW(), INTERVAL 6 HOUR)`
+      ) as any;
+
+      if ((recentAutoGen as any)?.[0]?.cnt === 0) {
+        const platforms = ["facebook", "instagram", "x", "linkedin"];
+        const platform = platforms[Math.floor(Math.random() * platforms.length)];
+        await proposeAction({
+          businessId: business.id,
+          category: "content",
+          title: `Auto-generate ${platform} content`,
+          description: `Content queue low (${readyCount} items). Generating fresh ${platform} content for ${business.name}.`,
+          riskTier: 1,
+          metadata: { platform, businessSlug: business.slug },
+        });
+      }
     }
   } catch (err: any) {
     console.error(`[MissionControl] Content pipeline monitor error (${business.slug}):`, err.message);
@@ -509,6 +531,106 @@ async function monitorSystemHealth(): Promise<AgentAlert[]> {
   return alerts;
 }
 
+// ─── Briefing Delivery (Webhook) ────────────────────────────────────────────
+
+/**
+ * Deliver a briefing via webhook (n8n, Zapier, Slack, email API, etc.)
+ * Set BRIEFING_WEBHOOK_URL in Railway to enable.
+ * Payload: { title, content, type, timestamp, alerts_count, pending_count }
+ */
+async function deliverBriefingViaWebhook(content: string, title: string, alertsCount: number, pendingCount: number): Promise<void> {
+  const webhookUrl = process.env.BRIEFING_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        content,
+        type: "daily_briefing",
+        timestamp: new Date().toISOString(),
+        alerts_count: alertsCount,
+        pending_count: pendingCount,
+      }),
+    });
+
+    if (response.ok) {
+      console.log("[MissionControl] Briefing delivered via webhook");
+    } else {
+      console.warn(`[MissionControl] Webhook returned ${response.status}: ${await response.text()}`);
+    }
+  } catch (err: any) {
+    console.error("[MissionControl] Webhook delivery failed:", err.message);
+  }
+}
+
+// ─── Auto-Execution Engine (Tier 1-2 Actions) ──────────────────────────────
+
+/**
+ * Execute queued actions that have status='executing' (auto-approved tier 1-2).
+ * Currently supports: content generation.
+ */
+async function executeQueuedActions(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    const { sql } = await import("drizzle-orm");
+    const [rows] = await db.execute(
+      sql`SELECT * FROM agent_actions WHERE status = 'executing' ORDER BY created_at ASC LIMIT 3`
+    ) as any;
+
+    for (const action of (rows as any[]) || []) {
+      try {
+        const metadata = action.metadata ? JSON.parse(action.metadata) : {};
+
+        switch (action.category) {
+          case "content": {
+            const { generateContentForPlatform } = await import("../social/content-generator");
+            const platform = metadata.platform || "facebook";
+            const businessSlug = metadata.businessSlug || "sober-strong";
+
+            const content = await generateContentForPlatform({
+              platform,
+              businessSlug,
+            });
+
+            // Add to content queue
+            await db.execute(sql`INSERT INTO content_queue
+              (platform, content_type, content, status, media_urls)
+              VALUES (
+                ${platform},
+                ${content.contentType},
+                ${content.content},
+                'ready',
+                ${JSON.stringify({
+                  hashtags: content.hashtags,
+                  suggestedMediaType: content.suggestedMediaType,
+                  suggestedMediaPrompt: content.suggestedMediaPrompt,
+                  suggestedTools: content.suggestedTools,
+                  autoGenerated: true,
+                })}
+              )`);
+
+            await completeAction(action.id, `Generated ${platform} content: "${content.content.substring(0, 80)}..."`);
+            console.log(`[MissionControl] Auto-generated ${platform} content for ${businessSlug}`);
+            break;
+          }
+          default:
+            await failAction(action.id, `No executor for category: ${action.category}`);
+        }
+      } catch (err: any) {
+        console.error(`[MissionControl] Action #${action.id} execution failed:`, err.message);
+        await failAction(action.id, err.message);
+      }
+    }
+  } catch (err: any) {
+    console.error("[MissionControl] Execute queued actions error:", err.message);
+  }
+}
+
 // ─── Daily Briefing Generator ──────────────────────────────────────────────
 
 async function generateDailyBriefing(
@@ -606,6 +728,9 @@ Keep it scannable. Shaun has ADHD - give him the 2-minute version. Use real numb
 
     console.log("[MissionControl] Daily briefing generated and stored");
     state.lastDailyBriefing = now;
+
+    // Deliver via webhook (email/Slack/n8n)
+    await deliverBriefingViaWebhook(briefingContent, `Daily Briefing - ${dateStr}`, allAlerts.length, pendingCount);
   } catch (err: any) {
     console.error("[MissionControl] Briefing generation failed:", err.message);
 
@@ -769,6 +894,9 @@ export async function runAgentCycle(): Promise<AgentState> {
       ) as any;
       state.todayActions = todayRows?.[0]?.cnt || 0;
     }
+
+    // Execute any auto-approved actions (tier 1-2)
+    await executeQueuedActions();
 
     // Log summary
     const criticalCount = allAlerts.filter(a => a.severity === "critical").length;
