@@ -3203,6 +3203,15 @@ Recovery is possible. But it requires working with your biology, not against it.
         return diagnoseTwitter();
       }),
 
+    /** Full YouTube diagnostic — checks credentials, token, channel access */
+    diagnoseYouTube: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { diagnoseYouTube } = await import("./social/youtube");
+        return diagnoseYouTube();
+      }),
+
     verifyMeta: protectedProcedure
       .mutation(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");
@@ -3697,6 +3706,117 @@ Recovery is possible. But it requires working with your biology, not against it.
         await proposeOwnerCommand(input.message, input.businessSlug);
 
         return { success: true };
+      }),
+
+    // ─── Content Feedback Agent ─────────────────────────────────────────
+
+    /** Submit feedback about any content asset — agent analyzes, modifies, and re-uploads */
+    submitContentFeedback: protectedProcedure
+      .input(z.object({
+        target: z.enum(["blog_post", "social_post", "course_lesson", "course_module", "lead_magnet", "image", "video_script", "audio_script", "page_copy", "product_description"]),
+        targetId: z.number().optional(),
+        targetSlug: z.string().optional(),
+        feedback: z.string().min(1),
+        feedbackType: z.enum(["criticism", "suggestion", "bug_report", "content_update", "style_change", "factual_correction", "tone_adjustment"]).optional(),
+        businessSlug: z.string().optional(),
+        autoApply: z.boolean().optional(),
+        fieldToModify: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { processContentFeedback } = await import("./agent/content-feedback");
+        return processContentFeedback(input);
+      }),
+
+    /** Apply a previously proposed feedback change (after admin approval) */
+    applyProposedFeedback: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { applyProposedFeedback } = await import("./agent/content-feedback");
+        return applyProposedFeedback(input.actionId);
+      }),
+
+    /** Submit bulk feedback for multiple content items */
+    submitBulkFeedback: protectedProcedure
+      .input(z.object({
+        items: z.array(z.object({
+          target: z.enum(["blog_post", "social_post", "course_lesson", "course_module", "lead_magnet", "image", "video_script", "audio_script", "page_copy", "product_description"]),
+          targetId: z.number().optional(),
+          targetSlug: z.string().optional(),
+          feedback: z.string().min(1),
+          feedbackType: z.enum(["criticism", "suggestion", "bug_report", "content_update", "style_change", "factual_correction", "tone_adjustment"]).optional(),
+          businessSlug: z.string().optional(),
+          autoApply: z.boolean().optional(),
+          fieldToModify: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { processBulkFeedback } = await import("./agent/content-feedback");
+        return processBulkFeedback(input.items);
+      }),
+
+    // ─── Research & Creation Agent ──────────────────────────────────────
+
+    /** Conduct research on a topic/niche and optionally create a draft */
+    conductResearch: protectedProcedure
+      .input(z.object({
+        scope: z.enum(["course", "digital_product", "lead_magnet", "blog_series", "social_campaign", "content_strategy", "competitor_analysis", "market_research"]),
+        topic: z.string().min(1),
+        context: z.string().optional(),
+        businessSlug: z.string().optional(),
+        depth: z.enum(["quick", "standard", "deep"]).optional(),
+        createDraft: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { conductResearchAndCreate } = await import("./agent/research-creator");
+        return conductResearchAndCreate(input);
+      }),
+
+    /** Quick competitor analysis */
+    analyzeCompetitors: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        businessSlug: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { analyzeCompetitors } = await import("./agent/research-creator");
+        return analyzeCompetitors(input.topic, input.businessSlug);
+      }),
+
+    /** Research and draft a new course */
+    researchAndDraftCourse: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        context: z.string().optional(),
+        businessSlug: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { researchAndDraftCourse } = await import("./agent/research-creator");
+        return researchAndDraftCourse(input.topic, input.context, input.businessSlug);
+      }),
+
+    /** Research and draft a new lead magnet */
+    researchAndDraftLeadMagnet: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        businessSlug: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { researchAndDraftLeadMagnet } = await import("./agent/research-creator");
+        return researchAndDraftLeadMagnet(input.topic, input.businessSlug);
       }),
 
     /** Update a business profile */
