@@ -135,10 +135,11 @@ async function processContentGeneration() {
 
       console.log(`[Scheduler] Generated content for ${item.platform} (queue item #${item.id})`);
     } catch (err: any) {
-      console.error(`[Scheduler] Failed to generate content for queue item #${item.id}:`, err.message);
+      const errMsg = typeof err === "string" ? err : (err?.message || JSON.stringify(err));
+      console.error(`[Scheduler] Failed to generate content for queue item #${item.id}:`, errMsg);
       await db.update(contentQueue).set({
         status: "failed",
-        errorMessage: err.message,
+        errorMessage: errMsg,
       }).where(eq(contentQueue.id, item.id));
     }
   }
@@ -259,31 +260,23 @@ async function postContentItem(item: {
             }
           } catch {}
         }
-        // If no image URL, try to auto-generate one via OpenAI
+        // If no image URL, try to auto-generate one via DALL-E
         if (!imageUrl) {
           try {
-            const { invokeLLM } = await import("../_core/llm");
-            const prompt = await invokeLLM(
-              `Create a short DALL-E image prompt (under 50 words) for an inspirational Instagram post about: "${item.content?.substring(0, 200)}". The image should be warm, hopeful, recovery-themed. Return ONLY the prompt text.`,
-              { maxTokens: 100 }
-            );
-            if (prompt && process.env.OPENAI_API_KEY) {
-              const openaiResp = await fetch("https://api.openai.com/v1/images/generations", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ model: "dall-e-3", prompt: prompt.substring(0, 1000), n: 1, size: "1024x1024" }),
-              });
-              const openaiData = await openaiResp.json();
-              const dalleUrl = openaiData.data?.[0]?.url;
-              if (dalleUrl) {
-                // Cache for Instagram
-                try {
-                  const { cacheImageForInstagram } = await import("./image-proxy");
-                  imageUrl = await cacheImageForInstagram(dalleUrl) || dalleUrl;
-                  console.log(`[Scheduler] Instagram: auto-generated image for text-only post`);
-                } catch {
-                  imageUrl = dalleUrl;
-                }
+            const { generatePostImage } = await import("./image-generator");
+            const imgResult = await generatePostImage({
+              content: item.content || "",
+              platform: "instagram",
+              suggestedMediaPrompt: `Warm, hopeful, recovery-themed image for Instagram: ${(item.content || "").substring(0, 200)}`,
+            });
+            if (imgResult.success && imgResult.imageUrl) {
+              // Cache for Instagram (IG fetches server-side, needs public URL)
+              try {
+                const { cacheImageForInstagram } = await import("./image-proxy");
+                imageUrl = await cacheImageForInstagram(imgResult.imageUrl) || imgResult.imageUrl;
+                console.log(`[Scheduler] Instagram: auto-generated image for text-only post`);
+              } catch {
+                imageUrl = imgResult.imageUrl;
               }
             }
           } catch (err: any) {
@@ -330,7 +323,7 @@ async function postContentItem(item: {
       }
       case "youtube": {
         if (!isYouTubeConfigured()) {
-          result = { success: false, error: "YouTube credentials not configured - visit /api/youtube/connect to authorize" };
+          result = { success: false, error: "YouTube not configured. Visit /api/youtube/connect to authorize your channel, then add YOUTUBE_REFRESH_TOKEN to Railway env vars." };
           await db.update(contentQueue)
             .set({ status: "ready", errorMessage: result.error })
             .where(eq(contentQueue.id, item.id));
@@ -364,14 +357,20 @@ async function postContentItem(item: {
               };
               break;
             } else {
-              result = { success: false, error: pipelineResult.error || "HeyGen video generation failed" };
+              // If HeyGen generated the video but YouTube upload failed, keep as ready to retry
+              const errDetail = pipelineResult.error || "HeyGen→YouTube pipeline failed";
+              if (pipelineResult.heygenVideoUrl) {
+                result = { success: false, error: `Video generated (${pipelineResult.heygenVideoUrl}) but YouTube upload failed: ${errDetail}` };
+              } else {
+                result = { success: false, error: `HeyGen video generation failed: ${errDetail}` };
+              }
             }
           } catch (err: any) {
             console.error(`[Scheduler] HeyGen→YouTube pipeline failed:`, err.message);
-            result = { success: false, error: `HeyGen pipeline error: ${err.message}` };
+            result = { success: false, error: `HeyGen→YouTube pipeline error: ${err.message}` };
           }
         } else {
-          result = { success: false, error: "YouTube content ready — video upload required. Configure HeyGen for auto video generation, or use admin panel to upload manually." };
+          result = { success: false, error: "YouTube script ready but HeyGen not configured for auto video generation. Add HEYGEN_API_KEY to Railway, or upload video manually from admin." };
           await db.update(contentQueue)
             .set({ status: "ready", errorMessage: result.error })
             .where(eq(contentQueue.id, item.id));
@@ -433,18 +432,20 @@ async function postContentItem(item: {
       }).where(eq(contentQueue.id, item.id));
       console.log(`[Scheduler] Posted to ${item.platform}: ${result.tweetUrl}`);
     } else {
+      const errMsg = typeof result.error === "string" ? result.error : JSON.stringify(result.error);
       await db.update(contentQueue).set({
         status: "failed",
-        errorMessage: result.error,
+        errorMessage: errMsg,
       }).where(eq(contentQueue.id, item.id));
-      console.error(`[Scheduler] Failed to post to ${item.platform}: ${result.error}`);
+      console.error(`[Scheduler] Failed to post to ${item.platform}: ${errMsg}`);
     }
   } catch (err: any) {
+    const errMsg = typeof err === "string" ? err : (err?.message || JSON.stringify(err));
     await db.update(contentQueue).set({
       status: "failed",
-      errorMessage: err.message,
+      errorMessage: errMsg,
     }).where(eq(contentQueue.id, item.id));
-    console.error(`[Scheduler] Error posting to ${item.platform}:`, err.message);
+    console.error(`[Scheduler] Error posting to ${item.platform}:`, errMsg);
   }
 }
 

@@ -58,7 +58,7 @@ async function getAccessToken(): Promise<string> {
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`Failed to refresh YouTube token: ${err}`);
+    throw new Error(`Failed to refresh YouTube token (${response.status}): ${err}. If "invalid_grant", re-authorize at /api/youtube/connect`);
   }
 
   const data = await response.json();

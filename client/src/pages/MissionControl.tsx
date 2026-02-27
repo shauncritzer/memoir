@@ -18,12 +18,17 @@ import {
   Shield,
   Zap,
   TrendingUp,
+  Send,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminNav from "@/components/AdminNav";
 
 export default function MissionControl() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [commandInput, setCommandInput] = useState("");
+  const [feedbackInputs, setFeedbackInputs] = useState<Record<number, string>>({});
+  const [showFeedback, setShowFeedback] = useState<Record<number, boolean>>({});
 
   const agentState = trpc.agent.getState.useQuery();
   const businesses = trpc.agent.getBusinesses.useQuery();
@@ -46,6 +51,26 @@ export default function MissionControl() {
       pendingActions.refetch();
       recentActions.refetch();
     },
+  });
+
+  const respondMutation = trpc.agent.respondToAction.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(`Action ${vars.decision === "approve" ? "approved" : vars.decision === "deny" ? "denied" : "updated"} with feedback`);
+      setFeedbackInputs(prev => { const next = { ...prev }; delete next[vars.actionId]; return next; });
+      setShowFeedback(prev => { const next = { ...prev }; delete next[vars.actionId]; return next; });
+      pendingActions.refetch();
+      recentActions.refetch();
+    },
+    onError: (err) => toast.error(`Failed: ${err.message}`),
+  });
+
+  const sendCommandMutation = trpc.agent.sendCommand.useMutation({
+    onSuccess: () => {
+      toast.success("Command sent to Mission Control");
+      setCommandInput("");
+      recentActions.refetch();
+    },
+    onError: (err) => toast.error(`Failed: ${err.message}`),
   });
 
   const runCycleMutation = trpc.agent.runCycle.useMutation({
@@ -165,6 +190,43 @@ export default function MissionControl() {
           {/* OVERVIEW TAB */}
           <TabsContent value="overview">
             <div className="grid md:grid-cols-2 gap-6">
+              {/* Command Input */}
+              <Card className="bg-gray-900/50 border-gray-800 md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <MessageSquare className="h-5 w-5 text-green-400" />
+                    Talk to Mission Control
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Send instructions, ask questions, or tell the agent what to do next
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={commandInput}
+                      onChange={(e) => setCommandInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && commandInput.trim()) {
+                          sendCommandMutation.mutate({ message: commandInput.trim() });
+                        }
+                      }}
+                      placeholder="e.g., 'Generate 5 Instagram posts about recovery', 'Fix the content queue', 'Pause all posting'..."
+                      className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    />
+                    <Button
+                      onClick={() => commandInput.trim() && sendCommandMutation.mutate({ message: commandInput.trim() })}
+                      disabled={sendCommandMutation.isPending || !commandInput.trim()}
+                      className="bg-purple-700 hover:bg-purple-600"
+                    >
+                      <Send className="h-4 w-4 mr-1" />
+                      {sendCommandMutation.isPending ? "Sending..." : "Send"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Latest Briefing */}
               <Card className="bg-gray-900/50 border-gray-800 md:col-span-2">
                 <CardHeader>
@@ -312,26 +374,83 @@ export default function MissionControl() {
                             Proposed: {new Date(action.created_at).toLocaleString()}
                           </p>
                         </div>
-                        <div className="flex gap-2 ml-4">
-                          <Button
-                            size="sm"
-                            onClick={() => approveMutation.mutate({ actionId: action.id })}
-                            disabled={approveMutation.isPending}
-                            className="bg-green-700 hover:bg-green-600"
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => denyMutation.mutate({ actionId: action.id })}
-                            disabled={denyMutation.isPending}
-                            className="border-red-700 text-red-400 hover:bg-red-700/20"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" /> Deny
-                          </Button>
+                        <div className="flex flex-col gap-2 ml-4">
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                const fb = feedbackInputs[action.id];
+                                if (fb) {
+                                  respondMutation.mutate({ actionId: action.id, decision: "approve", feedback: fb });
+                                } else {
+                                  approveMutation.mutate({ actionId: action.id });
+                                }
+                              }}
+                              disabled={approveMutation.isPending || respondMutation.isPending}
+                              className="bg-green-700 hover:bg-green-600"
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> Yes
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const fb = feedbackInputs[action.id];
+                                if (fb) {
+                                  respondMutation.mutate({ actionId: action.id, decision: "deny", feedback: fb });
+                                } else {
+                                  denyMutation.mutate({ actionId: action.id });
+                                }
+                              }}
+                              disabled={denyMutation.isPending || respondMutation.isPending}
+                              className="border-red-700 text-red-400 hover:bg-red-700/20"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" /> No
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowFeedback(prev => ({ ...prev, [action.id]: !prev[action.id] }))}
+                              className="border-blue-700 text-blue-400 hover:bg-blue-700/20"
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" /> Reply
+                            </Button>
+                          </div>
                         </div>
                       </div>
+                      {/* Feedback input */}
+                      {showFeedback[action.id] && (
+                        <div className="mt-3 flex gap-2">
+                          <input
+                            type="text"
+                            value={feedbackInputs[action.id] || ""}
+                            onChange={(e) => setFeedbackInputs(prev => ({ ...prev, [action.id]: e.target.value }))}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && feedbackInputs[action.id]?.trim()) {
+                                respondMutation.mutate({
+                                  actionId: action.id,
+                                  decision: "modify",
+                                  feedback: feedbackInputs[action.id].trim(),
+                                });
+                              }
+                            }}
+                            placeholder="Add feedback, modify instructions, or explain why..."
+                            className="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => feedbackInputs[action.id]?.trim() && respondMutation.mutate({
+                              actionId: action.id,
+                              decision: "modify",
+                              feedback: feedbackInputs[action.id].trim(),
+                            })}
+                            disabled={respondMutation.isPending || !feedbackInputs[action.id]?.trim()}
+                            className="bg-blue-700 hover:bg-blue-600"
+                          >
+                            <Send className="h-3 w-3 mr-1" /> Send
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
