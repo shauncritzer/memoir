@@ -1051,6 +1051,43 @@ export async function markReportRead(reportId: number): Promise<boolean> {
   }
 }
 
+// ─── Owner Command Processing ────────────────────────────────────────────
+
+/**
+ * Process an owner command — store it as an action that the agent will pick up.
+ * This allows the owner to send instructions like "fix content queue" or "generate more IG posts"
+ */
+export async function proposeOwnerCommand(message: string, businessSlug?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    const { sql } = await import("drizzle-orm");
+
+    // Find the business ID if slug provided
+    let businessId: number | null = null;
+    if (businessSlug && businessSlug !== "all") {
+      const [rows] = await db.execute(sql`SELECT id FROM businesses WHERE slug = ${businessSlug} LIMIT 1`) as any;
+      if ((rows as any[])?.[0]?.id) {
+        businessId = (rows as any[])[0].id;
+      }
+    }
+
+    await proposeAction({
+      businessId,
+      category: "owner_command",
+      title: `Owner instruction: ${message.substring(0, 80)}`,
+      description: message,
+      riskTier: 2, // Auto-execute since the owner explicitly asked
+      metadata: { source: "mission_control_ui", businessSlug: businessSlug || "all" },
+    });
+
+    console.log(`[MissionControl] Owner command received: ${message.substring(0, 80)}`);
+  } catch (err: any) {
+    console.error("[MissionControl] Failed to process owner command:", err.message);
+  }
+}
+
 // ─── Startup ───────────────────────────────────────────────────────────────
 
 export function startMissionControl(): void {

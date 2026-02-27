@@ -41,6 +41,26 @@ export type TweetResult = {
   error?: string;
 };
 
+/** Format Twitter API errors into actionable messages */
+function formatTwitterError(err: any): string {
+  const rawMsg = err?.data?.detail || err?.message || String(err);
+  const statusCode = err?.code || err?.statusCode || err?.data?.status;
+
+  if (rawMsg.includes("not have any credits") || rawMsg.includes("client-not-enrolled")) {
+    return `X API credits exhausted or not enrolled. Free tier = 500 tweets/month. Go to developer.x.com → Dashboard → upgrade plan or wait for monthly reset. Raw: ${rawMsg}`;
+  }
+  if (statusCode === 401) {
+    return `X API 401 Unauthorized — API keys invalid or expired. Regenerate in X Developer Portal. Raw: ${rawMsg}`;
+  }
+  if (statusCode === 403) {
+    return `X API 403 Forbidden — App permissions may not include write access. Check Developer Portal → App → User Auth → must be "Read and Write". Raw: ${rawMsg}`;
+  }
+  if (statusCode === 429) {
+    return `X API 429 Rate Limited — too many requests. Free tier: ~17 tweets/day. Wait and retry. Raw: ${rawMsg}`;
+  }
+  return rawMsg;
+}
+
 /** Post a single tweet */
 export async function postTweet(text: string): Promise<TweetResult> {
   const client = getUserClient();
@@ -58,7 +78,7 @@ export async function postTweet(text: string): Promise<TweetResult> {
     console.log(`[Twitter] Posted tweet ${tweetId}: ${text.substring(0, 50)}...`);
     return { success: true, tweetId, tweetUrl };
   } catch (err: any) {
-    const errorMsg = err?.data?.detail || err?.message || String(err);
+    const errorMsg = formatTwitterError(err);
     console.error(`[Twitter] Failed to post tweet:`, errorMsg);
     return { success: false, error: errorMsg };
   }
@@ -95,7 +115,7 @@ export async function postThread(tweets: string[]): Promise<TweetResult> {
     console.log(`[Twitter] Posted thread of ${tweets.length} tweets starting at ${firstResult.data.id}`);
     return { success: true, tweetId: firstResult.data.id, tweetUrl };
   } catch (err: any) {
-    const errorMsg = err?.data?.detail || err?.message || String(err);
+    const errorMsg = formatTwitterError(err);
     console.error(`[Twitter] Failed to post thread:`, errorMsg);
     return { success: false, error: errorMsg };
   }
@@ -130,7 +150,7 @@ export async function postTweetWithMedia(text: string, mediaUrls: string[]): Pro
     console.log(`[Twitter] Posted tweet with ${mediaIds.length} media: ${tweetId}`);
     return { success: true, tweetId, tweetUrl };
   } catch (err: any) {
-    const errorMsg = err?.data?.detail || err?.message || String(err);
+    const errorMsg = formatTwitterError(err);
     console.error(`[Twitter] Failed to post tweet with media:`, errorMsg);
     return { success: false, error: errorMsg };
   }

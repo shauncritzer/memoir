@@ -3691,6 +3691,68 @@ Recovery is possible. But it requires working with your biology, not against it.
       return state;
     }),
 
+    /** Respond to a proposed action with feedback (approve with notes, deny with reason, or custom instruction) */
+    respondToAction: protectedProcedure
+      .input(z.object({
+        actionId: z.number(),
+        decision: z.enum(["approve", "deny", "modify"]),
+        feedback: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        const { sql } = await import("drizzle-orm");
+
+        if (input.decision === "approve") {
+          await db.execute(sql`UPDATE agent_actions
+            SET status = 'approved', approved_at = NOW(),
+                metadata = JSON_SET(COALESCE(metadata, '{}'), '$.owner_feedback', ${input.feedback || ""})
+            WHERE id = ${input.actionId} AND status = 'proposed'`);
+        } else if (input.decision === "deny") {
+          await db.execute(sql`UPDATE agent_actions
+            SET status = 'denied',
+                error_message = ${input.feedback || "Denied by owner"},
+                metadata = JSON_SET(COALESCE(metadata, '{}'), '$.owner_feedback', ${input.feedback || ""})
+            WHERE id = ${input.actionId} AND status = 'proposed'`);
+        } else if (input.decision === "modify") {
+          // Keep as proposed but store feedback for the agent to incorporate
+          await db.execute(sql`UPDATE agent_actions
+            SET description = CONCAT(description, '\n\n[Owner feedback]: ', ${input.feedback || ""}),
+                metadata = JSON_SET(COALESCE(metadata, '{}'), '$.owner_feedback', ${input.feedback || ""})
+            WHERE id = ${input.actionId} AND status = 'proposed'`);
+        }
+
+        return { success: true };
+      }),
+
+    /** Send a command/message to Mission Control (stored as a report for the agent to process) */
+    sendCommand: protectedProcedure
+      .input(z.object({
+        message: z.string().min(1),
+        businessSlug: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        const { sql } = await import("drizzle-orm");
+
+        // Store as an owner_command report that the agent picks up in its next cycle
+        await db.execute(sql`INSERT INTO agent_reports
+          (report_type, title, content, metrics)
+          VALUES (
+            'owner_command',
+            ${`Owner Command - ${new Date().toLocaleString()}`},
+            ${input.message},
+            ${JSON.stringify({ businessSlug: input.businessSlug || "all", timestamp: new Date().toISOString() })}
+          )`);
+
+        // Also create a tier-3 action to process the command
+        const { proposeOwnerCommand } = await import("./agent/mission-control");
+        await proposeOwnerCommand(input.message, input.businessSlug);
+
+        return { success: true };
+      }),
+
     /** Update a business profile */
     updateBusiness: protectedProcedure
       .input(z.object({
