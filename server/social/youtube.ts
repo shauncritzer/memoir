@@ -43,7 +43,8 @@ async function getAccessToken(): Promise<string> {
   }
 
   const { clientId, clientSecret, refreshToken } = getYouTubeCredentials();
-  if (!refreshToken) throw new Error("YouTube refresh token not configured");
+  if (!refreshToken) throw new Error("YouTube refresh token not configured. Visit /api/youtube/connect to authorize.");
+  if (!clientId || !clientSecret) throw new Error("YouTube OAuth credentials missing (YOUTUBE_CLIENT_ID / YOUTUBE_CLIENT_SECRET).");
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -57,8 +58,33 @@ async function getAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Failed to refresh YouTube token (${response.status}): ${err}. If "invalid_grant", re-authorize at /api/youtube/connect`);
+    const errText = await response.text();
+    let parsed: any = {};
+    try { parsed = JSON.parse(errText); } catch {}
+
+    // Clear cached token on any refresh failure
+    cachedAccessToken = null;
+    tokenExpiresAt = 0;
+
+    if (parsed.error === "invalid_grant") {
+      throw new Error(
+        `YouTube token expired (invalid_grant). ` +
+        `COMMON CAUSES: (1) Google Cloud project is in "Testing" mode — tokens expire after 7 days. ` +
+        `Fix: Go to Google Cloud Console → APIs & Services → OAuth consent screen → click "Publish App" to move to Production. ` +
+        `(2) User revoked access. (3) Token was regenerated elsewhere. ` +
+        `FIX: Visit /api/youtube/connect to re-authorize and get a new YOUTUBE_REFRESH_TOKEN, ` +
+        `then update it in Railway env vars and redeploy.`
+      );
+    }
+
+    if (parsed.error === "invalid_client") {
+      throw new Error(
+        `YouTube OAuth error: invalid_client. Your YOUTUBE_CLIENT_ID or YOUTUBE_CLIENT_SECRET is wrong. ` +
+        `Check Google Cloud Console → APIs & Services → Credentials.`
+      );
+    }
+
+    throw new Error(`YouTube token refresh failed (${response.status}): ${errText}`);
   }
 
   const data = await response.json();
@@ -378,6 +404,80 @@ export async function getChannelInfo(): Promise<{
   } catch {
     return null;
   }
+}
+
+/** Full diagnostic check for YouTube integration */
+export async function diagnoseYouTube(): Promise<{
+  configured: boolean;
+  credentials: Record<string, boolean>;
+  tokenTest?: { success: boolean; error?: string };
+  channelTest?: { success: boolean; channelTitle?: string; error?: string };
+  quotaEstimate?: string;
+  diagnosis: string;
+}> {
+  const creds = getYouTubeCredentials();
+  const credentials = {
+    YOUTUBE_CLIENT_ID: !!creds.clientId,
+    YOUTUBE_CLIENT_SECRET: !!creds.clientSecret,
+    YOUTUBE_REDIRECT_URI: !!creds.redirectUri,
+    YOUTUBE_REFRESH_TOKEN: !!creds.refreshToken,
+  };
+
+  if (!creds.clientId || !creds.clientSecret) {
+    return {
+      configured: false,
+      credentials,
+      diagnosis: "Missing OAuth credentials. Set YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET from Google Cloud Console → APIs & Services → Credentials.",
+    };
+  }
+
+  if (!creds.refreshToken) {
+    return {
+      configured: false,
+      credentials,
+      diagnosis: "No refresh token. Visit /api/youtube/connect to authorize your YouTube channel, then save the YOUTUBE_REFRESH_TOKEN to Railway env vars.",
+    };
+  }
+
+  // Test token refresh
+  let tokenTest: { success: boolean; error?: string };
+  try {
+    await getAccessToken();
+    tokenTest = { success: true };
+  } catch (err: any) {
+    return {
+      configured: true,
+      credentials,
+      tokenTest: { success: false, error: err.message },
+      diagnosis: err.message,
+    };
+  }
+
+  // Test channel access
+  let channelTest: { success: boolean; channelTitle?: string; error?: string };
+  try {
+    const channel = await getChannelInfo();
+    if (channel) {
+      channelTest = { success: true, channelTitle: channel.title };
+    } else {
+      channelTest = { success: false, error: "No channel found for this account" };
+    }
+  } catch (err: any) {
+    channelTest = { success: false, error: err.message };
+  }
+
+  const diagnosis = channelTest.success
+    ? `YouTube connected to "${channelTest.channelTitle}". Token refresh working. Ready to upload videos. Quota: 10,000 units/day (6 video uploads/day max).`
+    : `Token works but channel access failed: ${channelTest.error}. Ensure the authorized Google account has a YouTube channel.`;
+
+  return {
+    configured: true,
+    credentials,
+    tokenTest,
+    channelTest,
+    quotaEstimate: "10,000 units/day (1,600 per upload = ~6 uploads/day)",
+    diagnosis,
+  };
 }
 
 /** List recent uploads from the channel */

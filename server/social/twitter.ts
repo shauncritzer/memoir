@@ -41,22 +41,35 @@ export type TweetResult = {
   error?: string;
 };
 
+/**
+ * X API Tier Info (as of 2024+):
+ *   Free ($0) — READ ONLY: 1,500 tweet reads/month, 1 app, NO tweet creation
+ *   Basic ($200/mo) — 3,000 tweets/month (post), 10,000 reads, 1 app, user-context OAuth
+ *   Pro ($5,000/mo) — 300,000 tweets/month, 1M reads, 3 apps, full API
+ *
+ * The "Free" tier does NOT support posting tweets at all.
+ * You need at least Basic ($200/mo) to write/post tweets.
+ */
+
 /** Format Twitter API errors into actionable messages */
 function formatTwitterError(err: any): string {
   const rawMsg = err?.data?.detail || err?.message || String(err);
   const statusCode = err?.code || err?.statusCode || err?.data?.status;
 
   if (rawMsg.includes("not have any credits") || rawMsg.includes("client-not-enrolled")) {
-    return `X API credits exhausted or not enrolled. Free tier = 500 tweets/month. Go to developer.x.com → Dashboard → upgrade plan or wait for monthly reset. Raw: ${rawMsg}`;
+    return `X API: Not enrolled or no write credits. IMPORTANT: X's Free tier ($0) is READ-ONLY — it cannot post tweets. You need the Basic tier ($200/mo) at developer.x.com/en/portal/products. Raw: ${rawMsg}`;
+  }
+  if (rawMsg.includes("Your current subscription") || rawMsg.includes("not included in your current subscription")) {
+    return `X API: Your subscription tier does not include tweet posting. The Free tier is read-only. Upgrade to Basic ($200/mo) at developer.x.com/en/portal/products. Raw: ${rawMsg}`;
   }
   if (statusCode === 401) {
-    return `X API 401 Unauthorized — API keys invalid or expired. Regenerate in X Developer Portal. Raw: ${rawMsg}`;
+    return `X API 401 Unauthorized — API keys invalid or expired. Regenerate at developer.x.com → Dashboard → Keys & Tokens. Raw: ${rawMsg}`;
   }
   if (statusCode === 403) {
-    return `X API 403 Forbidden — App permissions may not include write access. Check Developer Portal → App → User Auth → must be "Read and Write". Raw: ${rawMsg}`;
+    return `X API 403 Forbidden — Either (a) Free tier which is read-only (upgrade to Basic $200/mo), or (b) app permissions don't include write access. Check: Developer Portal → App → Settings → User authentication → must be "Read and Write". Raw: ${rawMsg}`;
   }
   if (statusCode === 429) {
-    return `X API 429 Rate Limited — too many requests. Free tier: ~17 tweets/day. Wait and retry. Raw: ${rawMsg}`;
+    return `X API 429 Rate Limited — too many requests. Basic tier: ~100 tweets/day. Wait 15 min and retry. Raw: ${rawMsg}`;
   }
   return rawMsg;
 }
@@ -219,7 +232,7 @@ export async function diagnoseTwitter(): Promise<{
     };
   }
 
-  // Test authentication
+  // Test authentication (read — works on all tiers)
   const client = getUserClient()!;
   let authTest: { success: boolean; username?: string; error?: string };
   try {
@@ -232,13 +245,13 @@ export async function diagnoseTwitter(): Promise<{
 
     let diagnosis = `Auth failed: ${errorDetail}`;
     if (statusCode === 401) {
-      diagnosis = "401 Unauthorized — API keys are invalid or expired. Regenerate them in the Twitter Developer Portal.";
+      diagnosis = "401 Unauthorized — API keys are invalid or expired. Regenerate them at developer.x.com → Dashboard → Keys & Tokens.";
     } else if (statusCode === 403) {
-      diagnosis = "403 Forbidden — App doesn't have the right permissions. Check: Developer Portal → App → User authentication settings → App permissions must be 'Read and write'. Also ensure you have at least Free tier access (not just Essential).";
+      diagnosis = "403 Forbidden — Your X API tier likely does not support this operation. The Free tier ($0) is READ-ONLY. You need the Basic tier ($200/mo) to post tweets. Upgrade at developer.x.com/en/portal/products.";
     } else if (statusCode === 429) {
-      diagnosis = "429 Rate Limited — Too many requests. Free tier: 500 tweets/month, 17/day.";
+      diagnosis = "429 Rate Limited — Too many requests. Wait 15 minutes and retry.";
     } else if (errorDetail.includes("client-not-enrolled")) {
-      diagnosis = "Your app is not enrolled in the Free tier. Go to developer.x.com → Projects & Apps → Subscribe to Free access.";
+      diagnosis = "Your app is not enrolled in any API tier. Go to developer.x.com/en/portal/products → Subscribe to Basic ($200/mo) for tweet posting.";
     }
 
     return {
@@ -249,10 +262,38 @@ export async function diagnoseTwitter(): Promise<{
     };
   }
 
+  // Test write capability by checking usage limits (doesn't actually post)
+  let postTest: { success: boolean; error?: string } = { success: false, error: "Not tested" };
+  try {
+    // Try to access the tweet creation endpoint with a dry-run-like approach:
+    // We'll attempt to post and catch any tier/permission errors.
+    // NOTE: There's no true dry-run for X API, so we check via the usage endpoint.
+    const usageResponse = await fetch("https://api.twitter.com/2/usage/tweets", {
+      headers: { Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },
+    });
+    if (usageResponse.ok) {
+      const usage = await usageResponse.json();
+      const cap = usage?.data?.cap_reset_day || "unknown";
+      postTest = { success: true, error: `Usage endpoint accessible. Cap resets: ${cap}` };
+    } else if (usageResponse.status === 403) {
+      postTest = { success: false, error: "403 on usage endpoint — Free tier is READ-ONLY. No tweet posting. Upgrade to Basic ($200/mo)." };
+    } else {
+      postTest = { success: false, error: `Usage check returned ${usageResponse.status}` };
+    }
+  } catch (err: any) {
+    postTest = { success: false, error: `Usage check failed: ${err.message}` };
+  }
+
+  const writeCapable = postTest.success;
+  const tierInfo = writeCapable
+    ? "Basic or Pro tier detected — tweet posting should work."
+    : "WARNING: Your X API tier appears to be Free (read-only). Tweet posting will NOT work. Upgrade to Basic ($200/mo) at developer.x.com/en/portal/products.";
+
   return {
     configured: true,
     credentials,
     authTest,
-    diagnosis: `Authenticated as @${authTest.username}. Credentials OK. If posting fails, check: (1) App permissions = Read+Write in Developer Portal, (2) Free tier active, (3) Monthly tweet limit not exceeded (500/mo).`,
+    postTest,
+    diagnosis: `Authenticated as @${authTest.username}. ${tierInfo} If posting fails: (1) Ensure Basic tier or higher at developer.x.com, (2) App permissions = Read+Write, (3) Monthly tweet limit not exceeded.`,
   };
 }

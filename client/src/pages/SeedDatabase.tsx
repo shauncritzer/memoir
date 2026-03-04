@@ -12,11 +12,13 @@ export default function SeedDatabase() {
   const [pdfMessage, setPdfMessage] = useState("");
   const [migrateStatus, setMigrateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [migrateMessage, setMigrateMessage] = useState("");
+  const [courseStatus, setCourseStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [courseMessage, setCourseMessage] = useState("");
 
-  const seedMutation = trpc.admin.seedBlogPosts.useMutation({
+  const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
       setStatus("success");
-      setMessage(data.message || `Successfully seeded ${data.postsCreated} blog posts!`);
+      setMessage(data.message || `Successfully added ${data.postsCreated} new blog posts!`);
     },
     onError: (error) => {
       setStatus("error");
@@ -32,6 +34,17 @@ export default function SeedDatabase() {
     onError: (error) => {
       setPdfStatus("error");
       setPdfMessage(error.message);
+    },
+  });
+
+  const seedCourseMutation = trpc.admin.seedFromBrokenToWhole.useMutation({
+    onSuccess: (data) => {
+      setCourseStatus("success");
+      setCourseMessage(data.message || `Seeded ${data.modules} modules and ${data.lessons} lessons!`);
+    },
+    onError: (error) => {
+      setCourseStatus("error");
+      setCourseMessage(error.message);
     },
   });
 
@@ -56,6 +69,12 @@ export default function SeedDatabase() {
     setPdfStatus("loading");
     setPdfMessage("");
     fixPdfMutation.mutate({});
+  };
+
+  const handleSeedCourse = () => {
+    setCourseStatus("loading");
+    setCourseMessage("");
+    seedCourseMutation.mutate();
   };
 
   const handleMigrate = () => {
@@ -132,10 +151,57 @@ export default function SeedDatabase() {
         </div>
 
         <div className="border-t pt-6 space-y-4">
-          <h3 className="font-semibold">Seed Blog Posts</h3>
+          <h3 className="font-semibold">Seed "From Broken to Whole" Course</h3>
           <p className="text-sm text-muted-foreground">
-            <strong>What this does:</strong> Deletes existing blog posts and creates 5 new comprehensive blog posts (800-1100 words each).
-            Does NOT modify PDFs or any other data. Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience.
+            <strong>What this does:</strong> Creates 8 modules and 30 daily lessons for the $97 course in the database.
+            Deletes any existing course data first to avoid duplicates. Video URLs are left empty (will be generated via HeyGen pipeline).
+          </p>
+
+          <Button
+            onClick={handleSeedCourse}
+            disabled={courseStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-green-600 hover:bg-green-700 text-white font-bold"
+          >
+            {courseStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Seeding Course...
+              </>
+            ) : (
+              "Seed 30-Day Course"
+            )}
+          </Button>
+
+          {courseStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{courseMessage}</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Visit <a href="/course/from-broken-to-whole" className="underline font-medium hover:text-green-900">/course/from-broken-to-whole</a> to test (requires purchase)
+                </p>
+              </div>
+            </div>
+          )}
+
+          {courseStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{courseMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Add Blog Posts</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Adds new blog posts WITHOUT deleting existing ones. Checks for duplicates by slug.
+            Topics: Nervous System, Self-Compassion, Inner Child, Somatic Healing, REWIRED Method.
           </p>
 
           <Button
@@ -150,7 +216,7 @@ export default function SeedDatabase() {
                 Seeding Database...
               </>
             ) : (
-              "Seed Blog Posts"
+              "Add New Blog Posts (Safe)"
             )}
           </Button>
 
@@ -223,23 +289,23 @@ export default function SeedDatabase() {
         </div>
 
         <div className="border-t pt-6 space-y-3">
-          <h3 className="font-semibold text-sm text-muted-foreground">What this does:</h3>
+          <h3 className="font-semibold text-sm text-muted-foreground">Summary:</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Deletes existing blog posts</span>
+              <span>Blog seeding adds new posts only — never deletes existing content</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Creates 5 comprehensive blog posts (800-1100 words each)</span>
+              <span>Course seeding creates 8 modules + 30 daily lessons for From Broken to Whole</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience</span>
+              <span>AI Coach migration creates the table for message tracking</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>All content is kid-safe and ad-platform approved</span>
+              <span>All actions are safe to run multiple times</span>
             </li>
           </ul>
         </div>

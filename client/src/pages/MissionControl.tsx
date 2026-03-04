@@ -20,6 +20,11 @@ import {
   TrendingUp,
   Send,
   MessageSquare,
+  Search,
+  MessageCircle,
+  Film,
+  Loader2,
+  Mic,
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminNav from "@/components/AdminNav";
@@ -29,6 +34,20 @@ export default function MissionControl() {
   const [commandInput, setCommandInput] = useState("");
   const [feedbackInputs, setFeedbackInputs] = useState<Record<number, string>>({});
   const [showFeedback, setShowFeedback] = useState<Record<number, boolean>>({});
+
+  // Research Agent state
+  const [researchTopic, setResearchTopic] = useState("");
+  const [researchScope, setResearchScope] = useState<string>("course");
+  const [researchDepth, setResearchDepth] = useState<string>("standard");
+  const [researchContext, setResearchContext] = useState("");
+  const [createDraft, setCreateDraft] = useState(true);
+
+  // Content Feedback state
+  const [feedbackTarget, setFeedbackTarget] = useState<string>("blog_post");
+  const [feedbackTargetId, setFeedbackTargetId] = useState("");
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackType, setFeedbackType] = useState<string>("suggestion");
+  const [feedbackAutoApply, setFeedbackAutoApply] = useState(false);
 
   const agentState = trpc.agent.getState.useQuery();
   const businesses = trpc.agent.getBusinesses.useQuery();
@@ -87,6 +106,42 @@ export default function MissionControl() {
   const markReadMutation = trpc.agent.markReportRead.useMutation({
     onSuccess: () => briefings.refetch(),
   });
+
+  // Research Agent mutations
+  const researchReports = trpc.agent.getReports.useQuery({ type: "research", limit: 10 });
+
+  const conductResearch = trpc.agent.conductResearch.useMutation({
+    onSuccess: (data) => {
+      toast.success("Research complete!");
+      setResearchTopic("");
+      setResearchContext("");
+      researchReports.refetch();
+    },
+    onError: (err) => toast.error(`Research failed: ${err.message}`),
+  });
+
+  const analyzeCompetitors = trpc.agent.analyzeCompetitors.useMutation({
+    onSuccess: () => {
+      toast.success("Competitor analysis complete!");
+      setResearchTopic("");
+      researchReports.refetch();
+    },
+    onError: (err) => toast.error(`Analysis failed: ${err.message}`),
+  });
+
+  // Content Feedback mutation
+  const submitFeedback = trpc.agent.submitContentFeedback.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Feedback processed: ${data.success ? "applied" : "proposed"}`);
+      setFeedbackText("");
+      setFeedbackTargetId("");
+      recentActions.refetch();
+    },
+    onError: (err) => toast.error(`Feedback failed: ${err.message}`),
+  });
+
+  // Video Producer status
+  const videoStatus = trpc.admin.videoProducerStatus.useQuery(undefined, { retry: false });
 
   const state = agentState.data;
 
@@ -176,15 +231,24 @@ export default function MissionControl() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-gray-900 border border-gray-800 mb-6">
+          <TabsList className="bg-gray-900 border border-gray-800 mb-6 flex-wrap">
             <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:text-white">Overview</TabsTrigger>
             <TabsTrigger value="approvals" className="text-gray-300 data-[state=active]:text-white">
               Approvals {(pendingActions.data?.length || 0) > 0 && `(${pendingActions.data?.length})`}
             </TabsTrigger>
+            <TabsTrigger value="research" className="text-gray-300 data-[state=active]:text-white">
+              <Search className="h-3.5 w-3.5 mr-1" /> Research
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="text-gray-300 data-[state=active]:text-white">
+              <MessageCircle className="h-3.5 w-3.5 mr-1" /> Feedback
+            </TabsTrigger>
+            <TabsTrigger value="video-producer" className="text-gray-300 data-[state=active]:text-white">
+              <Film className="h-3.5 w-3.5 mr-1" /> Video
+            </TabsTrigger>
             <TabsTrigger value="businesses" className="text-gray-300 data-[state=active]:text-white">Businesses</TabsTrigger>
             <TabsTrigger value="briefings" className="text-gray-300 data-[state=active]:text-white">Briefings</TabsTrigger>
             <TabsTrigger value="ideas" className="text-gray-300 data-[state=active]:text-white">Ideas</TabsTrigger>
-            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-white">Action History</TabsTrigger>
+            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-white">History</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -461,6 +525,406 @@ export default function MissionControl() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* RESEARCH AGENT TAB */}
+          <TabsContent value="research">
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-gray-900/50 border-gray-800 md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Search className="h-5 w-5 text-cyan-400" />
+                    Research Agent
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Conduct market research, competitor analysis, and draft courses or lead magnets
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-1 block">Topic</label>
+                    <input
+                      type="text"
+                      value={researchTopic}
+                      onChange={(e) => setResearchTopic(e.target.value)}
+                      placeholder="e.g., 'addiction recovery online courses', 'trauma-informed coaching certifications'"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-1 block">Scope</label>
+                      <select
+                        value={researchScope}
+                        onChange={(e) => setResearchScope(e.target.value)}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                      >
+                        <option value="course">Course</option>
+                        <option value="digital_product">Digital Product</option>
+                        <option value="lead_magnet">Lead Magnet</option>
+                        <option value="blog_series">Blog Series</option>
+                        <option value="social_campaign">Social Campaign</option>
+                        <option value="content_strategy">Content Strategy</option>
+                        <option value="competitor_analysis">Competitor Analysis</option>
+                        <option value="market_research">Market Research</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-1 block">Depth</label>
+                      <select
+                        value={researchDepth}
+                        onChange={(e) => setResearchDepth(e.target.value)}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                      >
+                        <option value="quick">Quick (3-5 findings)</option>
+                        <option value="standard">Standard (8-12 findings)</option>
+                        <option value="deep">Deep (15+ findings)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-1 block">Additional Context (optional)</label>
+                    <textarea
+                      value={researchContext}
+                      onChange={(e) => setResearchContext(e.target.value)}
+                      placeholder="Any specific angles, requirements, or constraints..."
+                      rows={3}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={createDraft}
+                      onChange={(e) => setCreateDraft(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm text-gray-300">Create draft from research</span>
+                  </label>
+
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => conductResearch.mutate({
+                        scope: researchScope as any,
+                        topic: researchTopic,
+                        context: researchContext || undefined,
+                        depth: researchDepth as any,
+                        createDraft,
+                      })}
+                      disabled={conductResearch.isPending || !researchTopic.trim()}
+                      className="bg-cyan-700 hover:bg-cyan-600"
+                    >
+                      {conductResearch.isPending ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Researching...</>
+                      ) : (
+                        <><Search className="h-4 w-4 mr-2" /> Run Research</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => analyzeCompetitors.mutate({ topic: researchTopic })}
+                      disabled={analyzeCompetitors.isPending || !researchTopic.trim()}
+                      className="border-cyan-700 text-cyan-300 hover:bg-cyan-700/20"
+                    >
+                      {analyzeCompetitors.isPending ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analyzing...</>
+                      ) : (
+                        <><TrendingUp className="h-4 w-4 mr-2" /> Competitor Analysis</>
+                      )}
+                    </Button>
+                  </div>
+
+                  {conductResearch.isSuccess && conductResearch.data && (
+                    <Card className="bg-gray-800/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-sm font-medium text-cyan-300 mb-2">
+                          <CheckCircle2 className="h-4 w-4 inline mr-1" /> Research Complete
+                        </p>
+                        <pre className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-gray-300 text-xs">
+                          {JSON.stringify(conductResearch.data, null, 2)}
+                        </pre>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Research Reports */}
+              <div className="space-y-4">
+                <Card className="bg-gray-900/50 border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-white">Recent Research</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+                    {researchReports.data?.map((report: any) => (
+                      <div key={report.id} className="p-3 rounded-lg border border-gray-700 bg-gray-800/30">
+                        <h4 className="text-sm font-medium text-gray-100 mb-1">{report.title}</h4>
+                        <p className="text-xs text-gray-400 line-clamp-3">{report.content?.substring(0, 200)}...</p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(report.created_at).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                    {!researchReports.data?.length && (
+                      <p className="text-sm text-gray-500">No research reports yet.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* CONTENT FEEDBACK TAB */}
+          <TabsContent value="feedback">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <MessageCircle className="h-5 w-5 text-amber-400" />
+                    Content Feedback Agent
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Submit feedback on any content asset — the agent analyzes and applies changes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-1 block">Content Type</label>
+                      <select
+                        value={feedbackTarget}
+                        onChange={(e) => setFeedbackTarget(e.target.value)}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                      >
+                        <option value="blog_post">Blog Post</option>
+                        <option value="social_post">Social Post</option>
+                        <option value="course_lesson">Course Lesson</option>
+                        <option value="course_module">Course Module</option>
+                        <option value="lead_magnet">Lead Magnet</option>
+                        <option value="image">Image</option>
+                        <option value="video_script">Video Script</option>
+                        <option value="audio_script">Audio Script</option>
+                        <option value="page_copy">Page Copy</option>
+                        <option value="product_description">Product Description</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-1 block">Feedback Type</label>
+                      <select
+                        value={feedbackType}
+                        onChange={(e) => setFeedbackType(e.target.value)}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                      >
+                        <option value="suggestion">Suggestion</option>
+                        <option value="criticism">Criticism</option>
+                        <option value="bug_report">Bug Report</option>
+                        <option value="content_update">Content Update</option>
+                        <option value="style_change">Style Change</option>
+                        <option value="factual_correction">Factual Correction</option>
+                        <option value="tone_adjustment">Tone Adjustment</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-1 block">Target ID (numeric)</label>
+                    <input
+                      type="number"
+                      value={feedbackTargetId}
+                      onChange={(e) => setFeedbackTargetId(e.target.value)}
+                      placeholder="e.g., blog post ID, lesson ID..."
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-1 block">Your Feedback</label>
+                    <textarea
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      placeholder="Describe what you'd like changed, improved, or fixed..."
+                      rows={4}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={feedbackAutoApply}
+                      onChange={(e) => setFeedbackAutoApply(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm text-gray-300">Auto-apply if within risk tier (tier 1-2)</span>
+                  </label>
+
+                  <Button
+                    onClick={() => submitFeedback.mutate({
+                      target: feedbackTarget as any,
+                      targetId: feedbackTargetId ? parseInt(feedbackTargetId) : undefined,
+                      feedback: feedbackText,
+                      feedbackType: feedbackType as any,
+                      autoApply: feedbackAutoApply,
+                    })}
+                    disabled={submitFeedback.isPending || !feedbackText.trim()}
+                    className="w-full bg-amber-700 hover:bg-amber-600"
+                  >
+                    {submitFeedback.isPending ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing Feedback...</>
+                    ) : (
+                      <><Send className="h-4 w-4 mr-2" /> Submit Feedback</>
+                    )}
+                  </Button>
+
+                  {submitFeedback.data && (
+                    <Card className="bg-gray-800/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-sm font-medium text-amber-300 mb-2">
+                          <CheckCircle2 className="h-4 w-4 inline mr-1" /> Feedback Processed
+                        </p>
+                        <pre className="text-xs text-gray-300 whitespace-pre-wrap">
+                          {JSON.stringify(submitFeedback.data, null, 2)}
+                        </pre>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Feedback Guide */}
+              <div className="space-y-4">
+                <Card className="bg-gray-900/50 border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-white">How It Works</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm text-gray-400">
+                    <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                      <p className="font-medium text-gray-200 mb-1">Risk-Tiered Processing</p>
+                      <p>The agent assesses the impact of each change:</p>
+                      <ul className="mt-2 space-y-1 text-xs">
+                        <li><Badge variant="outline" className="text-xs border-green-600 text-green-400 mr-1">Tier 1</Badge> Bug fixes, minor social edits — auto-applied</li>
+                        <li><Badge variant="outline" className="text-xs border-blue-600 text-blue-400 mr-1">Tier 2</Badge> Blog corrections, images — applied + notification</li>
+                        <li><Badge variant="outline" className="text-xs border-yellow-600 text-yellow-400 mr-1">Tier 3</Badge> Course content, lead magnets — needs approval</li>
+                        <li><Badge variant="outline" className="text-xs border-red-600 text-red-400 mr-1">Tier 4</Badge> Page copy, pricing — must approve</li>
+                      </ul>
+                    </div>
+                    <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                      <p className="font-medium text-gray-200 mb-1">Supported Targets</p>
+                      <p className="text-xs">Blog posts, social posts, course lessons & modules, lead magnets, images, video/audio scripts, page copy, product descriptions</p>
+                    </div>
+                    <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                      <p className="font-medium text-gray-200 mb-1">Finding Target IDs</p>
+                      <p className="text-xs">Check the Blog Editor, Content Pipeline, or Videos page for numeric IDs. For blog posts, the ID is in the URL when editing.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* VIDEO PRODUCER TAB */}
+          <TabsContent value="video-producer">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Film className="h-5 w-5 text-rose-400" />
+                    Video Producer Status
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    HeyGen avatar video generation and ElevenLabs audio synthesis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {videoStatus.isLoading ? (
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Checking status...
+                    </div>
+                  ) : videoStatus.error ? (
+                    <div className="p-3 rounded border border-red-800 bg-red-950/30">
+                      <p className="text-sm text-red-400">Failed to check status: {videoStatus.error.message}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Film className="h-5 w-5 text-rose-400" />
+                            <span className="font-medium text-gray-200">HeyGen</span>
+                          </div>
+                          {videoStatus.data?.heygenConfigured ? (
+                            <>
+                              <Badge className="bg-green-900/50 text-green-400 border-green-700 mb-2">Connected</Badge>
+                              {videoStatus.data.heygenCredits && (
+                                <p className="text-sm text-gray-300">Credits: <strong>{videoStatus.data.heygenCredits.remaining}</strong></p>
+                              )}
+                              {videoStatus.data.avatarId && (
+                                <p className="text-xs text-gray-500 mt-1">Avatar: {videoStatus.data.avatarId}</p>
+                              )}
+                            </>
+                          ) : (
+                            <Badge variant="outline" className="border-orange-600 text-orange-400">Not Configured</Badge>
+                          )}
+                        </div>
+                        <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Mic className="h-5 w-5 text-purple-400" />
+                            <span className="font-medium text-gray-200">ElevenLabs</span>
+                          </div>
+                          {videoStatus.data?.elevenlabsConfigured ? (
+                            <Badge className="bg-green-900/50 text-green-400 border-green-700">Connected</Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-orange-600 text-orange-400">Not Configured</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => videoStatus.refetch()}
+                        disabled={videoStatus.isFetching}
+                        className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${videoStatus.isFetching ? "animate-spin" : ""}`} />
+                        Refresh Status
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <a href="/admin/videos">
+                    <Button className="w-full bg-rose-700 hover:bg-rose-600 mb-2">
+                      <Film className="h-4 w-4 mr-2" />
+                      Open Video Generation Dashboard
+                    </Button>
+                  </a>
+                  <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                    <p className="text-sm text-gray-300 font-medium mb-2">Video Producer Agent Capabilities:</p>
+                    <ul className="text-xs text-gray-400 space-y-1">
+                      <li>- Batch generate HeyGen avatar videos for course lessons</li>
+                      <li>- Auto-extract scripts from course content (modules 1-4)</li>
+                      <li>- AI-generate scripts for modules 5-8</li>
+                      <li>- ElevenLabs audio narration fallback</li>
+                      <li>- Test mode for free watermarked previews</li>
+                      <li>- 3,000 char limit per HeyGen video script</li>
+                    </ul>
+                  </div>
+                  <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                    <p className="text-sm text-gray-300 font-medium mb-2">Pipeline:</p>
+                    <p className="text-xs text-gray-400">
+                      Script extraction → HeyGen render (3-10 min) → Storage upload → DB update → YouTube upload (optional)
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* BUSINESSES TAB */}
