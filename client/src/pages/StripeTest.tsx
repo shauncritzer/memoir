@@ -21,12 +21,12 @@ export default function StripeTest() {
     },
     {
       name: "From Broken to Whole",
-      priceId: "price_1SYt3KC2dOpPzSOOpAokf1UQ",
+      priceId: "price_1SYt3kC2dOpPzSOOpAokf1UQ",
       expectedMode: "payment"
     },
     {
       name: "Monthly Membership",
-      priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+      priceId: "price_1SYt3iC2dOpPzSOOR7dbuGtY",
       expectedMode: "subscription"
     }
   ];

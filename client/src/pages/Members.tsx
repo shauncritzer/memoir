@@ -210,7 +210,7 @@ function getProductInfo(productId: string) {
       moduleCount: 8,
       duration: "30 days",
       image: "/images/from-broken-to-whole-hero.jpg",
-      href: "/products",
+      href: "/from-broken-to-whole",
     },
     "thriving-sober": {
       title: "Thriving Sober",

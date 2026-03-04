@@ -75,7 +75,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Deep Healing",
       price: "$97",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokfJUQ",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3kC2dOpPzSOOpAokf1UQ",
       description: "A 30-day trauma healing journey with daily lessons, video teachings, guided practices, and neuroscience-backed tools for lasting recovery.",
       features: [
         "30 daily lessons across 8 modules",
@@ -97,7 +97,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3iC2dOpPzSOOR7dbuGtY",
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",
@@ -184,6 +184,16 @@ export default function Products() {
                       asChild
                     >
                       <Link href="/7-day-reset">
+                        Learn More & Enroll
+                      </Link>
+                    </Button>
+                  ) : product.id === "from-broken-to-whole" ? (
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      asChild
+                    >
+                      <Link href="/from-broken-to-whole">
                         Learn More & Enroll
                       </Link>
                     </Button>

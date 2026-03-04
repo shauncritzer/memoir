@@ -211,7 +211,10 @@ IMPORTANT:
 - Be authentic, not corporate
 - The content must be ready to post as-is
 - For X threads, each tweet MUST be under 280 characters
-- Match the platform's native culture and format`;
+- Match the platform's native culture and format
+- For Instagram: ALWAYS set suggestedMediaType to "image" and provide a suggestedMediaPrompt — Instagram requires an image to post
+- For Facebook: ALWAYS set suggestedMediaType to "image" and provide a suggestedMediaPrompt — images dramatically increase engagement
+- If a CTA URL is provided, include the FULL URL in the content text (not just "click here" or "link in bio" without the URL)`;
 
   const result = await invokeLLM({
     messages: [
