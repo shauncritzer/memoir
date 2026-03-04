@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
       { label: "Shaun's Story", href: "/about", description: "From trauma to transformation" },
       { label: "The REWIRED Method", href: "/rewired-method", description: "The science behind recovery" },
       { label: "The Memoir", href: "/memoir", description: "Bent, Not Broken" },
+      { label: "Buy the Book", href: "/book", description: "Get your copy of Crooked Lines" },
     ],
   },
   {
