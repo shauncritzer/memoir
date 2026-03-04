@@ -12,6 +12,8 @@ export default function SeedDatabase() {
   const [pdfMessage, setPdfMessage] = useState("");
   const [migrateStatus, setMigrateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [migrateMessage, setMigrateMessage] = useState("");
+  const [courseStatus, setCourseStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [courseMessage, setCourseMessage] = useState("");
 
   const seedMutation = trpc.admin.seedBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -32,6 +34,17 @@ export default function SeedDatabase() {
     onError: (error) => {
       setPdfStatus("error");
       setPdfMessage(error.message);
+    },
+  });
+
+  const seedCourseMutation = trpc.admin.seedFromBrokenToWhole.useMutation({
+    onSuccess: (data) => {
+      setCourseStatus("success");
+      setCourseMessage(data.message || `Seeded ${data.modules} modules and ${data.lessons} lessons!`);
+    },
+    onError: (error) => {
+      setCourseStatus("error");
+      setCourseMessage(error.message);
     },
   });
 
@@ -56,6 +69,12 @@ export default function SeedDatabase() {
     setPdfStatus("loading");
     setPdfMessage("");
     fixPdfMutation.mutate({});
+  };
+
+  const handleSeedCourse = () => {
+    setCourseStatus("loading");
+    setCourseMessage("");
+    seedCourseMutation.mutate({});
   };
 
   const handleMigrate = () => {
@@ -126,6 +145,53 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
                 <p className="text-sm text-red-800 dark:text-red-200">{migrateMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Seed "From Broken to Whole" Course</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Creates 8 modules and 30 daily lessons for the $97 course in the database.
+            Deletes any existing course data first to avoid duplicates. Video URLs are left empty (will be generated via HeyGen pipeline).
+          </p>
+
+          <Button
+            onClick={handleSeedCourse}
+            disabled={courseStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-green-600 hover:bg-green-700 text-white font-bold"
+          >
+            {courseStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Seeding Course...
+              </>
+            ) : (
+              "Seed 30-Day Course"
+            )}
+          </Button>
+
+          {courseStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{courseMessage}</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Visit <a href="/course/from-broken-to-whole" className="underline font-medium hover:text-green-900">/course/from-broken-to-whole</a> to test (requires purchase)
+                </p>
+              </div>
+            </div>
+          )}
+
+          {courseStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{courseMessage}</p>
               </div>
             </div>
           )}

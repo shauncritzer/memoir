@@ -1743,6 +1743,175 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    // Seed From Broken to Whole course - 8 modules, 30 daily lessons
+    seedFromBrokenToWhole: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { courseModules, courseLessons } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        // Delete existing course data to avoid duplicates
+        const existingModules = await db.select().from(courseModules)
+          .where(eq(courseModules.productId, "from-broken-to-whole"));
+
+        for (const mod of existingModules) {
+          await db.delete(courseLessons).where(eq(courseLessons.moduleId, mod.id));
+        }
+        await db.delete(courseModules).where(eq(courseModules.productId, "from-broken-to-whole"));
+
+        const moduleData = [
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 1,
+            title: "Module 1: The Foundation — Understanding Your Story",
+            description: "Map your addiction timeline, identify core wounds, and understand the trauma-addiction connection. Recovery begins with seeing your story clearly.",
+            unlockDay: 1,
+            sortOrder: 1,
+            lessons: [
+              { day: 1, title: "Day 1: The Trauma-Addiction Connection", desc: "Understand why addiction is a survival strategy, not a moral failing. Map the progression from trauma to substance use." },
+              { day: 2, title: "Day 2: Sobriety vs. Recovery", desc: "The critical distinction between not using and actually healing. Assess where you are on the spectrum." },
+              { day: 3, title: "Day 3: Your Core Wound", desc: "Identify the deep, unconscious belief driving your self-destructive behavior. Common wounds: 'I'm not enough,' 'I'm unlovable,' 'I'm broken.'" },
+              { day: 4, title: "Day 4: Rewriting Your Story", desc: "Change the meaning you give to your past. You are not the villain — you are the survivor rising from the ashes." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 2,
+            title: "Module 2: Shame & Self-Compassion",
+            description: "Break the shame cycle that fuels addiction. Learn the difference between guilt and shame, and practice radical self-compassion.",
+            unlockDay: 5,
+            sortOrder: 2,
+            lessons: [
+              { day: 5, title: "Day 5: Shame vs. Guilt", desc: "Guilt says 'I did something bad.' Shame says 'I am bad.' Learn why shame is the jet fuel of the addiction cycle." },
+              { day: 6, title: "Day 6: Talking to Yourself Like a Friend", desc: "Practice self-compassion using Dr. Kristin Neff's framework: self-kindness, common humanity, and mindfulness." },
+              { day: 7, title: "Day 7: Forgiving Yourself", desc: "Release the backpack of rocks. Self-forgiveness doesn't mean forgetting — it means choosing freedom over self-hatred." },
+              { day: 8, title: "Day 8: Building Self-Worth", desc: "Self-esteem is conditional. Self-worth is inherent. Learn to reclaim your unconditional value as a human being." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 3,
+            title: "Module 3: The Inner Child — Healing Childhood Wounds",
+            description: "Meet the wounded child inside you. Learn reparenting, inner child visualization, and integration work to heal at the root.",
+            unlockDay: 9,
+            sortOrder: 3,
+            lessons: [
+              { day: 9, title: "Day 9: The Wounded Child Inside You", desc: "Connect with your inner child through guided visualization. Understand how childhood wounds drive adult addiction." },
+              { day: 10, title: "Day 10: Reparenting Yourself", desc: "Give yourself what you needed as a child: safety, validation, unconditional love. Learn practical reparenting techniques." },
+              { day: 11, title: "Day 11: Healing Childhood Wounds", desc: "Acknowledge overt and subtle trauma. Introduction to EMDR, IFS, and somatic therapies for deep healing." },
+              { day: 12, title: "Day 12: Integration and Wholeness", desc: "Bring all parts of yourself home. Healing isn't about erasing the past — it's about embracing all of who you are." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 4,
+            title: "Module 4: The Body Keeps the Score — Somatic Healing",
+            description: "Trauma lives in the body, not just the mind. Learn breathwork, movement, and body-based practices to release trapped survival energy.",
+            unlockDay: 13,
+            sortOrder: 4,
+            lessons: [
+              { day: 13, title: "Day 13: Trauma Lives in the Body", desc: "Why talk therapy alone isn't enough. Understanding how your nervous system gets stuck in survival mode." },
+              { day: 14, title: "Day 14: Breathwork — Your Nervous System Remote Control", desc: "Learn Box Breathing and 4-7-8 technique. Your breath is the most powerful free tool you have." },
+              { day: 15, title: "Day 15: Moving Trauma Out of Your Body", desc: "Like a deer shaking after escape, movement releases trapped survival energy. Find your body's healing practice." },
+              { day: 16, title: "Day 16: EMDR and Professional Trauma Therapy", desc: "How EMDR processes traumatic memories at a neurological level. Resources for finding a qualified trauma therapist." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 5,
+            title: "Module 5: Rebuilding Relationships & Trust",
+            description: "Addiction destroys relationships. Learn how to rebuild trust, make meaningful amends, and create healthy connections.",
+            unlockDay: 17,
+            sortOrder: 5,
+            lessons: [
+              { day: 17, title: "Day 17: The Wreckage of Addiction", desc: "Take an honest inventory of the relationships your addiction damaged. Name the harm without drowning in shame." },
+              { day: 18, title: "Day 18: Making Amends That Matter", desc: "Direct amends vs. living amends. When contact helps and when it causes more harm. Working with a sponsor." },
+              { day: 19, title: "Day 19: Setting Healthy Boundaries", desc: "Learn to protect your recovery by setting boundaries with people, places, and situations that threaten your healing." },
+              { day: 20, title: "Day 20: Building New Connections", desc: "Recovery is about connection, not isolation. Identify the qualities you need in relationships and invest in them." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 6,
+            title: "Module 6: Finding Meaning & Purpose",
+            description: "Build a life so good you don't want to escape from it. Discover your values, strengths, and purpose.",
+            unlockDay: 21,
+            sortOrder: 6,
+            lessons: [
+              { day: 21, title: "Day 21: What Do You Value?", desc: "Clarify your core values and assess where your life is aligned — and where it isn't." },
+              { day: 22, title: "Day 22: Your Strengths Inventory", desc: "Identify at least 5 strengths, skills, and talents. Discover how to use them in service of your recovery." },
+              { day: 23, title: "Day 23: Your Purpose Statement", desc: "Write a clear purpose statement that answers: Why am I here? What am I meant to do? Who am I meant to serve?" },
+              { day: 24, title: "Day 24: Living in Alignment", desc: "Close the gap between your values and your daily life. One small step toward purpose today." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 7,
+            title: "Module 7: Spiritual Awakening & Connection",
+            description: "Connect to something greater than yourself — not religion, but meaning, transcendence, and surrender.",
+            unlockDay: 25,
+            sortOrder: 7,
+            lessons: [
+              { day: 25, title: "Day 25: The God-Shaped Hole", desc: "Explore the deep longing for connection that substances temporarily filled. Spirituality in recovery, regardless of beliefs." },
+              { day: 26, title: "Day 26: Spiritual Practices for Recovery", desc: "Meditation, gratitude, nature, service, creativity — find practices that connect you to something greater." },
+              { day: 27, title: "Day 27: Surrender and Trust", desc: "Letting go of the need to control everything. What would it look like to trust the process?" },
+              { day: 28, title: "Day 28: Finding Your Community", desc: "Recovery meetings, faith groups, service organizations — building a spiritual support network that sustains you." },
+            ],
+          },
+          {
+            productId: "from-broken-to-whole",
+            moduleNumber: 8,
+            title: "Module 8: Thriving in Long-Term Recovery",
+            description: "Integrate everything you've learned. Build your maintenance plan, relapse prevention strategy, and vision for the future.",
+            unlockDay: 29,
+            sortOrder: 8,
+            lessons: [
+              { day: 29, title: "Day 29: Your Recovery Maintenance Plan", desc: "Design your daily, weekly, and monthly practices for sustained recovery. Build the structure that keeps you free." },
+              { day: 30, title: "Day 30: Your Vision for the Future", desc: "Write your 1-year, 5-year, and 10-year vision. You're not just surviving — you're thriving. Your best days are ahead." },
+            ],
+          },
+        ];
+
+        const createdModules = [];
+        let totalLessons = 0;
+
+        for (const mod of moduleData) {
+          const { lessons: lessonList, ...moduleFields } = mod;
+          const [inserted] = await db.insert(courseModules).values(moduleFields);
+          const moduleId = inserted.insertId;
+
+          for (let i = 0; i < lessonList.length; i++) {
+            const lesson = lessonList[i];
+            await db.insert(courseLessons).values({
+              moduleId: moduleId,
+              lessonNumber: i + 1,
+              title: lesson.title,
+              description: lesson.desc,
+              videoUrl: null, // Videos will be generated via HeyGen pipeline
+              videoProvider: "other",
+              videoDuration: null,
+              workbookPdfUrl: null,
+              slidePdfUrl: null,
+              sortOrder: i + 1,
+            });
+            totalLessons++;
+          }
+
+          createdModules.push({ id: moduleId, title: mod.title, lessons: lessonList.length });
+        }
+
+        return {
+          success: true,
+          message: `Seeded "From Broken to Whole" course: ${createdModules.length} modules, ${totalLessons} daily lessons!`,
+          modules: createdModules.length,
+          lessons: totalLessons,
+        };
+      }),
+
     // Seed CTA Offers - Load your products + affiliate tool offers
     seedCtaOffers: protectedProcedure
       .mutation(async ({ ctx }) => {
