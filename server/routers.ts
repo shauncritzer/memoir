@@ -2326,6 +2326,48 @@ Recovery is possible. But it requires working with your biology, not against it.
         return getVideoStatus(input.videoId);
       }),
 
+    // ─── Video Producer Agent Endpoints ──────────────────────────────────
+
+    // Check video production capability (HeyGen credits, avatar, voice)
+    videoProducerStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { checkVideoCapability } = await import("./agent/video-producer");
+        return checkVideoCapability();
+      }),
+
+    // Generate videos for course lessons (batch)
+    generateCourseVideos: protectedProcedure
+      .input(z.object({
+        moduleFilter: z.array(z.number()).optional(), // Only specific modules
+        skipExisting: z.boolean().optional(),          // Skip lessons with videos
+        test: z.boolean().optional(),                  // HeyGen test mode (free, watermarked)
+        maxVideos: z.number().optional(),              // Limit number of videos
+      }).optional())
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { batchGenerateCourseVideos } = await import("./agent/video-producer");
+        return batchGenerateCourseVideos({
+          moduleFilter: input?.moduleFilter,
+          skipExisting: input?.skipExisting ?? true,
+          test: input?.test,
+          maxVideos: input?.maxVideos,
+        });
+      }),
+
+    // Generate audio for a specific lesson (ElevenLabs)
+    generateLessonAudio: protectedProcedure
+      .input(z.object({
+        lessonId: z.number(),
+        script: z.string(),
+        title: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { generateLessonAudio } = await import("./agent/video-producer");
+        return generateLessonAudio(input);
+      }),
+
     // Promote current logged-in user to admin (requires ADMIN_SECRET)
     promoteToAdmin: protectedProcedure
       .input(z.object({

@@ -15,10 +15,10 @@ export default function SeedDatabase() {
   const [courseStatus, setCourseStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [courseMessage, setCourseMessage] = useState("");
 
-  const seedMutation = trpc.admin.seedBlogPosts.useMutation({
+  const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
       setStatus("success");
-      setMessage(data.message || `Successfully seeded ${data.postsCreated} blog posts!`);
+      setMessage(data.message || `Successfully added ${data.postsCreated} new blog posts!`);
     },
     onError: (error) => {
       setStatus("error");
@@ -74,7 +74,7 @@ export default function SeedDatabase() {
   const handleSeedCourse = () => {
     setCourseStatus("loading");
     setCourseMessage("");
-    seedCourseMutation.mutate({});
+    seedCourseMutation.mutate();
   };
 
   const handleMigrate = () => {
@@ -198,10 +198,10 @@ export default function SeedDatabase() {
         </div>
 
         <div className="border-t pt-6 space-y-4">
-          <h3 className="font-semibold">Seed Blog Posts</h3>
+          <h3 className="font-semibold">Add Blog Posts</h3>
           <p className="text-sm text-muted-foreground">
-            <strong>What this does:</strong> Deletes existing blog posts and creates 5 new comprehensive blog posts (800-1100 words each).
-            Does NOT modify PDFs or any other data. Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience.
+            <strong>What this does:</strong> Adds new blog posts WITHOUT deleting existing ones. Checks for duplicates by slug.
+            Topics: Nervous System, Self-Compassion, Inner Child, Somatic Healing, REWIRED Method.
           </p>
 
           <Button
@@ -216,7 +216,7 @@ export default function SeedDatabase() {
                 Seeding Database...
               </>
             ) : (
-              "Seed Blog Posts"
+              "Add New Blog Posts (Safe)"
             )}
           </Button>
 
@@ -289,23 +289,23 @@ export default function SeedDatabase() {
         </div>
 
         <div className="border-t pt-6 space-y-3">
-          <h3 className="font-semibold text-sm text-muted-foreground">What this does:</h3>
+          <h3 className="font-semibold text-sm text-muted-foreground">Summary:</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Deletes existing blog posts</span>
+              <span>Blog seeding adds new posts only — never deletes existing content</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Creates 5 comprehensive blog posts (800-1100 words each)</span>
+              <span>Course seeding creates 8 modules + 30 daily lessons for From Broken to Whole</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Topics: Sobriety vs Recovery, Childhood Trauma, Nervous System, Willpower, Neuroscience</span>
+              <span>AI Coach migration creates the table for message tracking</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>All content is kid-safe and ad-platform approved</span>
+              <span>All actions are safe to run multiple times</span>
             </li>
           </ul>
         </div>
