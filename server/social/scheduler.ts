@@ -181,6 +181,7 @@ async function postContentItem(item: {
   contentType: string;
   content: string | null;
   mediaUrls: string | null;
+  ctaOfferId: number | null;
 }) {
   if (!item.content) return;
 
@@ -224,11 +225,55 @@ async function postContentItem(item: {
             fbImageUrl = media.generatedImageUrl || media.imageUrl || "";
           } catch {}
         }
+
+        // Auto-generate image if none exists
+        if (!fbImageUrl) {
+          try {
+            const { generatePostImage } = await import("./image-generator");
+            const imgResult = await generatePostImage({
+              content: item.content || "",
+              platform: "facebook",
+              suggestedMediaPrompt: `Warm, hopeful, recovery-themed image for Facebook: ${(item.content || "").substring(0, 200)}`,
+            });
+            if (imgResult.success && imgResult.imageUrl) {
+              fbImageUrl = imgResult.imageUrl;
+              console.log(`[Scheduler] Facebook: auto-generated image for post`);
+            }
+          } catch (err: any) {
+            console.warn(`[Scheduler] Facebook auto-image generation failed:`, err.message);
+          }
+        }
+
+        // Retrieve CTA URL from the linked ctaOffer
+        let ctaUrl = "";
+        if (item.ctaOfferId) {
+          try {
+            const { ctaOffers } = await import("../../drizzle/schema");
+            const offers = await db.select().from(ctaOffers)
+              .where(eq(ctaOffers.id, item.ctaOfferId)).limit(1);
+            if (offers.length > 0 && offers[0].ctaUrl) {
+              ctaUrl = offers[0].ctaUrl;
+            }
+          } catch {}
+        }
+
+        // Append CTA URL to content if it contains CTA text but no actual link
+        let fbContent = item.content;
+        if (ctaUrl && fbContent && !fbContent.includes("http")) {
+          fbContent = fbContent + "\n\n" + ctaUrl;
+        }
+
         // Use postPhotoToFacebookPage to download + upload the image permanently
         // (DALL-E URLs expire in ~1 hour, so we can't just pass the URL as a link)
-        const fbResult = fbImageUrl
-          ? await postPhotoToFacebookPage(item.content, fbImageUrl)
-          : await postToFacebookPage(item.content);
+        let fbResult;
+        if (fbImageUrl) {
+          fbResult = await postPhotoToFacebookPage(fbContent, fbImageUrl);
+        } else if (ctaUrl) {
+          // Post with link preview when we have a CTA URL but no image
+          fbResult = await postLinkToFacebookPage(fbContent, ctaUrl);
+        } else {
+          fbResult = await postToFacebookPage(fbContent);
+        }
         result = {
           success: fbResult.success,
           tweetId: fbResult.postId,

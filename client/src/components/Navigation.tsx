@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
     label: "Programs",
     children: [
       { label: "7-Day Rewired Reset", href: "/7-day-reset", description: "Quick-start your recovery — $47" },
-      { label: "30-Day Course", href: "/products", description: "From Broken to Whole — Coming Soon" },
+      { label: "30-Day Course", href: "/from-broken-to-whole", description: "From Broken to Whole — $97" },
       { label: "Monthly Community", href: "/products", description: "Bent Not Broken Circle — Coming Soon" },
     ],
   },
