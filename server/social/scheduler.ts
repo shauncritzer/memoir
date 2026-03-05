@@ -103,17 +103,23 @@ async function processContentGeneration() {
       });
 
       // Auto-generate image with DALL-E 3 if configured
+      // Force image generation for Facebook and Instagram (they need images for engagement/posting)
       let generatedImageUrl: string | undefined;
-      if (generated.suggestedMediaType !== "none" && generated.suggestedMediaPrompt) {
+      const platformNeedsImage = ["facebook", "instagram", "linkedin"].includes(item.platform);
+      const shouldGenerateImage = platformNeedsImage || (generated.suggestedMediaType !== "none" && generated.suggestedMediaPrompt);
+      if (shouldGenerateImage) {
         try {
           const { generatePostImage } = await import("./image-generator");
           const imgResult = await generatePostImage({
             content: generated.content,
             platform: item.platform,
-            suggestedMediaPrompt: generated.suggestedMediaPrompt,
+            suggestedMediaPrompt: generated.suggestedMediaPrompt || `Warm, hopeful, recovery-themed image for ${item.platform}: ${generated.content.substring(0, 200)}`,
           });
           if (imgResult.success && imgResult.imageUrl) {
             generatedImageUrl = imgResult.imageUrl;
+            console.log(`[Scheduler] Generated ${imgResult.styleName || "default"} style image for ${item.platform}`);
+          } else {
+            console.warn(`[Scheduler] Image generation returned no URL for ${item.platform}:`, imgResult.error);
           }
         } catch (err) {
           console.warn(`[Scheduler] Image generation failed for queue item #${item.id}:`, err);
@@ -204,17 +210,13 @@ async function postContentItem(item: {
 
     switch (item.platform) {
       case "x": {
-        if (item.contentType === "thread" && item.content.includes("|||TWEET_BREAK|||")) {
-          const tweets = item.content.split("|||TWEET_BREAK|||").map(t => t.trim()).filter(Boolean);
-          result = await postThread(tweets);
-        } else {
-          // For single tweet, truncate to 280 chars if needed
-          const tweetText = item.content.length > 280
-            ? item.content.substring(0, 277) + "..."
-            : item.content;
-          result = await postTweet(tweetText);
-        }
-        break;
+        // X/Twitter free tier is READ-ONLY — cannot post via API.
+        // Keep content as "ready" for manual copy/paste posting.
+        result = { success: false, error: "X/Twitter content ready for manual posting — copy from Content Pipeline and paste into X." };
+        await db.update(contentQueue)
+          .set({ status: "ready", errorMessage: result.error })
+          .where(eq(contentQueue.id, item.id));
+        return;
       }
       case "facebook": {
         // Check for generated image to upload as a photo post
@@ -502,7 +504,7 @@ async function updateEngagementMetrics() {
   const { contentQueue } = await import("../../drizzle/schema");
   const { eq, and, isNotNull } = await import("drizzle-orm");
 
-  // Get posted items with a platformPostId (X and Facebook)
+  // Get posted items with a platformPostId (all platforms with metrics APIs)
   const { or } = await import("drizzle-orm");
   const postedItems = await db
     .select()
@@ -510,7 +512,13 @@ async function updateEngagementMetrics() {
     .where(
       and(
         eq(contentQueue.status, "posted"),
-        or(eq(contentQueue.platform, "x"), eq(contentQueue.platform, "facebook"), eq(contentQueue.platform, "youtube")),
+        or(
+          eq(contentQueue.platform, "x"),
+          eq(contentQueue.platform, "facebook"),
+          eq(contentQueue.platform, "instagram"),
+          eq(contentQueue.platform, "linkedin"),
+          eq(contentQueue.platform, "youtube"),
+        ),
         isNotNull(contentQueue.platformPostId),
       )
     )
@@ -519,43 +527,76 @@ async function updateEngagementMetrics() {
   for (const item of postedItems) {
     if (!item.platformPostId) continue;
 
-    if (item.platform === "x") {
-      const metrics = await getTweetMetrics(item.platformPostId);
-      if (metrics) {
-        await db.update(contentQueue).set({
-          metrics: JSON.stringify({
-            likes: metrics.like_count,
-            retweets: metrics.retweet_count,
-            replies: metrics.reply_count,
-            views: metrics.impression_count,
-            quotes: metrics.quote_count,
-          }),
-        }).where(eq(contentQueue.id, item.id));
+    try {
+      if (item.platform === "x") {
+        const metrics = await getTweetMetrics(item.platformPostId);
+        if (metrics) {
+          await db.update(contentQueue).set({
+            metrics: JSON.stringify({
+              likes: metrics.like_count,
+              retweets: metrics.retweet_count,
+              replies: metrics.reply_count,
+              views: metrics.impression_count,
+              quotes: metrics.quote_count,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+        }
+      } else if (item.platform === "facebook") {
+        const fbMetrics = await getFacebookPostMetrics(item.platformPostId);
+        if (fbMetrics) {
+          await db.update(contentQueue).set({
+            metrics: JSON.stringify({
+              likes: fbMetrics.likes,
+              comments: fbMetrics.comments,
+              shares: fbMetrics.shares,
+              reach: fbMetrics.reach,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+        }
+      } else if (item.platform === "instagram") {
+        // Instagram metrics via Graph API (uses same token as FB)
+        const { pageAccessToken } = { pageAccessToken: process.env.META_PAGE_ACCESS_TOKEN };
+        if (pageAccessToken) {
+          const igResp = await fetch(
+            `https://graph.facebook.com/v21.0/${item.platformPostId}?fields=like_count,comments_count,timestamp&access_token=${pageAccessToken}`
+          );
+          if (igResp.ok) {
+            const igData = await igResp.json();
+            await db.update(contentQueue).set({
+              metrics: JSON.stringify({
+                likes: igData.like_count || 0,
+                comments: igData.comments_count || 0,
+              }),
+            }).where(eq(contentQueue.id, item.id));
+          }
+        }
+      } else if (item.platform === "linkedin") {
+        const liMetrics = await getLinkedInPostMetrics(item.platformPostId);
+        if (liMetrics) {
+          await db.update(contentQueue).set({
+            metrics: JSON.stringify({
+              likes: liMetrics.likes,
+              comments: liMetrics.comments,
+              shares: liMetrics.shares,
+              impressions: liMetrics.impressions,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+        }
+      } else if (item.platform === "youtube") {
+        const ytMetrics = await getYouTubeVideoMetrics(item.platformPostId);
+        if (ytMetrics) {
+          await db.update(contentQueue).set({
+            metrics: JSON.stringify({
+              views: ytMetrics.views,
+              likes: ytMetrics.likes,
+              comments: ytMetrics.comments,
+              favorites: ytMetrics.favorites,
+            }),
+          }).where(eq(contentQueue.id, item.id));
+        }
       }
-    } else if (item.platform === "facebook") {
-      const fbMetrics = await getFacebookPostMetrics(item.platformPostId);
-      if (fbMetrics) {
-        await db.update(contentQueue).set({
-          metrics: JSON.stringify({
-            likes: fbMetrics.likes,
-            comments: fbMetrics.comments,
-            shares: fbMetrics.shares,
-            reach: fbMetrics.reach,
-          }),
-        }).where(eq(contentQueue.id, item.id));
-      }
-    } else if (item.platform === "youtube") {
-      const ytMetrics = await getYouTubeVideoMetrics(item.platformPostId);
-      if (ytMetrics) {
-        await db.update(contentQueue).set({
-          metrics: JSON.stringify({
-            views: ytMetrics.views,
-            likes: ytMetrics.likes,
-            comments: ytMetrics.comments,
-            favorites: ytMetrics.favorites,
-          }),
-        }).where(eq(contentQueue.id, item.id));
-      }
+    } catch (err: any) {
+      console.warn(`[Scheduler] Metrics fetch failed for ${item.platform} post ${item.platformPostId}:`, err.message);
     }
   }
 }
