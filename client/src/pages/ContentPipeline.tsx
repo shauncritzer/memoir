@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Zap, Target, Users, ArrowLeft, Plus, Trash2, Play, Pause, Eye,
   Send, Clock, CheckCircle2, XCircle, Loader2, BarChart3, Link2,
-  Sparkles, Calendar, Wifi, WifiOff, Lightbulb, Rocket,
+  Sparkles, Calendar, Wifi, WifiOff, Lightbulb, Rocket, Copy, ClipboardCheck,
 } from "lucide-react";
 import { Link } from "wouter";
 import AdminNav from "@/components/AdminNav";
@@ -45,6 +45,213 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
   posted: { label: "Posted", variant: "default" },
   failed: { label: "Failed", variant: "destructive" },
 };
+
+/** Manual Posting tab — copy/paste content for X/Twitter and TikTok */
+function ManualPostingTab({ queueItems }: { queueItems: any[] }) {
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
+
+  // Get ready content for manual-post platforms (X, TikTok — no API posting)
+  const manualPlatforms = ["x", "tiktok"];
+  const manualItems = queueItems.filter(item =>
+    manualPlatforms.includes(item.platform) &&
+    ["ready", "failed"].includes(item.status) &&
+    item.content
+  );
+
+  const filteredItems = platformFilter === "all"
+    ? manualItems
+    : manualItems.filter(i => i.platform === platformFilter);
+
+  const copyToClipboard = async (text: string, itemId: number) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedId(itemId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Format X thread content for easy copy/paste
+  const formatForCopy = (item: any) => {
+    if (item.platform === "x" && item.content.includes("|||TWEET_BREAK|||")) {
+      return item.content.split("|||TWEET_BREAK|||").map((t: string) => t.trim()).filter(Boolean);
+    }
+    return [item.content];
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Platform Guides */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-black">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <span className="w-6 h-6 bg-black text-white rounded flex items-center justify-center text-xs font-bold">X</span>
+              X (Twitter) — Manual Posting Guide
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-2">
+            <p><strong>What is X?</strong> A microblogging platform (formerly Twitter) where you post short messages called "tweets" (max 280 characters). "Threads" are multiple connected tweets telling a longer story.</p>
+            <p><strong>How to post:</strong></p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Go to <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">x.com</a> and sign in</li>
+              <li>Click the blue "Post" button (or the + icon on mobile)</li>
+              <li>Paste your content from below</li>
+              <li>For threads: Post the first tweet, then click "Add to thread" to add each subsequent tweet</li>
+              <li>Click "Post" (or "Post all" for threads)</li>
+            </ol>
+            <p><strong>Best times to post:</strong> 7am, 12pm, 5pm EST</p>
+            <p><strong>Tips for growth:</strong> Post 3-5x daily, engage with replies, quote-tweet others in recovery space, use 1-2 relevant hashtags. Threads get 2-3x more engagement than single tweets.</p>
+            <p><strong>Monetization:</strong> X Premium ($8/mo) gives you ad revenue sharing once you hit 5M organic impressions in 3 months. Drive traffic to your products via link-in-bio.</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-black">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <span className="w-6 h-6 bg-black text-white rounded flex items-center justify-center text-xs font-bold">TT</span>
+              TikTok — Manual Posting Guide
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-2">
+            <p><strong>What is TikTok?</strong> A short-form video platform (15s to 10min). The algorithm surfaces content based on engagement, not follower count — so even new accounts can go viral.</p>
+            <p><strong>How to post:</strong></p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Open TikTok app on your phone (no desktop posting for new videos)</li>
+              <li>Tap the + button at the bottom center</li>
+              <li>Record yourself speaking the script from below (or use a teleprompter app)</li>
+              <li>Add text overlays, effects, and trending sounds</li>
+              <li>Paste the caption and hashtags from below</li>
+              <li>Tap "Post"</li>
+            </ol>
+            <p><strong>Best times to post:</strong> 10am, 7pm, 10pm EST</p>
+            <p><strong>Tips for growth:</strong> Hook viewers in first 2 seconds, use trending sounds, post 1-3x daily, reply to comments with video responses. Recovery content does very well on TikTok.</p>
+            <p><strong>Monetization:</strong> TikTok Creativity Program pays $0.50-$1 per 1K views. Need 10K followers + 100K views in 30 days to qualify. Link in bio drives sales.</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filter */}
+      <div className="flex items-center gap-3">
+        <Label>Filter:</Label>
+        <div className="flex gap-2">
+          {["all", "x", "tiktok"].map(p => (
+            <Button
+              key={p}
+              variant={platformFilter === p ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPlatformFilter(p)}
+            >
+              {p === "all" ? "All" : platformConfig[p]?.label || p}
+            </Button>
+          ))}
+        </div>
+        <span className="text-sm text-muted-foreground ml-2">
+          {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""} ready to post
+        </span>
+      </div>
+
+      {/* Content Cards */}
+      {filteredItems.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p className="text-lg mb-2">No content ready for manual posting</p>
+            <p className="text-sm">Generate content for X or TikTok in the Content Queue tab, and it will appear here ready to copy and paste.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredItems.map(item => {
+            const parts = formatForCopy(item);
+            const isThread = parts.length > 1;
+            const pConfig = platformConfig[item.platform] || { label: item.platform, color: "bg-gray-500 text-white" };
+
+            return (
+              <Card key={item.id} className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge className={pConfig.color}>{pConfig.label}</Badge>
+                      {isThread && <Badge variant="outline">Thread ({parts.length} tweets)</Badge>}
+                      <Badge variant={item.status === "ready" ? "default" : "destructive"}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      #{item.id} • {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ""}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {isThread ? (
+                    // Thread format — each tweet as a separate copyable block
+                    <div className="space-y-2">
+                      {parts.map((tweet: string, idx: number) => (
+                        <div key={idx} className="flex gap-2 items-start">
+                          <span className="text-xs font-bold text-muted-foreground mt-2 min-w-[24px]">{idx + 1}.</span>
+                          <div className="flex-1 bg-muted/50 rounded-lg p-3 text-sm whitespace-pre-wrap font-mono">
+                            {tweet}
+                            <div className="text-xs text-muted-foreground mt-1">{tweet.length}/280 chars</div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(tweet, item.id * 1000 + idx)}
+                            className="mt-1"
+                          >
+                            {copiedId === item.id * 1000 + idx ? <ClipboardCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        className="w-full mt-2"
+                        variant="outline"
+                        onClick={() => copyToClipboard(parts.join("\n\n---\n\n"), item.id)}
+                      >
+                        {copiedId === item.id ? <ClipboardCheck className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+                        Copy Entire Thread
+                      </Button>
+                    </div>
+                  ) : (
+                    // Single post
+                    <div className="flex gap-2 items-start">
+                      <div className="flex-1 bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap">
+                        {item.content}
+                        {item.platform === "x" && (
+                          <div className="text-xs text-muted-foreground mt-2">{item.content.length}/280 chars</div>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard(item.content, item.id)}
+                      >
+                        {copiedId === item.id ? <ClipboardCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Image info if available */}
+                  {item.mediaUrls && (() => {
+                    try {
+                      const media = JSON.parse(item.mediaUrls);
+                      if (media.suggestedMediaPrompt) {
+                        return (
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
+                            <strong>Suggested image/video:</strong> {media.suggestedMediaPrompt}
+                          </div>
+                        );
+                      }
+                    } catch { /* ignore */ }
+                    return null;
+                  })()}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ContentPipeline() {
   const trpcUtils = trpc.useUtils();
@@ -433,10 +640,14 @@ export default function ContentPipeline() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="queue" className="space-y-6">
-          <TabsList className="grid w-full max-w-3xl grid-cols-3">
+          <TabsList className="grid w-full max-w-4xl grid-cols-4">
             <TabsTrigger value="queue">
               <Zap className="mr-2 h-4 w-4" />
               Content Queue
+            </TabsTrigger>
+            <TabsTrigger value="manual">
+              <Copy className="mr-2 h-4 w-4" />
+              Manual Posting
             </TabsTrigger>
             <TabsTrigger value="cta">
               <Target className="mr-2 h-4 w-4" />
@@ -836,6 +1047,11 @@ export default function ContentPipeline() {
                 )}
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* ================= MANUAL POSTING TAB ================= */}
+          <TabsContent value="manual" className="space-y-4">
+            <ManualPostingTab queueItems={queueItems || []} />
           </TabsContent>
 
           {/* ================= CTA OFFERS TAB ================= */}

@@ -78,7 +78,7 @@ export async function generateImage(opts: {
         prompt: enhancedPrompt,
         n: 1,
         size,
-        quality: "standard",
+        quality: "hd",
       }),
     });
 
