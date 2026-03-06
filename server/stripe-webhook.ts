@@ -29,10 +29,10 @@ export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
   "price_1T0QQqC2dOpPzSOO61RNrJQR": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
 
   // From Broken to Whole ($97 one-time) — updated price ID
-  "price_1SYt3KC2dOpPzSOOpAokfJUQ": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
+  "price_1T83EwC2dOpPzSOOockMjc5R": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
 
   // Bent Not Broken Circle ($29/month recurring) — updated price ID
-  "price_1SYt3jC2dOpPzSOOR7dDuGtY": CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
+  "price_1T83FTC2dOpPzSOOQCWvWdJd": CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
 };
 
 /**
@@ -40,8 +40,8 @@ export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
  */
 export const STRIPE_PRICE_TO_PRODUCT_NAME: Record<string, string> = {
   "price_1T0QQqC2dOpPzSOO61RNrJQR": "7-Day Reset",
-  "price_1SYt3KC2dOpPzSOOpAokfJUQ": "From Broken to Whole",
-  "price_1SYt3jC2dOpPzSOOR7dDuGtY": "Bent Not Broken Circle Membership",
+  "price_1T83EwC2dOpPzSOOockMjc5R": "From Broken to Whole",
+  "price_1T83FTC2dOpPzSOOQCWvWdJd": "Bent Not Broken Circle Membership",
 };
 
 /**
@@ -231,8 +231,8 @@ export function verifyWebhookSignature(
  */
 export const STRIPE_PRICE_TO_PRODUCT_ID: Record<string, { productId: string; amount: number }> = {
   "price_1T0QQqC2dOpPzSOO61RNrJQR": { productId: "7-day-reset", amount: 4700 },
-  "price_1SYt3KC2dOpPzSOOpAokfJUQ": { productId: "from-broken-to-whole", amount: 9700 },
-  "price_1SYt3jC2dOpPzSOOR7dDuGtY": { productId: "bent-not-broken-circle", amount: 2900 },
+  "price_1T83EwC2dOpPzSOOockMjc5R": { productId: "from-broken-to-whole", amount: 9700 },
+  "price_1T83FTC2dOpPzSOOQCWvWdJd": { productId: "bent-not-broken-circle", amount: 2900 },
 };
 
 /**

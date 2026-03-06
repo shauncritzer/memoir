@@ -37,7 +37,7 @@ export default function Products() {
       name: "Crooked Lines: Bent, Not Broken",
       tagline: "The Memoir",
       price: "$19.99",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_MEMOIR || "price_1SbOUTC2dOpPzSOOOdxient8",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MEMOIR || "price_1T83CrC2dOpPzSOO7aeZQHEe",
       description: "A raw, unflinching memoir about childhood trauma, addiction, rock bottom, and the redemption that comes from choosing recovery one day at a time.",
       features: [
         "13-year recovery journey from rock bottom to redemption",
@@ -75,7 +75,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Deep Healing",
       price: "$97",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokfJUQ",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1T83EwC2dOpPzSOOockMjc5R",
       description: "A 30-day trauma healing journey with daily lessons, video teachings, guided practices, and neuroscience-backed tools for lasting recovery.",
       features: [
         "30 daily lessons across 8 modules",
@@ -97,7 +97,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1T83FTC2dOpPzSOOQCWvWdJd",
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",

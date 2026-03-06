@@ -392,7 +392,7 @@ export const appRouter = router({
         }
         
         // Determine mode based on price ID (Monthly Membership is subscription)
-        const isSubscription = input.priceId === "price_1SYt3jC2dOpPzSOOR7dDuGtY"; // Monthly Membership
+        const isSubscription = input.priceId === "price_1T83FTC2dOpPzSOOQCWvWdJd"; // Monthly Membership
 
         const session = await stripe.checkout.sessions.create({
           mode: isSubscription ? "subscription" : "payment",

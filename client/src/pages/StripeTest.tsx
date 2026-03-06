@@ -11,7 +11,7 @@ export default function StripeTest() {
   const products = [
     {
       name: "Crooked Lines Memoir",
-      priceId: "price_1SbOUTC2dOpPzSOOOdxient8",
+      priceId: "price_1T83CrC2dOpPzSOO7aeZQHEe",
       expectedMode: "payment"
     },
     {
@@ -21,12 +21,12 @@ export default function StripeTest() {
     },
     {
       name: "From Broken to Whole",
-      priceId: "price_1SYt3KC2dOpPzSOOpAokfJUQ",
+      priceId: "price_1T83EwC2dOpPzSOOockMjc5R",
       expectedMode: "payment"
     },
     {
       name: "Monthly Membership",
-      priceId: "price_1SYt3jC2dOpPzSOOR7dDuGtY",
+      priceId: "price_1T83FTC2dOpPzSOOQCWvWdJd",
       expectedMode: "subscription"
     }
   ];
