@@ -42,6 +42,18 @@ export default function MissionControl() {
   const [researchContext, setResearchContext] = useState("");
   const [createDraft, setCreateDraft] = useState(true);
 
+  // Web Research state
+  const [webSearchQuery, setWebSearchQuery] = useState("");
+  const [webSearchDepth, setWebSearchDepth] = useState<"basic" | "advanced">("basic");
+  const [webSearchResults, setWebSearchResults] = useState<any>(null);
+  const [webExtractUrl, setWebExtractUrl] = useState("");
+  const [webExtractResults, setWebExtractResults] = useState<any>(null);
+
+  // Browser Arm state
+  const [browserUrl, setBrowserUrl] = useState("");
+  const [browserScreenshotData, setBrowserScreenshotData] = useState<string | null>(null);
+  const [browserExtractedContent, setBrowserExtractedContent] = useState<string | null>(null);
+
   // Content Feedback state
   const [feedbackTarget, setFeedbackTarget] = useState<string>("blog_post");
   const [feedbackTargetId, setFeedbackTargetId] = useState("");
@@ -142,6 +154,72 @@ export default function MissionControl() {
 
   // Video Producer status
   const videoStatus = trpc.admin.videoProducerStatus.useQuery(undefined, { retry: false });
+
+  // Web Research mutations
+  const webSearchMutation = trpc.agent.webSearch.useMutation({
+    onSuccess: (data) => {
+      setWebSearchResults(data);
+      if (data.success) {
+        toast.success(`Found ${data.results.length} results`);
+      } else {
+        toast.error(data.error || "Search failed");
+      }
+    },
+    onError: (err) => toast.error(`Search failed: ${err.message}`),
+  });
+
+  const webExtractMutation = trpc.agent.webExtract.useMutation({
+    onSuccess: (data) => {
+      setWebExtractResults(data);
+      if (data.success) {
+        toast.success(`Extracted content from ${data.results.length} URLs`);
+      } else {
+        toast.error(data.error || "Extraction failed");
+      }
+    },
+    onError: (err) => toast.error(`Extract failed: ${err.message}`),
+  });
+
+  const diagnoseTavilyMutation = trpc.agent.diagnoseTavily.useMutation({
+    onSuccess: (data) => {
+      if (data.working) toast.success("Tavily is configured and working!");
+      else toast.error(`Tavily issue: ${data.error || "Not configured"}`);
+    },
+    onError: (err) => toast.error(`Diagnose failed: ${err.message}`),
+  });
+
+  // Browser Arm mutations
+  const browserScreenshotMutation = trpc.agent.browserScreenshot.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.screenshot) {
+        setBrowserScreenshotData(data.screenshot);
+        toast.success(`Screenshot: "${data.pageTitle}" (${data.durationMs}ms)`);
+      } else {
+        toast.error(data.error || "Screenshot failed");
+      }
+    },
+    onError: (err) => toast.error(`Screenshot failed: ${err.message}`),
+  });
+
+  const browserExtractMutation = trpc.agent.browserExtract.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.extractedContent) {
+        setBrowserExtractedContent(data.extractedContent);
+        toast.success(`Extracted ${data.extractedContent.length} chars from "${data.pageTitle}"`);
+      } else {
+        toast.error(data.error || "Extraction failed");
+      }
+    },
+    onError: (err) => toast.error(`Extract failed: ${err.message}`),
+  });
+
+  const diagnoseBrowserbaseMutation = trpc.agent.diagnoseBrowserbase.useMutation({
+    onSuccess: (data) => {
+      if (data.canCreateSession) toast.success("Browserbase is configured and sessions work!");
+      else toast.error(`Browserbase issue: ${data.error || "Not configured"}`);
+    },
+    onError: (err) => toast.error(`Diagnose failed: ${err.message}`),
+  });
 
   const state = agentState.data;
 
@@ -244,6 +322,12 @@ export default function MissionControl() {
             </TabsTrigger>
             <TabsTrigger value="video-producer" className="text-gray-300 data-[state=active]:text-white">
               <Film className="h-3.5 w-3.5 mr-1" /> Video
+            </TabsTrigger>
+            <TabsTrigger value="web-research" className="text-gray-300 data-[state=active]:text-white">
+              <Search className="h-3.5 w-3.5 mr-1" /> Web Eyes
+            </TabsTrigger>
+            <TabsTrigger value="browser-arm" className="text-gray-300 data-[state=active]:text-white">
+              <Zap className="h-3.5 w-3.5 mr-1" /> Browser Arm
             </TabsTrigger>
             <TabsTrigger value="businesses" className="text-gray-300 data-[state=active]:text-white">Businesses</TabsTrigger>
             <TabsTrigger value="briefings" className="text-gray-300 data-[state=active]:text-white">Briefings</TabsTrigger>
@@ -921,6 +1005,243 @@ export default function MissionControl() {
                     <p className="text-xs text-gray-400">
                       Script extraction → HeyGen render (3-10 min) → Storage upload → DB update → YouTube upload (optional)
                     </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* WEB RESEARCH TAB (Tavily) */}
+          <TabsContent value="web-research">
+            <div className="space-y-6">
+              {/* Diagnostics */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Search className="h-5 w-5 text-blue-400" /> Web Research Eyes (Tavily)
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Real-time web search and content extraction. Gives agents live data instead of just training knowledge.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => diagnoseTavilyMutation.mutate()}
+                    disabled={diagnoseTavilyMutation.isPending}
+                    className="border-blue-600 text-blue-300 hover:bg-blue-600/20"
+                  >
+                    {diagnoseTavilyMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Activity className="h-4 w-4 mr-1" />}
+                    Test Tavily Connection
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Search */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-base">Web Search</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <input
+                    value={webSearchQuery}
+                    onChange={(e) => setWebSearchQuery(e.target.value)}
+                    placeholder="Search the web..."
+                    className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={webSearchDepth}
+                      onChange={(e) => setWebSearchDepth(e.target.value as "basic" | "advanced")}
+                      className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm"
+                    >
+                      <option value="basic">Basic (faster)</option>
+                      <option value="advanced">Advanced (thorough)</option>
+                    </select>
+                    <Button
+                      onClick={() => webSearchMutation.mutate({ query: webSearchQuery, depth: webSearchDepth })}
+                      disabled={!webSearchQuery.trim() || webSearchMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {webSearchMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Search className="h-4 w-4 mr-1" />}
+                      Search
+                    </Button>
+                  </div>
+
+                  {/* Search Results */}
+                  {webSearchResults && (
+                    <div className="space-y-3 mt-4">
+                      {webSearchResults.answer && (
+                        <div className="p-3 rounded border border-blue-800 bg-blue-900/20">
+                          <p className="text-sm text-blue-300 font-medium mb-1">AI Answer:</p>
+                          <p className="text-sm text-gray-300">{webSearchResults.answer}</p>
+                        </div>
+                      )}
+                      {webSearchResults.results?.map((r: any, i: number) => (
+                        <div key={i} className="p-3 rounded border border-gray-700 bg-gray-800/50">
+                          <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-400 hover:underline">{r.title}</a>
+                          <p className="text-xs text-gray-500 mt-0.5">{r.url}</p>
+                          <p className="text-sm text-gray-300 mt-1">{r.content?.substring(0, 300)}...</p>
+                          <Badge variant="outline" className="mt-1 text-xs border-gray-600 text-gray-400">Score: {r.score?.toFixed(2)}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* URL Extract */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-base">Extract Content from URL</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      value={webExtractUrl}
+                      onChange={(e) => setWebExtractUrl(e.target.value)}
+                      placeholder="https://example.com/article"
+                      className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+                    />
+                    <Button
+                      onClick={() => webExtractMutation.mutate({ urls: [webExtractUrl] })}
+                      disabled={!webExtractUrl.trim() || webExtractMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {webExtractMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />}
+                      Extract
+                    </Button>
+                  </div>
+
+                  {webExtractResults?.results?.map((r: any, i: number) => (
+                    <div key={i} className="p-3 rounded border border-gray-700 bg-gray-800/50 max-h-96 overflow-auto">
+                      <p className="text-xs text-gray-500 mb-1">{r.url}</p>
+                      <pre className="text-sm text-gray-300 whitespace-pre-wrap">{r.rawContent?.substring(0, 3000)}</pre>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* BROWSER ARM TAB (Browserbase) */}
+          <TabsContent value="browser-arm">
+            <div className="space-y-6">
+              {/* Diagnostics */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-amber-400" /> Browser Arm (Browserbase)
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Cloud headless browser for tasks that need real browser interaction — logging into services, form fills, screenshots, and experimental social posting.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => diagnoseBrowserbaseMutation.mutate()}
+                    disabled={diagnoseBrowserbaseMutation.isPending}
+                    className="border-amber-600 text-amber-300 hover:bg-amber-600/20"
+                  >
+                    {diagnoseBrowserbaseMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Activity className="h-4 w-4 mr-1" />}
+                    Test Browserbase Connection
+                  </Button>
+                  <div className="p-3 rounded border border-gray-700 bg-gray-800/30">
+                    <p className="text-sm text-gray-300 font-medium mb-2">Plan: Developer ($20/mo)</p>
+                    <ul className="text-xs text-gray-400 space-y-1">
+                      <li>- 25 concurrent browsers</li>
+                      <li>- 6,000 browser minutes/month</li>
+                      <li>- 1GB proxy usage</li>
+                      <li>- 5 min session timeout</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Screenshot Tool */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-base">Screenshot a URL</CardTitle>
+                  <CardDescription className="text-gray-400">Take a real browser screenshot of any page (useful for auditing)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      value={browserUrl}
+                      onChange={(e) => setBrowserUrl(e.target.value)}
+                      placeholder="https://shauncritzer.com"
+                      className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+                    />
+                    <Button
+                      onClick={() => browserScreenshotMutation.mutate({ url: browserUrl })}
+                      disabled={!browserUrl.trim() || browserScreenshotMutation.isPending}
+                      className="bg-amber-600 hover:bg-amber-700"
+                    >
+                      {browserScreenshotMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Search className="h-4 w-4 mr-1" />}
+                      Screenshot
+                    </Button>
+                    <Button
+                      onClick={() => browserExtractMutation.mutate({ url: browserUrl })}
+                      disabled={!browserUrl.trim() || browserExtractMutation.isPending}
+                      variant="outline"
+                      className="border-gray-600"
+                    >
+                      {browserExtractMutation.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />}
+                      Extract Text
+                    </Button>
+                  </div>
+
+                  {/* Screenshot Display */}
+                  {browserScreenshotData && (
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-400 mb-2">Screenshot result:</p>
+                      <img
+                        src={`data:image/png;base64,${browserScreenshotData}`}
+                        alt="Browser screenshot"
+                        className="w-full rounded border border-gray-700"
+                      />
+                    </div>
+                  )}
+
+                  {/* Extracted Content Display */}
+                  {browserExtractedContent && (
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-400 mb-2">Extracted text ({browserExtractedContent.length} chars):</p>
+                      <pre className="p-3 rounded border border-gray-700 bg-gray-800/50 max-h-96 overflow-auto text-sm text-gray-300 whitespace-pre-wrap">
+                        {browserExtractedContent.substring(0, 5000)}
+                      </pre>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Capabilities Info */}
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-base">What the Browser Arm Can Do</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-3 rounded border border-green-800/50 bg-green-900/10">
+                      <p className="text-sm font-medium text-green-400 mb-2">Ready Now</p>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>- Page screenshots (audit your own site)</li>
+                        <li>- Content extraction (scrape pages that block APIs)</li>
+                        <li>- Multi-step automation (navigate, click, fill forms)</li>
+                        <li>- Logged-in session tasks (ConvertKit, etc.)</li>
+                      </ul>
+                    </div>
+                    <div className="p-3 rounded border border-yellow-800/50 bg-yellow-900/10">
+                      <p className="text-sm font-medium text-yellow-400 mb-2">Experimental</p>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>- TikTok posting (bot detection risk)</li>
+                        <li>- Platform interactions requiring login</li>
+                        <li>- Dynamic page scraping (JS-rendered content)</li>
+                      </ul>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
