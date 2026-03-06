@@ -50,7 +50,6 @@ export default function Products() {
       ideal: "Perfect for: Anyone seeking hope, understanding addiction's roots, or supporting a loved one",
       badge: "The Foundation",
       badgeVariant: "secondary" as const,
-      comingSoon: true,
     },
     {
       id: "7-day-reset",

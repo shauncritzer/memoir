@@ -22,6 +22,7 @@ import AdminMigrate from "./pages/AdminMigrate";
 import SeedDatabase from "./pages/SeedDatabase";
 import AdminContent from "./pages/AdminContent";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminDiagnostics from "./pages/AdminDiagnostics";
 import ContentPipeline from "./pages/ContentPipeline";
 import MissionControl from "./pages/MissionControl";
 import StripeTest from "./pages/StripeTest";
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/admin/pipeline">{() => <AdminRoute component={ContentPipeline} />}</Route>
       <Route path="/admin/mission-control">{() => <AdminRoute component={MissionControl} />}</Route>
       <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
+      <Route path="/admin/diagnostics">{() => <AdminRoute component={AdminDiagnostics} />}</Route>
       <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />

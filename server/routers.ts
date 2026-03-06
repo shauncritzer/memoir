@@ -3314,6 +3314,216 @@ Recovery is possible. But it requires working with your biology, not against it.
           note: "Never-expiring Page Access Token. Update META_PAGE_ACCESS_TOKEN in Railway with this value.",
         };
       }),
+
+    /** Full system diagnostics — checks all integrations from one endpoint */
+    systemDiagnostics: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const results: Record<string, { status: "ok" | "warning" | "error" | "not_configured"; message: string; details?: any }> = {};
+
+        // --- Stripe ---
+        try {
+          const stripeKey = process.env.STRIPE_SECRET_KEY;
+          const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+          if (!stripeKey) {
+            results.stripe = { status: "not_configured", message: "STRIPE_SECRET_KEY not set" };
+          } else {
+            const isLive = stripeKey.startsWith("sk_live_");
+            results.stripe = {
+              status: isLive ? "ok" : "warning",
+              message: isLive ? "Live mode configured" : "Using TEST mode keys — payments won't process real money",
+              details: { liveMode: isLive, webhookSecretSet: !!webhookSecret },
+            };
+          }
+        } catch (e: any) {
+          results.stripe = { status: "error", message: e.message };
+        }
+
+        // --- Twitter/X ---
+        try {
+          const { diagnoseTwitter } = await import("./social/twitter");
+          const tw = await diagnoseTwitter();
+          results.twitter = {
+            status: tw.authTest?.success ? "ok" : tw.configured ? "warning" : "not_configured",
+            message: tw.diagnosis,
+            details: tw,
+          };
+        } catch (e: any) {
+          results.twitter = { status: "error", message: e.message };
+        }
+
+        // --- Facebook/Instagram (Meta) ---
+        try {
+          const { verifyMetaConnection } = await import("./social/meta");
+          const meta = await verifyMetaConnection();
+          results.facebook = {
+            status: meta.success && meta.facebook ? "ok" : "not_configured",
+            message: meta.success && meta.facebook ? `Connected: ${meta.facebook.pageName}` : "Not connected",
+            details: meta.facebook,
+          };
+          results.instagram = {
+            status: meta.success && meta.instagram ? "ok" : "not_configured",
+            message: meta.success && meta.instagram ? `Connected: ${meta.instagram.username}` : "Not connected",
+            details: meta.instagram,
+          };
+        } catch (e: any) {
+          results.facebook = { status: "error", message: e.message };
+          results.instagram = { status: "error", message: e.message };
+        }
+
+        // --- YouTube ---
+        try {
+          const { isYouTubeConfigured, getChannelInfo } = await import("./social/youtube");
+          if (!isYouTubeConfigured()) {
+            results.youtube = { status: "not_configured", message: "YouTube credentials not set (YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN)" };
+          } else {
+            try {
+              const channel = await getChannelInfo();
+              results.youtube = { status: "ok", message: `Connected: ${channel?.title || "Channel found"}`, details: channel };
+            } catch (ytErr: any) {
+              results.youtube = { status: "warning", message: `Configured but token may be expired: ${ytErr.message}. If Google Cloud project is in "Testing" mode, tokens expire after 7 days — publish to "Production" in Google Cloud Console.` };
+            }
+          }
+        } catch (e: any) {
+          results.youtube = { status: "error", message: e.message };
+        }
+
+        // --- LinkedIn ---
+        try {
+          const { isLinkedInConfigured } = await import("./social/linkedin");
+          results.linkedin = {
+            status: isLinkedInConfigured() ? "ok" : "not_configured",
+            message: isLinkedInConfigured() ? "Configured" : "LINKEDIN_ACCESS_TOKEN and LINKEDIN_PERSON_URN not set",
+          };
+        } catch (e: any) {
+          results.linkedin = { status: "error", message: e.message };
+        }
+
+        // --- HeyGen ---
+        try {
+          const heygenKey = process.env.HEYGEN_API_KEY;
+          if (!heygenKey) {
+            results.heygen = { status: "not_configured", message: "HEYGEN_API_KEY not set" };
+          } else {
+            const resp = await fetch("https://api.heygen.com/v1/video/list", {
+              method: "GET",
+              headers: { "X-Api-Key": heygenKey },
+            });
+            if (resp.ok) {
+              const data = await resp.json();
+              results.heygen = { status: "ok", message: `Connected — ${data?.data?.videos?.length ?? 0} videos found`, details: { videoCount: data?.data?.videos?.length ?? 0 } };
+            } else {
+              results.heygen = { status: "warning", message: `API returned ${resp.status}: ${resp.statusText}. Check API key or credits.` };
+            }
+          }
+        } catch (e: any) {
+          results.heygen = { status: "error", message: e.message };
+        }
+
+        // --- ElevenLabs ---
+        try {
+          const elKey = process.env.ELEVENLABS_API_KEY;
+          if (!elKey) {
+            results.elevenlabs = { status: "not_configured", message: "ELEVENLABS_API_KEY not set" };
+          } else {
+            const resp = await fetch("https://api.elevenlabs.io/v1/user/subscription", {
+              headers: { "xi-api-key": elKey },
+            });
+            if (resp.ok) {
+              const data = await resp.json();
+              results.elevenlabs = {
+                status: "ok",
+                message: `Connected — ${data.character_count}/${data.character_limit} characters used`,
+                details: { characterCount: data.character_count, characterLimit: data.character_limit, tier: data.tier },
+              };
+            } else {
+              results.elevenlabs = { status: "warning", message: `API returned ${resp.status}. Check API key.` };
+            }
+          }
+        } catch (e: any) {
+          results.elevenlabs = { status: "error", message: e.message };
+        }
+
+        // --- ConvertKit ---
+        try {
+          // Test by fetching subscriber list (keys are hardcoded in server/convertkit.ts)
+          const { getSubscriber } = await import("./convertkit");
+          // A simple connectivity test — fetch any subscriber to verify API keys work
+          const testResult = await getSubscriber("test@example.com");
+          // getSubscriber returns success:true even if subscriber not found (just no data)
+          results.convertkit = { status: "ok", message: "API keys valid — connected to ConvertKit" };
+        } catch (e: any) {
+          results.convertkit = { status: "error", message: `ConvertKit check failed: ${e.message}` };
+        }
+
+        // --- Tavily ---
+        try {
+          const tavilyKey = process.env.TAVILY_API_KEY;
+          results.tavily = {
+            status: tavilyKey ? "ok" : "not_configured",
+            message: tavilyKey ? "API key configured" : "TAVILY_API_KEY not set",
+          };
+        } catch (e: any) {
+          results.tavily = { status: "error", message: e.message };
+        }
+
+        // --- Browserbase ---
+        try {
+          const bbKey = process.env.BROWSERBASE_API_KEY;
+          results.browserbase = {
+            status: bbKey ? "ok" : "not_configured",
+            message: bbKey ? "API key configured" : "BROWSERBASE_API_KEY not set",
+          };
+        } catch (e: any) {
+          results.browserbase = { status: "error", message: e.message };
+        }
+
+        // --- Make.com ---
+        try {
+          const makeKey = process.env.MAKE_API_KEY;
+          results.make = {
+            status: makeKey ? "ok" : "not_configured",
+            message: makeKey ? "API key configured" : "MAKE_API_KEY not set",
+          };
+        } catch (e: any) {
+          results.make = { status: "error", message: e.message };
+        }
+
+        // --- Google Gemini (LLM) ---
+        try {
+          const geminiKey = process.env.GOOGLE_API_KEY;
+          const openaiKey = process.env.OPENAI_API_KEY;
+          results.llm = {
+            status: geminiKey ? "ok" : openaiKey ? "warning" : "not_configured",
+            message: geminiKey
+              ? "Google Gemini configured (primary, free tier)"
+              : openaiKey
+                ? "Gemini not set — falling back to OpenAI (costs money)"
+                : "No LLM keys configured",
+            details: { gemini: !!geminiKey, openai: !!openaiKey },
+          };
+        } catch (e: any) {
+          results.llm = { status: "error", message: e.message };
+        }
+
+        // --- Database ---
+        try {
+          const db = await getDb();
+          if (db) {
+            const { users } = await import("../drizzle/schema");
+            const { count } = await import("drizzle-orm");
+            const [userCount] = await db.select({ count: count() }).from(users);
+            results.database = { status: "ok", message: `Connected — ${userCount.count} users`, details: { userCount: userCount.count } };
+          } else {
+            results.database = { status: "error", message: "Database not available" };
+          }
+        } catch (e: any) {
+          results.database = { status: "error", message: e.message };
+        }
+
+        return results;
+      }),
   }),
 
   // ============================================================

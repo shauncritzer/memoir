@@ -2,12 +2,31 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Download, Star } from "lucide-react";
+import { BookOpen, Download, Loader2, ShoppingCart, Star } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Memoir() {
   const [videoEnded, setVideoEnded] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+
+  const createCheckoutSession = trpc.stripe.createCheckoutSession.useMutation({
+    onSuccess: (data: { url: string; sessionId: string }) => {
+      window.location.href = data.url;
+    },
+    onError: (error: { message: string }) => {
+      toast.error("Failed to start checkout", { description: error.message });
+      setPurchasing(false);
+    },
+  });
+
+  const handleBuyBook = () => {
+    setPurchasing(true);
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_MEMOIR || "price_1SbOUTC2dOpPzSOOOdxient8";
+    createCheckoutSession.mutate({ priceId });
+  };
 
   return (
     <div className="min-h-screen pt-16">
@@ -75,24 +94,34 @@ export default function Memoir() {
                 <Star className="h-5 w-5 fill-current" />
                 <Star className="h-5 w-5 fill-current" />
               </div>
-              <span className="text-gray-500">(Coming 2026)</span>
+              <span className="text-gray-500">Available Now — $19.99</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/resources">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                  <Download className="mr-2 h-5 w-5" />
-                  Download First 3 Chapters Free
-                </Button>
-              </Link>
               <Button
                 size="lg"
-                variant="outline"
-                className="text-lg px-8"
-                disabled
+                className="bg-primary hover:bg-primary/90 text-lg px-8"
+                onClick={handleBuyBook}
+                disabled={purchasing}
               >
-                Pre-Order on Amazon (Coming 2026)
+                {purchasing ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Get the Book — $19.99
+                  </>
+                )}
               </Button>
+              <Link href="/resources">
+                <Button size="lg" variant="outline" className="text-lg px-8">
+                  <Download className="mr-2 h-5 w-5" />
+                  Read First 3 Chapters Free
+                </Button>
+              </Link>
             </div>
           </div>
 
