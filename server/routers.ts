@@ -3477,6 +3477,58 @@ Recovery is possible. But it requires working with your biology, not against it.
         return diagnoseYouTube();
       }),
 
+    /** ConvertKit diagnostic — checks API key, subscriber count, form/tag config */
+    diagnoseConvertKit: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { getSubscriber, CONVERTKIT_FORMS, CONVERTKIT_TAGS } = await import("./convertkit");
+
+        // Test API connection
+        let configured = false;
+        let subscriberCount: number | undefined;
+        let diagnosis = "";
+
+        try {
+          // Test with a simple subscriber lookup
+          const testResult = await getSubscriber("test@test.com");
+          configured = testResult.success || !testResult.error?.includes("401");
+
+          // Count configured forms (ones that don't look like TODO placeholders)
+          const formEntries = Object.entries(CONVERTKIT_FORMS);
+          const configuredForms = formEntries.filter(([_, v]) => !String(v).includes("TODO") && String(v).length < 20).length;
+
+          // Count configured tags vs TODO
+          const tagEntries = Object.entries(CONVERTKIT_TAGS);
+          const configuredTags = tagEntries.filter(([key]) =>
+            key.startsWith("LEAD_MAGNET_")
+          ).length;
+          const todoTags = tagEntries.length - configuredTags;
+
+          if (configured) {
+            diagnosis = `ConvertKit API is working. ${configuredForms}/${formEntries.length} forms configured, ${configuredTags}/${tagEntries.length} tags verified.`;
+            if (todoTags > 0) diagnosis += ` ${todoTags} tags still need correct IDs from ConvertKit dashboard.`;
+          } else {
+            diagnosis = "ConvertKit API connection failed. Check API key in server/convertkit.ts.";
+          }
+
+          return {
+            configured,
+            subscriberCount,
+            forms: formEntries.length,
+            tags: { configured: configuredTags, todo: todoTags, total: tagEntries.length },
+            diagnosis,
+          };
+        } catch (error) {
+          return {
+            configured: false,
+            diagnosis: `ConvertKit error: ${String(error)}`,
+            forms: 0,
+            tags: { configured: 0, todo: 0, total: 0 },
+          };
+        }
+      }),
+
     verifyMeta: protectedProcedure
       .mutation(async ({ ctx }) => {
         if (ctx.user.role !== "admin") throw new Error("Admin access required");

@@ -39,6 +39,7 @@ import Success from "./pages/Success";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import BookLaunch from "./pages/BookLaunch";
+import SystemDiagnostics from "./pages/SystemDiagnostics";
 import { AdminRoute } from "./components/AdminRoute";
 
 function Router() {
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/admin/pipeline">{() => <AdminRoute component={ContentPipeline} />}</Route>
       <Route path="/admin/mission-control">{() => <AdminRoute component={MissionControl} />}</Route>
       <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
+      <Route path="/admin/diagnostics">{() => <AdminRoute component={SystemDiagnostics} />}</Route>
       <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
