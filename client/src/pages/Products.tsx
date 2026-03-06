@@ -56,7 +56,7 @@ export default function Products() {
       name: "7-Day Reset",
       tagline: "Recovery Jumpstart",
       price: "$47",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1SxAyzC2dOpPzSOOmqjxVQIB",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RESET_CHALLENGE || "price_1T0QQqC2dOpPzSOO61RNrJQR",
       description: "A comprehensive 7-day workbook designed to give you momentum, clarity, and hope in early recovery.",
       features: [
         "7 days of structured exercises and reflections",
@@ -75,7 +75,7 @@ export default function Products() {
       name: "From Broken to Whole",
       tagline: "30-Day Deep Healing",
       price: "$97",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3kC2dOpPzSOOpAokf1UQ",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokfJUQ",
       description: "A 30-day trauma healing journey with daily lessons, video teachings, guided practices, and neuroscience-backed tools for lasting recovery.",
       features: [
         "30 daily lessons across 8 modules",
@@ -97,7 +97,7 @@ export default function Products() {
       name: "Bent Not Broken Circle",
       tagline: "Monthly Membership",
       price: "$29/month",
-      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3iC2dOpPzSOOR7dbuGtY",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1SYt3jC2dOpPzSOOR7dDuGtY",
       description: "Ongoing community, support, and accountability for long-term recovery.",
       features: [
         "Monthly live group coaching calls",

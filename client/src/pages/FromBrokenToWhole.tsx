@@ -24,7 +24,7 @@ function SalesPage({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   const handleEnroll = () => {
     setIsLoading(true);
-    const priceId = import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3kC2dOpPzSOOpAokf1UQ";
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_RECOVERY_ROADMAP || "price_1SYt3KC2dOpPzSOOpAokfJUQ";
     createCheckoutSession.mutate({ priceId });
   };
 
