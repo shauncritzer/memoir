@@ -116,6 +116,385 @@ function getMakeApiKey(): string | null {
   return ENV.makeApiKey || null;
 }
 
+function getMakeBaseUrl(): string {
+  return ENV.makeBaseUrl || "https://us2.make.com";
+}
+
+function getMakeTeamId(): string | null {
+  return ENV.makeTeamId || null;
+}
+
+// ─── Make.com REST API ──────────────────────────────────────────────────────
+
+/**
+ * Call the Make.com REST API.
+ * Docs: https://developers.make.com/api-documentation
+ */
+async function makeApiCall(
+  method: "GET" | "POST" | "PATCH" | "DELETE",
+  path: string,
+  body?: any
+): Promise<{ ok: boolean; status: number; data: any; error?: string }> {
+  const apiKey = getMakeApiKey();
+  if (!apiKey) {
+    return { ok: false, status: 0, data: null, error: "MAKE_API_KEY not set" };
+  }
+
+  const baseUrl = getMakeBaseUrl();
+  const url = `${baseUrl}/api/v2${path}`;
+
+  try {
+    const headers: Record<string, string> = {
+      "Authorization": `Token ${apiKey}`,
+      "Content-Type": "application/json",
+    };
+
+    const opts: RequestInit = { method, headers };
+    if (body && (method === "POST" || method === "PATCH")) {
+      opts.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, opts);
+    const contentType = response.headers.get("content-type") || "";
+    let data: any;
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        data,
+        error: typeof data === "object" ? (data.message || data.detail || JSON.stringify(data)) : String(data),
+      };
+    }
+
+    return { ok: true, status: response.status, data };
+  } catch (err: any) {
+    return { ok: false, status: 0, data: null, error: `API call failed: ${err.message}` };
+  }
+}
+
+// ─── Make.com Scenario Management ───────────────────────────────────────────
+
+/**
+ * List all scenarios in the Make.com account.
+ */
+export async function listMakeScenarios(): Promise<{
+  success: boolean;
+  scenarios: any[];
+  error?: string;
+}> {
+  const teamId = getMakeTeamId();
+  if (!teamId) {
+    return { success: false, scenarios: [], error: "MAKE_TEAM_ID not set" };
+  }
+
+  const result = await makeApiCall("GET", `/scenarios?teamId=${teamId}`);
+  if (!result.ok) {
+    return { success: false, scenarios: [], error: result.error };
+  }
+
+  const scenarios = result.data?.scenarios || result.data || [];
+  return { success: true, scenarios };
+}
+
+/**
+ * Get details of a specific Make.com scenario.
+ */
+export async function getMakeScenario(scenarioId: number): Promise<{
+  success: boolean;
+  scenario: any;
+  error?: string;
+}> {
+  const result = await makeApiCall("GET", `/scenarios/${scenarioId}`);
+  if (!result.ok) {
+    return { success: false, scenario: null, error: result.error };
+  }
+
+  return { success: true, scenario: result.data?.scenario || result.data };
+}
+
+/**
+ * Get the blueprint (full definition) of a Make.com scenario.
+ */
+export async function getMakeBlueprint(scenarioId: number): Promise<{
+  success: boolean;
+  blueprint: any;
+  error?: string;
+}> {
+  const result = await makeApiCall("GET", `/scenarios/${scenarioId}/blueprint`);
+  if (!result.ok) {
+    return { success: false, blueprint: null, error: result.error };
+  }
+
+  return { success: true, blueprint: result.data?.response?.blueprint || result.data };
+}
+
+/**
+ * Create a new scenario in Make.com from a blueprint.
+ *
+ * @param name - Scenario name
+ * @param blueprint - The full scenario blueprint object (will be JSON-stringified)
+ * @param scheduling - Scheduling config (default: run every 15 min indefinitely)
+ * @param folderId - Optional folder ID
+ */
+export async function createMakeScenario(
+  name: string,
+  blueprint: any,
+  scheduling?: { type: string; interval: number },
+  folderId?: number
+): Promise<{
+  success: boolean;
+  scenarioId?: number;
+  webhookUrl?: string;
+  scenario?: any;
+  error?: string;
+}> {
+  const teamId = getMakeTeamId();
+  if (!teamId) {
+    return { success: false, error: "MAKE_TEAM_ID not set" };
+  }
+
+  // Make.com requires blueprint as a JSON string
+  const blueprintString = typeof blueprint === "string" ? blueprint : JSON.stringify(blueprint);
+  const schedulingString = JSON.stringify(scheduling || { type: "indefinitely", interval: 900 });
+
+  const body: any = {
+    blueprint: blueprintString,
+    scheduling: schedulingString,
+    teamId: parseInt(teamId),
+    confirmed: true,
+  };
+
+  if (folderId) {
+    body.folderId = folderId;
+  }
+
+  const result = await makeApiCall("POST", "/scenarios", body);
+  if (!result.ok) {
+    return { success: false, error: result.error };
+  }
+
+  const scenario = result.data?.scenario || result.data;
+  console.log(`[MakeAPI] Created scenario "${name}" (ID: ${scenario?.id})`);
+
+  return {
+    success: true,
+    scenarioId: scenario?.id,
+    scenario,
+  };
+}
+
+/**
+ * Activate or deactivate a Make.com scenario.
+ */
+export async function setMakeScenarioActive(scenarioId: number, active: boolean): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const result = await makeApiCall("PATCH", `/scenarios/${scenarioId}`, {
+    isEnabled: active,
+  });
+
+  if (!result.ok) {
+    return { success: false, error: result.error };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Run a Make.com scenario on-demand.
+ */
+export async function runMakeScenario(scenarioId: number, data?: any): Promise<{
+  success: boolean;
+  executionId?: string;
+  error?: string;
+}> {
+  const body = data ? { data: JSON.stringify(data) } : undefined;
+  const result = await makeApiCall("POST", `/scenarios/${scenarioId}/run`, body);
+
+  if (!result.ok) {
+    return { success: false, error: result.error };
+  }
+
+  return { success: true, executionId: result.data?.executionId };
+}
+
+/**
+ * Delete a Make.com scenario.
+ */
+export async function deleteMakeScenario(scenarioId: number): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const result = await makeApiCall("DELETE", `/scenarios/${scenarioId}`);
+  if (!result.ok) {
+    return { success: false, error: result.error };
+  }
+  return { success: true };
+}
+
+/**
+ * List all hooks (webhooks) in the Make.com account.
+ */
+export async function listMakeHooks(): Promise<{
+  success: boolean;
+  hooks: any[];
+  error?: string;
+}> {
+  const teamId = getMakeTeamId();
+  if (!teamId) {
+    return { success: false, hooks: [], error: "MAKE_TEAM_ID not set" };
+  }
+
+  const result = await makeApiCall("GET", `/hooks?teamId=${teamId}`);
+  if (!result.ok) {
+    return { success: false, hooks: [], error: result.error };
+  }
+
+  const hooks = result.data?.hooks || result.data || [];
+  return { success: true, hooks };
+}
+
+/**
+ * Get execution log for a scenario.
+ */
+export async function getMakeExecutions(scenarioId: number, limit: number = 10): Promise<{
+  success: boolean;
+  executions: any[];
+  error?: string;
+}> {
+  const result = await makeApiCall("GET", `/scenarios/${scenarioId}/logs?pg[limit]=${limit}&pg[sortBy]=timestamp&pg[sortDir]=desc`);
+  if (!result.ok) {
+    return { success: false, executions: [], error: result.error };
+  }
+
+  return { success: true, executions: result.data?.scenarioLogs || result.data || [] };
+}
+
+// ─── Blueprint Templates ────────────────────────────────────────────────────
+
+/**
+ * Generate a webhook-trigger blueprint for common scenarios.
+ * This creates a scenario in Make.com that listens for webhook calls from our system.
+ */
+export function buildWebhookBlueprint(name: string, modules: BlueprintModule[]): any {
+  return {
+    name,
+    flow: [
+      {
+        id: 1,
+        module: "gateway:CustomWebHook",
+        version: 1,
+        metadata: { designer: { x: 0, y: 0 } },
+      },
+      ...modules.map((mod, idx) => ({
+        id: idx + 2,
+        module: mod.module,
+        version: mod.version || 1,
+        parameters: mod.parameters || {},
+        mapper: mod.mapper || {},
+        metadata: { designer: { x: (idx + 1) * 300, y: 0 } },
+      })),
+    ],
+    metadata: { instant: true, version: 1 },
+  };
+}
+
+export type BlueprintModule = {
+  module: string;
+  version?: number;
+  parameters?: Record<string, any>;
+  mapper?: Record<string, any>;
+};
+
+/**
+ * Full diagnostic of Make.com API integration.
+ * Tests API connectivity, lists scenarios, hooks, and reports status.
+ */
+export async function diagnoseMakeApi(): Promise<{
+  apiConnected: boolean;
+  teamId: string | null;
+  baseUrl: string;
+  scenarioCount: number;
+  hookCount: number;
+  scenarios: Array<{ id: number; name: string; isEnabled: boolean; lastEdit: string }>;
+  hooks: Array<{ id: number; name: string; url: string }>;
+  error?: string;
+}> {
+  const teamId = getMakeTeamId();
+  const baseUrl = getMakeBaseUrl();
+  const apiKey = getMakeApiKey();
+
+  if (!apiKey) {
+    return {
+      apiConnected: false,
+      teamId,
+      baseUrl,
+      scenarioCount: 0,
+      hookCount: 0,
+      scenarios: [],
+      hooks: [],
+      error: "MAKE_API_KEY not set. Go to Make.com → Profile → API Tokens to create one.",
+    };
+  }
+
+  if (!teamId) {
+    return {
+      apiConnected: false,
+      teamId: null,
+      baseUrl,
+      scenarioCount: 0,
+      hookCount: 0,
+      scenarios: [],
+      hooks: [],
+      error: "MAKE_TEAM_ID not set. Check your Make.com URL — the number after your domain (e.g., us2.make.com/652854/...) is your team/org ID.",
+    };
+  }
+
+  // Test API connectivity by listing scenarios
+  const scenarioResult = await listMakeScenarios();
+  if (!scenarioResult.success) {
+    return {
+      apiConnected: false,
+      teamId,
+      baseUrl,
+      scenarioCount: 0,
+      hookCount: 0,
+      scenarios: [],
+      hooks: [],
+      error: `API connection failed: ${scenarioResult.error}`,
+    };
+  }
+
+  // List hooks
+  const hookResult = await listMakeHooks();
+
+  return {
+    apiConnected: true,
+    teamId,
+    baseUrl,
+    scenarioCount: scenarioResult.scenarios.length,
+    hookCount: hookResult.hooks?.length || 0,
+    scenarios: scenarioResult.scenarios.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      isEnabled: s.isEnabled,
+      lastEdit: s.lastEdit || s.updatedAt || "unknown",
+    })),
+    hooks: (hookResult.hooks || []).map((h: any) => ({
+      id: h.id,
+      name: h.name,
+      url: h.url || "",
+    })),
+  };
+}
+
 // ─── Database: Scenario Registry ────────────────────────────────────────────
 
 /**

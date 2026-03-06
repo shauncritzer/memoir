@@ -186,11 +186,93 @@ async function getExistingContent(businessSlug?: string): Promise<string> {
   }
 }
 
+// ─── Web Research Helper ────────────────────────────────────────────────────
+
+/**
+ * Use Tavily to gather real web data before LLM analysis.
+ * Falls back gracefully if Tavily isn't configured.
+ */
+async function gatherWebResearch(topic: string, scope: ResearchScope, depth: string): Promise<string> {
+  try {
+    const { tavilySearch, diagnoseTavily } = await import("./web-research");
+    const diag = await diagnoseTavily();
+    if (!diag.configured) {
+      return "[Web research unavailable — TAVILY_API_KEY not set. Using LLM knowledge only.]";
+    }
+
+    // Build search queries based on scope
+    const queries: string[] = [];
+    switch (scope) {
+      case "course":
+        queries.push(`best online courses ${topic} 2025 2026`, `${topic} course pricing reviews`);
+        break;
+      case "competitor_analysis":
+        queries.push(`${topic} competitors market leaders`, `${topic} reviews comparison`);
+        break;
+      case "market_research":
+        queries.push(`${topic} market size trends 2026`, `${topic} industry report statistics`);
+        break;
+      case "digital_product":
+        queries.push(`${topic} digital products ebooks templates`, `${topic} products pricing`);
+        break;
+      case "lead_magnet":
+        queries.push(`${topic} free resources lead magnets`, `${topic} email opt-in ideas`);
+        break;
+      case "content_strategy":
+        queries.push(`${topic} content marketing strategy 2026`, `${topic} social media best practices`);
+        break;
+      default:
+        queries.push(`${topic} ${scope}`, `${topic} trends 2026`);
+    }
+
+    // For deep research, add more queries
+    if (depth === "deep") {
+      queries.push(`${topic} pricing strategy`, `${topic} audience demographics`, `${topic} success stories case studies`);
+    }
+
+    const searchDepth = depth === "quick" ? "basic" : "advanced";
+    const allResults: string[] = [];
+
+    for (const query of queries.slice(0, depth === "deep" ? 5 : 3)) {
+      try {
+        const searchResult = await tavilySearch({
+          query,
+          depth: searchDepth as "basic" | "advanced",
+          maxResults: depth === "deep" ? 5 : 3,
+        });
+
+        if (searchResult.results) {
+          for (const r of searchResult.results) {
+            allResults.push(`SOURCE: ${r.title} (${r.url})\n${r.content?.substring(0, 500) || "No content"}`);
+          }
+        }
+      } catch {
+        // Skip failed individual searches
+      }
+    }
+
+    if (allResults.length === 0) {
+      return "[Web search returned no results. Using LLM knowledge only.]";
+    }
+
+    return `LIVE WEB RESEARCH RESULTS (${allResults.length} sources found):\n\n${allResults.join("\n\n---\n\n")}`;
+  } catch (err: any) {
+    return `[Web research error: ${err.message}. Using LLM knowledge only.]`;
+  }
+}
+
 // ─── Core Research Engine ───────────────────────────────────────────────────
 
 async function conductResearch(request: ResearchRequest): Promise<ResearchResult> {
   const brandContext = await getBrandContext(request.businessSlug);
   const existingContent = await getExistingContent(request.businessSlug);
+
+  // Gather live web research via Tavily
+  const webResearch = await gatherWebResearch(
+    request.topic,
+    request.scope,
+    request.depth || "standard"
+  );
 
   const depthInstructions = {
     quick: "Provide a brief analysis with 3-5 key findings. Focus on the most important opportunities.",
@@ -217,6 +299,8 @@ ${brandContext}
 EXISTING CONTENT WE ALREADY HAVE:
 ${existingContent}
 
+${webResearch}
+
 RESEARCH REQUEST:
 Scope: ${request.scope}
 Topic: "${request.topic}"
@@ -227,7 +311,7 @@ ${scopeInstructions[request.scope]}
 
 DEPTH: ${depthInstructions[request.depth || "standard"]}
 
-IMPORTANT: Since you cannot browse the web, use your training knowledge about this space. Focus on well-known competitors, established market patterns, and proven strategies. Be specific with names, prices, and strategies you know about.
+IMPORTANT: Use the live web research results above as your PRIMARY data source. Supplement with your training knowledge for context, established patterns, and strategies. Cite specific sources and URLs from the web research when possible. Be specific with names, prices, and strategies.
 
 RESPOND IN THIS EXACT JSON FORMAT (no markdown, no code fences):
 {
