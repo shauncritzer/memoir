@@ -19,4 +19,12 @@ export const ENV = {
   elevenlabsVoiceId: process.env.ELEVENLABS_VOICE_ID ?? "",
   // HeyGen
   heygenApiKey: process.env.HEYGEN_API_KEY ?? "",
+  // Tavily (web research)
+  tavilyApiKey: process.env.TAVILY_API_KEY ?? "",
+  // Browserbase (headless browser automation)
+  browserbaseApiKey: process.env.BROWSERBASE_API_KEY ?? "",
+  browserbaseProjectId: process.env.BROWSERBASE_PROJECT_ID ?? "",
+  // Make.com (workflow automation)
+  makeApiKey: process.env.MAKE_API_KEY ?? "",
+  makeWebhookSecret: process.env.MAKE_WEBHOOK_SECRET ?? "",
 };

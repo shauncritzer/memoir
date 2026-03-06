@@ -4084,6 +4084,205 @@ Recovery is possible. But it requires working with your biology, not against it.
         return researchAndDraftLeadMagnet(input.topic, input.businessSlug);
       }),
 
+    // ─── Web Research Arm (Tavily) ─────────────────────────────────────────
+
+    /** Search the web using Tavily */
+    webSearch: protectedProcedure
+      .input(z.object({
+        query: z.string().min(1),
+        depth: z.enum(["basic", "advanced"]).optional(),
+        maxResults: z.number().min(1).max(10).optional(),
+        includeDomains: z.array(z.string()).optional(),
+        excludeDomains: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { tavilySearch } = await import("./agent/web-research");
+        return tavilySearch({
+          query: input.query,
+          depth: input.depth,
+          maxResults: input.maxResults,
+          includeDomains: input.includeDomains,
+          excludeDomains: input.excludeDomains,
+          includeAnswer: true,
+        });
+      }),
+
+    /** Extract content from URLs using Tavily */
+    webExtract: protectedProcedure
+      .input(z.object({
+        urls: z.array(z.string().url()).min(1).max(5),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { tavilyExtract } = await import("./agent/web-research");
+        return tavilyExtract({ urls: input.urls });
+      }),
+
+    /** Deep multi-step research on a topic using Tavily */
+    webResearch: protectedProcedure
+      .input(z.object({
+        topic: z.string().min(1),
+        context: z.string().optional(),
+        maxIterations: z.number().min(1).max(5).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { tavilyResearch } = await import("./agent/web-research");
+        return tavilyResearch({
+          topic: input.topic,
+          context: input.context,
+          maxIterations: input.maxIterations,
+        });
+      }),
+
+    /** Check if Tavily is configured and working */
+    diagnoseTavily: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { diagnoseTavily } = await import("./agent/web-research");
+        return diagnoseTavily();
+      }),
+
+    // ─── Browser Automation Arm (Browserbase) ───────────────────────────────
+
+    /** Take a screenshot of a URL */
+    browserScreenshot: protectedProcedure
+      .input(z.object({
+        url: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { takeScreenshot } = await import("./agent/browser-arm");
+        return takeScreenshot(input.url);
+      }),
+
+    /** Extract page content using a real browser */
+    browserExtract: protectedProcedure
+      .input(z.object({
+        url: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { extractPageContent } = await import("./agent/browser-arm");
+        return extractPageContent(input.url);
+      }),
+
+    /** Audit a page (screenshot + content extraction) */
+    browserAudit: protectedProcedure
+      .input(z.object({
+        url: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { auditPage } = await import("./agent/browser-arm");
+        return auditPage(input.url);
+      }),
+
+    /** Execute a multi-step browser task */
+    browserTask: protectedProcedure
+      .input(z.object({
+        type: z.enum(["screenshot", "extract_content", "fill_form", "click_action", "login_and_act", "social_post", "audit_page"]),
+        url: z.string().url(),
+        description: z.string(),
+        steps: z.array(z.object({
+          action: z.enum(["navigate", "click", "type", "wait", "screenshot", "extract", "select"]),
+          selector: z.string().optional(),
+          value: z.string().optional(),
+          url: z.string().optional(),
+          waitMs: z.number().optional(),
+          description: z.string().optional(),
+        })).optional(),
+        timeout: z.number().max(280000).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { executeBrowserTask } = await import("./agent/browser-arm");
+        return executeBrowserTask(input);
+      }),
+
+    /** Check if Browserbase is configured and can create sessions */
+    diagnoseBrowserbase: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { diagnoseBrowserbase } = await import("./agent/browser-arm");
+        return diagnoseBrowserbase();
+      }),
+
+    // ─── Make.com Automation ───────────────────────────────────────────────
+
+    /** List all registered Make.com scenarios */
+    makeGetScenarios: protectedProcedure
+      .input(z.object({
+        businessSlug: z.string().optional(),
+        activeOnly: z.boolean().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getScenarios } = await import("./agent/make-automation");
+        return getScenarios(input || {});
+      }),
+
+    /** Register or update a Make.com scenario */
+    makeRegisterScenario: protectedProcedure
+      .input(z.object({
+        businessSlug: z.string(),
+        name: z.string(),
+        description: z.string(),
+        category: z.enum(["lead_nurture", "content_repurpose", "customer_comms", "order_management", "reporting", "notification", "onboarding", "custom"]),
+        webhookUrl: z.string().url(),
+        riskTier: z.number().min(1).max(4),
+        active: z.boolean().default(true),
+        payloadSchema: z.record(z.string(), z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { registerScenario } = await import("./agent/make-automation");
+        const id = await registerScenario(input as any);
+        return { success: !!id, id };
+      }),
+
+    /** Trigger a Make.com scenario */
+    makeTriggerScenario: protectedProcedure
+      .input(z.object({
+        scenarioName: z.string(),
+        businessSlug: z.string(),
+        payload: z.record(z.string(), z.any()).optional(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { triggerScenario } = await import("./agent/make-automation");
+        return triggerScenario(input.scenarioName, input.businessSlug, input.payload || {}, { reason: input.reason });
+      }),
+
+    /** Execute a previously approved Make.com scenario action */
+    makeExecuteApproved: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { executeApprovedScenario } = await import("./agent/make-automation");
+        return executeApprovedScenario(input.actionId);
+      }),
+
+    /** Diagnose Make.com integration status */
+    diagnoseMake: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { diagnoseMake } = await import("./agent/make-automation");
+        return diagnoseMake();
+      }),
+
+    /** Seed default Make.com scenario templates */
+    makeSeedScenarios: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { ensureMakeTable, seedDefaultScenarios } = await import("./agent/make-automation");
+        await ensureMakeTable();
+        await seedDefaultScenarios();
+        return { success: true, message: "Default scenarios seeded" };
+      }),
+
     /** Update a business profile */
     updateBusiness: protectedProcedure
       .input(z.object({
