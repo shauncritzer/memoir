@@ -2,12 +2,28 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Download, Star } from "lucide-react";
+import { BookOpen, Download, Star, ShoppingCart, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
 
 export default function Memoir() {
   const [videoEnded, setVideoEnded] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const checkoutMutation = trpc.stripe.createCheckoutSession.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.location.href = data.url;
+    },
+    onError: () => setIsCheckingOut(false),
+  });
+
+  const handleBuyDigital = () => {
+    setIsCheckingOut(true);
+    checkoutMutation.mutate({
+      priceId: "price_1T83CrC2dOpPzSOO7aeZQHEe",
+    });
+  };
 
   return (
     <div className="min-h-screen pt-16">
@@ -75,7 +91,7 @@ export default function Memoir() {
                 <Star className="h-5 w-5 fill-current" />
                 <Star className="h-5 w-5 fill-current" />
               </div>
-              <span className="text-gray-500">(Coming 2026)</span>
+              <span className="text-gray-500">A Memoir by Shaun Critzer</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -87,11 +103,15 @@ export default function Memoir() {
               </Link>
               <Button
                 size="lg"
-                variant="outline"
-                className="text-lg px-8"
-                disabled
+                className="bg-teal-600 hover:bg-teal-700 text-white text-lg px-8"
+                onClick={handleBuyDigital}
+                disabled={isCheckingOut}
               >
-                Pre-Order on Amazon (Coming 2026)
+                {isCheckingOut ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Processing...</>
+                ) : (
+                  <><ShoppingCart className="mr-2 h-5 w-5" />Buy Digital Copy — $19.99</>
+                )}
               </Button>
             </div>
           </div>
