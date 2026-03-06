@@ -4209,6 +4209,80 @@ Recovery is possible. But it requires working with your biology, not against it.
         return diagnoseBrowserbase();
       }),
 
+    // ─── Make.com Automation ───────────────────────────────────────────────
+
+    /** List all registered Make.com scenarios */
+    makeGetScenarios: protectedProcedure
+      .input(z.object({
+        businessSlug: z.string().optional(),
+        activeOnly: z.boolean().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getScenarios } = await import("./agent/make-automation");
+        return getScenarios(input || {});
+      }),
+
+    /** Register or update a Make.com scenario */
+    makeRegisterScenario: protectedProcedure
+      .input(z.object({
+        businessSlug: z.string(),
+        name: z.string(),
+        description: z.string(),
+        category: z.enum(["lead_nurture", "content_repurpose", "customer_comms", "order_management", "reporting", "notification", "onboarding", "custom"]),
+        webhookUrl: z.string().url(),
+        riskTier: z.number().min(1).max(4),
+        active: z.boolean().default(true),
+        payloadSchema: z.record(z.string(), z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { registerScenario } = await import("./agent/make-automation");
+        const id = await registerScenario(input as any);
+        return { success: !!id, id };
+      }),
+
+    /** Trigger a Make.com scenario */
+    makeTriggerScenario: protectedProcedure
+      .input(z.object({
+        scenarioName: z.string(),
+        businessSlug: z.string(),
+        payload: z.record(z.string(), z.any()).optional(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { triggerScenario } = await import("./agent/make-automation");
+        return triggerScenario(input.scenarioName, input.businessSlug, input.payload || {}, { reason: input.reason });
+      }),
+
+    /** Execute a previously approved Make.com scenario action */
+    makeExecuteApproved: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { executeApprovedScenario } = await import("./agent/make-automation");
+        return executeApprovedScenario(input.actionId);
+      }),
+
+    /** Diagnose Make.com integration status */
+    diagnoseMake: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { diagnoseMake } = await import("./agent/make-automation");
+        return diagnoseMake();
+      }),
+
+    /** Seed default Make.com scenario templates */
+    makeSeedScenarios: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { ensureMakeTable, seedDefaultScenarios } = await import("./agent/make-automation");
+        await ensureMakeTable();
+        await seedDefaultScenarios();
+        return { success: true, message: "Default scenarios seeded" };
+      }),
+
     /** Update a business profile */
     updateBusiness: protectedProcedure
       .input(z.object({

@@ -24,4 +24,7 @@ export const ENV = {
   // Browserbase (headless browser automation)
   browserbaseApiKey: process.env.BROWSERBASE_API_KEY ?? "",
   browserbaseProjectId: process.env.BROWSERBASE_PROJECT_ID ?? "",
+  // Make.com (workflow automation)
+  makeApiKey: process.env.MAKE_API_KEY ?? "",
+  makeWebhookSecret: process.env.MAKE_WEBHOOK_SECRET ?? "",
 };

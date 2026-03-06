@@ -231,6 +231,36 @@ async function startServer() {
     }
   });
 
+  // Make.com inbound webhook — receives callbacks from Make.com scenarios
+  app.post("/api/make/webhook", async (req, res) => {
+    try {
+      // Optional: verify webhook secret
+      const secret = process.env.MAKE_WEBHOOK_SECRET;
+      if (secret) {
+        const provided = req.headers["x-webhook-secret"] || req.body?._secret;
+        if (provided !== secret) {
+          console.warn("[Make Webhook] Invalid secret");
+          return res.status(401).json({ error: "Invalid webhook secret" });
+        }
+      }
+
+      const { processInboundWebhook } = await import("../agent/make-automation");
+      const result = await processInboundWebhook({
+        scenarioName: req.body?.scenarioName || "unknown",
+        event: req.body?.event || "callback",
+        businessSlug: req.body?.businessSlug,
+        data: req.body?.data,
+        needsApproval: req.body?.needsApproval,
+        error: req.body?.error,
+      });
+
+      res.json(result);
+    } catch (err: any) {
+      console.error("[Make Webhook] Error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // YouTube OAuth flow - connect YouTube account
   app.get("/api/youtube/connect", (_req, res) => {
     try {
