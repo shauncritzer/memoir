@@ -141,18 +141,18 @@ upload/                   # Uploaded images/assets
 ### Currently Selling
 | Product | Price | Stripe Price ID | Status |
 |---------|-------|----------------|--------|
-| **7-Day REWIRED Reset** | $47 one-time | `price_1SxAyzC2dOpPzSOOmqjxVQIB` | Active — selling |
+| **7-Day REWIRED Reset** | $47 one-time | `price_1T0QQqC2dOpPzSOO61RNrJQR` | Active — selling |
 
 ### Built But Needs More Content
 | Product | Price | Stripe Price ID | Status |
 |---------|-------|----------------|--------|
-| **From Broken to Whole** (30-day course) | $97 one-time | `price_1SYt3kC2dOpPzSOOpAokf1UQ` | Content exists in markdown, needs to be turned into robust 30-day course worth $97 |
-| **Bent Not Broken Circle** (monthly membership) | $29/month | `price_1SYt3iC2dOpPzSOOR7dbuGtY` | Schema built, needs community features and content |
+| **From Broken to Whole** (30-day course) | $97 one-time | `price_1T83EwC2dOpPzSOOockMjc5R` | Content exists in markdown, needs to be turned into robust 30-day course worth $97 |
+| **Bent Not Broken Circle** (monthly membership) | $29/month | `price_1T83FTC2dOpPzSOOQCWvWdJd` | Schema built, needs community features and content |
 
 ### Not Yet Published
 | Product | Price | Stripe Price ID | Status |
 |---------|-------|----------------|--------|
-| **Crooked Lines memoir** (book) | $19.99 | `price_1SbOUTC2dOpPzSOOOdxient8` | Full manuscript exists in repo, needs Amazon listing or direct PDF sales page |
+| **Crooked Lines memoir** (book) | $19.99 | `price_1T83CrC2dOpPzSOO7aeZQHEe` | Full manuscript exists in repo, needs Amazon listing or direct PDF sales page |
 
 ### Free Lead Magnets
 | Lead Magnet | ConvertKit Form ID |

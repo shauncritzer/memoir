@@ -67,6 +67,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
+      <Route path="/admin/stripe-test">{() => <AdminRoute component={StripeTest} />}</Route>
       <Route path="/ai-coach" component={AICoach} />
       <Route path="/7-day-reset" component={SevenDayReset} />
       <Route path="/from-broken-to-whole" component={FromBrokenToWhole} />

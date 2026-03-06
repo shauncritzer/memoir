@@ -392,7 +392,7 @@ export const appRouter = router({
         }
         
         // Determine mode based on price ID (Monthly Membership is subscription)
-        const isSubscription = input.priceId === "price_1SYt3iC2dOpPzSOOR7dbuGtY"; // Monthly Membership
+        const isSubscription = input.priceId === "price_1T83FTC2dOpPzSOOQCWvWdJd"; // Monthly Membership
 
         const session = await stripe.checkout.sessions.create({
           mode: isSubscription ? "subscription" : "payment",
@@ -4281,6 +4281,92 @@ Recovery is possible. But it requires working with your biology, not against it.
         await ensureMakeTable();
         await seedDefaultScenarios();
         return { success: true, message: "Default scenarios seeded" };
+      }),
+
+    /** Diagnose Make.com REST API connection (tests live API) */
+    diagnoseMakeApi: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { diagnoseMakeApi } = await import("./agent/make-automation");
+        return diagnoseMakeApi();
+      }),
+
+    /** List scenarios from the live Make.com account (not our DB) */
+    makeListRemoteScenarios: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { listMakeScenarios } = await import("./agent/make-automation");
+        return listMakeScenarios();
+      }),
+
+    /** Get a specific scenario's blueprint from Make.com */
+    makeGetBlueprint: protectedProcedure
+      .input(z.object({ scenarioId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getMakeBlueprint } = await import("./agent/make-automation");
+        return getMakeBlueprint(input.scenarioId);
+      }),
+
+    /** Create a new scenario in Make.com from a blueprint */
+    makeCreateScenario: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        blueprint: z.any(),
+        scheduling: z.object({
+          type: z.string().default("indefinitely"),
+          interval: z.number().default(900),
+        }).optional(),
+        folderId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { createMakeScenario } = await import("./agent/make-automation");
+        return createMakeScenario(input.name, input.blueprint, input.scheduling, input.folderId);
+      }),
+
+    /** Activate or deactivate a Make.com scenario */
+    makeSetScenarioActive: protectedProcedure
+      .input(z.object({ scenarioId: z.number(), active: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { setMakeScenarioActive } = await import("./agent/make-automation");
+        return setMakeScenarioActive(input.scenarioId, input.active);
+      }),
+
+    /** Run a Make.com scenario on-demand */
+    makeRunScenario: protectedProcedure
+      .input(z.object({ scenarioId: z.number(), data: z.any().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { runMakeScenario } = await import("./agent/make-automation");
+        return runMakeScenario(input.scenarioId, input.data);
+      }),
+
+    /** List all webhooks/hooks in Make.com account */
+    makeListHooks: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { listMakeHooks } = await import("./agent/make-automation");
+        return listMakeHooks();
+      }),
+
+    /** Get execution logs for a Make.com scenario */
+    makeGetExecutions: protectedProcedure
+      .input(z.object({ scenarioId: z.number(), limit: z.number().default(10) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getMakeExecutions } = await import("./agent/make-automation");
+        return getMakeExecutions(input.scenarioId, input.limit);
+      }),
+
+    /** Delete a Make.com scenario */
+    makeDeleteScenario: protectedProcedure
+      .input(z.object({ scenarioId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { deleteMakeScenario } = await import("./agent/make-automation");
+        return deleteMakeScenario(input.scenarioId);
       }),
 
     /** Update a business profile */

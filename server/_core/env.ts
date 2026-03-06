@@ -27,4 +27,6 @@ export const ENV = {
   // Make.com (workflow automation)
   makeApiKey: process.env.MAKE_API_KEY ?? "",
   makeWebhookSecret: process.env.MAKE_WEBHOOK_SECRET ?? "",
+  makeTeamId: process.env.MAKE_TEAM_ID ?? "",
+  makeBaseUrl: process.env.MAKE_BASE_URL ?? "https://us2.make.com",
 };
