@@ -288,9 +288,11 @@ export default function SystemDiagnostics() {
                     </div>
                     {d.heygenCredits !== null && d.heygenCredits !== undefined && (
                       <div className="flex justify-between">
-                        <span>Credits Remaining</span>
-                        <Badge variant={d.heygenCredits > 0 ? "default" : "destructive"}>
-                          {d.heygenCredits}
+                        <span>Credits</span>
+                        <Badge variant={(typeof d.heygenCredits === 'object' ? d.heygenCredits.remaining : d.heygenCredits) > 0 ? "default" : "destructive"}>
+                          {typeof d.heygenCredits === 'object'
+                            ? `${d.heygenCredits.remaining} remaining / ${d.heygenCredits.used} used`
+                            : d.heygenCredits}
                         </Badge>
                       </div>
                     )}

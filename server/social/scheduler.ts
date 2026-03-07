@@ -127,7 +127,8 @@ async function processContentGeneration() {
       }
 
       // Update the queue item with generated content + image
-      await db.update(contentQueue).set({
+      // If no scheduledFor is set, default to now so the posting cron picks it up automatically (Tier 1 auto-post)
+      const updateData: Record<string, any> = {
         content: generated.content,
         status: "ready",
         mediaUrls: JSON.stringify({
@@ -137,7 +138,11 @@ async function processContentGeneration() {
           hashtags: generated.hashtags,
           generatedImageUrl,
         }),
-      }).where(eq(contentQueue.id, item.id));
+      };
+      if (!item.scheduledFor) {
+        updateData.scheduledFor = new Date();
+      }
+      await db.update(contentQueue).set(updateData).where(eq(contentQueue.id, item.id));
 
       console.log(`[Scheduler] Generated content for ${item.platform} (queue item #${item.id})`);
     } catch (err: any) {

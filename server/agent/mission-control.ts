@@ -478,6 +478,39 @@ async function monitorEngagement(business: BusinessProfile): Promise<{ alerts: A
     ) as any;
     metrics.revenue_30d_cents = revenueStats?.[0]?.total || 0;
     metrics.purchases_30d = revenueStats?.[0]?.cnt || 0;
+
+    // Generate Tier 3 proposals for significant engagement issues (once per day max)
+    const [recentProposals] = await db.execute(
+      sql`SELECT COUNT(*) as cnt FROM agent_actions
+          WHERE category = 'engagement' AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)`
+    ) as any;
+
+    if ((recentProposals as any)?.[0]?.cnt === 0) {
+      // Propose content strategy improvements if no recent revenue
+      if (metrics.purchases_30d === 0) {
+        await proposeAction({
+          businessId: business.id,
+          category: "engagement",
+          title: "No sales in 30 days — review content funnel",
+          description: "Zero purchases recorded in the last 30 days. Recommended actions: (1) Review email sequences and CTA placement, (2) Increase social posting frequency to drive traffic, (3) Consider a limited-time discount or flash sale on the 7-Day Reset ($47) or From Broken to Whole ($97).",
+          riskTier: 3,
+          metadata: { metrics, businessSlug: business.slug },
+        });
+      }
+
+      // Propose platform focus if some platforms are failing
+      const failedPlatforms = (platformStats as any[] || []).filter((r: any) => r.failed > 2 && r.failed > r.successful);
+      if (failedPlatforms.length > 0) {
+        await proposeAction({
+          businessId: business.id,
+          category: "engagement",
+          title: `Platform issues: ${failedPlatforms.map((p: any) => p.platform).join(", ")} failing`,
+          description: `These platforms have more failures than successful posts in the last 7 days: ${failedPlatforms.map((p: any) => `${p.platform} (${p.failed} failed / ${p.successful} posted)`).join(", ")}. Should we pause posting to these platforms and investigate, or reallocate content to better-performing channels?`,
+          riskTier: 3,
+          metadata: { failedPlatforms, businessSlug: business.slug },
+        });
+      }
+    }
   } catch (err: any) {
     console.error(`[MissionControl] Engagement monitor error (${business.slug}):`, err.message);
   }
@@ -597,14 +630,15 @@ async function executeQueuedActions(): Promise<void> {
               businessSlug,
             });
 
-            // Add to content queue
+            // Add to content queue with scheduled_for = NOW so posting cron auto-picks it up (Tier 1)
             await db.execute(sql`INSERT INTO content_queue
-              (platform, content_type, content, status, media_urls)
+              (platform, content_type, content, status, scheduled_for, media_urls)
               VALUES (
                 ${platform},
                 ${content.contentType},
                 ${content.content},
                 'ready',
+                NOW(),
                 ${JSON.stringify({
                   hashtags: content.hashtags,
                   suggestedMediaType: content.suggestedMediaType,
@@ -843,7 +877,29 @@ RESPOND IN JSON:
           ${JSON.stringify(ideas)}
         )`);
 
-      console.log(`[MissionControl] Generated ${ideas.length} strategic ideas`);
+      // Also create Tier 3 approval actions for high-impact ideas so they appear in the Approvals tab
+      for (const idea of ideas) {
+        if (idea.impact === "high" || idea.impact === "medium") {
+          let businessId: number | null = null;
+          if (idea.business && idea.business !== "cross-business") {
+            const [bizRows] = await db.execute(sql`SELECT id FROM businesses WHERE slug = ${idea.business} LIMIT 1`) as any;
+            if ((bizRows as any[])?.[0]?.id) {
+              businessId = (bizRows as any[])[0].id;
+            }
+          }
+
+          await proposeAction({
+            businessId,
+            category: "strategy",
+            title: idea.title,
+            description: `${idea.description}\n\nFirst step: ${idea.firstStep}\nEffort: ${idea.effort} | Impact: ${idea.impact}`,
+            riskTier: 3, // Requires owner approval
+            metadata: { source: "strategic_ideas", ...idea },
+          });
+        }
+      }
+
+      console.log(`[MissionControl] Generated ${ideas.length} strategic ideas (${ideas.filter((i: any) => i.impact === "high" || i.impact === "medium").length} sent for approval)`);
     }
   } catch (err: any) {
     console.error("[MissionControl] Strategic ideas error:", err.message);
