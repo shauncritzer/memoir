@@ -24,24 +24,26 @@ const stripe = stripeKey ? new Stripe(stripeKey, {
  * 
  * Actual Price IDs from Stripe dashboard (via Railway environment variables)
  */
+// Use env vars for Stripe price IDs (set in Railway), with hardcoded fallbacks
+const PRICE_RESET = process.env.STRIPE_PRICE_RESET_CHALLENGE || "price_1T0QQqC2dOpPzSOO61RNrJQR";
+const PRICE_ROADMAP = process.env.STRIPE_PRICE_RECOVERY_ROADMAP || "price_1T83EwC2dOpPzSOOockMjc5R";
+const PRICE_MEMBERSHIP = process.env.STRIPE_PRICE_MONTHLY_MEMBERSHIP || "price_1T83FTC2dOpPzSOOQCWvWdJd";
+const PRICE_MEMOIR = process.env.STRIPE_PRICE_MEMOIR || "price_1T83CrC2dOpPzSOO7aeZQHEe";
+
 export const STRIPE_PRICE_TO_CONVERTKIT_FORM: Record<string, string> = {
-  // 7-Day Reset ($47 one-time) — updated price ID
-  "price_1T0QQqC2dOpPzSOO61RNrJQR": CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
-
-  // From Broken to Whole ($97 one-time) — updated price ID
-  "price_1T83EwC2dOpPzSOOockMjc5R": CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
-
-  // Bent Not Broken Circle ($29/month recurring) — updated price ID
-  "price_1T83FTC2dOpPzSOOQCWvWdJd": CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
+  [PRICE_RESET]: CONVERTKIT_FORMS.SEVEN_DAY_RESET_PURCHASE,
+  [PRICE_ROADMAP]: CONVERTKIT_FORMS.FROM_BROKEN_TO_WHOLE_PURCHASE,
+  [PRICE_MEMBERSHIP]: CONVERTKIT_FORMS.BENT_NOT_BROKEN_CIRCLE_MEMBERSHIP,
 };
 
 /**
  * Product names for logging
  */
 export const STRIPE_PRICE_TO_PRODUCT_NAME: Record<string, string> = {
-  "price_1T0QQqC2dOpPzSOO61RNrJQR": "7-Day Reset",
-  "price_1T83EwC2dOpPzSOOockMjc5R": "From Broken to Whole",
-  "price_1T83FTC2dOpPzSOOQCWvWdJd": "Bent Not Broken Circle Membership",
+  [PRICE_RESET]: "7-Day Reset",
+  [PRICE_ROADMAP]: "From Broken to Whole",
+  [PRICE_MEMBERSHIP]: "Bent Not Broken Circle Membership",
+  [PRICE_MEMOIR]: "Crooked Lines Memoir",
 };
 
 /**
@@ -230,9 +232,10 @@ export function verifyWebhookSignature(
  * Stripe Price ID to Product ID mapping for database
  */
 export const STRIPE_PRICE_TO_PRODUCT_ID: Record<string, { productId: string; amount: number }> = {
-  "price_1T0QQqC2dOpPzSOO61RNrJQR": { productId: "7-day-reset", amount: 4700 },
-  "price_1T83EwC2dOpPzSOOockMjc5R": { productId: "from-broken-to-whole", amount: 9700 },
-  "price_1T83FTC2dOpPzSOOQCWvWdJd": { productId: "bent-not-broken-circle", amount: 2900 },
+  [PRICE_RESET]: { productId: "7-day-reset", amount: 4700 },
+  [PRICE_ROADMAP]: { productId: "from-broken-to-whole", amount: 9700 },
+  [PRICE_MEMBERSHIP]: { productId: "bent-not-broken-circle", amount: 2900 },
+  [PRICE_MEMOIR]: { productId: "crooked-lines-memoir", amount: 1999 },
 };
 
 /**

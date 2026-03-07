@@ -1807,6 +1807,7 @@ Recovery is possible. But it requires working with your biology, not against it.
 
         const { courseModules, courseLessons } = await import("../drizzle/schema");
         const { eq } = await import("drizzle-orm");
+        const { videoScripts } = await import("./course-content/video-scripts");
 
         // Delete existing course data to avoid duplicates
         const existingModules = await db.select().from(courseModules)
@@ -1940,14 +1941,24 @@ Recovery is possible. But it requires working with your biology, not against it.
 
           for (let i = 0; i < lessonList.length; i++) {
             const lesson = lessonList[i];
+            // Split desc into brief description and full content
+            const firstSentence = lesson.desc.split(/\.\s/)[0] + '.';
+            // Extract exercise content (everything after "Exercise:" or "exercise:")
+            const exerciseMatch = lesson.desc.match(/(Exercise[\s\S]*)/i);
+            const workbookContent = exerciseMatch ? exerciseMatch[1] : null;
+
             await db.insert(courseLessons).values({
               moduleId: moduleId,
               lessonNumber: i + 1,
               title: lesson.title,
-              description: lesson.desc,
-              videoUrl: null, // Videos will be generated via HeyGen pipeline
+              description: firstSentence,
+              content: lesson.desc,
+              videoScript: videoScripts[lesson.day] || null,
+              workbookContent: workbookContent,
+              videoUrl: null,
               videoProvider: "other",
               videoDuration: null,
+              estimatedMinutes: 20,
               workbookPdfUrl: null,
               slidePdfUrl: null,
               sortOrder: i + 1,
