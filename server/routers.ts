@@ -4456,6 +4456,147 @@ Recovery is possible. But it requires working with your biology, not against it.
 
         return { success: true };
       }),
+
+    // ─── Course Factory (Autonomous Course Creation) ─────────────────────────
+
+    /** Build an entire course from a single prompt */
+    buildCourse: protectedProcedure
+      .input(z.object({
+        prompt: z.string().min(5),
+        businessSlug: z.string().optional(),
+        targetPrice: z.number().optional(),
+        moduleCount: z.number().min(2).max(20).optional(),
+        lessonsPerModule: z.number().min(2).max(10).optional(),
+        durationDays: z.number().min(7).max(90).optional(),
+        autoLaunch: z.boolean().optional(),
+        generateVideoScripts: z.boolean().optional(),
+        generateWorkbook: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { buildCourseFromPrompt } = await import("./agent/course-factory");
+        return buildCourseFromPrompt(input);
+      }),
+
+    /** Enhance an existing course with fresh content */
+    enhanceCourse: protectedProcedure
+      .input(z.object({
+        productId: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { enhanceExistingCourse } = await import("./agent/course-factory");
+        return enhanceExistingCourse(input.productId);
+      }),
+
+    // ─── Revenue Engine ──────────────────────────────────────────────────────
+
+    /** Get a revenue snapshot (day/week/month) */
+    revenueSnapshot: protectedProcedure
+      .input(z.object({
+        period: z.enum(["day", "week", "month"]).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getRevenueSnapshot } = await import("./agent/revenue-engine");
+        return getRevenueSnapshot(input?.period || "week");
+      }),
+
+    /** Run revenue optimization (adjusts CTAs, analyzes patterns) */
+    optimizeRevenue: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { optimizeRevenue } = await import("./agent/revenue-engine");
+        return optimizeRevenue();
+      }),
+
+    /** Generate revenue forecast (30/60/90 day) */
+    revenueForecast: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { generateRevenueForecast } = await import("./agent/revenue-engine");
+        return generateRevenueForecast();
+      }),
+
+    // ─── Strategy Brain (Self-Improving) ─────────────────────────────────────
+
+    /** Run a strategy update cycle */
+    runStrategyUpdate: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { runStrategyUpdate } = await import("./agent/strategy-brain");
+        return runStrategyUpdate();
+      }),
+
+    /** Get current content strategy state */
+    getCurrentStrategy: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getCurrentStrategy } = await import("./agent/strategy-brain");
+        return getCurrentStrategy();
+      }),
+
+    /** Get content guidance for a specific platform */
+    getContentGuidance: protectedProcedure
+      .input(z.object({
+        platform: z.string().min(1),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { getContentGuidance } = await import("./agent/strategy-brain");
+        return getContentGuidance(input.platform);
+      }),
+
+    // ─── Niche Expander ──────────────────────────────────────────────────────
+
+    /** Discover profitable niches */
+    discoverNiches: protectedProcedure
+      .input(z.object({
+        seedTopic: z.string().optional(),
+        count: z.number().min(1).max(10).optional(),
+      }).optional())
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { discoverNiches } = await import("./agent/niche-expander");
+        return discoverNiches(input?.seedTopic, input?.count);
+      }),
+
+    /** Validate a discovered niche */
+    validateNiche: protectedProcedure
+      .input(z.object({
+        slug: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { validateNiche } = await import("./agent/niche-expander");
+        return validateNiche(input.slug);
+      }),
+
+    /** Activate a niche (create business profile, generate content, optionally build course) */
+    activateNiche: protectedProcedure
+      .input(z.object({
+        niche: z.object({
+          slug: z.string(),
+          name: z.string(),
+          description: z.string(),
+          targetAudience: z.string(),
+          brandVoice: z.string(),
+          viabilityScore: z.number(),
+          searchVolume: z.string(),
+          competition: z.enum(["low", "medium", "high"]),
+          monetization: z.enum(["low", "medium", "high"]),
+          suggestedProducts: z.array(z.string()),
+          contentThemes: z.array(z.string()),
+          status: z.enum(["discovered", "validating", "active", "paused", "abandoned"]),
+        }),
+        createCourse: z.boolean().optional(),
+        contentCount: z.number().min(1).max(50).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        const { activateNiche } = await import("./agent/niche-expander");
+        return activateNiche(input.niche, { createCourse: input.createCourse, contentCount: input.contentCount });
+      }),
   }),
 });
 

@@ -472,6 +472,68 @@ function getNextScheduledTime(platform: string): Date {
   return targetDate;
 }
 
+// ─── 5. Revenue Optimization Loop ────────────────────────────────────────────
+// Runs daily: analyzes revenue data, optimizes CTAs, adjusts strategy
+
+async function runRevenueLoop(): Promise<string | null> {
+  if (!canRun("revenue", 1440)) return null; // once per day
+
+  try {
+    const { optimizeRevenue } = await import("./revenue-engine");
+    const result = await optimizeRevenue();
+    markRun("revenue");
+
+    if (result) {
+      return `Revenue optimized: ${result.ctaAdjustments.length} CTA adjustments, strategy: ${result.strategyNote.substring(0, 100)}`;
+    }
+    return null;
+  } catch (err: any) {
+    console.error("[Orchestrator] Revenue loop error:", err.message);
+    markRun("revenue");
+    return null;
+  }
+}
+
+// ─── 6. Strategy Brain Loop ─────────────────────────────────────────────────
+// Runs every 12 hours: self-improving feedback loop
+
+async function runStrategyLoop(): Promise<string | null> {
+  if (!canRun("strategy", 720)) return null; // every 12 hours
+
+  try {
+    const { runStrategyUpdate } = await import("./strategy-brain");
+    const result = await runStrategyUpdate();
+    markRun("strategy");
+
+    if (result.updated) {
+      return `Strategy updated: ${result.changes.join("; ")}`;
+    }
+    return null;
+  } catch (err: any) {
+    console.error("[Orchestrator] Strategy loop error:", err.message);
+    markRun("strategy");
+    return null;
+  }
+}
+
+// ─── 7. Niche Discovery Loop ────────────────────────────────────────────────
+// Runs weekly: discovers and validates new niches
+
+async function runNicheLoop(): Promise<string | null> {
+  if (!canRun("niche", 10080)) return null; // once per week (7 * 24 * 60)
+
+  try {
+    const { runNicheDiscoveryLoop } = await import("./niche-expander");
+    const result = await runNicheDiscoveryLoop();
+    markRun("niche");
+    return result;
+  } catch (err: any) {
+    console.error("[Orchestrator] Niche loop error:", err.message);
+    markRun("niche");
+    return null;
+  }
+}
+
 // ─── Main Orchestrator Entry Point ───────────────────────────────────────────
 // Called by Mission Control on each 30-minute cycle
 
@@ -485,11 +547,14 @@ export async function runOrchestration(): Promise<{
   console.log("[Orchestrator] Running orchestration cycle...");
 
   // Run all loops (each has its own rate limiting)
-  const loops = [
+  const loops: { name: string; fn: () => Promise<string | null> }[] = [
     { name: "research", fn: runResearchLoop },
     { name: "replenish", fn: runReplenishLoop },
     { name: "quality", fn: runQualityLoop },
     { name: "optimize", fn: runOptimizeLoop },
+    { name: "revenue", fn: runRevenueLoop },
+    { name: "strategy", fn: runStrategyLoop },
+    { name: "niche", fn: runNicheLoop },
   ];
 
   for (const loop of loops) {
