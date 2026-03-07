@@ -652,6 +652,46 @@ async function executeQueuedActions(): Promise<void> {
             console.log(`[MissionControl] Auto-generated ${platform} content for ${businessSlug}`);
             break;
           }
+          case "research": {
+            // Execute a research task using Tavily + Research Creator
+            try {
+              const { tavilySearch } = await import("./web-research");
+              const topic = metadata.topic || metadata.query || action.description;
+              const searchResult = await tavilySearch({ query: topic, depth: "basic", maxResults: 5 });
+              await completeAction(
+                action.id,
+                `Research completed: ${searchResult.results?.length || 0} results found for "${topic.substring(0, 60)}"`
+              );
+            } catch (err: any) {
+              await failAction(action.id, `Research execution failed: ${err.message}`);
+            }
+            break;
+          }
+          case "engagement": {
+            // Generate content to address engagement issues
+            const { generateContentForPlatform } = await import("../social/content-generator");
+            const platform = metadata.platform || "instagram";
+            const content = await generateContentForPlatform({ platform, businessSlug: metadata.businessSlug || "sober-strong" });
+            await db.execute(sql`INSERT INTO content_queue (platform, content_type, content, status, scheduled_for)
+              VALUES (${platform}, ${content.contentType}, ${content.content}, 'ready', NOW())`);
+            await completeAction(action.id, `Generated ${platform} engagement content`);
+            break;
+          }
+          case "owner_command": {
+            // Process owner instructions — generate content or take action based on the description
+            const instruction = action.description || "";
+            if (instruction.toLowerCase().includes("generate") || instruction.toLowerCase().includes("post") || instruction.toLowerCase().includes("content")) {
+              const { generateContentForPlatform } = await import("../social/content-generator");
+              const platform = metadata.platform || "instagram";
+              const content = await generateContentForPlatform({ platform, topic: instruction, businessSlug: metadata.businessSlug || "sober-strong" });
+              await db.execute(sql`INSERT INTO content_queue (platform, content_type, content, status, scheduled_for)
+                VALUES (${platform}, ${content.contentType}, ${content.content}, 'ready', NOW())`);
+              await completeAction(action.id, `Executed owner command: generated ${platform} content`);
+            } else {
+              await completeAction(action.id, `Owner command logged: "${instruction.substring(0, 100)}"`);
+            }
+            break;
+          }
           default:
             await failAction(action.id, `No executor for category: ${action.category}`);
         }
@@ -966,6 +1006,21 @@ export async function runAgentCycle(): Promise<AgentState> {
 
     // Execute any auto-approved actions (tier 1-2)
     await executeQueuedActions();
+
+    // Run the orchestrator — this is the real brain that connects all agent arms
+    // (research via Tavily, content generation, quality verification, optimization)
+    try {
+      const { runOrchestration } = await import("./orchestrator");
+      const orchResult = await runOrchestration();
+      if (orchResult.actions.length > 0) {
+        console.log(`[MissionControl] Orchestrator actions: ${orchResult.actions.join("; ")}`);
+      }
+      if (orchResult.errors.length > 0) {
+        console.warn(`[MissionControl] Orchestrator errors: ${orchResult.errors.join("; ")}`);
+      }
+    } catch (err: any) {
+      console.warn("[MissionControl] Orchestrator not available (non-fatal):", err.message);
+    }
 
     // Log summary
     const criticalCount = allAlerts.filter(a => a.severity === "critical").length;

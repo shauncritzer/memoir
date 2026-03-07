@@ -157,6 +157,35 @@ async function processContentGeneration() {
 }
 
 /** Process ready items that are scheduled to post */
+/** Per-platform daily posting limits to protect algorithm reach */
+const PLATFORM_DAILY_LIMITS: Record<string, number> = {
+  instagram: 2,
+  facebook: 2,
+  x: 5,
+  linkedin: 1,
+  youtube: 1,
+  tiktok: 3,
+  podcast: 1,
+};
+
+/** Check how many posts a platform has already made today */
+async function getPlatformPostCountToday(platform: string): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  try {
+    const { sql } = await import("drizzle-orm");
+    const [rows] = await db.execute(
+      sql`SELECT COUNT(*) as cnt FROM content_queue
+          WHERE platform = ${platform}
+          AND status IN ('posted', 'posting')
+          AND posted_at >= CURDATE()`
+    ) as any;
+    return rows?.[0]?.cnt || 0;
+  } catch {
+    return 0;
+  }
+}
+
 async function processScheduledPosts() {
   const db = await getDb();
   if (!db) return;
@@ -180,6 +209,21 @@ async function processScheduledPosts() {
 
   for (const item of readyItems) {
     if (!item.content) continue;
+
+    // Enforce per-platform daily limits
+    const dailyLimit = PLATFORM_DAILY_LIMITS[item.platform] ?? 5;
+    const postedToday = await getPlatformPostCountToday(item.platform);
+    if (postedToday >= dailyLimit) {
+      // Reschedule for tomorrow instead of posting
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60), 0, 0);
+      await db.update(contentQueue)
+        .set({ scheduledFor: tomorrow })
+        .where(eq(contentQueue.id, item.id));
+      console.log(`[Scheduler] ${item.platform} hit daily limit (${dailyLimit}), rescheduled post #${item.id} to tomorrow`);
+      continue;
+    }
 
     await postContentItem(item);
   }
