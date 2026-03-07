@@ -84,6 +84,54 @@ async function startServer() {
     console.warn("[Server] Image proxy registration failed (non-fatal):", err.message);
   }
 
+  // ─── /recommends/:slug — Affiliate link redirects ─────────────────────────
+  // Looks up the CTA offer by slug, tracks the click, and redirects to the affiliate URL.
+  // If no affiliate URL is set, redirects to the CTA URL on the site.
+  app.get("/recommends/:slug", async (req, res) => {
+    const { slug } = req.params;
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (!db) {
+        return res.redirect("/products");
+      }
+
+      const { sql } = await import("drizzle-orm");
+
+      // Look up the CTA offer by matching the slug in the ctaUrl
+      const [rows] = await db.execute(
+        sql`SELECT id, cta_url, affiliate_url, name FROM cta_offers
+            WHERE cta_url LIKE ${`%/recommends/${slug}%`}
+            OR cta_url LIKE ${`%recommends/${slug}%`}
+            LIMIT 1`
+      ) as any;
+
+      const offer = (rows as any[])?.[0];
+
+      if (!offer) {
+        console.log(`[Recommends] No offer found for slug: ${slug}`);
+        return res.redirect("/products");
+      }
+
+      // Track the click
+      try {
+        await db.execute(
+          sql`UPDATE cta_offers SET clicks = clicks + 1 WHERE id = ${offer.id}`
+        );
+      } catch {
+        // Non-fatal — click tracking failure shouldn't block redirect
+      }
+
+      // Redirect to affiliate URL if set, otherwise fall back to products page
+      const redirectUrl = offer.affiliate_url || "/products";
+      console.log(`[Recommends] ${slug} → ${redirectUrl} (offer: ${offer.name})`);
+      return res.redirect(302, redirectUrl);
+    } catch (err: any) {
+      console.error(`[Recommends] Error for ${slug}:`, err.message);
+      return res.redirect("/products");
+    }
+  });
+
   // TikTok domain verification - serves verification file from env var
   // Set TIKTOK_VERIFICATION_CODE in Railway, e.g. "tiktok-developers-site-verification=XXXXX"
   app.get("/tiktok-*.txt", (req, res) => {
