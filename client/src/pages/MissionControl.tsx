@@ -31,6 +31,7 @@ import AdminNav from "@/components/AdminNav";
 
 export default function MissionControl() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAdvancedTools, setShowAdvancedTools] = useState(false);
   const [commandInput, setCommandInput] = useState("");
   const [feedbackInputs, setFeedbackInputs] = useState<Record<number, string>>({});
   const [showFeedback, setShowFeedback] = useState<Record<number, boolean>>({});
@@ -309,31 +310,48 @@ export default function MissionControl() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-gray-900 border border-gray-800 mb-6 flex-wrap">
-            <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:text-white">Overview</TabsTrigger>
-            <TabsTrigger value="approvals" className="text-gray-300 data-[state=active]:text-white">
-              Approvals {(pendingActions.data?.length || 0) > 0 && `(${pendingActions.data?.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="research" className="text-gray-300 data-[state=active]:text-white">
-              <Search className="h-3.5 w-3.5 mr-1" /> Research
-            </TabsTrigger>
-            <TabsTrigger value="feedback" className="text-gray-300 data-[state=active]:text-white">
-              <MessageCircle className="h-3.5 w-3.5 mr-1" /> Feedback
-            </TabsTrigger>
-            <TabsTrigger value="video-producer" className="text-gray-300 data-[state=active]:text-white">
-              <Film className="h-3.5 w-3.5 mr-1" /> Video
-            </TabsTrigger>
-            <TabsTrigger value="web-research" className="text-gray-300 data-[state=active]:text-white">
-              <Search className="h-3.5 w-3.5 mr-1" /> Web Eyes
-            </TabsTrigger>
-            <TabsTrigger value="browser-arm" className="text-gray-300 data-[state=active]:text-white">
-              <Zap className="h-3.5 w-3.5 mr-1" /> Browser Arm
-            </TabsTrigger>
-            <TabsTrigger value="businesses" className="text-gray-300 data-[state=active]:text-white">Businesses</TabsTrigger>
-            <TabsTrigger value="briefings" className="text-gray-300 data-[state=active]:text-white">Briefings</TabsTrigger>
-            <TabsTrigger value="ideas" className="text-gray-300 data-[state=active]:text-white">Ideas</TabsTrigger>
-            <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-white">History</TabsTrigger>
-          </TabsList>
+          <div className="mb-6 space-y-2">
+            <TabsList className="bg-gray-900 border border-gray-800 flex-wrap">
+              <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:text-white">Overview</TabsTrigger>
+              <TabsTrigger value="approvals" className="text-gray-300 data-[state=active]:text-white">
+                Approvals {(pendingActions.data?.length || 0) > 0 && `(${pendingActions.data?.length})`}
+              </TabsTrigger>
+              <TabsTrigger value="briefings" className="text-gray-300 data-[state=active]:text-white">Briefings</TabsTrigger>
+              <TabsTrigger value="ideas" className="text-gray-300 data-[state=active]:text-white">Ideas</TabsTrigger>
+              <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-white">History</TabsTrigger>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedTools(!showAdvancedTools)}
+                className="text-gray-500 hover:text-gray-300 ml-2 text-xs"
+              >
+                {showAdvancedTools ? "Hide" : "Show"} Advanced Tools {showAdvancedTools ? "▲" : "▼"}
+              </Button>
+            </TabsList>
+            {showAdvancedTools && (
+              <TabsList className="bg-gray-900/60 border border-gray-800/60 flex-wrap">
+                <span className="text-[10px] text-gray-600 uppercase tracking-wider px-2 py-1">Advanced:</span>
+                <TabsTrigger value="research" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <Search className="h-3 w-3 mr-1" /> Research
+                </TabsTrigger>
+                <TabsTrigger value="feedback" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <MessageCircle className="h-3 w-3 mr-1" /> Feedback
+                </TabsTrigger>
+                <TabsTrigger value="video-producer" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <Film className="h-3 w-3 mr-1" /> Video
+                </TabsTrigger>
+                <TabsTrigger value="web-research" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <Search className="h-3 w-3 mr-1" /> Web Eyes
+                </TabsTrigger>
+                <TabsTrigger value="browser-arm" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <Zap className="h-3 w-3 mr-1" /> Browser Arm
+                </TabsTrigger>
+                <TabsTrigger value="businesses" className="text-gray-400 data-[state=active]:text-white text-xs">
+                  <Building2 className="h-3 w-3 mr-1" /> Businesses
+                </TabsTrigger>
+              </TabsList>
+            )}
+          </div>
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview">
@@ -371,6 +389,50 @@ export default function MissionControl() {
                       <Send className="h-4 w-4 mr-1" />
                       {sendCommandMutation.isPending ? "Sending..." : "Send"}
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* How It Works Guide */}
+              <Card className="bg-gray-900/50 border-gray-800 md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Shield className="h-5 w-5 text-purple-400" />
+                    How This System Works
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">What's automatic vs. what needs you</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-green-400 flex items-center gap-2">
+                        <Zap className="h-4 w-4" /> Runs Automatically (no action needed)
+                      </h3>
+                      <ul className="text-sm text-gray-300 space-y-1.5 ml-1">
+                        <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" /> AI generates social content every 5 minutes</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" /> Auto-posts to Instagram, Facebook, LinkedIn, YouTube</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" /> Tracks engagement metrics every 30 minutes</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" /> Rotates CTAs/product links in posts</li>
+                        <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" /> Generates DALL-E images for posts</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
+                        <Clock className="h-4 w-4" /> What You Need To Do
+                      </h3>
+                      <ul className="text-sm text-gray-300 space-y-1.5 ml-1">
+                        <li className="flex items-start gap-2"><span className="text-orange-400 font-bold shrink-0">1.</span> Check <strong>Approvals</strong> tab — approve/deny anything the agent wants to do that costs money</li>
+                        <li className="flex items-start gap-2"><span className="text-orange-400 font-bold shrink-0">2.</span> Use <strong>Content Pipeline</strong> (in nav above) to add topics or queue posts manually</li>
+                        <li className="flex items-start gap-2"><span className="text-orange-400 font-bold shrink-0">3.</span> Copy/paste content for <strong>X/Twitter &amp; TikTok</strong> from Content Pipeline's "Manual Posting" tab</li>
+                        <li className="flex items-start gap-2"><span className="text-orange-400 font-bold shrink-0">4.</span> Read <strong>Briefings</strong> to see what the agent did today</li>
+                        <li className="flex items-start gap-2"><span className="text-orange-400 font-bold shrink-0">5.</span> Use the command box above to give instructions like "focus on relapse content this week"</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <p className="text-xs text-gray-400">
+                      <strong className="text-gray-300">Advanced Tools</strong> (hidden by default) — Research, Feedback, Video, Web Eyes, and Browser Arm are power-user tools for manually triggering specific agent capabilities. You don't need these for day-to-day operations.
+                    </p>
                   </div>
                 </CardContent>
               </Card>

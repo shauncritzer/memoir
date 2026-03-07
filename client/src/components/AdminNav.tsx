@@ -6,8 +6,6 @@ import {
   Zap,
   FileEdit,
   Video,
-  Database,
-  Settings,
   Activity,
 } from "lucide-react";
 
@@ -18,8 +16,6 @@ const adminPages = [
   { href: "/admin/blog-editor", label: "Blog Editor", icon: FileEdit },
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/diagnostics", label: "Diagnostics", icon: Activity },
-  { href: "/admin/seed", label: "Seed DB", icon: Database },
-  { href: "/admin/migrate", label: "Migrate", icon: Settings },
 ];
 
 export default function AdminNav() {
