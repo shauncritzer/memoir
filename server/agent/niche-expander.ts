@@ -25,6 +25,31 @@
 import { getDb } from "../db";
 import { invokeLLM } from "../_core/llm";
 
+// ─── Approved Verticals ─────────────────────────────────────────────────────
+// Only these niches are allowed. Anything outside this list is auto-rejected.
+const APPROVED_VERTICALS = [
+  "recovery",
+  "sobriety",
+  "addiction",
+  "nervous system regulation",
+  "trauma healing",
+  "fitness",
+  "bodybuilding",
+  "transformation",
+  "special needs parenting",
+] as const;
+
+const APPROVED_VERTICALS_LABEL = APPROVED_VERTICALS.join(", ");
+
+/**
+ * Check if a niche falls within approved verticals.
+ * Uses keyword matching against the niche name, description, and target audience.
+ */
+function isApprovedNiche(niche: NicheProfile): boolean {
+  const haystack = `${niche.name} ${niche.description} ${niche.targetAudience} ${niche.contentThemes?.join(" ") || ""}`.toLowerCase();
+  return APPROVED_VERTICALS.some(v => haystack.includes(v.toLowerCase()));
+}
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export type NicheProfile = {
@@ -97,11 +122,11 @@ export async function discoverNiches(
     messages: [
       {
         role: "system",
-        content: `You are a niche market researcher. Identify profitable niches for digital products and online courses. Return ONLY valid JSON.`,
+        content: `You are a niche market researcher for Shaun Critzer's brand. You MUST ONLY identify niches within these approved verticals: ${APPROVED_VERTICALS_LABEL}. Do NOT suggest niches outside these verticals — they will be rejected. Return ONLY valid JSON.`,
       },
       {
         role: "user",
-        content: `WEB RESEARCH:\n${webData}\n\n${seedTopic ? `SEED TOPIC: "${seedTopic}"` : "Find the best niches across all categories."}\n\nIdentify ${count} profitable niches. For each, evaluate:\n- Audience size and willingness to pay\n- Competition level\n- Content creation feasibility\n- Monetization paths\n\nReturn JSON:\n{\n  "niches": [\n    {\n      "slug": "niche-slug",\n      "name": "Niche Name",\n      "description": "What this niche is about",\n      "targetAudience": "Who the customers are",\n      "brandVoice": "Recommended brand voice/tone",\n      "viabilityScore": 8,\n      "searchVolume": "10K-50K/month",\n      "competition": "medium",\n      "monetization": "high",\n      "suggestedProducts": ["Course on X ($97)", "Toolkit ($47)", "Membership ($29/mo)"],\n      "contentThemes": ["theme 1", "theme 2", "theme 3"],\n      "status": "discovered"\n    }\n  ],\n  "analysisNotes": "Overall analysis of the niche landscape"\n}`,
+        content: `WEB RESEARCH:\n${webData}\n\nAPPROVED VERTICALS ONLY: ${APPROVED_VERTICALS_LABEL}\n\n${seedTopic ? `SEED TOPIC: "${seedTopic}" (must relate to one of the approved verticals above)` : `Find the best niches ONLY within these verticals: ${APPROVED_VERTICALS_LABEL}.`}\n\nIdentify ${count} profitable niches. Each niche MUST fall within the approved verticals listed above. For each, evaluate:\n- Audience size and willingness to pay\n- Competition level\n- Content creation feasibility\n- Monetization paths\n\nReturn JSON:\n{\n  "niches": [\n    {\n      "slug": "niche-slug",\n      "name": "Niche Name",\n      "description": "What this niche is about",\n      "targetAudience": "Who the customers are",\n      "brandVoice": "Recommended brand voice/tone",\n      "viabilityScore": 8,\n      "searchVolume": "10K-50K/month",\n      "competition": "medium",\n      "monetization": "high",\n      "suggestedProducts": ["Course on X ($97)", "Toolkit ($47)", "Membership ($29/mo)"],\n      "contentThemes": ["theme 1", "theme 2", "theme 3"],\n      "status": "discovered"\n    }\n  ],\n  "analysisNotes": "Overall analysis of the niche landscape"\n}`,
       },
     ],
     maxTokens: 4000,
@@ -115,15 +140,24 @@ export async function discoverNiches(
 
   try {
     const parsed = JSON.parse(clean);
+    const rawNiches: NicheProfile[] = parsed.niches || [];
+
+    // Hard filter: reject any niche outside approved verticals
+    const approved = rawNiches.filter(n => isApprovedNiche(n));
+    const rejected = rawNiches.length - approved.length;
+    if (rejected > 0) {
+      console.log(`[NicheExpander] Rejected ${rejected} niche(s) outside approved verticals`);
+    }
+
     const discovery: NicheDiscoveryResult = {
-      niches: parsed.niches || [],
+      niches: approved,
       researchSources: [],
       analysisNotes: parsed.analysisNotes || "",
     };
 
     // Save to database
     await saveNicheDiscovery(discovery);
-    console.log(`[NicheExpander] Discovered ${discovery.niches.length} niches`);
+    console.log(`[NicheExpander] Discovered ${discovery.niches.length} approved niches`);
     return discovery;
   } catch {
     return { niches: [], researchSources: [], analysisNotes: "Failed to parse results" };
@@ -200,6 +234,12 @@ export async function activateNiche(
   niche: NicheProfile,
   opts: { createCourse?: boolean; contentCount?: number } = {},
 ): Promise<{ success: boolean; actions: string[] }> {
+  // Gate: reject niches outside approved verticals
+  if (!isApprovedNiche(niche)) {
+    console.log(`[NicheExpander] Blocked activation of unapproved niche: "${niche.name}"`);
+    return { success: false, actions: [`Rejected: "${niche.name}" is outside approved verticals (${APPROVED_VERTICALS_LABEL})`] };
+  }
+
   const db = await getDb();
   if (!db) return { success: false, actions: ["Database unavailable"] };
 
@@ -358,8 +398,11 @@ export async function runNicheDiscoveryLoop(): Promise<string | null> {
   const discovery = await discoverNiches();
 
   if (discovery.niches.length > 0) {
-    // Auto-validate top niche
+    // Auto-validate top niche (already filtered to approved verticals by discoverNiches)
     const topNiche = discovery.niches.sort((a, b) => b.viabilityScore - a.viabilityScore)[0];
+    if (!isApprovedNiche(topNiche)) {
+      return `Discovered ${discovery.niches.length} niches but top niche "${topNiche.name}" is outside approved verticals — skipped`;
+    }
     const validation = await validateNiche(topNiche.slug);
 
     let result = `Discovered ${discovery.niches.length} niches. Top: "${topNiche.name}" (${topNiche.viabilityScore}/10)`;
