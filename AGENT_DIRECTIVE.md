@@ -31,6 +31,13 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
 4. Wire LangGraph basic orchestration loop
 5. Connect ConvertKit sequences (31 emails ready to import)
 
+## Infrastructure URLs
+| Service | URL | Notes |
+|---------|-----|-------|
+| **Main app** | `https://shauncritzer.com` | Railway, auto-deploys from `main` |
+| **n8n** | `https://<n8n-service>.up.railway.app` | Self-hosted, see `n8n/` dir for Dockerfile + workflow |
+| **Scheduler endpoint** | `POST /api/scheduler/run` | Bearer auth via `N8N_WEBHOOK_SECRET` env var |
+
 ## Do Not Touch
 - Course content and UI (7-Day Reset is complete and sellable)
 - Stripe configuration (live mode, working)

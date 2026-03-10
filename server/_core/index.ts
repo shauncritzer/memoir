@@ -309,6 +309,30 @@ async function startServer() {
     }
   });
 
+  // n8n / external scheduler trigger — runs one full content pipeline cycle
+  // Secured via N8N_WEBHOOK_SECRET (Bearer token or query param)
+  app.post("/api/scheduler/run", async (req, res) => {
+    try {
+      const secret = process.env.N8N_WEBHOOK_SECRET;
+      if (secret) {
+        const authHeader = req.headers.authorization || "";
+        const queryToken = req.query.token || "";
+        const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+        if (bearerToken !== secret && queryToken !== secret) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+      }
+
+      const { runSchedulerCycle } = await import("../social/scheduler");
+      const result = await runSchedulerCycle();
+      console.log(`[Scheduler] External trigger completed:`, result);
+      res.json(result);
+    } catch (err: any) {
+      console.error("[Scheduler] External trigger error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // YouTube OAuth flow - connect YouTube account
   app.get("/api/youtube/connect", (_req, res) => {
     try {
