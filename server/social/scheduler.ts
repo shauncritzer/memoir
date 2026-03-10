@@ -191,9 +191,13 @@ async function processScheduledPosts() {
   if (!db) return;
 
   const { contentQueue } = await import("../../drizzle/schema");
-  const { eq, and, lte, isNotNull } = await import("drizzle-orm");
+  const { eq, and, lte, isNull, or } = await import("drizzle-orm");
 
-  // Find items that are ready and have a scheduled time that has passed
+  // Find items that are ready and either:
+  // 1. Have a scheduled time that has passed, OR
+  // 2. Have no scheduled time (NULL) — treat as "post immediately"
+  // Bug fix: several code paths (e.g. admin generateContent) set status='ready'
+  // without setting scheduledFor, causing posts to never be picked up.
   const now = new Date();
   const readyItems = await db
     .select()
@@ -201,8 +205,10 @@ async function processScheduledPosts() {
     .where(
       and(
         eq(contentQueue.status, "ready"),
-        isNotNull(contentQueue.scheduledFor),
-        lte(contentQueue.scheduledFor, now),
+        or(
+          isNull(contentQueue.scheduledFor),
+          lte(contentQueue.scheduledFor, now),
+        ),
       )
     )
     .limit(3);

@@ -3301,6 +3301,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               content: generated.content,
               status: "ready",
               mediaUrls: mediaJson,
+              scheduledFor: item.scheduledFor ? undefined : new Date(),
             }).where(eq(contentQueue.id, item.id));
           } catch (dbErr: any) {
             console.error(`[ContentPipeline] DB update failed for queue item #${item.id}:`, dbErr.message);
@@ -3311,6 +3312,7 @@ Recovery is possible. But it requires working with your biology, not against it.
                 content: generated.content,
                 status: "ready",
                 errorMessage: `Media save failed: ${dbErr.message}`,
+                scheduledFor: item.scheduledFor ? undefined : new Date(),
               }).where(eq(contentQueue.id, item.id));
             } catch {
               // If even this fails, mark as failed
@@ -3358,6 +3360,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               contentType: result.contentType,
               content: result.content,
               status: "ready",
+              scheduledFor: new Date(),
               mediaUrls: JSON.stringify({
                 suggestedMediaType: result.suggestedMediaType,
                 suggestedMediaPrompt: result.suggestedMediaPrompt,
