@@ -31,4 +31,7 @@ export const ENV = {
   makeBaseUrl: process.env.MAKE_BASE_URL ?? "https://us2.make.com",
   // n8n (external scheduler trigger)
   n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET ?? "",
+  // LangSmith (agent observability) — set LANGCHAIN_TRACING_V2=true to enable
+  langsmithApiKey: process.env.LANGCHAIN_API_KEY ?? "",
+  langchainTracing: process.env.LANGCHAIN_TRACING_V2 === "true",
 };

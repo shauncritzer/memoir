@@ -22,7 +22,7 @@ function isDue(scheduledFor: Date): boolean {
 }
 
 /** Process pending content generation */
-async function processContentGeneration() {
+export async function processContentGeneration() {
   const db = await getDb();
   if (!db) return;
 
@@ -186,7 +186,7 @@ async function getPlatformPostCountToday(platform: string): Promise<number> {
   }
 }
 
-async function processScheduledPosts() {
+export async function processScheduledPosts() {
   const db = await getDb();
   if (!db) return;
 
@@ -552,7 +552,7 @@ async function postContentItem(item: {
 }
 
 /** Update engagement metrics for recently posted items */
-async function updateEngagementMetrics() {
+export async function updateEngagementMetrics() {
   const db = await getDb();
   if (!db) return;
 
