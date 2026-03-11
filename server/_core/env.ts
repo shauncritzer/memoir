@@ -34,4 +34,9 @@ export const ENV = {
   // LangSmith (agent observability) — set LANGCHAIN_TRACING_V2=true to enable
   langsmithApiKey: process.env.LANGCHAIN_API_KEY ?? "",
   langchainTracing: process.env.LANGCHAIN_TRACING_V2 === "true",
+  // Supabase (agent vector memory)
+  supabaseUrl: process.env.SUPABASE_URL ?? "",
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+  // Replicate (Flux image generation)
+  replicateApiToken: process.env.REPLICATE_API_TOKEN ?? "",
 };

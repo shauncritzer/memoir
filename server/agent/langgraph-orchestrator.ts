@@ -116,6 +116,15 @@ async function optimizeNode(_state: OrchestratorStateType) {
   try {
     const { runOptimizeLoop } = await import("./orchestrator");
     const result = await runOptimizeLoop();
+
+    // Store performance data in vector memory (non-blocking)
+    try {
+      const { storePerformanceSnapshot } = await import("./vector-memory-hooks");
+      await storePerformanceSnapshot();
+    } catch {
+      // Vector memory not configured — skip silently
+    }
+
     if (result) {
       return { optimizeResult: result, actions: [`[optimize] ${result}`] };
     }
@@ -172,7 +181,16 @@ export async function runContentGraph(businessSlug: string = "sober-strong"): Pr
 
   console.log("[LangGraph] Starting content pipeline graph...");
 
-  const result = await app.invoke({ businessSlug });
+  // LangSmith tracing is automatic when LANGCHAIN_TRACING_V2=true and LANGCHAIN_API_KEY are set.
+  // Pass run metadata for better organization in the LangSmith dashboard.
+  const result = await app.invoke(
+    { businessSlug },
+    {
+      runName: "content-pipeline",
+      metadata: { businessSlug, trigger: "scheduler" },
+      tags: ["content-pipeline", businessSlug],
+    }
+  );
 
   const success = result.errors.length === 0;
 

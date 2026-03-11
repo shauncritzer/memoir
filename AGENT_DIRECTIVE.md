@@ -138,21 +138,23 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
    - `/api/scheduler/run` now uses LangGraph (with legacy fallback)
    - `/api/orchestrator/run` — new endpoint for full orchestration (content + revenue + strategy + niche)
    - LangSmith env vars ready: set `LANGCHAIN_TRACING_V2=true` + `LANGCHAIN_API_KEY` in Railway
-9. Add Supabase pgvector for agent memory
-   - Enable pgvector on Supabase
-   - Create embeddings table
-   - Store content performance data
-   - Feed back into content generation
-10. Add LangSmith observability
-    - LANGSMITH_API_KEY in Railway env vars
-    - Wrap LangGraph calls with LangSmith tracing
-    - Agent decision visibility
+9. ~~Add Supabase pgvector for agent memory~~ ✓ DONE
+   - `server/agent/vector-memory.ts` — embeddings via Gemini embedding-001 (free, 768 dims)
+   - `server/agent/vector-memory-hooks.ts` — wired into optimize loop to store performance data
+   - SQL setup instructions in `setupInstructions()` — run in Supabase SQL Editor
+   - [SHAUN] Create Supabase project, run SQL, set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Railway
+10. ~~Add LangSmith observability~~ ✓ DONE
+    - LangGraph auto-traces when env vars set (built into @langchain/core)
+    - Run metadata added: runName, tags, businessSlug for dashboard organization
+    - [SHAUN] Set `LANGCHAIN_TRACING_V2=true` + `LANGCHAIN_API_KEY` in Railway
 
 ### Week 3 — Make It Actually Sell
-11. Replace DALL-E with Flux via Replicate
-    - Add REPLICATE_API_KEY to Railway
-    - Update image generation to use Flux Pro
-    - Use Ideogram for text-in-image / quote graphics
+11. ~~Replace DALL-E with Flux via Replicate~~ ✓ DONE
+    - `server/social/image-generator.ts` rewritten: Flux 1.1 Pro (primary) → DALL-E 3 (fallback)
+    - Same API surface (`generateImage`, `generatePostImage`, `isImageGenerationConfigured`)
+    - Aspect ratios instead of pixel sizes (1:1, 16:9, 9:16)
+    - ~$0.04/image on Replicate, same visual styles
+    - [SHAUN] Set `REPLICATE_API_TOKEN` in Railway env vars
 12. [SHAUN] 7-Day REWIRED Reset launch — announce, $47, first sale validates the system
 13. [SHAUN] Memoir final edits + Amazon KDP setup ($19.99)
 
