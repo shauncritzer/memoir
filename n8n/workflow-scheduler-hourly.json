@@ -27,7 +27,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+              "value": "Bearer sk_datadisco_n8n_2026_xK9mPq7vRt"
             },
             {
               "name": "Content-Type",
