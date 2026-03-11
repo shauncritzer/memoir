@@ -335,6 +335,65 @@ async function startServer() {
     }
   });
 
+  // Telegram webhook — receives button callbacks (approve/deny actions)
+  app.post("/api/telegram/webhook", async (req, res) => {
+    try {
+      const { handleTelegramWebhook } = await import("../agent/telegram");
+      const result = await handleTelegramWebhook(req.body);
+      res.json(result);
+    } catch (err: any) {
+      console.error("[Telegram] Webhook error:", err.message);
+      res.json({ handled: false, error: err.message });
+    }
+  });
+
+  // Telegram test — send a test message to verify the bot works
+  app.post("/api/telegram/test", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const { sendMessage, diagnoseTelegram } = await import("../agent/telegram");
+      const diag = await diagnoseTelegram();
+      if (!diag.botWorking) {
+        return res.json({ success: false, ...diag });
+      }
+      const result = await sendMessage(
+        `🤖 *Engine Test*\n\nTelegram integration is working\\. Bot: @${diag.botUsername}\n\nYou will receive:\n• Daily briefings\n• Tier 3\\-4 approval requests\n• Critical alerts`,
+        { parseMode: "Markdown" }
+      );
+      res.json({ success: true, ...diag, messageSent: result.success });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Self-monitoring endpoint — engine checks its own health
+  app.get("/api/engine/health", async (req, res) => {
+    try {
+      const { getEngineHealth } = await import("../agent/self-monitor");
+      const health = await getEngineHealth();
+      const statusCode = health.overall === "critical" ? 503 : 200;
+      res.status(statusCode).json(health);
+    } catch (err: any) {
+      res.status(500).json({ overall: "critical", error: err.message });
+    }
+  });
+
+  // Self-monitoring — full diagnostic run
+  app.post("/api/engine/diagnose", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const { runFullDiagnostic } = await import("../agent/self-monitor");
+      const report = await runFullDiagnostic();
+      res.json(report);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // YouTube OAuth flow - connect YouTube account
   app.get("/api/youtube/connect", (_req, res) => {
     try {

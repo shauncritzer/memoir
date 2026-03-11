@@ -323,6 +323,55 @@ export async function runQualityLoop(): Promise<string | null> {
   }
 }
 
+// ─── 3.5 Engagement Reading Loop ─────────────────────────────────────────────
+// Uses Browserbase to read real engagement data from social platforms (the "Ears")
+
+export async function runEngagementLoop(): Promise<string | null> {
+  if (!canRun("engagement_read", 720)) return null; // every 12 hours
+
+  try {
+    const { readEngagement } = await import("./engagement-reader");
+    const result = await readEngagement();
+
+    if (result.snapshots.length === 0 && result.errors.length === 0) {
+      markRun("engagement_read");
+      return null;
+    }
+
+    const totalEngagement = result.snapshots.reduce(
+      (sum, s) => sum + s.metrics.likes + s.metrics.comments + s.metrics.shares,
+      0
+    );
+
+    markRun("engagement_read");
+
+    if (result.snapshots.length > 0) {
+      // Send summary to Telegram if significant engagement found
+      if (totalEngagement > 0) {
+        try {
+          const { isTelegramConfigured, sendActionSummary } = await import("./telegram");
+          if (isTelegramConfigured()) {
+            const actions = result.snapshots.map(
+              s => `${s.platform}: ${s.metrics.likes} likes, ${s.metrics.comments} comments (${s.sentiment})`
+            );
+            await sendActionSummary(actions, result.errors);
+          }
+        } catch {
+          // Non-critical
+        }
+      }
+
+      return `Read ${result.snapshots.length} posts: ${totalEngagement} total engagement`;
+    }
+
+    return null;
+  } catch (err: any) {
+    console.error("[Orchestrator] Engagement read loop error:", err.message);
+    markRun("engagement_read");
+    return null;
+  }
+}
+
 // ─── 4. Optimization Loop ───────────────────────────────────────────────────
 // Analyzes metrics from posted content and adjusts content strategy
 
@@ -551,6 +600,7 @@ export async function runOrchestration(): Promise<{
     { name: "research", fn: runResearchLoop },
     { name: "replenish", fn: runReplenishLoop },
     { name: "quality", fn: runQualityLoop },
+    { name: "engagement", fn: runEngagementLoop },
     { name: "optimize", fn: runOptimizeLoop },
     { name: "revenue", fn: runRevenueLoop },
     { name: "strategy", fn: runStrategyLoop },
