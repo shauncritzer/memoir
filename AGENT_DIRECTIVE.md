@@ -27,7 +27,7 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
 ## Immediate Priorities (in order)
 1. ~~Fix Ready → Published scheduler bug~~ ✓ DONE
 2. ~~Install and configure n8n on Railway~~ ✓ DONE — live at https://n8n-production-cddc.up.railway.app
-3. Fix course_lessons module_id mismatch for video generation
+3. ~~Fix course_lessons module_id mismatch for video generation~~ ✓ DONE
 4. Wire LangGraph basic orchestration loop
 5. Connect ConvertKit sequences (31 emails ready to import)
 
