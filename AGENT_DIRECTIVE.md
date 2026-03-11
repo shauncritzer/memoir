@@ -132,10 +132,12 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
 7. [SHAUN] Import ConvertKit sequences (31 emails, 7 sequences, 6 automation rules — manual task)
 
 ### Week 2 — Make It Actually Think
-8. Wire LangGraph as orchestration layer
-   - Install LangGraph
-   - Create basic agent graph: Research → Content → Publish
-   - Replace linear cron with graph orchestration
+8. ~~Wire LangGraph as orchestration layer~~ ✓ DONE
+   - @langchain/langgraph + @langchain/core installed
+   - `server/agent/langgraph-orchestrator.ts` — StateGraph: research → replenish → content-gen → publish → metrics → quality → optimize
+   - `/api/scheduler/run` now uses LangGraph (with legacy fallback)
+   - `/api/orchestrator/run` — new endpoint for full orchestration (content + revenue + strategy + niche)
+   - LangSmith env vars ready: set `LANGCHAIN_TRACING_V2=true` + `LANGCHAIN_API_KEY` in Railway
 9. Add Supabase pgvector for agent memory
    - Enable pgvector on Supabase
    - Create embeddings table

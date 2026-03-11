@@ -309,26 +309,58 @@ async function startServer() {
     }
   });
 
+  // Auth helper for scheduler endpoints
+  function verifySchedulerAuth(req: any): boolean {
+    const secret = process.env.N8N_WEBHOOK_SECRET;
+    if (!secret) return true;
+    const authHeader = req.headers.authorization || "";
+    const queryToken = req.query.token || "";
+    const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    return bearerToken === secret || queryToken === secret;
+  }
+
   // n8n / external scheduler trigger — runs one full content pipeline cycle
+  // Now uses LangGraph orchestration for research → content → publish → metrics
   // Secured via N8N_WEBHOOK_SECRET (Bearer token or query param)
   app.post("/api/scheduler/run", async (req, res) => {
     try {
-      const secret = process.env.N8N_WEBHOOK_SECRET;
-      if (secret) {
-        const authHeader = req.headers.authorization || "";
-        const queryToken = req.query.token || "";
-        const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-        if (bearerToken !== secret && queryToken !== secret) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const { runSchedulerCycle } = await import("../social/scheduler");
-      const result = await runSchedulerCycle();
-      console.log(`[Scheduler] External trigger completed:`, result);
+      // Use LangGraph orchestrator (wraps the same underlying functions)
+      const { runContentGraph } = await import("../agent/langgraph-orchestrator");
+      const result = await runContentGraph();
+      console.log(`[Scheduler] LangGraph pipeline completed:`, result);
       res.json(result);
     } catch (err: any) {
-      console.error("[Scheduler] External trigger error:", err.message);
+      console.error("[Scheduler] LangGraph pipeline error, falling back to legacy:", err.message);
+      // Fallback to legacy scheduler if LangGraph fails
+      try {
+        const { runSchedulerCycle } = await import("../social/scheduler");
+        const result = await runSchedulerCycle();
+        console.log(`[Scheduler] Legacy fallback completed:`, result);
+        res.json({ ...result, fallback: true });
+      } catch (fallbackErr: any) {
+        res.status(500).json({ error: fallbackErr.message });
+      }
+    }
+  });
+
+  // Full orchestration endpoint — runs all loops (content + revenue + strategy + niche)
+  // Use this for the hourly n8n trigger when you want the full autonomous cycle
+  app.post("/api/orchestrator/run", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { runFullOrchestration } = await import("../agent/langgraph-orchestrator");
+      const result = await runFullOrchestration();
+      console.log(`[Orchestrator] Full LangGraph orchestration completed:`, result);
+      res.json(result);
+    } catch (err: any) {
+      console.error("[Orchestrator] Full orchestration error:", err.message);
       res.status(500).json({ error: err.message });
     }
   });
