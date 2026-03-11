@@ -25,8 +25,8 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
 8:15pm: Memory update → Supabase vector stores what worked
 
 ## Immediate Priorities (in order)
-1. Fix Ready → Published scheduler bug
-2. Install and configure n8n on Railway
+1. ~~Fix Ready → Published scheduler bug~~ ✓ DONE
+2. ~~Install and configure n8n on Railway~~ ✓ DONE — live at https://n8n-production-cddc.up.railway.app
 3. Fix course_lessons module_id mismatch for video generation
 4. Wire LangGraph basic orchestration loop
 5. Connect ConvertKit sequences (31 emails ready to import)
@@ -35,8 +35,9 @@ n8n (heartbeat/trigger) → LangGraph (agent coordination)
 | Service | URL | Notes |
 |---------|-----|-------|
 | **Main app** | `https://shauncritzer.com` | Railway, auto-deploys from `main` |
-| **n8n** | `https://<n8n-service>.up.railway.app` | Self-hosted, see `n8n/` dir for Dockerfile + workflow |
+| **n8n** | `https://n8n-production-cddc.up.railway.app` | Self-hosted on Railway, PostgreSQL storage (no volume needed) |
 | **Scheduler endpoint** | `POST /api/scheduler/run` | Bearer auth via `N8N_WEBHOOK_SECRET` env var |
+| **Active workflow** | `Sober Strong – Hourly Scheduler` | Fires every hour, calls `/api/scheduler/run` |
 
 ## Do Not Touch
 - Course content and UI (7-Day Reset is complete and sellable)
