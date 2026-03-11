@@ -34,4 +34,7 @@ export const ENV = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   // Replicate (Flux image generation)
   replicateApiToken: process.env.REPLICATE_API_TOKEN ?? "",
+  // Telegram (briefings + approvals delivered to phone)
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
+  telegramChatId: process.env.TELEGRAM_CHAT_ID ?? "",
 };

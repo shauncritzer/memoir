@@ -290,7 +290,22 @@ async function proposeAction(opts: {
         ${opts.metadata ? JSON.stringify(opts.metadata) : null}
       )`) as any;
 
-    return result.insertId || null;
+    const actionId = result.insertId || null;
+
+    // Send Tier 3-4 approval requests to Telegram
+    if (!autoExecute && actionId) {
+      try {
+        const { isTelegramConfigured, sendApprovalRequest } = await import("./telegram");
+        if (isTelegramConfigured()) {
+          await sendApprovalRequest(actionId, opts.title, opts.description, opts.riskTier, opts.category);
+          console.log(`[MissionControl] Tier ${opts.riskTier} approval sent to Telegram: ${opts.title}`);
+        }
+      } catch (err: any) {
+        console.warn("[MissionControl] Telegram approval notification failed:", err.message);
+      }
+    }
+
+    return actionId;
   } catch (err: any) {
     console.error("[MissionControl] Propose action error:", err.message);
     return null;
@@ -572,6 +587,22 @@ async function monitorSystemHealth(): Promise<AgentAlert[]> {
  * Payload: { title, content, type, timestamp, alerts_count, pending_count }
  */
 async function deliverBriefingViaWebhook(content: string, title: string, alertsCount: number, pendingCount: number): Promise<void> {
+  // 1. Deliver via Telegram (primary — direct to Shaun's phone)
+  try {
+    const { isTelegramConfigured, sendDailyBriefing } = await import("./telegram");
+    if (isTelegramConfigured()) {
+      const result = await sendDailyBriefing(content, alertsCount, pendingCount);
+      if (result.success) {
+        console.log("[MissionControl] Briefing delivered via Telegram");
+      } else {
+        console.warn("[MissionControl] Telegram delivery failed:", result.error);
+      }
+    }
+  } catch (err: any) {
+    console.warn("[MissionControl] Telegram delivery error:", err.message);
+  }
+
+  // 2. Also deliver via webhook if configured (n8n, Slack, email, etc.)
   const webhookUrl = process.env.BRIEFING_WEBHOOK_URL;
   if (!webhookUrl) return;
 

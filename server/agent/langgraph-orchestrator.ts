@@ -24,6 +24,8 @@ const OrchestratorState = Annotation.Root({
   postingResult: Annotation<string>,
   metricsResult: Annotation<string>,
   qualityResult: Annotation<string>,
+  engagementResult: Annotation<string>,
+  healthResult: Annotation<string>,
   optimizeResult: Annotation<string>,
 
   // Accumulated actions log (reducer: appends new entries)
@@ -112,6 +114,58 @@ async function qualityNode(_state: OrchestratorStateType) {
   }
 }
 
+async function engagementNode(_state: OrchestratorStateType) {
+  try {
+    const { runEngagementLoop } = await import("./orchestrator");
+    const result = await runEngagementLoop();
+    if (result) {
+      return { engagementResult: result, actions: [`[engagement] ${result}`] };
+    }
+    return { engagementResult: "skipped" };
+  } catch (err: any) {
+    return { engagementResult: `error: ${err.message}`, errors: [`[engagement] ${err.message}`] };
+  }
+}
+
+async function healthCheckNode(_state: OrchestratorStateType) {
+  try {
+    const { getEngineHealth } = await import("./self-monitor");
+    const health = await getEngineHealth();
+
+    if (health.overall === "critical") {
+      // Send critical alert via Telegram
+      try {
+        const { isTelegramConfigured, sendCriticalAlert } = await import("./telegram");
+        if (isTelegramConfigured()) {
+          await sendCriticalAlert(
+            "Engine Health Critical",
+            health.criticals.join(". "),
+            health.warnings.join("\n")
+          );
+        }
+      } catch {
+        // Non-critical
+      }
+      return {
+        healthResult: `CRITICAL: ${health.criticals.join("; ")}`,
+        actions: [`[health] CRITICAL: ${health.criticals.join("; ")}`],
+        errors: health.criticals.map(c => `[health] ${c}`),
+      };
+    }
+
+    if (health.warnings.length > 0) {
+      return {
+        healthResult: `degraded: ${health.warnings.join("; ")}`,
+        actions: [`[health] Warnings: ${health.warnings.join("; ")}`],
+      };
+    }
+
+    return { healthResult: "healthy" };
+  } catch (err: any) {
+    return { healthResult: `error: ${err.message}`, errors: [`[health] ${err.message}`] };
+  }
+}
+
 async function optimizeNode(_state: OrchestratorStateType) {
   try {
     const { runOptimizeLoop } = await import("./orchestrator");
@@ -145,20 +199,24 @@ async function optimizeNode(_state: OrchestratorStateType) {
  */
 function buildContentPipelineGraph() {
   const graph = new StateGraph(OrchestratorState)
+    .addNode("health_check", healthCheckNode)
     .addNode("research", researchNode)
     .addNode("replenish", replenishNode)
     .addNode("content_gen", contentGenerationNode)
     .addNode("publish", publishNode)
     .addNode("metrics", metricsNode)
     .addNode("quality", qualityNode)
+    .addNode("engagement", engagementNode)
     .addNode("optimize", optimizeNode)
-    .addEdge(START, "research")
+    .addEdge(START, "health_check")
+    .addEdge("health_check", "research")
     .addEdge("research", "replenish")
     .addEdge("replenish", "content_gen")
     .addEdge("content_gen", "publish")
     .addEdge("publish", "metrics")
     .addEdge("metrics", "quality")
-    .addEdge("quality", "optimize")
+    .addEdge("quality", "engagement")
+    .addEdge("engagement", "optimize")
     .addEdge("optimize", END);
 
   return graph.compile();
