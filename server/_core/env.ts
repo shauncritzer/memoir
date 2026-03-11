@@ -29,4 +29,6 @@ export const ENV = {
   makeWebhookSecret: process.env.MAKE_WEBHOOK_SECRET ?? "",
   makeTeamId: process.env.MAKE_TEAM_ID ?? "",
   makeBaseUrl: process.env.MAKE_BASE_URL ?? "https://us2.make.com",
+  // n8n (external scheduler trigger)
+  n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET ?? "",
 };

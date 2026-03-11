@@ -770,7 +770,7 @@ FORMAT YOUR RESPONSE AS:
 (Any tier 3-4 actions waiting, or "Nothing pending")
 
 ### Ideas & Opportunities
-(1-2 proactive suggestions for growth, optimization, or new initiatives)
+(1-2 proactive suggestions — ONLY within approved verticals: recovery, sobriety, addiction, nervous system regulation, trauma healing, fitness, bodybuilding, transformation, special needs parenting. No AI/ML, tech, or SaaS ideas.)
 
 ### Today's Plan
 (What the agent plans to do today)
@@ -871,6 +871,8 @@ For each idea include:
 3. Estimated effort (low/medium/high)
 4. Estimated impact (low/medium/high)
 5. Specific first step to implement
+
+IMPORTANT CONSTRAINT: All ideas must stay within these approved verticals: recovery, sobriety, addiction, nervous system regulation, trauma healing, fitness, bodybuilding, transformation, special needs parenting. Do NOT propose ideas for AI/ML, tech, SaaS, or any niche outside these verticals.
 
 Focus on quick wins and cross-business synergies. Be specific, not generic.
 

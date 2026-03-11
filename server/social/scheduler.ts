@@ -782,3 +782,43 @@ export function getSchedulerStatus() {
     },
   };
 }
+
+/**
+ * Run a single scheduler cycle on demand (for external triggers like n8n).
+ * Executes content generation → posting → metrics in sequence.
+ * Returns a summary of what happened.
+ */
+export async function runSchedulerCycle(): Promise<{
+  success: boolean;
+  contentGeneration: string;
+  posting: string;
+  metrics: string;
+}> {
+  const results = { success: true, contentGeneration: "", posting: "", metrics: "" };
+
+  try {
+    await processContentGeneration();
+    results.contentGeneration = "ok";
+  } catch (err: any) {
+    results.contentGeneration = `error: ${err.message}`;
+    results.success = false;
+  }
+
+  try {
+    await processScheduledPosts();
+    results.posting = "ok";
+  } catch (err: any) {
+    results.posting = `error: ${err.message}`;
+    results.success = false;
+  }
+
+  try {
+    await updateEngagementMetrics();
+    results.metrics = "ok";
+  } catch (err: any) {
+    results.metrics = `error: ${err.message}`;
+    results.success = false;
+  }
+
+  return results;
+}
