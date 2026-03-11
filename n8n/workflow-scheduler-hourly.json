@@ -21,7 +21,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.APP_BASE_URL }}/api/scheduler/run",
+        "url": "https://shauncritzer.com/api/scheduler/run",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
