@@ -65,7 +65,9 @@ export async function cacheImageForInstagram(imageUrl: string): Promise<string |
 
     // Build our public URL from environment
     const appUrl = process.env.APP_URL
-      || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "");
+      || process.env.VITE_APP_URL
+      || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "")
+      || "https://shauncritzer.com";
 
     if (!appUrl) {
       console.warn("[ImageProxy] No APP_URL or RAILWAY_PUBLIC_DOMAIN set — cannot serve cached images");
