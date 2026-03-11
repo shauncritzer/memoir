@@ -1806,15 +1806,21 @@ Recovery is possible. But it requires working with your biology, not against it.
         if (!db) throw new Error("Database not available");
 
         const { courseModules, courseLessons } = await import("../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { eq, inArray, sql } = await import("drizzle-orm");
 
         // Delete existing course data to avoid duplicates
         const existingModules = await db.select().from(courseModules)
           .where(eq(courseModules.productId, "from-broken-to-whole"));
 
+        // Delete lessons for current modules
         for (const mod of existingModules) {
           await db.delete(courseLessons).where(eq(courseLessons.moduleId, mod.id));
         }
+
+        // Also delete orphaned lessons whose module_id references deleted modules
+        // (handles re-seeding where old module IDs no longer exist in course_modules)
+        await db.execute(sql`DELETE FROM course_lessons WHERE module_id NOT IN (SELECT id FROM course_modules)`);
+
         await db.delete(courseModules).where(eq(courseModules.productId, "from-broken-to-whole"));
 
         const moduleData = [

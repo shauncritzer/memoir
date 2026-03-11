@@ -310,6 +310,14 @@ async function seedCourseToDatabase(
   let modulesCreated = 0;
   let lessonsCreated = 0;
 
+  // Clean up existing course data to prevent orphaned lessons on re-seed
+  await db.execute(sql`DELETE cl FROM course_lessons cl
+    INNER JOIN course_modules cm ON cl.module_id = cm.id
+    WHERE cm.product_id = ${productId}`);
+  await db.execute(sql`DELETE FROM course_modules WHERE product_id = ${productId}`);
+  // Also clean orphaned lessons whose module_id no longer exists
+  await db.execute(sql`DELETE FROM course_lessons WHERE module_id NOT IN (SELECT id FROM course_modules)`);
+
   // Ensure course_lessons has the new columns (safe to run multiple times)
   try {
     await db.execute(sql`ALTER TABLE course_lessons ADD COLUMN IF NOT EXISTS content TEXT`);

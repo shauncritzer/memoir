@@ -309,7 +309,7 @@ export async function batchGenerateCourseVideos(opts?: {
   if (!db) return { success: false, totalJobs: 0, completed: 0, failed: 0, jobs: [], error: "Database not available" };
 
   const { courseModules, courseLessons } = await import("../../drizzle/schema");
-  const { eq, and, isNull } = await import("drizzle-orm");
+  const { eq, and, isNull, inArray, sql } = await import("drizzle-orm");
 
   // Get all modules for the course
   const modules = await db.select().from(courseModules)
@@ -318,6 +318,42 @@ export async function batchGenerateCourseVideos(opts?: {
 
   if (modules.length === 0) {
     return { success: false, totalJobs: 0, completed: 0, failed: 0, jobs: [], error: "Course not seeded. Run 'Seed 30-Day Course' first." };
+  }
+
+  // ── Repair orphaned lessons whose module_id no longer matches current modules ──
+  const currentModuleIds = modules.map(m => m.id);
+  const testLesson = await db.select().from(courseLessons)
+    .where(eq(courseLessons.moduleId, modules[0].id))
+    .limit(1);
+
+  if (testLesson.length === 0) {
+    // Lessons exist but reference stale module IDs — find and remap them
+    const allLessons = await db.select({ moduleId: courseLessons.moduleId })
+      .from(courseLessons);
+    const seen = new Set<number>();
+    const orphanedModuleIds = allLessons
+      .map(l => l.moduleId)
+      .filter(id => {
+        if (currentModuleIds.includes(id) || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      })
+      .sort((a, b) => a - b);
+
+    if (orphanedModuleIds.length > 0 && orphanedModuleIds.length <= modules.length) {
+      console.log(`[VideoProducer] Repairing ${orphanedModuleIds.length} orphaned module_id references`);
+      // Map old module IDs (sorted) to current modules (sorted by sortOrder)
+      for (let i = 0; i < orphanedModuleIds.length; i++) {
+        const oldId = orphanedModuleIds[i];
+        const newId = modules[i].id;
+        if (oldId !== newId) {
+          await db.execute(
+            sql`UPDATE course_lessons SET module_id = ${newId} WHERE module_id = ${oldId}`
+          );
+          console.log(`[VideoProducer] Remapped module_id ${oldId} → ${newId}`);
+        }
+      }
+    }
   }
 
   const jobs: VideoJob[] = [];
