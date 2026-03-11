@@ -24,11 +24,6 @@ export const ENV = {
   // Browserbase (headless browser automation)
   browserbaseApiKey: process.env.BROWSERBASE_API_KEY ?? "",
   browserbaseProjectId: process.env.BROWSERBASE_PROJECT_ID ?? "",
-  // Make.com (workflow automation)
-  makeApiKey: process.env.MAKE_API_KEY ?? "",
-  makeWebhookSecret: process.env.MAKE_WEBHOOK_SECRET ?? "",
-  makeTeamId: process.env.MAKE_TEAM_ID ?? "",
-  makeBaseUrl: process.env.MAKE_BASE_URL ?? "https://us2.make.com",
   // n8n (external scheduler trigger)
   n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET ?? "",
   // LangSmith (agent observability) — set LANGCHAIN_TRACING_V2=true to enable
