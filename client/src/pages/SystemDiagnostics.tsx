@@ -17,7 +17,6 @@ import {
   CreditCard,
   Search,
   Globe,
-  Workflow,
   Activity,
 } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
@@ -104,7 +103,6 @@ export default function SystemDiagnostics() {
   const [heygen, setHeygen] = useState<DiagResult>({ status: "idle" });
   const [tavily, setTavily] = useState<DiagResult>({ status: "idle" });
   const [browserbase, setBrowserbase] = useState<DiagResult>({ status: "idle" });
-  const [make, setMake] = useState<DiagResult>({ status: "idle" });
   const [convertkit, setConvertkit] = useState<DiagResult>({ status: "idle" });
 
   // Mutations for diagnostics
@@ -128,10 +126,6 @@ export default function SystemDiagnostics() {
     onSuccess: (data: any) => setBrowserbase({ status: "success", data }),
     onError: (err: any) => setBrowserbase({ status: "error", error: err.message }),
   });
-  const mkDiag = trpc.agent.diagnoseMakeApi.useMutation({
-    onSuccess: (data: any) => setMake({ status: "success", data }),
-    onError: (err: any) => setMake({ status: "error", error: err.message }),
-  });
   const ckDiag = trpc.contentPipeline.diagnoseConvertKit.useMutation({
     onSuccess: (data: any) => setConvertkit({ status: "success", data }),
     onError: (err: any) => setConvertkit({ status: "error", error: err.message }),
@@ -143,7 +137,6 @@ export default function SystemDiagnostics() {
     setHeygen({ status: "loading" });
     setTavily({ status: "loading" });
     setBrowserbase({ status: "loading" });
-    setMake({ status: "loading" });
     setConvertkit({ status: "loading" });
     ytDiag.mutate();
     twDiag.mutate();
@@ -153,7 +146,6 @@ export default function SystemDiagnostics() {
     );
     tvDiag.mutate();
     bbDiag.mutate();
-    mkDiag.mutate();
     ckDiag.mutate();
   };
 
@@ -452,39 +444,6 @@ export default function SystemDiagnostics() {
                 )}
               </DiagCard>
 
-              {/* Make.com */}
-              <DiagCard
-                title="Make.com (Automation)"
-                icon={Workflow}
-                result={make}
-                onRun={() => { setMake({ status: "loading" }); mkDiag.mutate(); }}
-              >
-                {(d) => (
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>API Connection</span>
-                      <StatusBadge configured={d.configured} />
-                    </div>
-                    {d.scenarios !== undefined && (
-                      <div className="flex justify-between">
-                        <span>Scenarios</span>
-                        <span>{d.scenarios} found</span>
-                      </div>
-                    )}
-                    {d.teamId && (
-                      <div className="flex justify-between text-muted-foreground">
-                        <span>Team ID</span>
-                        <span className="font-mono text-xs">{d.teamId}</span>
-                      </div>
-                    )}
-                    {d.diagnosis && (
-                      <div className={`mt-2 p-2 rounded text-xs ${d.configured ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
-                        {d.diagnosis}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </DiagCard>
             </div>
           </TabsContent>
         </Tabs>

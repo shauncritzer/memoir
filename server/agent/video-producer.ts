@@ -320,38 +320,47 @@ export async function batchGenerateCourseVideos(opts?: {
     return { success: false, totalJobs: 0, completed: 0, failed: 0, jobs: [], error: "Course not seeded. Run 'Seed 30-Day Course' first." };
   }
 
-  // ── Repair orphaned lessons whose module_id no longer matches current modules ──
+  // ── Always repair orphaned lessons whose module_id no longer matches current modules ──
   const currentModuleIds = modules.map(m => m.id);
-  const testLesson = await db.select().from(courseLessons)
-    .where(eq(courseLessons.moduleId, modules[0].id))
-    .limit(1);
+  const allLessons = await db.select({ moduleId: courseLessons.moduleId })
+    .from(courseLessons);
+  const seen = new Set<number>();
+  const orphanedModuleIds = allLessons
+    .map(l => l.moduleId)
+    .filter(id => {
+      if (currentModuleIds.includes(id) || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    })
+    .sort((a, b) => a - b);
 
-  if (testLesson.length === 0) {
-    // Lessons exist but reference stale module IDs — find and remap them
-    const allLessons = await db.select({ moduleId: courseLessons.moduleId })
-      .from(courseLessons);
-    const seen = new Set<number>();
-    const orphanedModuleIds = allLessons
-      .map(l => l.moduleId)
-      .filter(id => {
-        if (currentModuleIds.includes(id) || seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      })
-      .sort((a, b) => a - b);
-
-    if (orphanedModuleIds.length > 0 && orphanedModuleIds.length <= modules.length) {
-      console.log(`[VideoProducer] Repairing ${orphanedModuleIds.length} orphaned module_id references`);
-      // Map old module IDs (sorted) to current modules (sorted by sortOrder)
-      for (let i = 0; i < orphanedModuleIds.length; i++) {
-        const oldId = orphanedModuleIds[i];
+  if (orphanedModuleIds.length > 0 && orphanedModuleIds.length <= modules.length) {
+    console.log(`[VideoProducer] Repairing ${orphanedModuleIds.length} orphaned module_id references: ${orphanedModuleIds.join(", ")}`);
+    // Map old module IDs (sorted) to current modules (sorted by sortOrder)
+    for (let i = 0; i < orphanedModuleIds.length; i++) {
+      const oldId = orphanedModuleIds[i];
+      const newId = modules[i].id;
+      if (oldId !== newId) {
+        await db.execute(
+          sql`UPDATE course_lessons SET module_id = ${newId} WHERE module_id = ${oldId}`
+        );
+        console.log(`[VideoProducer] Remapped module_id ${oldId} → ${newId}`);
+      }
+    }
+  } else if (orphanedModuleIds.length > modules.length) {
+    // More orphan groups than modules — delete the extras, keep what we can map
+    console.warn(`[VideoProducer] Found ${orphanedModuleIds.length} orphaned module groups but only ${modules.length} modules — remapping what we can, deleting extras`);
+    for (let i = 0; i < orphanedModuleIds.length; i++) {
+      const oldId = orphanedModuleIds[i];
+      if (i < modules.length) {
         const newId = modules[i].id;
         if (oldId !== newId) {
-          await db.execute(
-            sql`UPDATE course_lessons SET module_id = ${newId} WHERE module_id = ${oldId}`
-          );
+          await db.execute(sql`UPDATE course_lessons SET module_id = ${newId} WHERE module_id = ${oldId}`);
           console.log(`[VideoProducer] Remapped module_id ${oldId} → ${newId}`);
         }
+      } else {
+        await db.execute(sql`DELETE FROM course_lessons WHERE module_id = ${oldId}`);
+        console.log(`[VideoProducer] Deleted orphaned lessons with module_id ${oldId}`);
       }
     }
   }

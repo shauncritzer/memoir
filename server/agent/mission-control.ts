@@ -806,18 +806,6 @@ Keep it scannable. Shaun has ADHD - give him the 2-minute version. Use real numb
     // Deliver via webhook (email/Slack/n8n)
     await deliverBriefingViaWebhook(briefingContent, `Daily Briefing - ${dateStr}`, allAlerts.length, pendingCount);
 
-    // Also trigger Make.com daily metrics report if configured
-    try {
-      const { triggerScenario } = await import("./make-automation");
-      await triggerScenario("daily-metrics-report", "sober-strong", {
-        metrics: allMetrics,
-        alerts: allAlerts.map(a => ({ severity: a.severity, title: a.title, message: a.message })),
-        date: dateStr,
-        briefing: briefingContent.substring(0, 2000),
-      });
-    } catch {
-      // Make.com not configured yet — silent fail
-    }
   } catch (err: any) {
     console.error("[MissionControl] Briefing generation failed:", err.message);
 
@@ -1228,17 +1216,6 @@ export function startMissionControl(): void {
     await seedDefaultBusinesses();
     console.log("[MissionControl] Agent tables ready");
 
-    // Initialize Make.com automation table and seed default scenarios
-    try {
-      const { ensureMakeTable, seedDefaultScenarios } = await import("./make-automation");
-      const makeReady = await ensureMakeTable();
-      if (makeReady) {
-        await seedDefaultScenarios();
-        console.log("[MissionControl] Make.com automation ready");
-      }
-    } catch (err: any) {
-      console.warn("[MissionControl] Make.com setup skipped (non-fatal):", err.message);
-    }
   }).catch(err => {
     console.error("[MissionControl] Table setup error:", err.message);
   });
