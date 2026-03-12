@@ -549,6 +549,17 @@ async function startServer() {
     } catch (err: any) {
       console.error("[SelfMonitor] Import failed (non-fatal):", err.message);
     }
+
+    // Start Engagement Reader every 12 hours (non-blocking)
+    try {
+      import("../agent/engagement-reader").then(({ startEngagementReader }) => {
+        startEngagementReader();
+      }).catch((err) => {
+        console.error("[EngagementReader] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[EngagementReader] Import failed (non-fatal):", err.message);
+    }
   });
 }
 
