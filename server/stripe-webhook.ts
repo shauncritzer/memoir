@@ -9,6 +9,7 @@
 
 import Stripe from "stripe";
 import { subscribeToForm, CONVERTKIT_FORMS } from "./convertkit";
+import { handlePurchaseAutomation } from "./integrations/convertkit";
 
 // Initialize Stripe
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -119,6 +120,21 @@ async function handleCheckoutSessionCompleted(
       return { success: false, message: result.error || "ConvertKit subscription failed" };
     }
 
+    // Auto-tag buyer and trigger email sequence based on purchased product
+    try {
+      const automation = await handlePurchaseAutomation(
+        customerEmail,
+        session.customer_details?.name?.split(" ")[0],
+        priceId
+      );
+      console.log(`[Stripe Webhook] Purchase automation: ${automation.actions.join(", ")}`);
+      if (automation.errors.length > 0) {
+        console.warn(`[Stripe Webhook] Automation errors: ${automation.errors.join(", ")}`);
+      }
+    } catch (err: any) {
+      console.error("[Stripe Webhook] Purchase automation failed (non-fatal):", err.message);
+    }
+
     // Also create purchase record in database for course access
     const productInfo = STRIPE_PRICE_TO_PRODUCT_ID[priceId];
     if (productInfo) {
@@ -185,6 +201,17 @@ async function handleInvoicePaymentSucceeded(
     } else {
       console.error(`[Stripe Webhook] Failed to add ${customerEmail} to ConvertKit:`, result.error);
       return { success: false, message: result.error || "ConvertKit subscription failed" };
+    }
+
+    // Auto-tag buyer and trigger email sequence based on purchased product
+    try {
+      const automation = await handlePurchaseAutomation(customerEmail, undefined, priceId);
+      console.log(`[Stripe Webhook] Purchase automation: ${automation.actions.join(", ")}`);
+      if (automation.errors.length > 0) {
+        console.warn(`[Stripe Webhook] Automation errors: ${automation.errors.join(", ")}`);
+      }
+    } catch (err: any) {
+      console.error("[Stripe Webhook] Purchase automation failed (non-fatal):", err.message);
     }
 
     // Also create purchase record in database for course access

@@ -38,4 +38,7 @@ export const ENV = {
   // Telegram (briefings + approvals delivered to phone)
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
   telegramChatId: process.env.TELEGRAM_CHAT_ID ?? "",
+  // ConvertKit (email marketing)
+  convertkitApiKey: process.env.CONVERTKIT_API_KEY ?? "",
+  convertkitApiSecret: process.env.CONVERTKIT_API_SECRET ?? "",
 };
