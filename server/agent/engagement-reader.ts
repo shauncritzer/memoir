@@ -22,6 +22,7 @@
  *   - LinkedIn (public post pages)
  */
 
+import cron from "node-cron";
 import { ENV } from "../_core/env";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -292,4 +293,37 @@ function analyzeSentiment(text: string): "positive" | "neutral" | "negative" | "
   if (posCount > negCount) return "positive";
   if (negCount > posCount) return "negative";
   return "neutral";
+}
+
+// ─── Cron-based Engagement Reader ──────────────────────────────────────────
+
+/**
+ * Start the engagement reader on a 12-hour cron schedule.
+ * Reads real engagement data from social platforms via Browserbase.
+ * Called once on server boot alongside Mission Control and Self-Monitor.
+ */
+export function startEngagementReader(): void {
+  console.log("[EngagementReader] Starting 12-hour engagement read cron...");
+
+  // Run once on startup (delayed 90s to let other services initialize)
+  setTimeout(async () => {
+    try {
+      console.log("[EngagementReader] Running initial engagement read...");
+      const result = await readEngagement();
+      console.log(`[EngagementReader] Initial read: ${result.snapshots.length} posts, ${result.errors.length} errors`);
+    } catch (err: any) {
+      console.error("[EngagementReader] Initial read failed:", err.message);
+    }
+  }, 90_000);
+
+  // Every 12 hours: 0 */12 * * *
+  cron.schedule("0 */12 * * *", async () => {
+    try {
+      console.log("[EngagementReader] Running scheduled engagement read...");
+      const result = await readEngagement();
+      console.log(`[EngagementReader] Read: ${result.snapshots.length} posts, ${result.errors.length} errors`);
+    } catch (err: any) {
+      console.error("[EngagementReader] Scheduled read failed:", err.message);
+    }
+  });
 }

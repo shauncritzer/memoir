@@ -26,6 +26,10 @@ import cron from "node-cron";
 import { getDb } from "../db";
 import { invokeLLM } from "../_core/llm";
 
+// ─── Mission Statement ────────────────────────────────────────────────────
+
+const MISSION = `MISSION: Build an autonomous recovery transformation business generating $10K/month within 90 days. Every autonomous action must advance: (1) generating HeyGen course videos for the 7-Day REWIRED Reset, (2) growing the email list via the AI Coach lead magnet, (3) converting subscribers to paying customers at $47-$97.`;
+
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 export type BusinessProfile = {
@@ -763,7 +767,9 @@ async function generateDailyBriefing(
         ORDER BY executed_at DESC LIMIT 20`
   ) as any;
 
-  const promptText = `You are the AI operations manager for Shaun Critzer's business empire.
+  const promptText = `${MISSION}
+
+You are the AI operations manager for Shaun Critzer's business empire.
 Generate a concise daily morning briefing.
 
 DATE: ${dateStr}
@@ -909,7 +915,7 @@ RESPOND IN JSON:
 
     const result = await invokeLLM({
       messages: [
-        { role: "system", content: "You are a business strategist. Respond with valid JSON only." },
+        { role: "system", content: `${MISSION}\n\nYou are a business strategist. Respond with valid JSON only.` },
         { role: "user", content: promptText },
       ],
       maxTokens: 1000,
@@ -1041,6 +1047,59 @@ export async function runAgentCycle(): Promise<AgentState> {
       }
     } catch (err: any) {
       console.warn("[MissionControl] Orchestrator not available (non-fatal):", err.message);
+    }
+
+    // If no actions were taken this cycle, ask the LLM what ONE task to do next
+    if (state.todayActions === 0) {
+      try {
+        const missionPrompt = `${MISSION}
+
+The engine just completed a cycle and took ZERO actions. No content was generated, no emails sent, no videos created. This is wasted time.
+
+Current state:
+- Businesses: ${businesses.map(b => b.name).join(", ")}
+- Alerts: ${allAlerts.length} (${allAlerts.filter(a => a.severity === "critical").length} critical)
+- Pending approvals: ${state.pendingApprovals}
+
+Based on our mission, what ONE task can I do right now to move the needle? Be specific — name the exact action, platform, and expected outcome. One sentence.`;
+
+        const llmResult = await invokeLLM({
+          messages: [{ role: "user", content: missionPrompt }],
+          maxTokens: 300,
+        });
+
+        const suggestion = (llmResult.choices?.[0]?.message?.content as string) || "No suggestion generated.";
+        console.log(`[MissionControl] No-action suggestion: ${suggestion}`);
+
+        // Log to agent_reports
+        if (db) {
+          const { sql } = await import("drizzle-orm");
+          await db.execute(sql`INSERT INTO agent_reports
+            (report_type, title, content, metrics)
+            VALUES (
+              'mission_nudge',
+              'No Actions Taken — Mission Nudge',
+              ${suggestion},
+              ${JSON.stringify({ cycle_alerts: allAlerts.length, businesses: businesses.length })}
+            )`);
+        }
+
+        // Send to Telegram
+        try {
+          const { isTelegramConfigured, sendMessage } = await import("./telegram");
+          if (isTelegramConfigured()) {
+            const escapedSuggestion = suggestion.replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
+            await sendMessage(
+              `🎯 *Mission Nudge*\n\nCycle completed with zero actions\\.\n\n${escapedSuggestion}`,
+              { parseMode: "Markdown" }
+            );
+          }
+        } catch {
+          // Telegram send failed — non-fatal
+        }
+      } catch (err: any) {
+        console.error("[MissionControl] Mission nudge failed:", err.message);
+      }
     }
 
     // Log summary
