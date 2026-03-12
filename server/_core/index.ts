@@ -133,23 +133,6 @@ async function startServer() {
     console.warn("[Migration] CTA fix failed (non-fatal):", err.message);
   }
 
-  // One-shot migration: add heygen_job_id column to course_lessons (idempotent)
-  try {
-    const { getDb } = await import("../db");
-    const db = await getDb();
-    if (db) {
-      const { sql } = await import("drizzle-orm");
-      await db.execute(sql`ALTER TABLE course_lessons ADD COLUMN heygen_job_id VARCHAR(255) NULL`);
-      console.log("[Migration] Added heygen_job_id column to course_lessons");
-    }
-  } catch (err: any) {
-    if (err.message?.includes("Duplicate column")) {
-      // Column already exists — expected on subsequent boots
-    } else {
-      console.warn("[Migration] heygen_job_id column add failed (non-fatal):", err.message);
-    }
-  }
-
   // One-shot migration: seed 7-Day REWIRED Reset module + Day 1 lesson for HeyGen video agent
   try {
     const { getDb } = await import("../db");
