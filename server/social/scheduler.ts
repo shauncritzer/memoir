@@ -161,10 +161,10 @@ export async function processContentGeneration() {
 const PLATFORM_DAILY_LIMITS: Record<string, number> = {
   instagram: 2,
   facebook: 2,
-  x: 5,
+  x: 2,
   linkedin: 1,
   youtube: 1,
-  tiktok: 3,
+  tiktok: 2,
   podcast: 1,
 };
 
@@ -226,7 +226,7 @@ export async function processScheduledPosts() {
     } catch { /* self-heal module not available, proceed normally */ }
 
     // Enforce per-platform daily limits
-    const dailyLimit = PLATFORM_DAILY_LIMITS[item.platform] ?? 5;
+    const dailyLimit = PLATFORM_DAILY_LIMITS[item.platform] ?? 2;
     const postedToday = await getPlatformPostCountToday(item.platform);
     if (postedToday >= dailyLimit) {
       // Reschedule for tomorrow instead of posting
@@ -737,8 +737,8 @@ export function startScheduler() {
 
   console.log("[Scheduler] Starting content pipeline scheduler...");
 
-  // Process content generation every 5 minutes
-  contentGenTask = cron.schedule("*/5 * * * *", async () => {
+  // Process content generation every 60 minutes
+  contentGenTask = cron.schedule("0 * * * *", async () => {
     try {
       await processContentGeneration();
     } catch (err: any) {
@@ -746,8 +746,8 @@ export function startScheduler() {
     }
   });
 
-  // Check for scheduled posts every 2 minutes
-  postingTask = cron.schedule("*/2 * * * *", async () => {
+  // Check for scheduled posts every 30 minutes
+  postingTask = cron.schedule("*/30 * * * *", async () => {
     try {
       await processScheduledPosts();
     } catch (err: any) {
