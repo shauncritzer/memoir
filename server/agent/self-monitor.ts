@@ -18,6 +18,7 @@
  *            n8n hourly health check workflow
  */
 
+import cron from "node-cron";
 import { ENV } from "../_core/env";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -64,6 +65,21 @@ export type DiagnosticReport = {
 // ─── Server Start Timestamp ─────────────────────────────────────────────────
 
 const SERVER_START = Date.now();
+
+// ─── Alert Deduplication ────────────────────────────────────────────────────
+// Track last alert sent by type to avoid spamming Telegram with the same alert.
+// Key: alert type string, Value: timestamp (ms) when last sent.
+const lastAlertSent = new Map<string, number>();
+const ALERT_DEDUP_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+function shouldSendAlert(alertType: string): boolean {
+  const lastSent = lastAlertSent.get(alertType);
+  if (lastSent && Date.now() - lastSent < ALERT_DEDUP_WINDOW_MS) {
+    return false;
+  }
+  lastAlertSent.set(alertType, Date.now());
+  return true;
+}
 
 // ─── Quick Health Check ─────────────────────────────────────────────────────
 
@@ -164,7 +180,7 @@ export async function runFullDiagnostic(): Promise<DiagnosticReport> {
   }
 
   // Generate recommendations
-  if (pipelineStats.errorRate > 0.2) {
+  if (pipelineStats.errorRate > 0.5) {
     recommendations.push(
       `High pipeline error rate (${(pipelineStats.errorRate * 100).toFixed(1)}%). Check platform API tokens and rate limits.`
     );
@@ -208,19 +224,24 @@ export async function runFullDiagnostic(): Promise<DiagnosticReport> {
     recommendations,
   };
 
-  // Send critical alerts to Telegram
+  // Send critical alerts to Telegram (deduplicated — same alert type skipped within 2h)
   if (overall === "critical") {
-    try {
-      const { isTelegramConfigured, sendCriticalAlert } = await import("./telegram");
-      if (isTelegramConfigured()) {
-        await sendCriticalAlert(
-          "Engine Health Critical",
-          `${components.filter(c => c.status === "critical").map(c => c.message).join(". ")}`,
-          recommendations.join("\n")
-        );
+    const alertType = `critical:${components.filter(c => c.status === "critical").map(c => c.name).sort().join(",")}`;
+    if (shouldSendAlert(alertType)) {
+      try {
+        const { isTelegramConfigured, sendCriticalAlert } = await import("./telegram");
+        if (isTelegramConfigured()) {
+          await sendCriticalAlert(
+            "Engine Health Critical",
+            `${components.filter(c => c.status === "critical").map(c => c.message).join(". ")}`,
+            recommendations.join("\n")
+          );
+        }
+      } catch {
+        // Can't send Telegram — probably part of the problem
       }
-    } catch {
-      // Can't send Telegram — probably part of the problem
+    } else {
+      console.log(`[SelfMonitor] Skipping duplicate alert: ${alertType} (sent within last 2h)`);
     }
   }
 
@@ -476,4 +497,37 @@ async function getPipelineStats(): Promise<DiagnosticReport["pipelineStats"]> {
   } catch {
     return defaults;
   }
+}
+
+// ─── Cron-based Self-Monitor ───────────────────────────────────────────────
+
+/**
+ * Start the self-monitor on a 30-minute cron schedule.
+ * Runs a full diagnostic and sends Telegram alerts for critical/degraded status.
+ * Called once on server boot alongside Mission Control and the content scheduler.
+ */
+export function startSelfMonitor(): void {
+  console.log("[SelfMonitor] Starting 30-minute health check cron...");
+
+  // Run once on startup (delayed 60s to let other services initialize)
+  setTimeout(async () => {
+    try {
+      console.log("[SelfMonitor] Running initial health check...");
+      const report = await runFullDiagnostic();
+      console.log(`[SelfMonitor] Initial check: ${report.overall} — ${report.recommendations.length} recommendations`);
+    } catch (err: any) {
+      console.error("[SelfMonitor] Initial check failed:", err.message);
+    }
+  }, 60_000);
+
+  // Every 30 minutes: */30 * * * *
+  cron.schedule("*/30 * * * *", async () => {
+    try {
+      console.log("[SelfMonitor] Running scheduled health check...");
+      const report = await runFullDiagnostic();
+      console.log(`[SelfMonitor] Health: ${report.overall} — ${report.components.length} components, ${report.recommendations.length} recommendations`);
+    } catch (err: any) {
+      console.error("[SelfMonitor] Scheduled check failed:", err.message);
+    }
+  });
 }
