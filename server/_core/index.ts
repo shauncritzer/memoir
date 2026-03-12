@@ -73,6 +73,66 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // One-shot migration: fix affiliate CTA offers (idempotent, runs on every boot)
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (db) {
+      const { sql } = await import("drizzle-orm");
+
+      // Update existing offers with real affiliate URLs
+      const affiliateUpdates: [string, string][] = [
+        ["elevenlabs", "https://try.elevenlabs.io/7tu62ns5muha"],
+        ["pictory", "https://pictory.ai/?ref=shaun42"],
+        ["systemeio", "https://systeme.io/?sa=sa022859422340857ad748d1e66f74ad1e4461b50c"],
+        ["gohighlevel", "https://affiliates.gohighlevel.com/?fp_ref=digital-gravity-ai51"],
+        ["getresponse", "https://try.getresponsetoday.com/ixu014he4e17-xlkg1t"],
+      ];
+      for (const [slug, url] of affiliateUpdates) {
+        await db.execute(
+          sql`UPDATE cta_offers SET affiliate_url = ${url}
+              WHERE cta_url LIKE ${`%/recommends/${slug}%`}
+              AND (affiliate_url IS NULL OR affiliate_url = '')`
+        );
+      }
+
+      // Pause wrong-audience offers (biz-opp / MMO — not recovery content)
+      const pauseNames = [
+        "Learn Launch Lead Challenge",
+        "Freedom Breakthrough 3",
+        "FreedomStack Bundle",
+        "7 Figure Accelerator",
+        "OLSP Mega Funnel",
+        "One Funnel Away",
+        "AI Funnel Builder",
+        "PLR Funnels",
+        "ClickFunnels Trial",
+      ];
+      for (const name of pauseNames) {
+        await db.execute(
+          sql`UPDATE cta_offers SET status = 'paused' WHERE name = ${name} AND status = 'active'`
+        );
+      }
+
+      // Also remove old offers that no longer have real affiliate links:
+      // HeyGen, Jasper AI, ConvertKit, ThriveCart, ClickFunnels, Midjourney
+      // (no verified affiliate URL provided — pause to stop broken redirects)
+      const pauseSlugs = ["heygen", "jasper", "convertkit", "thrivecart", "clickfunnels", "midjourney"];
+      for (const slug of pauseSlugs) {
+        await db.execute(
+          sql`UPDATE cta_offers SET status = 'paused'
+              WHERE cta_url LIKE ${`%/recommends/${slug}%`}
+              AND (affiliate_url IS NULL OR affiliate_url = '')
+              AND status = 'active'`
+        );
+      }
+
+      console.log("[Migration] CTA affiliate URLs updated, wrong-audience offers paused");
+    }
+  } catch (err: any) {
+    console.warn("[Migration] CTA fix failed (non-fatal):", err.message);
+  }
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
 
@@ -122,8 +182,8 @@ async function startServer() {
         // Non-fatal — click tracking failure shouldn't block redirect
       }
 
-      // Redirect to affiliate URL if set, otherwise fall back to products page
-      const redirectUrl = offer.affiliate_url || "/products";
+      // Redirect to affiliate URL if set, otherwise fall back to the on-site CTA page
+      const redirectUrl = offer.affiliate_url || offer.cta_url || "/products";
       console.log(`[Recommends] ${slug} → ${redirectUrl} (offer: ${offer.name})`);
       return res.redirect(302, redirectUrl);
     } catch (err: any) {
