@@ -66,6 +66,21 @@ export type DiagnosticReport = {
 
 const SERVER_START = Date.now();
 
+// ─── Alert Deduplication ────────────────────────────────────────────────────
+// Track last alert sent by type to avoid spamming Telegram with the same alert.
+// Key: alert type string, Value: timestamp (ms) when last sent.
+const lastAlertSent = new Map<string, number>();
+const ALERT_DEDUP_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+function shouldSendAlert(alertType: string): boolean {
+  const lastSent = lastAlertSent.get(alertType);
+  if (lastSent && Date.now() - lastSent < ALERT_DEDUP_WINDOW_MS) {
+    return false;
+  }
+  lastAlertSent.set(alertType, Date.now());
+  return true;
+}
+
 // ─── Quick Health Check ─────────────────────────────────────────────────────
 
 /**
@@ -165,7 +180,7 @@ export async function runFullDiagnostic(): Promise<DiagnosticReport> {
   }
 
   // Generate recommendations
-  if (pipelineStats.errorRate > 0.2) {
+  if (pipelineStats.errorRate > 0.5) {
     recommendations.push(
       `High pipeline error rate (${(pipelineStats.errorRate * 100).toFixed(1)}%). Check platform API tokens and rate limits.`
     );
@@ -209,19 +224,24 @@ export async function runFullDiagnostic(): Promise<DiagnosticReport> {
     recommendations,
   };
 
-  // Send critical alerts to Telegram
+  // Send critical alerts to Telegram (deduplicated — same alert type skipped within 2h)
   if (overall === "critical") {
-    try {
-      const { isTelegramConfigured, sendCriticalAlert } = await import("./telegram");
-      if (isTelegramConfigured()) {
-        await sendCriticalAlert(
-          "Engine Health Critical",
-          `${components.filter(c => c.status === "critical").map(c => c.message).join(". ")}`,
-          recommendations.join("\n")
-        );
+    const alertType = `critical:${components.filter(c => c.status === "critical").map(c => c.name).sort().join(",")}`;
+    if (shouldSendAlert(alertType)) {
+      try {
+        const { isTelegramConfigured, sendCriticalAlert } = await import("./telegram");
+        if (isTelegramConfigured()) {
+          await sendCriticalAlert(
+            "Engine Health Critical",
+            `${components.filter(c => c.status === "critical").map(c => c.message).join(". ")}`,
+            recommendations.join("\n")
+          );
+        }
+      } catch {
+        // Can't send Telegram — probably part of the problem
       }
-    } catch {
-      // Can't send Telegram — probably part of the problem
+    } else {
+      console.log(`[SelfMonitor] Skipping duplicate alert: ${alertType} (sent within last 2h)`);
     }
   }
 
