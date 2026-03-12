@@ -236,7 +236,7 @@ const resolveProvider = (): LLMProvider => {
     return {
       apiUrl: "https://api.anthropic.com",
       apiKey: ENV.anthropicApiKey,
-      model: "claude-3-5-haiku-20241022",
+      model: "claude-haiku-4-5",
       name: "Claude",
     };
   }
