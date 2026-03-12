@@ -165,7 +165,7 @@ async function startServer() {
                   ${moduleId},
                   1,
                   ${"Day 1: The Reset Mindset"},
-                  ${"Welcome to Day 1 of the 7-Day REWIRED Reset. Today we're not starting with willpower. We're starting with truth. Your nervous system isn't broken — it's been doing exactly what it was trained to do. Today we begin retraining it. Here's what that looks like..."},
+                  ${"Welcome to Day 1 of the 7-Day REWIRED Reset. Today we are not starting with willpower. We are starting with truth. Your nervous system is not broken. It has been doing exactly what it was trained to do. Today we begin retraining it. You are enough exactly as you are right now. That is where we start."},
                   1
                 )`
           );
