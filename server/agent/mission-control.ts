@@ -1177,7 +1177,7 @@ export async function getPendingActions(): Promise<any[]> {
   }
 }
 
-export async function getRecentActions(limit: number = 50): Promise<any[]> {
+export async function getRecentActions(limit: number = 500): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
 
@@ -1196,7 +1196,7 @@ export async function getRecentActions(limit: number = 50): Promise<any[]> {
   }
 }
 
-export async function getReports(type?: string, limit: number = 20): Promise<any[]> {
+export async function getReports(type?: string, limit: number = 100): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
 
