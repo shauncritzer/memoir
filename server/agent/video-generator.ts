@@ -4,10 +4,13 @@
  * Runs on each agent cycle (30 min) and does two things:
  *
  * 1. SUBMIT: Find the next course_lesson with a video_script but no video_url
- *    and no in-progress heygen_job_id → submit to HeyGen → store job ID.
+ *    and no in-progress job → submit to HeyGen → store job in video_generation_jobs.
  *
- * 2. POLL: Find all course_lessons with a heygen_job_id but no video_url →
+ * 2. POLL: Find all video_generation_jobs with status='pending' →
  *    check HeyGen status → if complete, save video_url + notify via Telegram.
+ *
+ * Job tracking uses a separate video_generation_jobs table (created via
+ * CREATE TABLE IF NOT EXISTS on boot) to avoid DDL ALTER TABLE issues.
  *
  * Tier 2 action: auto-executes but notifies (each video costs HeyGen credits).
  */
@@ -18,38 +21,36 @@ import { getDb } from "../db";
 // ─── Config ─────────────────────────────────────────────────────────────────
 
 const MAX_SCRIPT_CHARS = 3000; // HeyGen limit per video
-let columnVerified = false; // cached result of column-existence check
+let tableEnsured = false; // cached — only run CREATE TABLE once per process
 
 export function isVideoGenerationReady(): boolean {
   return !!(ENV.heygenApiKey);
 }
 
 /**
- * Check whether heygen_job_id column exists in course_lessons.
- * The column is defined in drizzle/schema.ts and should be created
- * via `pnpm run db:push`. If the DB hasn't been migrated yet, skip
- * the video cycle silently rather than crashing.
+ * Ensure the video_generation_jobs table exists.
+ * Uses CREATE TABLE IF NOT EXISTS (DML-safe, no DDL ALTER required).
  */
-async function isColumnReady(): Promise<boolean> {
-  if (columnVerified) return true;
+async function ensureJobsTable(): Promise<boolean> {
+  if (tableEnsured) return true;
   const db = await getDb();
   if (!db) return false;
   try {
     const { sql } = await import("drizzle-orm");
-    const [rows] = await db.execute(
-      sql`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-          WHERE TABLE_NAME = 'course_lessons' AND COLUMN_NAME = 'heygen_job_id'
-          LIMIT 1`
-    ) as any;
-    const exists = (rows as any[])?.length > 0;
-    if (exists) {
-      columnVerified = true;
-    } else {
-      console.warn("[VideoGen] heygen_job_id column not found — run `pnpm run db:push` to add it. Skipping cycle.");
-    }
-    return exists;
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS video_generation_jobs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        lesson_id INT NOT NULL,
+        heygen_job_id VARCHAR(255) NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP NULL
+      )
+    `);
+    tableEnsured = true;
+    return true;
   } catch (err: any) {
-    console.warn("[VideoGen] Column check failed (non-fatal):", err.message);
+    console.warn("[VideoGen] Failed to ensure video_generation_jobs table:", err.message);
     return false;
   }
 }
@@ -77,15 +78,18 @@ export async function submitNextLesson(): Promise<{
   try {
     const { sql } = await import("drizzle-orm");
 
-    // Find next lesson: has script, no video, no in-progress job
+    // Find next lesson: has script, no video, no in-progress job in video_generation_jobs
     const [rows] = await db.execute(
-      sql`SELECT id, title, video_script, module_id, lesson_number
-          FROM course_lessons
-          WHERE video_script IS NOT NULL
-            AND video_script != ''
-            AND (video_url IS NULL OR video_url = '')
-            AND (heygen_job_id IS NULL OR heygen_job_id = '')
-          ORDER BY module_id ASC, lesson_number ASC
+      sql`SELECT cl.id, cl.title, cl.video_script, cl.module_id, cl.lesson_number
+          FROM course_lessons cl
+          WHERE cl.video_script IS NOT NULL
+            AND cl.video_script != ''
+            AND (cl.video_url IS NULL OR cl.video_url = '')
+            AND cl.id NOT IN (
+              SELECT vgj.lesson_id FROM video_generation_jobs vgj
+              WHERE vgj.status IN ('pending', 'processing')
+            )
+          ORDER BY cl.module_id ASC, cl.lesson_number ASC
           LIMIT 1`
     ) as any;
 
@@ -122,9 +126,10 @@ export async function submitNextLesson(): Promise<{
       return { submitted: false, lessonId: lesson.id, error: result.error };
     }
 
-    // Store the job ID in the database
+    // Store the job in video_generation_jobs
     await db.execute(
-      sql`UPDATE course_lessons SET heygen_job_id = ${result.videoId} WHERE id = ${lesson.id}`
+      sql`INSERT INTO video_generation_jobs (lesson_id, heygen_job_id, status)
+          VALUES (${lesson.id}, ${result.videoId}, 'pending')`
     );
 
     // Log to agent_actions
@@ -150,7 +155,7 @@ export async function submitNextLesson(): Promise<{
 // ─── Poll In-Progress Jobs ──────────────────────────────────────────────────
 
 /**
- * Check all course lessons with a heygen_job_id but no video_url.
+ * Check all video_generation_jobs with status 'pending' or 'processing'.
  * If any are complete, save the video URL and send a Telegram notification.
  */
 export async function pollPendingVideos(): Promise<{
@@ -169,14 +174,14 @@ export async function pollPendingVideos(): Promise<{
   try {
     const { sql } = await import("drizzle-orm");
 
-    // Find all lessons with in-progress jobs
+    // Find all pending/processing jobs joined with lesson info
     const [rows] = await db.execute(
-      sql`SELECT id, title, heygen_job_id, module_id, lesson_number
-          FROM course_lessons
-          WHERE heygen_job_id IS NOT NULL
-            AND heygen_job_id != ''
-            AND (video_url IS NULL OR video_url = '')
-          ORDER BY module_id ASC, lesson_number ASC`
+      sql`SELECT vgj.id AS job_id, vgj.lesson_id, vgj.heygen_job_id, vgj.status AS job_status,
+                 cl.title, cl.module_id, cl.lesson_number
+          FROM video_generation_jobs vgj
+          JOIN course_lessons cl ON cl.id = vgj.lesson_id
+          WHERE vgj.status IN ('pending', 'processing')
+          ORDER BY vgj.created_at ASC`
     ) as any;
 
     const pending = rows as any[];
@@ -184,35 +189,42 @@ export async function pollPendingVideos(): Promise<{
 
     const { getVideoStatus } = await import("../social/heygen");
 
-    for (const lesson of pending) {
+    for (const job of pending) {
       summary.checked++;
-      const jobId = lesson.heygen_job_id as string;
+      const jobId = job.heygen_job_id as string;
 
       try {
         const status = await getVideoStatus(jobId);
 
         if (status.status === "completed" && status.videoUrl) {
-          // Save video URL to database
+          // Save video URL to course_lessons
           await db.execute(
             sql`UPDATE course_lessons
                 SET video_url = ${status.videoUrl},
                     video_provider = 'other',
                     video_duration = ${status.duration || null}
-                WHERE id = ${lesson.id}`
+                WHERE id = ${job.lesson_id}`
+          );
+
+          // Mark job as completed
+          await db.execute(
+            sql`UPDATE video_generation_jobs
+                SET status = 'completed', completed_at = NOW()
+                WHERE id = ${job.job_id}`
           );
 
           summary.completed++;
           summary.results.push({
-            lessonId: lesson.id,
-            title: lesson.title,
+            lessonId: job.lesson_id,
+            title: job.title,
             status: "completed",
             videoUrl: status.videoUrl,
           });
 
           // Log success
           await logAction(
-            `Video ready: ${lesson.title}`,
-            `HeyGen video complete for lesson #${lesson.id} (Module ${lesson.module_id}, Lesson ${lesson.lesson_number}). URL: ${status.videoUrl}`,
+            `Video ready: ${job.title}`,
+            `HeyGen video complete for lesson #${job.lesson_id} (Module ${job.module_id}, Lesson ${job.lesson_number}). URL: ${status.videoUrl}`,
             "executed"
           );
 
@@ -222,49 +234,57 @@ export async function pollPendingVideos(): Promise<{
             if (isTelegramConfigured()) {
               await sendMessage(
                 `🎬 *Video Complete*\n\n` +
-                `*${lesson.title}*\n` +
-                `Module ${lesson.module_id}, Lesson ${lesson.lesson_number}\n\n` +
+                `*${job.title}*\n` +
+                `Module ${job.module_id}, Lesson ${job.lesson_number}\n\n` +
                 `${status.videoUrl}`
               );
             }
           } catch { /* Telegram unavailable */ }
 
-          console.log(`[VideoGen] Video complete: lesson #${lesson.id} "${lesson.title}" → ${status.videoUrl}`);
+          console.log(`[VideoGen] Video complete: lesson #${job.lesson_id} "${job.title}" → ${status.videoUrl}`);
         } else if (status.status === "failed") {
-          // Clear the job ID so it can be retried
+          // Mark job as failed so lesson can be retried
           await db.execute(
-            sql`UPDATE course_lessons SET heygen_job_id = NULL WHERE id = ${lesson.id}`
+            sql`UPDATE video_generation_jobs
+                SET status = 'failed', completed_at = NOW()
+                WHERE id = ${job.job_id}`
           );
 
           summary.failed++;
           summary.results.push({
-            lessonId: lesson.id,
-            title: lesson.title,
+            lessonId: job.lesson_id,
+            title: job.title,
             status: "failed",
           });
 
           await logAction(
-            `Video failed: ${lesson.title}`,
-            `HeyGen video failed for lesson #${lesson.id}: ${status.error || "unknown error"}. Job ID cleared for retry.`,
+            `Video failed: ${job.title}`,
+            `HeyGen video failed for lesson #${job.lesson_id}: ${status.error || "unknown error"}. Job marked failed for retry.`,
             "failed",
             status.error
           );
 
-          console.error(`[VideoGen] Video failed: lesson #${lesson.id} "${lesson.title}" — ${status.error}`);
+          console.error(`[VideoGen] Video failed: lesson #${job.lesson_id} "${job.title}" — ${status.error}`);
         } else {
-          // Still processing
+          // Still processing — update status if changed
+          if (status.status !== job.job_status) {
+            await db.execute(
+              sql`UPDATE video_generation_jobs SET status = ${status.status} WHERE id = ${job.job_id}`
+            );
+          }
+
           summary.results.push({
-            lessonId: lesson.id,
-            title: lesson.title,
+            lessonId: job.lesson_id,
+            title: job.title,
             status: status.status,
           });
-          console.log(`[VideoGen] Still processing: lesson #${lesson.id} "${lesson.title}" (${status.status})`);
+          console.log(`[VideoGen] Still processing: lesson #${job.lesson_id} "${job.title}" (${status.status})`);
         }
       } catch (err: any) {
         console.error(`[VideoGen] Error checking job ${jobId}:`, err.message);
         summary.results.push({
-          lessonId: lesson.id,
-          title: lesson.title,
+          lessonId: job.lesson_id,
+          title: job.title,
           status: "error",
         });
       }
@@ -280,8 +300,9 @@ export async function pollPendingVideos(): Promise<{
 
 /**
  * Run one full video generation cycle:
- * 1. Poll any in-progress jobs first (so completed ones free up before we submit new)
- * 2. Submit the next lesson if nothing is currently processing
+ * 1. Ensure video_generation_jobs table exists
+ * 2. Poll any in-progress jobs first (so completed ones free up before we submit new)
+ * 3. Submit the next lesson if nothing is currently processing
  *
  * Called by Mission Control's 30-minute cron cycle.
  */
@@ -291,8 +312,8 @@ export async function runVideoGenerationCycle(): Promise<{
 }> {
   console.log("[VideoGen] Running video generation cycle...");
 
-  // Verify heygen_job_id column exists before querying it
-  if (!(await isColumnReady())) {
+  // Ensure the jobs table exists before querying it
+  if (!(await ensureJobsTable())) {
     return { poll: { checked: 0, completed: 0, failed: 0, results: [] }, submit: null };
   }
 
