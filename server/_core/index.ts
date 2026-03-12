@@ -454,6 +454,87 @@ async function startServer() {
     }
   });
 
+  // HeyGen test endpoint — check credits, find first lesson, trigger test render
+  app.post("/api/admin/test-heygen", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const results: Record<string, any> = { timestamp: new Date().toISOString() };
+
+      // Step 1: Check HeyGen credits
+      const { getRemainingCredits, createVideo, isHeyGenConfigured } = await import("../social/heygen");
+      if (!isHeyGenConfigured()) {
+        return res.json({ error: "HEYGEN_API_KEY not set", configured: false });
+      }
+
+      const credits = await getRemainingCredits();
+      results.credits = credits || { error: "Could not fetch credits" };
+
+      // Step 2: Find first lesson
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (!db) {
+        return res.json({ ...results, error: "Database not available" });
+      }
+
+      const { sql } = await import("drizzle-orm");
+
+      // Try course_lessons first, then lessons
+      let lesson: any = null;
+      try {
+        const [rows] = await db.execute(sql`
+          SELECT id, title, content, video_script, sort_order, module_id
+          FROM course_lessons
+          ORDER BY sort_order ASC, id ASC
+          LIMIT 1
+        `) as any;
+        lesson = (rows as any[])?.[0];
+      } catch {}
+
+      if (!lesson) {
+        try {
+          const [rows] = await db.execute(sql`
+            SELECT id, title, content, day_number
+            FROM lessons
+            ORDER BY day_number ASC, id ASC
+            LIMIT 1
+          `) as any;
+          lesson = (rows as any[])?.[0];
+        } catch {}
+      }
+
+      if (!lesson) {
+        return res.json({ ...results, error: "No lessons found in database" });
+      }
+
+      results.lesson = {
+        id: lesson.id,
+        title: lesson.title,
+        contentLength: (lesson.video_script || lesson.content || "").length,
+        contentPreview: (lesson.video_script || lesson.content || "").substring(0, 200),
+      };
+
+      // Step 3: Trigger test video render
+      const scriptText = (lesson.video_script || lesson.content || lesson.title).substring(0, 2800);
+      const videoResult = await createVideo({
+        script: scriptText,
+        title: `Test: ${lesson.title}`,
+        test: true, // Watermarked, no credits burned
+      });
+
+      results.videoResult = videoResult;
+      results.testMode = true;
+      results.note = "test=true means watermarked video, no credits burned";
+
+      res.json(results);
+    } catch (err: any) {
+      console.error("[TestHeyGen] Error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // YouTube OAuth flow - connect YouTube account
   app.get("/api/youtube/connect", (_req, res) => {
     try {
