@@ -1,4 +1,5 @@
 import { ENV } from "./env";
+import Anthropic from "@anthropic-ai/sdk";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -230,7 +231,17 @@ const resolveProvider = (): LLMProvider => {
     };
   }
 
-  // Priority 2: Google Gemini (via OpenAI-compatible endpoint)
+  // Priority 2: Claude (Anthropic) — fast, reliable, no free-tier rate limits
+  if (ENV.anthropicApiKey) {
+    return {
+      apiUrl: "https://api.anthropic.com",
+      apiKey: ENV.anthropicApiKey,
+      model: "claude-haiku-3-5-20241022",
+      name: "Claude",
+    };
+  }
+
+  // Priority 3: Google Gemini (via OpenAI-compatible endpoint)
   if (ENV.googleApiKey) {
     return {
       apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
@@ -240,7 +251,7 @@ const resolveProvider = (): LLMProvider => {
     };
   }
 
-  // Priority 3: OpenAI directly
+  // Priority 4: OpenAI directly
   if (ENV.openaiApiKey) {
     return {
       apiUrl: "https://api.openai.com/v1/chat/completions",
@@ -251,7 +262,7 @@ const resolveProvider = (): LLMProvider => {
   }
 
   throw new Error(
-    "No AI API key configured. Set one of: GOOGLE_API_KEY (recommended, free tier), OPENAI_API_KEY, or BUILT_IN_FORGE_API_KEY in Railway environment variables."
+    "No AI API key configured. Set one of: ANTHROPIC_API_KEY (recommended), GOOGLE_API_KEY, OPENAI_API_KEY, or BUILT_IN_FORGE_API_KEY in Railway environment variables."
   );
 };
 
@@ -300,8 +311,155 @@ const normalizeResponseFormat = ({
   };
 };
 
+/**
+ * Invoke Claude via the Anthropic SDK and return an OpenAI-shaped InvokeResult
+ * so all 12 consumers work without changes.
+ */
+async function invokeClaudeNative(
+  provider: LLMProvider,
+  params: InvokeParams
+): Promise<InvokeResult> {
+  const client = new Anthropic({ apiKey: provider.apiKey });
+
+  const { messages, tools, toolChoice, tool_choice, maxTokens, max_tokens } =
+    params;
+
+  // Split system message from the rest (Anthropic takes system as a top-level param)
+  const systemMessages = messages.filter((m) => m.role === "system");
+  const nonSystemMessages = messages.filter((m) => m.role !== "system");
+
+  const systemText = systemMessages
+    .map((m) => {
+      const parts = ensureArray(m.content);
+      return parts
+        .map((p) => (typeof p === "string" ? p : "text" in p ? p.text : ""))
+        .join("\n");
+    })
+    .join("\n\n");
+
+  // Convert messages to Anthropic format
+  const anthropicMessages: Anthropic.MessageParam[] = nonSystemMessages.map(
+    (m) => {
+      const parts = ensureArray(m.content);
+      if (parts.length === 1 && typeof parts[0] === "string") {
+        return { role: m.role as "user" | "assistant", content: parts[0] };
+      }
+      const contentBlocks: Anthropic.ContentBlockParam[] = parts.map((p) => {
+        if (typeof p === "string") return { type: "text" as const, text: p };
+        if (p.type === "text") return { type: "text" as const, text: p.text };
+        if (p.type === "image_url") {
+          return {
+            type: "text" as const,
+            text: `[Image: ${p.image_url.url}]`,
+          };
+        }
+        return { type: "text" as const, text: "[Unsupported content]" };
+      });
+      return {
+        role: m.role as "user" | "assistant",
+        content: contentBlocks,
+      };
+    }
+  );
+
+  // Convert tools to Anthropic format
+  const anthropicTools: Anthropic.Tool[] | undefined =
+    tools && tools.length > 0
+      ? tools.map((t) => ({
+          name: t.function.name,
+          description: t.function.description ?? "",
+          input_schema: (t.function.parameters ?? {
+            type: "object",
+            properties: {},
+          }) as Anthropic.Tool.InputSchema,
+        }))
+      : undefined;
+
+  // Convert tool_choice
+  const resolvedToolChoice = toolChoice || tool_choice;
+  let anthropicToolChoice: Anthropic.MessageCreateParams["tool_choice"];
+  if (resolvedToolChoice === "auto") {
+    anthropicToolChoice = { type: "auto" };
+  } else if (resolvedToolChoice === "required") {
+    anthropicToolChoice = { type: "any" };
+  } else if (resolvedToolChoice === "none") {
+    anthropicToolChoice = undefined;
+    // Also clear tools so Anthropic doesn't try to use them
+  } else if (resolvedToolChoice && "name" in resolvedToolChoice) {
+    anthropicToolChoice = {
+      type: "tool",
+      name: resolvedToolChoice.name,
+    };
+  } else if (
+    resolvedToolChoice &&
+    typeof resolvedToolChoice === "object" &&
+    "function" in resolvedToolChoice
+  ) {
+    anthropicToolChoice = {
+      type: "tool",
+      name: (resolvedToolChoice as ToolChoiceExplicit).function.name,
+    };
+  }
+
+  const requestParams: Anthropic.MessageCreateParams = {
+    model: provider.model,
+    max_tokens: maxTokens || max_tokens || 4096,
+    messages: anthropicMessages,
+    ...(systemText ? { system: systemText } : {}),
+    ...(anthropicTools ? { tools: anthropicTools } : {}),
+    ...(anthropicToolChoice ? { tool_choice: anthropicToolChoice } : {}),
+  };
+
+  const response = await client.messages.create(requestParams);
+
+  // Convert Anthropic response → OpenAI-shaped InvokeResult
+  const textParts = response.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text);
+
+  const toolUseParts = response.content
+    .filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use")
+    .map((b) => ({
+      id: b.id,
+      type: "function" as const,
+      function: {
+        name: b.name,
+        arguments: JSON.stringify(b.input),
+      },
+    }));
+
+  return {
+    id: response.id,
+    created: Math.floor(Date.now() / 1000),
+    model: response.model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content: textParts.join("\n") || "",
+          ...(toolUseParts.length > 0 ? { tool_calls: toolUseParts } : {}),
+        },
+        finish_reason:
+          response.stop_reason === "end_turn" ? "stop" : response.stop_reason,
+      },
+    ],
+    usage: {
+      prompt_tokens: response.usage.input_tokens,
+      completion_tokens: response.usage.output_tokens,
+      total_tokens:
+        response.usage.input_tokens + response.usage.output_tokens,
+    },
+  };
+}
+
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   const provider = resolveProvider();
+
+  // Route Claude to native Anthropic SDK (not OpenAI-compatible)
+  if (provider.name === "Claude") {
+    return invokeClaudeNative(provider, params);
+  }
 
   const {
     messages,
