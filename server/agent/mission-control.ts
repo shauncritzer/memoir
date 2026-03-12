@@ -1049,6 +1049,22 @@ export async function runAgentCycle(): Promise<AgentState> {
       console.warn("[MissionControl] Orchestrator not available (non-fatal):", err.message);
     }
 
+    // Run video generation cycle — submit new lessons to HeyGen, poll pending jobs
+    try {
+      const { isVideoGenerationReady, runVideoGenerationCycle } = await import("./video-generator");
+      if (isVideoGenerationReady()) {
+        const videoResult = await runVideoGenerationCycle();
+        if (videoResult.poll.completed > 0) {
+          console.log(`[MissionControl] ${videoResult.poll.completed} video(s) completed`);
+        }
+        if (videoResult.submit?.submitted) {
+          console.log(`[MissionControl] Submitted video: ${videoResult.submit.lessonTitle}`);
+        }
+      }
+    } catch (err: any) {
+      console.warn("[MissionControl] Video generator not available (non-fatal):", err.message);
+    }
+
     // If no actions were taken this cycle, ask the LLM what ONE task to do next
     if (state.todayActions === 0) {
       try {
