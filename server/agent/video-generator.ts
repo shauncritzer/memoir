@@ -18,27 +18,40 @@ import { getDb } from "../db";
 // ─── Config ─────────────────────────────────────────────────────────────────
 
 const MAX_SCRIPT_CHARS = 3000; // HeyGen limit per video
-let columnEnsured = false;
+let columnVerified = false; // cached result of column-existence check
 
 export function isVideoGenerationReady(): boolean {
   return !!(ENV.heygenApiKey);
 }
 
-/** Ensure the heygen_job_id column exists (idempotent, runs once per boot) */
-async function ensureColumn(): Promise<void> {
-  if (columnEnsured) return;
+/**
+ * Check whether heygen_job_id column exists in course_lessons.
+ * The column is defined in drizzle/schema.ts and should be created
+ * via `pnpm run db:push`. If the DB hasn't been migrated yet, skip
+ * the video cycle silently rather than crashing.
+ */
+async function isColumnReady(): Promise<boolean> {
+  if (columnVerified) return true;
   const db = await getDb();
-  if (!db) return;
+  if (!db) return false;
   try {
     const { sql } = await import("drizzle-orm");
-    await db.execute(sql`ALTER TABLE course_lessons ADD COLUMN heygen_job_id VARCHAR(255) NULL`);
-    console.log("[VideoGen] Added heygen_job_id column to course_lessons");
-  } catch (e: any) {
-    if (!e.message?.includes("Duplicate column")) {
-      console.error("[VideoGen] Column migration error:", e.message);
+    const [rows] = await db.execute(
+      sql`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE TABLE_NAME = 'course_lessons' AND COLUMN_NAME = 'heygen_job_id'
+          LIMIT 1`
+    ) as any;
+    const exists = (rows as any[])?.length > 0;
+    if (exists) {
+      columnVerified = true;
+    } else {
+      console.warn("[VideoGen] heygen_job_id column not found — run `pnpm run db:push` to add it. Skipping cycle.");
     }
+    return exists;
+  } catch (err: any) {
+    console.warn("[VideoGen] Column check failed (non-fatal):", err.message);
+    return false;
   }
-  columnEnsured = true;
 }
 
 // ─── Submit Next Lesson ─────────────────────────────────────────────────────
@@ -278,8 +291,10 @@ export async function runVideoGenerationCycle(): Promise<{
 }> {
   console.log("[VideoGen] Running video generation cycle...");
 
-  // Ensure DB column exists (idempotent)
-  await ensureColumn();
+  // Verify heygen_job_id column exists before querying it
+  if (!(await isColumnReady())) {
+    return { poll: { checked: 0, completed: 0, failed: 0, results: [] }, submit: null };
+  }
 
   // 1. Check in-progress jobs
   const poll = await pollPendingVideos();
