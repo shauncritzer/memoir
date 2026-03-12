@@ -216,6 +216,15 @@ export async function processScheduledPosts() {
   for (const item of readyItems) {
     if (!item.content) continue;
 
+    // Check if platform is throttled by self-healing (rate limit recovery)
+    try {
+      const { isPlatformThrottled } = await import("../agent/self-heal");
+      if (isPlatformThrottled(item.platform)) {
+        console.log(`[Scheduler] ${item.platform} is throttled by self-heal (rate limit recovery), skipping post #${item.id}`);
+        continue;
+      }
+    } catch { /* self-heal module not available, proceed normally */ }
+
     // Enforce per-platform daily limits
     const dailyLimit = PLATFORM_DAILY_LIMITS[item.platform] ?? 5;
     const postedToday = await getPlatformPostCountToday(item.platform);
