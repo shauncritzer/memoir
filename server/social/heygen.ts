@@ -125,6 +125,28 @@ export async function createVideo(opts: {
       return { success: false, error: "No HeyGen avatar available. Set HEYGEN_AVATAR_ID env var or ensure your account has avatars." };
     }
 
+    // Resolve voice: explicit param → ElevenLabs env var → HeyGen default
+    const resolvedVoiceId = voiceId || process.env.ELEVENLABS_VOICE_ID || "";
+
+    let voiceConfig: any;
+    if (resolvedVoiceId) {
+      // ElevenLabs voice via HeyGen's ElevenLabs integration
+      voiceConfig = {
+        type: "text",
+        input_text: script,
+        voice_id: resolvedVoiceId,
+        speed: 1.0,
+      };
+      console.log(`[HeyGen] Using ElevenLabs voice: ${resolvedVoiceId}`);
+    } else {
+      voiceConfig = {
+        type: "text",
+        input_text: script,
+        voice_id: "en-US-default",
+      };
+      console.log("[HeyGen] No ELEVENLABS_VOICE_ID set, using default HeyGen voice");
+    }
+
     const payload: any = {
       video_inputs: [
         {
@@ -133,9 +155,7 @@ export async function createVideo(opts: {
             avatar_id: resolvedAvatarId,
             avatar_style: "normal",
           },
-          voice: voiceId
-            ? { type: "audio", voice_id: voiceId }
-            : { type: "text", input_text: script, voice_id: "en-US-default" },
+          voice: voiceConfig,
           background: {
             type: "color",
             value: "#1a1a2e",
@@ -145,15 +165,6 @@ export async function createVideo(opts: {
       dimension: { width, height },
       test,
     };
-
-    // If using text input, put script in the voice section
-    if (!voiceId) {
-      payload.video_inputs[0].voice = {
-        type: "text",
-        input_text: script,
-        voice_id: "en-US-default",
-      };
-    }
 
     if (title) {
       payload.title = title;
