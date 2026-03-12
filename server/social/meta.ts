@@ -409,6 +409,56 @@ export async function getLongLivedPageToken(
   }
 }
 
+// ─── Token Debug ─────────────────────────────────────────────────────────
+
+/** Debug the current META_PAGE_ACCESS_TOKEN via Facebook's debug_token endpoint */
+export async function debugMetaToken(): Promise<{
+  valid: boolean;
+  expiresAt: string | null;
+  scopes: string[];
+  appId?: string;
+  error?: string;
+}> {
+  const { pageAccessToken } = getMetaCredentials();
+  if (!pageAccessToken) {
+    return { valid: false, expiresAt: null, scopes: [], error: "META_PAGE_ACCESS_TOKEN not set" };
+  }
+
+  try {
+    // Use the token as both the input and access token (self-debug)
+    const response = await fetch(
+      `${GRAPH_API}/debug_token?input_token=${encodeURIComponent(pageAccessToken)}&access_token=${encodeURIComponent(pageAccessToken)}`
+    );
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      return {
+        valid: false,
+        expiresAt: null,
+        scopes: [],
+        error: data.error?.message || `HTTP ${response.status}`,
+      };
+    }
+
+    const info = data.data;
+    const isValid = info?.is_valid === true;
+    const expiresAt = info?.expires_at
+      ? info.expires_at === 0
+        ? "never"
+        : new Date(info.expires_at * 1000).toISOString()
+      : null;
+
+    return {
+      valid: isValid,
+      expiresAt,
+      scopes: info?.scopes || [],
+      appId: info?.app_id,
+    };
+  } catch (err: any) {
+    return { valid: false, expiresAt: null, scopes: [], error: err.message };
+  }
+}
+
 // ─── Metrics ──────────────────────────────────────────────────────────────
 
 /** Get engagement metrics for a Facebook post */
