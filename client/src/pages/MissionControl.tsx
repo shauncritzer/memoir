@@ -65,9 +65,9 @@ export default function MissionControl() {
   const agentState = trpc.agent.getState.useQuery();
   const businesses = trpc.agent.getBusinesses.useQuery();
   const pendingActions = trpc.agent.getPendingActions.useQuery();
-  const recentActions = trpc.agent.getRecentActions.useQuery({ limit: 30 });
-  const briefings = trpc.agent.getReports.useQuery({ type: "daily_briefing", limit: 5 });
-  const ideas = trpc.agent.getReports.useQuery({ type: "idea", limit: 5 });
+  const recentActions = trpc.agent.getRecentActions.useQuery({ limit: 500 });
+  const briefings = trpc.agent.getReports.useQuery({ type: "daily_briefing", limit: 30 });
+  const ideas = trpc.agent.getReports.useQuery({ type: "idea", limit: 100 });
 
   const approveMutation = trpc.agent.approveAction.useMutation({
     onSuccess: () => {
@@ -121,7 +121,7 @@ export default function MissionControl() {
   });
 
   // Research Agent mutations
-  const researchReports = trpc.agent.getReports.useQuery({ type: "research", limit: 10 });
+  const researchReports = trpc.agent.getReports.useQuery({ type: "research", limit: 100 });
 
   const conductResearch = trpc.agent.conductResearch.useMutation({
     onSuccess: (data) => {
