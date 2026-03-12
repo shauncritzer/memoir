@@ -299,7 +299,52 @@ async function checkPipeline(): Promise<ComponentHealth> {
     const stats = await getPipelineStats();
 
     if (stats.errorRate > 0.5) {
-      return { name: "Content Pipeline", status: "critical", message: `${(stats.errorRate * 100).toFixed(0)}% failure rate`, lastChecked: now, details: stats };
+      // High failure rate — attempt self-healing before alerting
+      try {
+        const { attemptSelfHeal } = await import("./self-heal");
+        const healResults = await attemptSelfHeal();
+
+        const anySuccess = healResults.some(r => r.success);
+        const allAttempted = healResults.filter(r => r.attempted);
+        const healSummary = healResults
+          .map(r => `${r.platform}/${r.category}: ${r.success ? "FIXED" : "FAILED"} — ${r.message.slice(0, 100)}`)
+          .join("; ");
+
+        if (anySuccess) {
+          // At least one fix worked — send success notification, downgrade severity
+          const alertType = "self_heal_success";
+          if (shouldSendAlert(alertType)) {
+            try {
+              const { isTelegramConfigured, sendMessage } = await import("./telegram");
+              if (isTelegramConfigured()) {
+                await sendMessage(
+                  `✅ *Self-Heal Success*\n\nPipeline failure rate: ${(stats.errorRate * 100).toFixed(0)}%\n\nFixes applied:\n${healResults.filter(r => r.success).map(r => `• ${r.platform}: ${r.message}`).join("\n")}`
+                );
+              }
+            } catch { /* Can't send Telegram */ }
+          }
+
+          return {
+            name: "Content Pipeline",
+            status: "degraded",
+            message: `${(stats.errorRate * 100).toFixed(0)}% failure rate — self-heal applied (${allAttempted.length} fixes attempted)`,
+            lastChecked: now,
+            details: { ...stats, selfHeal: healResults },
+          };
+        }
+
+        // No fixes worked — return critical with heal details attached
+        return {
+          name: "Content Pipeline",
+          status: "critical",
+          message: `${(stats.errorRate * 100).toFixed(0)}% failure rate — self-heal failed`,
+          lastChecked: now,
+          details: { ...stats, selfHeal: healResults, healSummary },
+        };
+      } catch (healErr: any) {
+        console.error("[SelfMonitor] Self-heal error:", healErr.message);
+        return { name: "Content Pipeline", status: "critical", message: `${(stats.errorRate * 100).toFixed(0)}% failure rate`, lastChecked: now, details: stats };
+      }
     }
     if (stats.errorRate > 0.2) {
       return { name: "Content Pipeline", status: "degraded", message: `${(stats.errorRate * 100).toFixed(0)}% failure rate`, lastChecked: now, details: stats };
