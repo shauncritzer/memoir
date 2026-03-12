@@ -478,6 +478,17 @@ async function startServer() {
     } catch (err: any) {
       console.error("[MissionControl] Import failed (non-fatal):", err.message);
     }
+
+    // Start Self-Monitor health checks every 30 minutes (non-blocking)
+    try {
+      import("../agent/self-monitor").then(({ startSelfMonitor }) => {
+        startSelfMonitor();
+      }).catch((err) => {
+        console.error("[SelfMonitor] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[SelfMonitor] Import failed (non-fatal):", err.message);
+    }
   });
 }
 

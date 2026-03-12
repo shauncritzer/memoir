@@ -18,6 +18,7 @@
  *            n8n hourly health check workflow
  */
 
+import cron from "node-cron";
 import { ENV } from "../_core/env";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -476,4 +477,37 @@ async function getPipelineStats(): Promise<DiagnosticReport["pipelineStats"]> {
   } catch {
     return defaults;
   }
+}
+
+// ─── Cron-based Self-Monitor ───────────────────────────────────────────────
+
+/**
+ * Start the self-monitor on a 30-minute cron schedule.
+ * Runs a full diagnostic and sends Telegram alerts for critical/degraded status.
+ * Called once on server boot alongside Mission Control and the content scheduler.
+ */
+export function startSelfMonitor(): void {
+  console.log("[SelfMonitor] Starting 30-minute health check cron...");
+
+  // Run once on startup (delayed 60s to let other services initialize)
+  setTimeout(async () => {
+    try {
+      console.log("[SelfMonitor] Running initial health check...");
+      const report = await runFullDiagnostic();
+      console.log(`[SelfMonitor] Initial check: ${report.overall} — ${report.recommendations.length} recommendations`);
+    } catch (err: any) {
+      console.error("[SelfMonitor] Initial check failed:", err.message);
+    }
+  }, 60_000);
+
+  // Every 30 minutes: */30 * * * *
+  cron.schedule("*/30 * * * *", async () => {
+    try {
+      console.log("[SelfMonitor] Running scheduled health check...");
+      const report = await runFullDiagnostic();
+      console.log(`[SelfMonitor] Health: ${report.overall} — ${report.components.length} components, ${report.recommendations.length} recommendations`);
+    } catch (err: any) {
+      console.error("[SelfMonitor] Scheduled check failed:", err.message);
+    }
+  });
 }
