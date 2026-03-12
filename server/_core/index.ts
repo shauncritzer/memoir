@@ -133,6 +133,50 @@ async function startServer() {
     console.warn("[Migration] CTA fix failed (non-fatal):", err.message);
   }
 
+  // One-shot migration: seed 7-Day REWIRED Reset module + Day 1 lesson for HeyGen video agent
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (db) {
+      const { sql } = await import("drizzle-orm");
+
+      // Ensure module exists for 7-day-reset (idempotent — skip if already present)
+      await db.execute(
+        sql`INSERT IGNORE INTO course_modules (product_id, module_number, title, description, unlock_day, sort_order)
+            VALUES ('7-day-reset', 1, 'Week 1: The Reset', 'Days 1-7 of the REWIRED Reset', 1, 1)`
+      );
+
+      // Get the module ID (whether just inserted or already existed)
+      const [moduleRows] = await db.execute(
+        sql`SELECT id FROM course_modules WHERE product_id = '7-day-reset' AND module_number = 1 LIMIT 1`
+      ) as any;
+      const moduleId = (moduleRows as any[])?.[0]?.id;
+
+      if (moduleId) {
+        // Seed Day 1 lesson (idempotent — skip if title already exists for this module)
+        const [existing] = await db.execute(
+          sql`SELECT id FROM course_lessons WHERE module_id = ${moduleId} AND lesson_number = 1 LIMIT 1`
+        ) as any;
+
+        if (!(existing as any[])?.[0]) {
+          await db.execute(
+            sql`INSERT INTO course_lessons (module_id, lesson_number, title, video_script, sort_order)
+                VALUES (
+                  ${moduleId},
+                  1,
+                  ${"Day 1: The Reset Mindset"},
+                  ${"Welcome to Day 1 of the 7-Day REWIRED Reset. Today we're not starting with willpower. We're starting with truth. Your nervous system isn't broken — it's been doing exactly what it was trained to do. Today we begin retraining it. Here's what that looks like..."},
+                  1
+                )`
+          );
+          console.log("[Migration] Seeded 7-Day Reset Day 1 lesson for HeyGen video agent");
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn("[Migration] 7-Day Reset seed failed (non-fatal):", err.message);
+  }
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
 
