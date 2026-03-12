@@ -160,6 +160,7 @@ export const courseLessons = mysqlTable("course_lessons", {
   videoProvider: mysqlEnum("video_provider", ["vimeo", "youtube", "other"]).default("vimeo"),
   videoDuration: int("video_duration"), // Duration in seconds
   videoScript: text("video_script"), // AI-generated video script for HeyGen
+  heygenJobId: varchar("heygen_job_id", { length: 255 }), // In-progress HeyGen video generation ID
   workbookContent: text("workbook_content"), // Generated workbook/exercises (markdown)
   workbookPdfUrl: varchar("workbook_pdf_url", { length: 512 }), // Optional lesson-specific PDF
   slidePdfUrl: varchar("slide_pdf_url", { length: 512 }), // Optional slideshow PDF
