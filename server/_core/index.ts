@@ -468,6 +468,20 @@ async function startServer() {
     }
   });
 
+  // Meta token health check — validates current META_PAGE_ACCESS_TOKEN
+  app.get("/api/admin/meta-token-status", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const { debugMetaToken } = await import("../social/meta");
+      const tokenInfo = await debugMetaToken();
+      res.json({ timestamp: new Date().toISOString(), ...tokenInfo });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // HeyGen test endpoint — check credits, find first lesson, trigger test render
   app.post("/api/admin/test-heygen", async (req, res) => {
     try {

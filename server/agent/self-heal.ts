@@ -183,10 +183,37 @@ async function attemptTokenRefresh(platform: string): Promise<{ success: boolean
 
   // Meta (Instagram/Facebook): uses long-lived page tokens set via env var.
   // Cannot auto-refresh — requires manual token regeneration in Meta Business Suite.
+  // Send a Telegram alert with specific instructions so Shaun can act quickly.
   if (platform === "instagram" || platform === "facebook") {
+    const instructions =
+      `Meta ${platform} token is expired or invalid.\n\n` +
+      `To fix:\n` +
+      `1. Go to https://developers.facebook.com/tools/explorer/\n` +
+      `2. Select your app → Get User Token → check pages_manage_posts, pages_read_engagement, instagram_basic, instagram_content_publish\n` +
+      `3. Click "Generate Access Token"\n` +
+      `4. Exchange for long-lived token (60 days) via the Graph API or use the Access Token Debugger\n` +
+      `5. Update META_PAGE_ACCESS_TOKEN in Railway dashboard → redeploy`;
+
+    try {
+      const { isTelegramConfigured, sendMessage } = await import("./telegram");
+      if (isTelegramConfigured()) {
+        await sendMessage(
+          `⚠️ *Meta Token Expired*\n\n` +
+          `Platform: ${platform}\n\n` +
+          `*Steps to fix:*\n` +
+          `1. Go to developers.facebook.com/tools/explorer\n` +
+          `2. Select your app → Get User Token\n` +
+          `3. Check: pages\\_manage\\_posts, pages\\_read\\_engagement, instagram\\_basic, instagram\\_content\\_publish\n` +
+          `4. Generate token → exchange for long-lived (60 day) token\n` +
+          `5. Update META\\_PAGE\\_ACCESS\\_TOKEN in Railway → redeploy`
+        );
+        console.log(`[SelfHeal] Sent Telegram alert for Meta ${platform} token expiry`);
+      }
+    } catch { /* Telegram unavailable — non-fatal */ }
+
     return {
       success: false,
-      message: `Meta ${platform} token cannot be auto-refreshed. Shaun needs to regenerate META_PAGE_ACCESS_TOKEN in Meta Business Suite and update Railway env vars.`,
+      message: instructions,
     };
   }
 
