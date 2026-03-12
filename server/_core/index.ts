@@ -440,20 +440,6 @@ async function startServer() {
     }
   });
 
-  // Self-monitoring — full diagnostic run
-  app.post("/api/engine/diagnose", async (req, res) => {
-    try {
-      if (!verifySchedulerAuth(req)) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      const { runFullDiagnostic } = await import("../agent/self-monitor");
-      const report = await runFullDiagnostic();
-      res.json(report);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
   // Self-healing diagnostic — show actual failed post errors + heal status
   app.get("/api/engine/failed-posts", async (req, res) => {
     try {
@@ -463,6 +449,20 @@ async function startServer() {
       const { getFailedPostsDiagnostic } = await import("../agent/self-heal");
       const diagnostic = await getFailedPostsDiagnostic();
       res.json(diagnostic);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Self-monitoring — full diagnostic run
+  app.post("/api/engine/diagnose", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const { runFullDiagnostic } = await import("../agent/self-monitor");
+      const report = await runFullDiagnostic();
+      res.json(report);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
