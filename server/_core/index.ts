@@ -481,43 +481,86 @@ async function startServer() {
 
       const { sql } = await import("drizzle-orm");
 
-      // Try course_lessons first, then lessons
+      // Try course_lessons first (has video_script column), then lessons table
       let lesson: any = null;
+      let lessonSource = "";
+      const dbDebug: Record<string, any> = {};
+
+      // 1) course_lessons — prefer rows with a video_script
       try {
         const [rows] = await db.execute(sql`
           SELECT id, title, content, video_script, sort_order, module_id
           FROM course_lessons
+          WHERE video_script IS NOT NULL AND video_script != ''
           ORDER BY sort_order ASC, id ASC
           LIMIT 1
         `) as any;
         lesson = (rows as any[])?.[0];
-      } catch {}
+        if (lesson) lessonSource = "course_lessons (video_script)";
+      } catch (e: any) {
+        dbDebug.course_lessons_script_error = e.message;
+      }
 
+      // 2) course_lessons — any row with content
       if (!lesson) {
         try {
           const [rows] = await db.execute(sql`
-            SELECT id, title, content, day_number
+            SELECT id, title, content, video_script, sort_order, module_id
+            FROM course_lessons
+            ORDER BY sort_order ASC, id ASC
+            LIMIT 1
+          `) as any;
+          lesson = (rows as any[])?.[0];
+          if (lesson) lessonSource = "course_lessons (content)";
+        } catch (e: any) {
+          dbDebug.course_lessons_error = e.message;
+        }
+      }
+
+      // 3) lessons table (flat 7-Day Reset structure)
+      if (!lesson) {
+        try {
+          const [rows] = await db.execute(sql`
+            SELECT id, title, description, day_number
             FROM lessons
             ORDER BY day_number ASC, id ASC
             LIMIT 1
           `) as any;
           lesson = (rows as any[])?.[0];
-        } catch {}
+          if (lesson) lessonSource = "lessons";
+        } catch (e: any) {
+          dbDebug.lessons_error = e.message;
+        }
       }
 
+      // 4) Fallback: use a hardcoded test script so HeyGen can still be tested
       if (!lesson) {
-        return res.json({ ...results, error: "No lessons found in database" });
+        lesson = {
+          id: 0,
+          title: "HeyGen Test — Sober Strong Academy",
+          video_script: "Hey, I'm Shaun Critzer. Welcome to Sober Strong Academy. "
+            + "Recovery isn't about being perfect — it's about showing up, every single day. "
+            + "You're not broken. You're bent. And bent things can be straightened. "
+            + "My journey took thirteen years, but I'm living proof that change is possible. "
+            + "If you're watching this, you've already taken the first step. Let's do this together.",
+        };
+        lessonSource = "fallback (hardcoded test script)";
+        dbDebug.note = "Both course_lessons and lessons tables returned no rows";
       }
 
+      results.dbDebug = dbDebug;
+      results.lessonSource = lessonSource;
+
+      const scriptText = (lesson.video_script || lesson.content || lesson.description || lesson.title).substring(0, 2800);
       results.lesson = {
         id: lesson.id,
         title: lesson.title,
-        contentLength: (lesson.video_script || lesson.content || "").length,
-        contentPreview: (lesson.video_script || lesson.content || "").substring(0, 200),
+        source: lessonSource,
+        scriptLength: scriptText.length,
+        scriptPreview: scriptText.substring(0, 200),
       };
 
       // Step 3: Trigger test video render
-      const scriptText = (lesson.video_script || lesson.content || lesson.title).substring(0, 2800);
       const videoResult = await createVideo({
         script: scriptText,
         title: `Test: ${lesson.title}`,
