@@ -526,6 +526,32 @@ async function startServer() {
     }
   });
 
+  // HeyGen avatar list — returns raw API response for diagnostics
+  app.get("/api/admin/heygen-avatars", async (req, res) => {
+    try {
+      if (!verifySchedulerAuth(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const apiKey = process.env.HEYGEN_API_KEY;
+      if (!apiKey) {
+        return res.json({ error: "HEYGEN_API_KEY not set" });
+      }
+
+      const response = await fetch("https://api.heygen.com/v2/avatars", {
+        headers: {
+          "X-Api-Key": apiKey,
+          "Accept": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      return res.json({ status: response.status, data });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
   // HeyGen test endpoint — check credits, find first lesson, trigger test render
   app.post("/api/admin/test-heygen", async (req, res) => {
     try {
