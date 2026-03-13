@@ -131,13 +131,19 @@ export async function createVideo(opts: {
     let voiceConfig: any;
     if (resolvedVoiceId) {
       // ElevenLabs voice via HeyGen's ElevenLabs integration
+      // Requires elevenlabs_settings.model_id — without it HeyGen silently
+      // falls back to default "Lisa" voice instead of erroring
       voiceConfig = {
         type: "text",
         input_text: script,
         voice_id: resolvedVoiceId,
         speed: 1.0,
+        elevenlabs_settings: {
+          model_id: "eleven_multilingual_v2",
+          stability: 1.0,
+        },
       };
-      console.log(`[HeyGen] Using ElevenLabs voice: ${resolvedVoiceId}`);
+      console.log(`[HeyGen] Using ElevenLabs voice: ${resolvedVoiceId} (model: eleven_multilingual_v2)`);
     } else {
       voiceConfig = {
         type: "text",
