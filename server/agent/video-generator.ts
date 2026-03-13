@@ -3,8 +3,8 @@
  *
  * Runs on each agent cycle (30 min) and does two things:
  *
- * 1. SUBMIT: Find the next course_lesson with a video_script but no video_url
- *    and no in-progress job → submit to HeyGen → store job in video_generation_jobs.
+ * 1. SUBMIT: Find the next lesson (from `lessons` table) with a description but
+ *    no video_url and no in-progress job → submit to HeyGen → store job in video_generation_jobs.
  *
  * 2. POLL: Find all video_generation_jobs with status='pending' →
  *    check HeyGen status → if complete, save video_url + notify via Telegram.
@@ -78,18 +78,18 @@ export async function submitNextLesson(): Promise<{
   try {
     const { sql } = await import("drizzle-orm");
 
-    // Find next lesson: has script, no video, no in-progress job in video_generation_jobs
+    // Find next lesson: has description (used as script), no video, no in-progress job
     const [rows] = await db.execute(
-      sql`SELECT cl.id, cl.title, cl.video_script, cl.module_id, cl.lesson_number
-          FROM course_lessons cl
-          WHERE cl.video_script IS NOT NULL
-            AND cl.video_script != ''
-            AND (cl.video_url IS NULL OR cl.video_url = '')
-            AND cl.id NOT IN (
+      sql`SELECT l.id, l.title, l.description, l.day_number, l.product_id
+          FROM lessons l
+          WHERE l.description IS NOT NULL
+            AND l.description != ''
+            AND (l.video_url IS NULL OR l.video_url = '')
+            AND l.id NOT IN (
               SELECT vgj.lesson_id FROM video_generation_jobs vgj
               WHERE vgj.status IN ('pending', 'processing')
             )
-          ORDER BY cl.module_id ASC, cl.lesson_number ASC
+          ORDER BY l.day_number ASC, l.id ASC
           LIMIT 1`
     ) as any;
 
@@ -98,8 +98,8 @@ export async function submitNextLesson(): Promise<{
       return { submitted: false, error: "No lessons need video generation" };
     }
 
-    // Truncate script to HeyGen's limit
-    let script = lesson.video_script as string;
+    // Truncate script to HeyGen's limit (description serves as the video script)
+    let script = lesson.description as string;
     if (script.length > MAX_SCRIPT_CHARS) {
       script = script.slice(0, MAX_SCRIPT_CHARS - 3) + "...";
       console.warn(`[VideoGen] Script for lesson #${lesson.id} truncated to ${MAX_SCRIPT_CHARS} chars`);
@@ -135,7 +135,7 @@ export async function submitNextLesson(): Promise<{
     // Log to agent_actions
     await logAction(
       `Video queued: ${lesson.title}`,
-      `Submitted lesson #${lesson.id} (Module ${lesson.module_id}, Lesson ${lesson.lesson_number}) to HeyGen. Job ID: ${result.videoId}`,
+      `Submitted lesson #${lesson.id} (Day ${lesson.day_number}, ${lesson.product_id}) to HeyGen. Job ID: ${result.videoId}`,
       "executed"
     );
 
@@ -177,9 +177,9 @@ export async function pollPendingVideos(): Promise<{
     // Find all pending/processing jobs joined with lesson info
     const [rows] = await db.execute(
       sql`SELECT vgj.id AS job_id, vgj.lesson_id, vgj.heygen_job_id, vgj.status AS job_status,
-                 cl.title, cl.module_id, cl.lesson_number
+                 l.title, l.day_number, l.product_id
           FROM video_generation_jobs vgj
-          JOIN course_lessons cl ON cl.id = vgj.lesson_id
+          JOIN lessons l ON l.id = vgj.lesson_id
           WHERE vgj.status IN ('pending', 'processing')
           ORDER BY vgj.created_at ASC`
     ) as any;
@@ -197,12 +197,10 @@ export async function pollPendingVideos(): Promise<{
         const status = await getVideoStatus(jobId);
 
         if (status.status === "completed" && status.videoUrl) {
-          // Save video URL to course_lessons
+          // Save video URL to lessons table
           await db.execute(
-            sql`UPDATE course_lessons
-                SET video_url = ${status.videoUrl},
-                    video_provider = 'other',
-                    video_duration = ${status.duration || null}
+            sql`UPDATE lessons
+                SET video_url = ${status.videoUrl}
                 WHERE id = ${job.lesson_id}`
           );
 
@@ -224,7 +222,7 @@ export async function pollPendingVideos(): Promise<{
           // Log success
           await logAction(
             `Video ready: ${job.title}`,
-            `HeyGen video complete for lesson #${job.lesson_id} (Module ${job.module_id}, Lesson ${job.lesson_number}). URL: ${status.videoUrl}`,
+            `HeyGen video complete for lesson #${job.lesson_id} (Day ${job.day_number}, ${job.product_id}). URL: ${status.videoUrl}`,
             "executed"
           );
 
@@ -235,7 +233,7 @@ export async function pollPendingVideos(): Promise<{
               await sendMessage(
                 `🎬 *Video Complete*\n\n` +
                 `*${job.title}*\n` +
-                `Module ${job.module_id}, Lesson ${job.lesson_number}\n\n` +
+                `Day ${job.day_number} (${job.product_id})\n\n` +
                 `${status.videoUrl}`
               );
             }
