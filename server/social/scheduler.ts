@@ -159,10 +159,10 @@ export async function processContentGeneration() {
 /** Process ready items that are scheduled to post */
 /** Per-platform daily posting limits to protect algorithm reach */
 const PLATFORM_DAILY_LIMITS: Record<string, number> = {
-  instagram: 2,
-  facebook: 2,
-  x: 2,
-  linkedin: 1,
+  instagram: 3,
+  facebook: 3,
+  x: 5,
+  linkedin: 2,
   youtube: 1,
   tiktok: 2,
   podcast: 1,
@@ -746,8 +746,8 @@ export function startScheduler() {
     }
   });
 
-  // Check for scheduled posts every 30 minutes
-  postingTask = cron.schedule("*/30 * * * *", async () => {
+  // Check for scheduled posts every 10 minutes
+  postingTask = cron.schedule("*/10 * * * *", async () => {
     try {
       await processScheduledPosts();
     } catch (err: any) {
@@ -766,8 +766,8 @@ export function startScheduler() {
 
   schedulerRunning = true;
   console.log("[Scheduler] Content pipeline scheduler started");
-  console.log("[Scheduler]   - Content generation: every 5 minutes");
-  console.log("[Scheduler]   - Post scheduling: every 2 minutes");
+  console.log("[Scheduler]   - Content generation: every 60 minutes");
+  console.log("[Scheduler]   - Post scheduling: every 10 minutes");
   console.log("[Scheduler]   - Metrics update: every 30 minutes");
 }
 
