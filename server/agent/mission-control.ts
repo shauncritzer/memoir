@@ -734,7 +734,13 @@ async function executeQueuedActions(): Promise<void> {
             break;
           }
           default:
-            await failAction(action.id, `No executor for category: ${action.category}`);
+            // For categories without automated executors, mark as executed with a note
+            // This prevents approved actions from getting stuck in "executing" state
+            await completeAction(
+              action.id, 
+              `Approved by owner. Category "${action.category}" requires manual follow-up: ${action.description.substring(0, 200)}`
+            );
+            console.log(`[MissionControl] Action #${action.id} (${action.category}) approved but no auto-executor available - marked as executed for manual follow-up`);
         }
       } catch (err: any) {
         console.error(`[MissionControl] Action #${action.id} execution failed:`, err.message);
