@@ -739,6 +739,29 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+
+    // Ensure course_lessons has video_script column (schema may be ahead of DB)
+    (async () => {
+      try {
+        const { getDb } = await import("../db");
+        const db = await getDb();
+        if (!db) return;
+        const { sql } = await import("drizzle-orm");
+        const [cols] = await db.execute(sql`
+          SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'course_lessons'
+            AND COLUMN_NAME = 'video_script'
+        `) as any;
+        if ((cols as any[]).length === 0) {
+          await db.execute(sql`ALTER TABLE course_lessons ADD COLUMN video_script TEXT`);
+          console.log("[Boot] Added missing video_script column to course_lessons");
+        }
+      } catch (err: any) {
+        console.warn("[Boot] course_lessons migration check failed (non-fatal):", err.message);
+      }
+    })();
+
     // Start the social media content pipeline scheduler (non-blocking, can't crash server)
     try {
       import("../social/scheduler").then(({ startScheduler }) => {

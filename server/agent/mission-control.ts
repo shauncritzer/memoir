@@ -646,6 +646,12 @@ async function executeQueuedActions(): Promise<void> {
 
   try {
     const { sql } = await import("drizzle-orm");
+
+    // Promote approved Tier 3-4 actions to 'executing' so they get picked up
+    await db.execute(
+      sql`UPDATE agent_actions SET status = 'executing' WHERE status = 'approved' AND approved_at IS NOT NULL`
+    );
+
     const [rows] = await db.execute(
       sql`SELECT * FROM agent_actions WHERE status = 'executing' ORDER BY created_at ASC LIMIT 3`
     ) as any;
