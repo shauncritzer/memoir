@@ -159,8 +159,8 @@ export async function processContentGeneration() {
 /** Process ready items that are scheduled to post */
 /** Per-platform daily posting limits to protect algorithm reach */
 const PLATFORM_DAILY_LIMITS: Record<string, number> = {
-  instagram: 3,
-  facebook: 3,
+  instagram: 1,  // Reduced from 3: one Instagram post per day
+  facebook: 1,   // Reduced from 3: one Facebook post per day
   x: 5,
   linkedin: 2,
   youtube: 1,
