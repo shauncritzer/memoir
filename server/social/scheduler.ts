@@ -199,7 +199,9 @@ export async function processScheduledPosts() {
   // Bug fix: several code paths (e.g. admin generateContent) set status='ready'
   // without setting scheduledFor, causing posts to never be picked up.
   // Hotfix: Exclude X/Twitter posts (free tier is read-only API, cannot post).
-  // Increase batch size from 3 to 10 to clear 80-post backlog faster.
+  // CRITICAL: Reduced back to 3 posts/cycle to avoid Instagram rate limiting.
+  // Processing 10+ posts simultaneously triggered Instagram API rejections.
+  // Slow and steady: 3 posts × 10 min cycles = ~18 posts/hour = sustainable.
   const now = new Date();
   const { ne } = await import("drizzle-orm");
   const readyItems = await db
@@ -215,10 +217,17 @@ export async function processScheduledPosts() {
         ),
       )
     )
-    .limit(10);  // Increased from 3 to 10 to clear backlog faster
+    .limit(3);  // REDUCED back from 10 to 3: slow and steady wins
 
   for (const item of readyItems) {
     if (!item.content) continue;
+
+    // HOTFIX: Skip Instagram posts without media (causes API rejection)
+    // Instagram requires image URLs — text-only posts fail with "Only photo or video can be accepted"
+    if (item.platform === "instagram" && !item.mediaUrls) {
+      console.warn(`[Scheduler] Skipping Instagram post #${item.id} — no mediaUrls provided (requires image). Move to next cycle.`);
+      continue;  // Skip for now, will retry next cycle if image is added
+    }
 
     // Check if platform is throttled by self-healing (rate limit recovery)
     try {
