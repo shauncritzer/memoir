@@ -715,6 +715,14 @@ async function startServer() {
     }
   });
 
+  // Diagnostic API
+  try {
+    const diagnosticRouter = await import("../routers/diagnostic");
+    app.use("/api/diagnostic", diagnosticRouter.default);
+  } catch (err: any) {
+    console.warn("[Server] Diagnostic router registration failed (non-fatal):", err.message);
+  }
+
   // tRPC API
   app.use(
     "/api/trpc",
