@@ -792,6 +792,17 @@ async function startServer() {
       console.error("[MissionControl] Import failed (non-fatal):", err.message);
     }
 
+    // Start Telegram two-way polling (non-blocking)
+    try {
+      import("../agent/telegram").then(({ startTelegramPolling }) => {
+        startTelegramPolling();
+      }).catch((err) => {
+        console.error("[Telegram] Polling failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[Telegram] Import failed (non-fatal):", err.message);
+    }
+
     // Start Self-Monitor health checks every 30 minutes (non-blocking)
     try {
       import("../agent/self-monitor").then(({ startSelfMonitor }) => {

@@ -1,8 +1,9 @@
 /**
- * TELEGRAM INTEGRATION — Direct Messaging for Briefings & Approvals
+ * TELEGRAM INTEGRATION — Two-Way Messaging for Briefings, Approvals & Commands
  *
  * Sends daily briefings, Tier 3-4 approval requests, and critical alerts
- * directly to Shaun's phone via Telegram Bot API.
+ * directly to Shaun's phone via Telegram Bot API. Receives text commands
+ * back from Shaun and acts on them (approve, deny, post now, pause, status).
  *
  * Setup:
  *   1. Message @BotFather on Telegram → /newbot → get TELEGRAM_BOT_TOKEN
@@ -11,19 +12,16 @@
  *      to get your chat_id from the response
  *   3. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in Railway env vars
  *
- * Why Telegram:
- *   - Free forever (no per-message cost)
- *   - Bot API is simple and reliable
- *   - Supports Markdown formatting
- *   - Supports inline buttons (for approvals)
- *   - Instant push notifications
- *
- * Message Types:
- *   - Daily briefing (morning summary)
- *   - Tier 3 approval request (with approve/deny buttons)
- *   - Tier 4 approval request (high-stakes, requires explicit confirmation)
- *   - Critical alert (system down, payment failure, etc.)
- *   - Action summary (what the engine did autonomously)
+ * Two-Way Commands (text Shaun can send to the bot):
+ *   /status           — Engine status: last run, pending approvals, today's actions
+ *   /pending          — List all pending Tier 3-4 approvals with approve/deny buttons
+ *   /approve <id>     — Approve action by ID
+ *   /deny <id>        — Deny action by ID
+ *   /post now         — Trigger immediate content generation + posting cycle
+ *   /pause <platform> — Pause posting to a platform (instagram, facebook, etc.)
+ *   /resume <platform>— Resume posting to a platform
+ *   /help             — Show available commands
+ *   (any other text)  — Treated as a direct owner command to the engine
  */
 
 import { ENV } from "../_core/env";
@@ -250,24 +248,44 @@ export async function sendActionSummary(
   return sendMessage(lines.join("\n"));
 }
 
-// ─── Webhook Handler for Button Callbacks ───────────────────────────────────
+// ─── Webhook Handler for Button Callbacks + Text Commands ────────────────────
 
 /**
- * Process Telegram callback queries (button presses).
+ * Process Telegram updates: button callbacks AND text commands.
  * Wire this into an Express route: POST /api/telegram/webhook
  */
 export async function handleTelegramWebhook(body: any): Promise<{ handled: boolean; action?: string }> {
-  const callbackQuery = body?.callback_query;
-  if (!callbackQuery) {
-    return { handled: false };
+  // Route 1: Inline button callbacks (approve/deny buttons)
+  if (body?.callback_query) {
+    return handleCallbackQuery(body.callback_query);
   }
 
+  // Route 2: Text messages (commands from Shaun)
+  if (body?.message?.text) {
+    const chatId = String(body.message.chat?.id);
+    const configuredChatId = ENV.telegramChatId;
+
+    // Security: only process messages from Shaun's chat
+    if (configuredChatId && chatId !== configuredChatId) {
+      console.warn(`[Telegram] Ignoring message from unknown chat_id: ${chatId}`);
+      return { handled: false };
+    }
+
+    return handleTextCommand(body.message.text.trim());
+  }
+
+  return { handled: false };
+}
+
+/**
+ * Handle inline button callback queries (approve/deny/view_approvals).
+ */
+async function handleCallbackQuery(callbackQuery: any): Promise<{ handled: boolean; action?: string }> {
   const data = callbackQuery.data;
   const messageId = callbackQuery.message?.message_id;
 
   // Answer the callback to remove the loading spinner
   try {
-    const { token } = getConfig();
     await sendTelegramRequest("answerCallbackQuery", {
       callback_query_id: callbackQuery.id,
     });
@@ -285,19 +303,45 @@ export async function handleTelegramWebhook(body: any): Promise<{ handled: boole
       return { handled: false };
     }
 
-    try {
-      const { getDb } = await import("../db");
-      const db = await getDb();
-      if (!db) return { handled: false };
+    return processApproval(action, actionId, messageId);
+  }
 
-      const { sql } = await import("drizzle-orm");
+  // Handle "view_approvals" — send a list of pending actions
+  if (data === "view_approvals") {
+    return listPendingApprovals();
+  }
 
-      if (action === "approve") {
-        await db.execute(
-          sql`UPDATE agent_actions SET status = 'approved', approved_at = NOW() WHERE id = ${actionId} AND status = 'proposed'`
-        );
+  return { handled: false };
+}
 
-        // Update the Telegram message to show it was approved
+/**
+ * Process an approve/deny action (shared by button callbacks and text commands).
+ */
+async function processApproval(
+  action: string,
+  actionId: number,
+  messageId?: number
+): Promise<{ handled: boolean; action?: string }> {
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (!db) return { handled: false };
+
+    const { sql } = await import("drizzle-orm");
+
+    if (action === "approve") {
+      const [result] = await db.execute(
+        sql`UPDATE agent_actions SET status = 'approved', approved_at = NOW() WHERE id = ${actionId} AND status = 'proposed'`
+      ) as any;
+
+      const affected = result?.affectedRows ?? result?.changes ?? 0;
+      if (affected === 0) {
+        await sendMessage(`⚠️ Action #${actionId} not found or already processed.`);
+        return { handled: true, action: `approve_not_found_${actionId}` };
+      }
+
+      // Update the Telegram message if from a button press
+      if (messageId) {
         try {
           const { chatId } = getConfig();
           await sendTelegramRequest("editMessageText", {
@@ -309,13 +353,23 @@ export async function handleTelegramWebhook(body: any): Promise<{ handled: boole
         } catch {
           // Non-critical
         }
-
-        return { handled: true, action: `approved_${actionId}` };
       } else {
-        await db.execute(
-          sql`UPDATE agent_actions SET status = 'denied' WHERE id = ${actionId} AND status = 'proposed'`
-        );
+        await sendMessage(`✅ *APPROVED* — Action #${actionId}`, { parseMode: "Markdown" });
+      }
 
+      return { handled: true, action: `approved_${actionId}` };
+    } else {
+      const [result] = await db.execute(
+        sql`UPDATE agent_actions SET status = 'denied' WHERE id = ${actionId} AND status = 'proposed'`
+      ) as any;
+
+      const affected = result?.affectedRows ?? result?.changes ?? 0;
+      if (affected === 0) {
+        await sendMessage(`⚠️ Action #${actionId} not found or already processed.`);
+        return { handled: true, action: `deny_not_found_${actionId}` };
+      }
+
+      if (messageId) {
         try {
           const { chatId } = getConfig();
           await sendTelegramRequest("editMessageText", {
@@ -327,51 +381,351 @@ export async function handleTelegramWebhook(body: any): Promise<{ handled: boole
         } catch {
           // Non-critical
         }
-
-        return { handled: true, action: `denied_${actionId}` };
+      } else {
+        await sendMessage(`❌ *DENIED* — Action #${actionId}`, { parseMode: "Markdown" });
       }
-    } catch (err: any) {
-      console.error("[Telegram] Webhook processing error:", err.message);
-      return { handled: false };
+
+      return { handled: true, action: `denied_${actionId}` };
     }
+  } catch (err: any) {
+    console.error("[Telegram] Approval processing error:", err.message);
+    return { handled: false };
+  }
+}
+
+/**
+ * List all pending approvals and send them as messages with buttons.
+ */
+async function listPendingApprovals(): Promise<{ handled: boolean; action?: string }> {
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (!db) return { handled: false };
+
+    const { sql } = await import("drizzle-orm");
+    const [rows] = await db.execute(
+      sql`SELECT id, title, description, risk_tier, category FROM agent_actions WHERE status = 'proposed' ORDER BY risk_tier DESC, created_at ASC LIMIT 10`
+    ) as any;
+
+    if (!rows || (rows as any[]).length === 0) {
+      await sendMessage("📋 No pending approvals right now.");
+      return { handled: true, action: "view_approvals_empty" };
+    }
+
+    // Send each approval as a separate message with buttons
+    for (const row of rows as any[]) {
+      await sendApprovalRequest(
+        row.id,
+        row.title,
+        row.description || "No description",
+        row.risk_tier,
+        row.category
+      );
+    }
+
+    return { handled: true, action: `view_approvals_${(rows as any[]).length}` };
+  } catch (err: any) {
+    console.error("[Telegram] View approvals error:", err.message);
+    return { handled: false };
+  }
+}
+
+// ─── Text Command Processing ────────────────────────────────────────────────
+
+/**
+ * Parse and execute text commands sent by Shaun.
+ */
+async function handleTextCommand(text: string): Promise<{ handled: boolean; action?: string }> {
+  const lower = text.toLowerCase();
+
+  // /help — show available commands
+  if (lower === "/help" || lower === "/start") {
+    await sendMessage([
+      "🤖 *Rewired Engine Commands*",
+      "",
+      "/status — Engine status overview",
+      "/pending — View pending approvals",
+      "/approve <id> — Approve an action",
+      "/deny <id> — Deny an action",
+      "/post now — Trigger content generation \\+ posting",
+      "/pause <platform> — Pause posting (instagram, facebook, etc.)",
+      "/resume <platform> — Resume posting",
+      "/help — This message",
+      "",
+      "_Or just type a message — the engine treats it as a direct command._",
+    ].join("\n"));
+    return { handled: true, action: "help" };
   }
 
-  // Handle "view_approvals" — send a list of pending actions
-  if (data === "view_approvals") {
-    try {
-      const { getDb } = await import("../db");
-      const db = await getDb();
-      if (!db) return { handled: false };
+  // /status — engine state
+  if (lower === "/status") {
+    return handleStatusCommand();
+  }
 
+  // /pending — list approvals
+  if (lower === "/pending") {
+    return listPendingApprovals();
+  }
+
+  // /approve <id>
+  if (lower.startsWith("/approve ")) {
+    const id = parseInt(text.substring("/approve ".length).trim(), 10);
+    if (isNaN(id)) {
+      await sendMessage("⚠️ Usage: /approve <action id>");
+      return { handled: true, action: "approve_invalid" };
+    }
+    return processApproval("approve", id);
+  }
+
+  // /deny <id>
+  if (lower.startsWith("/deny ")) {
+    const id = parseInt(text.substring("/deny ".length).trim(), 10);
+    if (isNaN(id)) {
+      await sendMessage("⚠️ Usage: /deny <action id>");
+      return { handled: true, action: "deny_invalid" };
+    }
+    return processApproval("deny", id);
+  }
+
+  // /post now — trigger immediate content cycle
+  if (lower === "/post now" || lower === "/postnow") {
+    return handlePostNowCommand();
+  }
+
+  // /pause <platform>
+  if (lower.startsWith("/pause ")) {
+    const platform = text.substring("/pause ".length).trim().toLowerCase();
+    return handlePausePlatform(platform, true);
+  }
+
+  // /resume <platform>
+  if (lower.startsWith("/resume ")) {
+    const platform = text.substring("/resume ".length).trim().toLowerCase();
+    return handlePausePlatform(platform, false);
+  }
+
+  // Anything else — treat as a direct owner command to the engine
+  return handleOwnerCommand(text);
+}
+
+/**
+ * /status — Show engine state, pending approvals, recent actions.
+ */
+async function handleStatusCommand(): Promise<{ handled: boolean; action?: string }> {
+  try {
+    const { getAgentState } = await import("./mission-control");
+    const agentState = getAgentState();
+
+    const { getDb } = await import("../db");
+    const db = await getDb();
+
+    let recentActions = 0;
+    let failedToday = 0;
+    let queuedContent = 0;
+    if (db) {
       const { sql } = await import("drizzle-orm");
-      const [rows] = await db.execute(
-        sql`SELECT id, title, description, risk_tier, category FROM agent_actions WHERE status = 'proposed' ORDER BY risk_tier DESC, created_at ASC LIMIT 10`
-      ) as any;
-
-      if (!rows || (rows as any[]).length === 0) {
-        await sendMessage("📋 No pending approvals right now.");
-        return { handled: true, action: "view_approvals_empty" };
-      }
-
-      // Send each approval as a separate message with buttons
-      for (const row of rows as any[]) {
-        await sendApprovalRequest(
-          row.id,
-          row.title,
-          row.description || "No description",
-          row.risk_tier,
-          row.category
-        );
-      }
-
-      return { handled: true, action: `view_approvals_${(rows as any[]).length}` };
-    } catch (err: any) {
-      console.error("[Telegram] View approvals error:", err.message);
-      return { handled: false };
+      const [acted] = await db.execute(sql`SELECT COUNT(*) as cnt FROM agent_actions WHERE status = 'executed' AND executed_at > CURDATE()`) as any;
+      recentActions = (acted as any[])?.[0]?.cnt || 0;
+      const [failed] = await db.execute(sql`SELECT COUNT(*) as cnt FROM agent_actions WHERE status = 'failed' AND created_at > CURDATE()`) as any;
+      failedToday = (failed as any[])?.[0]?.cnt || 0;
+      const [queued] = await db.execute(sql`SELECT COUNT(*) as cnt FROM content_queue WHERE status IN ('pending', 'ready') AND scheduled_for <= NOW()`) as any;
+      queuedContent = (queued as any[])?.[0]?.cnt || 0;
     }
+
+    const lastRun = agentState.lastRun
+      ? `${Math.round((Date.now() - agentState.lastRun.getTime()) / 60000)}min ago`
+      : "never";
+
+    const lines = [
+      "📊 *Engine Status*",
+      "",
+      `Last cycle: ${lastRun}`,
+      `Running: ${agentState.isRunning ? "yes ⏳" : "idle"}`,
+      `Businesses: ${agentState.activeBusinesses}`,
+      `Pending approvals: ${agentState.pendingApprovals}`,
+      `Actions today: ${recentActions}`,
+      failedToday > 0 ? `Failed today: ${failedToday} ⚠️` : "",
+      queuedContent > 0 ? `Content queued: ${queuedContent}` : "",
+      agentState.alerts.length > 0 ? `Active alerts: ${agentState.alerts.length}` : "",
+    ].filter(Boolean);
+
+    await sendMessage(lines.join("\n"));
+    return { handled: true, action: "status" };
+  } catch (err: any) {
+    await sendMessage(`⚠️ Status check failed: ${err.message}`);
+    return { handled: true, action: "status_error" };
+  }
+}
+
+/**
+ * /post now — Trigger immediate content generation and posting.
+ */
+async function handlePostNowCommand(): Promise<{ handled: boolean; action?: string }> {
+  try {
+    await sendMessage("⚡ Triggering content generation and posting cycle...");
+
+    const { processContentGeneration, processScheduledPosts } = await import("../social/scheduler");
+    await processContentGeneration();
+    await processScheduledPosts();
+
+    await sendMessage("✅ *Post cycle complete* — content generated and posted.");
+    return { handled: true, action: "post_now" };
+  } catch (err: any) {
+    await sendMessage(`⚠️ Post cycle failed: ${err.message}`);
+    return { handled: true, action: "post_now_error" };
+  }
+}
+
+/**
+ * /pause <platform> or /resume <platform> — Toggle platform posting.
+ */
+async function handlePausePlatform(
+  platform: string,
+  pause: boolean
+): Promise<{ handled: boolean; action?: string }> {
+  const validPlatforms = ["instagram", "facebook", "twitter", "linkedin", "youtube", "tiktok"];
+  if (!validPlatforms.includes(platform)) {
+    await sendMessage(
+      `⚠️ Unknown platform: "${platform}"\n\nValid: ${validPlatforms.join(", ")}`
+    );
+    return { handled: true, action: "pause_invalid" };
   }
 
-  return { handled: false };
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (!db) {
+      await sendMessage("⚠️ Database unavailable");
+      return { handled: false };
+    }
+
+    const { sql } = await import("drizzle-orm");
+
+    if (pause) {
+      // Mark all pending/ready content for this platform as 'paused'
+      await db.execute(
+        sql`UPDATE content_queue SET status = 'paused' WHERE platform = ${platform} AND status IN ('pending', 'ready')`
+      );
+      await sendMessage(`⏸️ *${platform}* paused — no new posts will go out until you /resume ${platform}`);
+    } else {
+      // Un-pause: set 'paused' items back to 'ready'
+      await db.execute(
+        sql`UPDATE content_queue SET status = 'ready' WHERE platform = ${platform} AND status = 'paused'`
+      );
+      await sendMessage(`▶️ *${platform}* resumed — queued posts will go out on next cycle`);
+    }
+
+    return { handled: true, action: `${pause ? "pause" : "resume"}_${platform}` };
+  } catch (err: any) {
+    await sendMessage(`⚠️ Failed to ${pause ? "pause" : "resume"} ${platform}: ${err.message}`);
+    return { handled: true, action: `${pause ? "pause" : "resume"}_error` };
+  }
+}
+
+/**
+ * Free-text owner command — forward to Mission Control as a Tier 2 action.
+ */
+async function handleOwnerCommand(text: string): Promise<{ handled: boolean; action?: string }> {
+  try {
+    const { proposeOwnerCommand } = await import("./mission-control");
+    await proposeOwnerCommand(text, "sober-strong");
+    await sendMessage(
+      `📝 *Command received*\n\n"${escapeMarkdown(text.substring(0, 200))}"\n\nQueued as Tier 2 action — will execute next cycle.`
+    );
+    return { handled: true, action: "owner_command" };
+  } catch (err: any) {
+    await sendMessage(`⚠️ Failed to queue command: ${err.message}`);
+    return { handled: true, action: "owner_command_error" };
+  }
+}
+
+// ─── Polling (getUpdates) — receives text commands without public webhook URL ─
+
+let pollingActive = false;
+let pollingOffset = 0;
+
+/**
+ * Start long-polling loop to receive Telegram updates.
+ * This is the primary way the bot receives text commands from Shaun.
+ * Works even if the server has no publicly reachable webhook URL.
+ */
+export async function startTelegramPolling(): Promise<void> {
+  if (!isTelegramConfigured()) {
+    console.log("[Telegram] Not configured — polling disabled");
+    return;
+  }
+
+  if (pollingActive) return;
+  pollingActive = true;
+
+  // Delete any stale webhook so getUpdates works
+  try {
+    await sendTelegramRequest("deleteWebhook", { drop_pending_updates: false });
+  } catch {
+    // Non-critical
+  }
+
+  console.log("[Telegram] Polling started — bot is now two-way");
+
+  pollLoop();
+}
+
+async function pollLoop(): Promise<void> {
+  while (pollingActive) {
+    try {
+      const { token } = getConfig();
+      const url = `${TELEGRAM_API}/bot${token}/getUpdates`;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 35_000);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offset: pollingOffset,
+          timeout: 30, // Telegram long-poll: wait up to 30s for new updates
+          allowed_updates: ["message", "callback_query"],
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        console.error(`[Telegram] Poll error: ${response.status}`);
+        await sleep(5000);
+        continue;
+      }
+
+      const data = await response.json();
+      const updates = data.result || [];
+
+      for (const update of updates) {
+        pollingOffset = update.update_id + 1;
+        try {
+          await handleTelegramWebhook(update);
+        } catch (err: any) {
+          console.error("[Telegram] Error handling update:", err.message);
+        }
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        // Normal timeout, continue polling
+        continue;
+      }
+      console.error("[Telegram] Poll loop error:", err.message);
+      await sleep(5000);
+    }
+  }
+}
+
+export function stopTelegramPolling(): void {
+  pollingActive = false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // ─── Diagnostic Function ────────────────────────────────────────────────────
