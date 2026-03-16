@@ -123,6 +123,17 @@ diagnosticRouter.get("/llm-provider", async (req, res) => {
   }
 });
 
+// Scheduler status endpoint
+diagnosticRouter.get("/scheduler-status", async (req, res) => {
+  try {
+    const { getSchedulerStatus } = await import("../social/scheduler");
+    const status = getSchedulerStatus();
+    res.json(status);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message, running: false });
+  }
+});
+
 // Content queue status endpoint
 diagnosticRouter.get("/content-queue", async (req, res) => {
   try {

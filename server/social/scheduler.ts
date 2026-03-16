@@ -777,6 +777,18 @@ export function stopScheduler() {
   postingTask?.stop();
   metricsTask?.stop();
   schedulerRunning = false;
+}
+
+/** Get scheduler status */
+export function getSchedulerStatus() {
+  return {
+    running: schedulerRunning,
+    tasks: {
+      contentGeneration: contentGenTask ? "initialized" : "not initialized",
+      posting: postingTask ? "initialized" : "not initialized",
+      metrics: metricsTask ? "initialized" : "not initialized",
+    },
+  };
   console.log("[Scheduler] Stopped");
 }
 
