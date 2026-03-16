@@ -123,6 +123,55 @@ diagnosticRouter.get("/llm-provider", async (req, res) => {
   }
 });
 
+// Content queue status endpoint
+diagnosticRouter.get("/content-queue", async (req, res) => {
+  try {
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({ error: "Database unavailable" });
+    }
+
+    const { sql } = await import("drizzle-orm");
+
+    // Get queue status breakdown
+    const [statusRows] = await db.execute(
+      sql`SELECT status, COUNT(*) as count
+          FROM content_queue
+          WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY status`
+    ) as any;
+
+    // Get platform breakdown
+    const [platformRows] = await db.execute(
+      sql`SELECT platform, status, COUNT(*) as count
+          FROM content_queue
+          WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY platform, status`
+    ) as any;
+
+    // Get items stuck in 'ready' status (should have been posted)
+    const [stuckReady] = await db.execute(
+      sql`SELECT id, platform, content_type, created_at, scheduled_for
+          FROM content_queue
+          WHERE status = 'ready'
+          AND (scheduled_for IS NULL OR scheduled_for <= NOW())
+          ORDER BY created_at ASC
+          LIMIT 10`
+    ) as any;
+
+    res.json({
+      statusBreakdown: statusRows,
+      platformBreakdown: platformRows,
+      stuckInReady: stuckReady,
+      diagnosis: (stuckReady as any[]).length > 0
+        ? `⚠️  ${(stuckReady as any[]).length} posts stuck in 'ready' status. Posting scheduler may be failing.`
+        : "✅ No posts stuck in ready status",
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Helper: Generate actionable recommendations
 function generateRecommendations(
   tokenDebug: any,
