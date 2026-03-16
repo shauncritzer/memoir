@@ -804,18 +804,6 @@ export function getSchedulerStatus(): { running: boolean; tasks: Record<string, 
   };
 }
 
-/** Get scheduler status */
-export function getSchedulerStatus() {
-  return {
-    running: schedulerRunning,
-    tasks: {
-      contentGeneration: contentGenTask ? "active" : "stopped",
-      posting: postingTask ? "active" : "stopped",
-      metricsUpdate: metricsTask ? "active" : "stopped",
-    },
-  };
-}
-
 /**
  * Run a single scheduler cycle on demand (for external triggers like n8n).
  * Executes content generation → posting → metrics in sequence.
