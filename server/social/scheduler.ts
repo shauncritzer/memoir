@@ -780,7 +780,7 @@ export function stopScheduler() {
 }
 
 /** Get scheduler status */
-export function getSchedulerStatus() {
+export function getSchedulerStatus(): { running: boolean; tasks: Record<string, string> } {
   return {
     running: schedulerRunning,
     tasks: {
@@ -789,7 +789,6 @@ export function getSchedulerStatus() {
       metrics: metricsTask ? "initialized" : "not initialized",
     },
   };
-  console.log("[Scheduler] Stopped");
 }
 
 /** Get scheduler status */
