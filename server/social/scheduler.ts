@@ -208,7 +208,7 @@ export async function processScheduledPosts() {
   const now = new Date();
   const { ne } = await import("drizzle-orm");
   
-  console.log(`[Scheduler] Querying for ready posts (status='ready', platform!='x', scheduled_for <= now)`);
+  console.log(`[Scheduler] Querying for ready posts (status='ready', platform!='x' and platform!='linkedin', scheduled_for <= now)`);
   
   const readyItems = await db
     .select()
@@ -217,13 +217,14 @@ export async function processScheduledPosts() {
       and(
         eq(contentQueue.status, "ready"),
         ne(contentQueue.platform, "x"),  // Skip X/Twitter (read-only API)
+        ne(contentQueue.platform, "linkedin"),  // Skip LinkedIn (account not ready, needs more followers for API approval)
         or(
           isNull(contentQueue.scheduledFor),
           lte(contentQueue.scheduledFor, now),
         ),
       )
     )
-    .limit(3);  // REDUCED back from 10 to 3: slow and steady wins
+    .limit(3);
 
   console.log(`[Scheduler] Query returned ${readyItems.length} items (before filtering)`);
   
