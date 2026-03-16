@@ -17,7 +17,7 @@ async function rescheduleStuckPosts() {
   const { contentQueue } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
 
-  // Get all "failed" posts (these are actually rescheduled, not true failures)
+  // Get all "failed" posts (these are actually posts that hit daily limits and were rescheduled)
   const failedPosts = await db
     .select()
     .from(contentQueue)
