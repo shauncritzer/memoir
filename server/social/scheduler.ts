@@ -198,20 +198,24 @@ export async function processScheduledPosts() {
   // 2. Have no scheduled time (NULL) — treat as "post immediately"
   // Bug fix: several code paths (e.g. admin generateContent) set status='ready'
   // without setting scheduledFor, causing posts to never be picked up.
+  // Hotfix: Exclude X/Twitter posts (free tier is read-only API, cannot post).
+  // Increase batch size from 3 to 10 to clear 80-post backlog faster.
   const now = new Date();
+  const { ne } = await import("drizzle-orm");
   const readyItems = await db
     .select()
     .from(contentQueue)
     .where(
       and(
         eq(contentQueue.status, "ready"),
+        ne(contentQueue.platform, "x"),  // Skip X/Twitter (read-only API)
         or(
           isNull(contentQueue.scheduledFor),
           lte(contentQueue.scheduledFor, now),
         ),
       )
     )
-    .limit(3);
+    .limit(10);  // Increased from 3 to 10 to clear backlog faster
 
   for (const item of readyItems) {
     if (!item.content) continue;
