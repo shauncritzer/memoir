@@ -731,11 +731,11 @@ let metricsTask: ScheduledTask | null = null;
 /** Start the content scheduler */
 export function startScheduler() {
   if (schedulerRunning) {
-    console.log("[Scheduler] Already running");
+    console.log(`[Scheduler] [${new Date().toISOString()}] Already running`);
     return;
   }
 
-  console.log("[Scheduler] Starting content pipeline scheduler...");
+  console.log(`[Scheduler] [${new Date().toISOString()}] Starting content pipeline scheduler...`);
 
   // Process content generation every 60 minutes
   contentGenTask = cron.schedule("0 * * * *", async () => {
@@ -749,9 +749,13 @@ export function startScheduler() {
   // Check for scheduled posts every 10 minutes
   postingTask = cron.schedule("*/10 * * * *", async () => {
     try {
+      const startTime = Date.now();
+      console.log(`[Scheduler] [${new Date().toISOString()}] Running posting cycle...`);
       await processScheduledPosts();
+      const duration = Date.now() - startTime;
+      console.log(`[Scheduler] [${new Date().toISOString()}] Posting cycle complete (${duration}ms)`);
     } catch (err: any) {
-      console.error("[Scheduler] Posting error:", err.message);
+      console.error(`[Scheduler] [${new Date().toISOString()}] Posting error:`, err.message);
     }
   });
 
@@ -764,10 +768,19 @@ export function startScheduler() {
     }
   });
 
+  // Heartbeat log every minute to verify cron is alive
+  cron.schedule("* * * * *", () => {
+    // Silent heartbeat - only log every 60 minutes to reduce noise
+    const minute = new Date().getMinutes();
+    if (minute === 0) {
+      console.log(`[Scheduler] ❤️ Heartbeat OK (${new Date().toISOString()})`);
+    }
+  });
+
   schedulerRunning = true;
-  console.log("[Scheduler] Content pipeline scheduler started");
+  console.log(`[Scheduler] [${new Date().toISOString()}] ✅ Content pipeline scheduler STARTED`);
   console.log("[Scheduler]   - Content generation: every 60 minutes");
-  console.log("[Scheduler]   - Post scheduling: every 10 minutes");
+  console.log("[Scheduler]   - Post scheduling: every 10 minutes (ACTIVE)");
   console.log("[Scheduler]   - Metrics update: every 30 minutes");
 }
 
