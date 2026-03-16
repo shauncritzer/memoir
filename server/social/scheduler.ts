@@ -242,13 +242,8 @@ export async function processScheduledPosts() {
       continue;
     }
 
-    // HOTFIX: Skip Instagram posts without media (causes API rejection)
-    // Instagram requires image URLs — text-only posts fail with "Only photo or video can be accepted"
-    if (item.platform === "instagram" && !item.mediaUrls) {
-      console.warn(`[Scheduler] Skipping Instagram post #${item.id} — no mediaUrls provided (requires image). Will retry next cycle.`);
-      skippedCount++;
-      continue;  // Skip for now, will retry next cycle if image is added
-    }
+    // NOTE: Instagram posts without mediaUrls will attempt auto-image generation in postContentItem()
+    // No early skip - let the posting function handle it
     
     console.log(`[Scheduler] Processing post #${item.id} (${item.platform})`);
 
