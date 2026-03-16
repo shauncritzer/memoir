@@ -188,7 +188,10 @@ async function getPlatformPostCountToday(platform: string): Promise<number> {
 
 export async function processScheduledPosts() {
   const db = await getDb();
-  if (!db) return;
+  if (!db) {
+    console.error("[Scheduler] Database not available");
+    return;
+  }
 
   const { contentQueue } = await import("../../drizzle/schema");
   const { eq, and, lte, isNull, or } = await import("drizzle-orm");
@@ -204,6 +207,9 @@ export async function processScheduledPosts() {
   // Slow and steady: 3 posts × 10 min cycles = ~18 posts/hour = sustainable.
   const now = new Date();
   const { ne } = await import("drizzle-orm");
+  
+  console.log(`[Scheduler] Querying for ready posts (status='ready', platform!='x', scheduled_for <= now)`);
+  
   const readyItems = await db
     .select()
     .from(contentQueue)
@@ -219,21 +225,39 @@ export async function processScheduledPosts() {
     )
     .limit(3);  // REDUCED back from 10 to 3: slow and steady wins
 
+  console.log(`[Scheduler] Query returned ${readyItems.length} items (before filtering)`);
+  
+  if (readyItems.length === 0) {
+    console.log(`[Scheduler] ⚠️  No ready posts found matching criteria. Cycle complete with 0 posts.`);
+    return;
+  }
+
+  let postedCount = 0;
+  let skippedCount = 0;
+
   for (const item of readyItems) {
-    if (!item.content) continue;
+    if (!item.content) {
+      console.warn(`[Scheduler] Post #${item.id} has no content, skipping`);
+      skippedCount++;
+      continue;
+    }
 
     // HOTFIX: Skip Instagram posts without media (causes API rejection)
     // Instagram requires image URLs — text-only posts fail with "Only photo or video can be accepted"
     if (item.platform === "instagram" && !item.mediaUrls) {
-      console.warn(`[Scheduler] Skipping Instagram post #${item.id} — no mediaUrls provided (requires image). Move to next cycle.`);
+      console.warn(`[Scheduler] Skipping Instagram post #${item.id} — no mediaUrls provided (requires image). Will retry next cycle.`);
+      skippedCount++;
       continue;  // Skip for now, will retry next cycle if image is added
     }
+    
+    console.log(`[Scheduler] Processing post #${item.id} (${item.platform})`);
 
     // Check if platform is throttled by self-healing (rate limit recovery)
     try {
       const { isPlatformThrottled } = await import("../agent/self-heal");
       if (isPlatformThrottled(item.platform)) {
         console.log(`[Scheduler] ${item.platform} is throttled by self-heal (rate limit recovery), skipping post #${item.id}`);
+        skippedCount++;
         continue;
       }
     } catch { /* self-heal module not available, proceed normally */ }
@@ -250,11 +274,15 @@ export async function processScheduledPosts() {
         .set({ scheduledFor: tomorrow })
         .where(eq(contentQueue.id, item.id));
       console.log(`[Scheduler] ${item.platform} hit daily limit (${dailyLimit}), rescheduled post #${item.id} to tomorrow`);
+      skippedCount++;
       continue;
     }
 
     await postContentItem(item);
+    postedCount++;
   }
+
+  console.log(`[Scheduler] Cycle complete: ${postedCount} posted, ${skippedCount} skipped, ${readyItems.length} total processed`);
 }
 
 /** Post a single content queue item to its platform */
