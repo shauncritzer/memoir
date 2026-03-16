@@ -90,6 +90,39 @@ diagnosticRouter.get("/meta-token", async (req, res) => {
   }
 });
 
+// LLM provider debug endpoint
+diagnosticRouter.get("/llm-provider", async (req, res) => {
+  try {
+    const { ENV } = await import("../_core/env");
+    
+    // Check which keys are set
+    const keys = {
+      forgeApiKey: ENV.forgeApiKey ? { set: true, length: ENV.forgeApiKey.length, preview: ENV.forgeApiKey.substring(0, 10) } : { set: false },
+      anthropicApiKey: ENV.anthropicApiKey ? { set: true, length: ENV.anthropicApiKey.length, preview: ENV.anthropicApiKey.substring(0, 10) } : { set: false },
+      googleApiKey: ENV.googleApiKey ? { set: true, length: ENV.googleApiKey.length, preview: ENV.googleApiKey.substring(0, 10) } : { set: false },
+      openaiApiKey: ENV.openaiApiKey ? { set: true, length: ENV.openaiApiKey.length, preview: ENV.openaiApiKey.substring(0, 10) } : { set: false },
+    };
+    
+    // Determine selected provider
+    let selectedProvider = "none";
+    if (ENV.forgeApiKey) selectedProvider = "Forge";
+    else if (ENV.anthropicApiKey) selectedProvider = "Anthropic Claude";
+    else if (ENV.googleApiKey) selectedProvider = "Google Gemini";
+    else if (ENV.openaiApiKey) selectedProvider = "OpenAI";
+    
+    res.json({
+      selectedProvider,
+      keys,
+      rawEnvCheck: {
+        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? { set: true, length: process.env.ANTHROPIC_API_KEY.length } : { set: false },
+        GOOGLE_API_KEY: process.env.GOOGLE_API_KEY ? { set: true, length: process.env.GOOGLE_API_KEY.length } : { set: false },
+      }
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Helper: Generate actionable recommendations
 function generateRecommendations(
   tokenDebug: any,
