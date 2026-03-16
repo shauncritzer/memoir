@@ -218,8 +218,16 @@ type LLMProvider = {
 };
 
 const resolveProvider = (): LLMProvider => {
+  // Debug logging to diagnose why Gemini is selected instead of Anthropic
+  console.log("[LLM] Provider resolution:");
+  console.log(`  forgeApiKey: ${ENV.forgeApiKey ? `SET (${ENV.forgeApiKey.length} chars)` : "NOT SET"}`);
+  console.log(`  anthropicApiKey: ${ENV.anthropicApiKey ? `SET (${ENV.anthropicApiKey.length} chars)` : "NOT SET"}`);
+  console.log(`  googleApiKey: ${ENV.googleApiKey ? `SET (${ENV.googleApiKey.length} chars)` : "NOT SET"}`);
+  console.log(`  openaiApiKey: ${ENV.openaiApiKey ? `SET (${ENV.openaiApiKey.length} chars)` : "NOT SET"}`);
+
   // Priority 1: Forge (Manus dev environment)
   if (ENV.forgeApiKey) {
+    console.log("[LLM] Selected provider: Forge");
     const baseUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
       ? ENV.forgeApiUrl.replace(/\/$/, "")
       : "https://forge.manus.im";
@@ -233,6 +241,7 @@ const resolveProvider = (): LLMProvider => {
 
   // Priority 2: Claude (Anthropic) — fast, reliable, no free-tier rate limits
   if (ENV.anthropicApiKey) {
+    console.log("[LLM] Selected provider: Anthropic Claude");
     return {
       apiUrl: "https://api.anthropic.com",
       apiKey: ENV.anthropicApiKey,
@@ -243,6 +252,7 @@ const resolveProvider = (): LLMProvider => {
 
   // Priority 3: Google Gemini (via OpenAI-compatible endpoint)
   if (ENV.googleApiKey) {
+    console.log("[LLM] Selected provider: Google Gemini (free tier - 20/day limit)");
     return {
       apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       apiKey: ENV.googleApiKey,
@@ -253,6 +263,7 @@ const resolveProvider = (): LLMProvider => {
 
   // Priority 4: OpenAI directly
   if (ENV.openaiApiKey) {
+    console.log("[LLM] Selected provider: OpenAI");
     return {
       apiUrl: "https://api.openai.com/v1/chat/completions",
       apiKey: ENV.openaiApiKey,
@@ -261,6 +272,7 @@ const resolveProvider = (): LLMProvider => {
     };
   }
 
+  console.error("[LLM] NO PROVIDER CONFIGURED - all env vars empty");
   throw new Error(
     "No AI API key configured. Set one of: ANTHROPIC_API_KEY (recommended), GOOGLE_API_KEY, OPENAI_API_KEY, or BUILT_IN_FORGE_API_KEY in Railway environment variables."
   );
