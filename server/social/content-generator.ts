@@ -183,11 +183,21 @@ export async function generateContentForPlatform(opts: {
     ? `\n\nCTA TO INCLUDE: "${ctaText}" linking to ${ctaUrl}`
     : "";
 
+  // Retrieve past performance context from vector memory (pgvector)
+  let memoryContext = "";
+  try {
+    const { getMemoryContext } = await import("../agent/vector-memory-hooks");
+    memoryContext = await getMemoryContext(topic || sourceBlogTitle || "recovery", platform);
+  } catch {
+    // Vector memory not configured — proceed without it
+  }
+
   const prompt = `${brandContext}
 
 TASK: Generate a ${rules.contentType} for ${platform.toUpperCase()}.
 ${sourceContext}
 ${ctaContext}
+${memoryContext}
 
 PLATFORM RULES FOR ${platform.toUpperCase()}:
 - Max length: ${rules.maxLength} characters${platform === "x" ? " per tweet" : ""}
