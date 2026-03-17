@@ -887,5 +887,40 @@ export async function runSchedulerCycle(): Promise<{
     results.success = false;
   }
 
+  // Sync queue counts to shared coordination layer (Supabase)
+  try {
+    const { syncQueueCounts, isCoordinationConfigured } = await import("../agent/coordination");
+    if (isCoordinationConfigured()) {
+      const db = await getDb();
+      if (db) {
+        const { sql } = await import("drizzle-orm");
+        const [rows] = await db.execute(sql`
+          SELECT
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+            SUM(CASE WHEN status = 'generating' THEN 1 ELSE 0 END) as generating_count,
+            SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as ready_count,
+            SUM(CASE WHEN status = 'posted' AND posted_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as posted_24h,
+            SUM(CASE WHEN status = 'failed' AND updated_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as failed_24h
+          FROM content_queue
+        `) as any;
+        const row = (rows as any[])?.[0] || {};
+        const posted = parseInt(row.posted_24h || "0", 10);
+        const failed = parseInt(row.failed_24h || "0", 10);
+        const total = posted + failed;
+
+        await syncQueueCounts({
+          pending: parseInt(row.pending_count || "0", 10),
+          generating: parseInt(row.generating_count || "0", 10),
+          ready: parseInt(row.ready_count || "0", 10),
+          posted_24h: posted,
+          failed_24h: failed,
+          error_rate: total > 0 ? failed / total : 0,
+        });
+      }
+    }
+  } catch {
+    // Non-critical — coordination sync failure shouldn't break the scheduler
+  }
+
   return results;
 }

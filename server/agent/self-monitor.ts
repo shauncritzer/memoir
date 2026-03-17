@@ -264,6 +264,16 @@ export async function runFullDiagnostic(): Promise<DiagnosticReport> {
     // Non-critical
   }
 
+  // Sync platform health to shared coordination layer (Supabase)
+  try {
+    const { syncPlatformHealth, isCoordinationConfigured } = await import("./coordination");
+    if (isCoordinationConfigured()) {
+      await syncPlatformHealth({ overall, components, integrations });
+    }
+  } catch {
+    // Non-critical — coordination sync failure shouldn't break diagnostics
+  }
+
   return report;
 }
 
