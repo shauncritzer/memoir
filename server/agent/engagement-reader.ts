@@ -85,7 +85,30 @@ export async function readEngagement(): Promise<{
 
   for (const post of rows as any[]) {
     try {
-      const snapshot = await readPostEngagement(post.id, post.platform, post.platform_post_url);
+      let snapshot = await readPostEngagement(post.id, post.platform, post.platform_post_url);
+
+      // If Browserbase scraping failed but we have API metrics in DB, build snapshot from those
+      if (snapshot.error && post.metrics) {
+        try {
+          const apiMetrics = JSON.parse(post.metrics);
+          const hasData = (apiMetrics.likes || 0) + (apiMetrics.comments || 0) + (apiMetrics.shares || 0) > 0;
+          if (hasData) {
+            snapshot = {
+              ...snapshot,
+              metrics: {
+                likes: apiMetrics.likes || 0,
+                comments: apiMetrics.comments || 0,
+                shares: apiMetrics.shares || apiMetrics.retweets || 0,
+                saves: apiMetrics.saves || 0,
+                views: apiMetrics.views || apiMetrics.reach || apiMetrics.impression_count || 0,
+              },
+              error: undefined, // Clear error — we have usable API data
+            };
+            console.log(`[EngagementReader] Browserbase failed for post #${post.id}, using API metrics`);
+          }
+        } catch { /* metrics parse failed, keep original error snapshot */ }
+      }
+
       snapshots.push(snapshot);
 
       // Update the content_queue metrics with fresh engagement data
@@ -133,16 +156,19 @@ export async function readEngagement(): Promise<{
 
 // ─── Platform-Specific Readers ──────────────────────────────────────────────
 
+/**
+ * Scrape a social media post page using Browserbase with platform-aware strategies.
+ * Instagram and Facebook serve different content to headless browsers (login walls),
+ * so we use mobile user agents, dismiss cookie banners, and wait for dynamic content.
+ */
 async function readPostEngagement(
   postId: number,
   platform: string,
   url: string
 ): Promise<EngagementSnapshot> {
-  const { extractPageContent } = await import("./browser-arm");
+  const content = await scrapePostPage(platform, url);
 
-  const result = await extractPageContent(url);
-
-  if (!result.success || !result.extractedContent) {
+  if (!content) {
     return {
       postId,
       platform,
@@ -151,13 +177,10 @@ async function readPostEngagement(
       topComments: [],
       sentiment: "neutral",
       extractedAt: new Date(),
-      error: result.error || "Could not extract content",
+      error: "Browserbase scrape returned no usable content",
     };
   }
 
-  const content = result.extractedContent;
-
-  // Parse engagement based on platform
   switch (platform) {
     case "instagram":
       return parseInstagramEngagement(postId, url, content);
@@ -167,6 +190,119 @@ async function readPostEngagement(
       return parseLinkedInEngagement(postId, url, content);
     default:
       return parseGenericEngagement(postId, platform, url, content);
+  }
+}
+
+/**
+ * Open a post URL in a Browserbase cloud browser with platform-appropriate settings.
+ * Uses mobile user agent (less likely to hit login walls), dismisses cookie dialogs,
+ * and waits for engagement numbers to render before extracting.
+ */
+async function scrapePostPage(platform: string, url: string): Promise<string | null> {
+  const startTime = Date.now();
+
+  try {
+    const { chromium } = await import("playwright-core");
+
+    // Create Browserbase session
+    const apiKey = ENV.browserbaseApiKey;
+    const projectId = ENV.browserbaseProjectId;
+    if (!apiKey || !projectId) return null;
+
+    const sessionResp = await fetch("https://api.browserbase.com/v1/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-bb-api-key": apiKey },
+      body: JSON.stringify({ projectId }),
+    });
+    if (!sessionResp.ok) {
+      console.error(`[EngagementReader] Browserbase session failed: ${sessionResp.status}`);
+      return null;
+    }
+    const sessionData = await sessionResp.json();
+    const connectUrl = `wss://connect.browserbase.com?apiKey=${apiKey}&sessionId=${sessionData.id}`;
+
+    const browser = await chromium.connectOverCDP(connectUrl);
+    const context = browser.contexts()[0] || await browser.newContext({
+      // Mobile user agent — IG/FB serve public post pages to mobile without login walls
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      viewport: { width: 390, height: 844 },
+      isMobile: true,
+    });
+    const page = await context.newPage();
+
+    // Navigate with domcontentloaded (networkidle hangs on social media pages)
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25000 });
+
+    // Wait for dynamic content to render (engagement counts load via JS)
+    await page.waitForTimeout(3000);
+
+    // Dismiss cookie/login banners that block content
+    for (const selector of [
+      'button:has-text("Accept")', 'button:has-text("Allow")',
+      'button:has-text("Not Now")', 'button:has-text("Decline")',
+      '[aria-label="Close"]', '[aria-label="Dismiss"]',
+    ]) {
+      try { await page.click(selector, { timeout: 1000 }); } catch { /* no banner */ }
+    }
+
+    // Extra wait after dismissal for content to appear
+    await page.waitForTimeout(1500);
+
+    // Platform-specific extraction for richer data
+    let content: string;
+    if (platform === "instagram") {
+      // IG mobile pages have engagement in meta tags and aria labels
+      content = await page.evaluate(() => {
+        const parts: string[] = [];
+        // Meta description often has "X likes, Y comments"
+        const meta = document.querySelector('meta[name="description"]');
+        if (meta) parts.push(meta.getAttribute("content") || "");
+        // aria-labels contain counts like "1,234 likes"
+        document.querySelectorAll('[aria-label]').forEach(el => {
+          const label = el.getAttribute("aria-label") || "";
+          if (/\d/.test(label) && /(like|comment|view|play|share|save)/i.test(label)) {
+            parts.push(label);
+          }
+        });
+        // Visible text as fallback
+        parts.push(document.body.innerText);
+        return parts.join("\n");
+      });
+    } else if (platform === "facebook") {
+      // FB mobile pages show engagement in various data attributes and text
+      content = await page.evaluate(() => {
+        const parts: string[] = [];
+        const meta = document.querySelector('meta[name="description"]');
+        if (meta) parts.push(meta.getAttribute("content") || "");
+        // FB uses aria-label on reaction/comment/share buttons
+        document.querySelectorAll('[aria-label]').forEach(el => {
+          const label = el.getAttribute("aria-label") || "";
+          if (/\d/.test(label) && /(like|reaction|comment|share|view)/i.test(label)) {
+            parts.push(label);
+          }
+        });
+        parts.push(document.body.innerText);
+        return parts.join("\n");
+      });
+    } else {
+      content = await page.evaluate(() => document.body.innerText);
+    }
+
+    await browser.close();
+
+    const duration = Date.now() - startTime;
+    console.log(`[EngagementReader] Scraped ${platform} post (${content.length} chars, ${duration}ms)`);
+
+    // Detect login wall — if content is too short or contains login keywords, it's a wall
+    if (content.length < 50 || /log\s?in|sign\s?up|create.*account/i.test(content.substring(0, 200))) {
+      console.warn(`[EngagementReader] Possible login wall detected for ${platform} — ${url}`);
+      return null;
+    }
+
+    return content;
+  } catch (err: any) {
+    console.error(`[EngagementReader] Browserbase scrape failed for ${platform}:`, err.message);
+    return null;
   }
 }
 
