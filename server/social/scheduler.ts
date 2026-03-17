@@ -700,6 +700,15 @@ export async function updateEngagementMetrics() {
       console.warn(`[Scheduler] Metrics fetch failed for ${item.platform} post ${item.platformPostId}:`, err.message);
     }
   }
+
+  // After metrics are updated in MySQL, store performance snapshots in pgvector
+  // so the content generator can learn from what worked
+  try {
+    const { storePerformanceSnapshot } = await import("../agent/vector-memory-hooks");
+    await storePerformanceSnapshot();
+  } catch {
+    // Vector memory not configured or failed — non-fatal
+  }
 }
 
 /** Manually trigger posting for a specific queue item */
