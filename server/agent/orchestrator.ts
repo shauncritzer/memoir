@@ -173,7 +173,7 @@ export async function runReplenishLoop(): Promise<string | null> {
     const { sql } = await import("drizzle-orm");
     const { generateContentForPlatform } = await import("../social/content-generator");
 
-    const platforms = ["instagram", "facebook", "linkedin", "x"];
+    const platforms = ["instagram", "facebook", "linkedin", "x", "youtube"];
     const generated: string[] = [];
 
     for (const platform of platforms) {
