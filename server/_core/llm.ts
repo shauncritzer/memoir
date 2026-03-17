@@ -1,5 +1,6 @@
 import { ENV } from "./env";
 import Anthropic from "@anthropic-ai/sdk";
+import { traceable } from "langsmith/traceable";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -465,7 +466,7 @@ async function invokeClaudeNative(
   };
 }
 
-export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+async function _invokeLLMRaw(params: InvokeParams): Promise<InvokeResult> {
   const provider = resolveProvider();
 
   // Route Claude to native Anthropic SDK (not OpenAI-compatible)
@@ -539,3 +540,21 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   return (await response.json()) as InvokeResult;
 }
+
+/**
+ * LLM invocation wrapped with LangSmith tracing.
+ * When LANGCHAIN_TRACING_V2=true and LANGCHAIN_API_KEY are set, every call
+ * is automatically sent to smith.langchain.com with model, provider, and
+ * token usage metadata. When tracing is off, this is a passthrough.
+ */
+export const invokeLLM: (params: InvokeParams) => Promise<InvokeResult> = traceable(
+  async (params: InvokeParams): Promise<InvokeResult> => {
+    const result = await _invokeLLMRaw(params);
+    return result;
+  },
+  {
+    name: "invokeLLM",
+    run_type: "llm",
+    metadata: { module: "llm.ts" },
+  }
+);
