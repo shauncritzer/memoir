@@ -524,3 +524,57 @@ export const agentReports = mysqlTable("agent_reports", {
 
 export type AgentReport = typeof agentReports.$inferSelect;
 export type InsertAgentReport = typeof agentReports.$inferInsert;
+
+// ============================================================
+// APOLLO OUTREACH — Lead generation for Critzer's Cabinets
+// ============================================================
+
+/**
+ * Apollo leads — prospects found via Apollo.io for outreach
+ */
+export const apolloLeads = mysqlTable("apollo_leads", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Which business this lead is for */
+  businessId: int("business_id").references(() => businesses.id),
+  /** Apollo person ID for deduplication */
+  apolloId: varchar("apollo_id", { length: 255 }).unique(),
+  /** Contact info */
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  email: varchar("email", { length: 320 }),
+  phone: varchar("phone", { length: 50 }),
+  /** Company / role */
+  company: varchar("company", { length: 255 }),
+  title: varchar("title", { length: 255 }),
+  /** Location */
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 50 }),
+  /** Lead type: homeowner, interior_designer, builder, contractor, realtor */
+  leadType: varchar("lead_type", { length: 50 }),
+  /** Outreach status */
+  status: mysqlEnum("status", [
+    "new",             // Just found, not yet contacted
+    "email_1_sent",    // First email sent
+    "email_2_sent",    // Follow-up sent
+    "email_3_sent",    // Final follow-up sent
+    "replied",         // They responded
+    "booked",          // Estimate/meeting booked
+    "won",             // Became a customer
+    "unsubscribed",    // Opted out
+    "bounced",         // Email bounced
+  ]).default("new").notNull(),
+  /** When each email in the sequence was sent */
+  email1SentAt: timestamp("email_1_sent_at"),
+  email2SentAt: timestamp("email_2_sent_at"),
+  email3SentAt: timestamp("email_3_sent_at"),
+  /** Response tracking */
+  repliedAt: timestamp("replied_at"),
+  replyContent: text("reply_content"),
+  /** JSON metadata from Apollo search result */
+  metadata: text("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ApolloLead = typeof apolloLeads.$inferSelect;
+export type InsertApolloLead = typeof apolloLeads.$inferInsert;

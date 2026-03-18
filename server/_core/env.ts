@@ -42,4 +42,6 @@ export const ENV = {
   // ConvertKit (email marketing)
   convertkitApiKey: process.env.CONVERTKIT_API_KEY ?? "",
   convertkitApiSecret: process.env.CONVERTKIT_API_SECRET ?? "",
+  // Apollo.io (lead generation for Critzer's Cabinets)
+  apolloApiKey: process.env.APOLLO_API_KEY ?? "",
 };

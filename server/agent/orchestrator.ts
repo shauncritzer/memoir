@@ -583,6 +583,23 @@ async function runNicheLoop(): Promise<string | null> {
   }
 }
 
+// ─── Apollo Outreach Loop ───────────────────────────────────────────────────
+
+async function runApolloOutreachLoop(): Promise<string | null> {
+  if (!canRun("apollo-outreach", 10080)) return null; // once per week (7 * 24 * 60)
+
+  try {
+    const { runApolloOutreach } = await import("./apollo-outreach");
+    const result = await runApolloOutreach();
+    markRun("apollo-outreach");
+    return result;
+  } catch (err: any) {
+    console.error("[Orchestrator] Apollo outreach loop error:", err.message);
+    markRun("apollo-outreach");
+    return null;
+  }
+}
+
 // ─── Main Orchestrator Entry Point ───────────────────────────────────────────
 // Called by Mission Control on each 30-minute cycle
 
@@ -605,6 +622,7 @@ export async function runOrchestration(): Promise<{
     { name: "revenue", fn: runRevenueLoop },
     { name: "strategy", fn: runStrategyLoop },
     { name: "niche", fn: runNicheLoop },
+    { name: "apollo-outreach", fn: runApolloOutreachLoop },
   ];
 
   for (const loop of loops) {
