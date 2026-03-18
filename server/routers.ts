@@ -4401,6 +4401,150 @@ Recovery is possible. But it requires working with your biology, not against it.
         const { activateNiche } = await import("./agent/niche-expander");
         return activateNiche(input.niche, { createCourse: input.createCourse, contentCount: input.contentCount });
       }),
+
+    // ─── Activity Feed (Freddy Audit) ────────────────────────────────────────
+
+    /** Get Freddy's activity feed (for auditing and token tracking) */
+    getActivityFeed: protectedProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(100).optional().default(50),
+        offset: z.number().min(0).optional().default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        
+        try {
+          // Query activity feed from memory/activity-log.jsonl or in-memory store
+          const fs = await import("fs");
+          const path = await import("path");
+          const logPath = path.join(process.cwd(), "memory", "activity-log.jsonl");
+          
+          if (!fs.existsSync(logPath)) {
+            return { activities: [], total: 0 };
+          }
+          
+          const lines = fs.readFileSync(logPath, "utf-8").split("\n").filter(l => l.trim());
+          const activities = lines
+            .map(line => {
+              try { return JSON.parse(line); } catch { return null; }
+            })
+            .filter(Boolean)
+            .reverse()
+            .slice(input.offset, input.offset + input.limit);
+          
+          return {
+            activities,
+            total: lines.length,
+            limit: input.limit,
+            offset: input.offset,
+          };
+        } catch (err) {
+          console.error("Error reading activity feed:", err);
+          return { activities: [], total: 0 };
+        }
+      }),
+
+    /** Log Freddy activity (called by Freddy after significant actions) */
+    logActivity: publicProcedure
+      .input(z.object({
+        action: z.string(),
+        status: z.enum(["success", "failed", "in_progress"]),
+        details: z.record(z.any()).optional(),
+        tokensUsed: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const fs = await import("fs");
+          const path = await import("path");
+          const dir = path.join(process.cwd(), "memory");
+          const logPath = path.join(dir, "activity-log.jsonl");
+          
+          // Ensure directory exists
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          
+          const entry = {
+            timestamp: new Date().toISOString(),
+            action: input.action,
+            status: input.status,
+            details: input.details || {},
+            tokensUsed: input.tokensUsed || 0,
+            agent: "freddy",
+          };
+          
+          fs.appendFileSync(logPath, JSON.stringify(entry) + "\n");
+          return { success: true, timestamp: entry.timestamp };
+        } catch (err) {
+          console.error("Error logging activity:", err);
+          return { success: false, error: String(err) };
+        }
+      }),
+
+    // ─── Cron Jobs Calendar ─────────────────────────────────────────────────
+
+    /** Get all scheduled cron jobs (for calendar view) */
+    getCronJobs: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+        
+        try {
+          // This would call the gateway cron.list API
+          // For now, return hardcoded jobs that Freddy has
+          const jobs = [
+            {
+              id: "apollo-cabinet-leads",
+              name: "Apollo Cabinet Leads Prospecting",
+              schedule: "0 9 * * 1",  // Every Monday 9 AM ET
+              description: "Search Apollo for 20-30 cabinet leads in Charlottesville VA",
+              nextRun: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+              lastRun: "2026-03-17T13:00:00Z",
+              enabled: true,
+            },
+            {
+              id: "content-generation",
+              name: "Content Generation",
+              schedule: "0 * * * *",  // Every hour
+              description: "Generate content for all platforms (Instagram, Facebook, YouTube, etc.)",
+              nextRun: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+              lastRun: "2026-03-18T02:00:00Z",
+              enabled: true,
+            },
+            {
+              id: "post-scheduling",
+              name: "Post Scheduling",
+              schedule: "*/10 * * * *",  // Every 10 minutes
+              description: "Post queued content to social platforms (1/platform/day)",
+              nextRun: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+              lastRun: "2026-03-18T03:00:00Z",
+              enabled: true,
+            },
+            {
+              id: "metrics-collection",
+              name: "Metrics Collection",
+              schedule: "*/30 * * * *",  // Every 30 minutes
+              description: "Read engagement metrics from social posts",
+              nextRun: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+              lastRun: "2026-03-18T02:30:00Z",
+              enabled: true,
+            },
+            {
+              id: "engagement-reader",
+              name: "Engagement Reader",
+              schedule: "0 */12 * * *",  // Every 12 hours
+              description: "Deep read of post engagement via Browserbase",
+              nextRun: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+              lastRun: "2026-03-18T00:00:00Z",
+              enabled: true,
+            },
+          ];
+          
+          return jobs;
+        } catch (err) {
+          console.error("Error getting cron jobs:", err);
+          return [];
+        }
+      }),
   }),
 });
 
