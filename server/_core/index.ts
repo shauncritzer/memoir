@@ -723,6 +723,87 @@ async function startServer() {
     console.warn("[Server] Diagnostic router registration failed (non-fatal):", err.message);
   }
 
+  // ─── Agent Coordination API ─────────────────────────────────────────────────
+  // Shared state layer between Rewired Engine (memoir) and Freddy (OpenClaw).
+  // GET  /api/coordination/state  — read all shared state (public, read-only)
+  // POST /api/coordination/update — write state (requires ADMIN_SECRET header)
+
+  app.get("/api/coordination/state", async (_req, res) => {
+    try {
+      const { getAllSystemState, isCoordinationConfigured } = await import("../agent/coordination");
+
+      if (!isCoordinationConfigured()) {
+        return res.status(503).json({
+          error: "Coordination layer not configured (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing)",
+        });
+      }
+
+      const state = await getAllSystemState();
+
+      // Return as a key→value object for easy consumption
+      const stateMap: Record<string, any> = {};
+      for (const entry of state) {
+        stateMap[entry.key] = {
+          value: entry.value,
+          updated_by: entry.updated_by,
+          updated_at: entry.updated_at,
+        };
+      }
+
+      res.json({ ok: true, state: stateMap, count: state.length });
+    } catch (err: any) {
+      console.error("[Coordination] GET /state error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/coordination/update", async (req, res) => {
+    try {
+      // Auth: require ADMIN_SECRET in header
+      const adminSecret = process.env.ADMIN_SECRET;
+      const providedSecret = req.headers["x-admin-secret"] as string | undefined;
+
+      if (!adminSecret) {
+        return res.status(500).json({ error: "ADMIN_SECRET not configured on server" });
+      }
+      if (!providedSecret || providedSecret !== adminSecret) {
+        return res.status(401).json({ error: "Invalid or missing X-Admin-Secret header" });
+      }
+
+      const { key, value, agent_name } = req.body;
+
+      if (!key || typeof key !== "string") {
+        return res.status(400).json({ error: "key (string) is required" });
+      }
+      if (!value || typeof value !== "object") {
+        return res.status(400).json({ error: "value (object) is required" });
+      }
+
+      const { setSystemState, logCoordinationAction, isCoordinationConfigured } = await import("../agent/coordination");
+
+      if (!isCoordinationConfigured()) {
+        return res.status(503).json({
+          error: "Coordination layer not configured (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing)",
+        });
+      }
+
+      const updatedBy = agent_name || "external";
+      const success = await setSystemState(key, value, updatedBy);
+
+      if (!success) {
+        return res.status(500).json({ error: "Failed to write state" });
+      }
+
+      // Log the update as a coordination action for audit trail
+      await logCoordinationAction(updatedBy, "state_update", "completed", { key, value });
+
+      res.json({ ok: true, key, updated_by: updatedBy });
+    } catch (err: any) {
+      console.error("[Coordination] POST /update error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

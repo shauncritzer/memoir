@@ -42,4 +42,6 @@ export const ENV = {
   // ConvertKit (email marketing)
   convertkitApiKey: process.env.CONVERTKIT_API_KEY ?? "",
   convertkitApiSecret: process.env.CONVERTKIT_API_SECRET ?? "",
+  // Admin secret (shared across agents for coordination API auth)
+  adminSecret: process.env.ADMIN_SECRET ?? "",
 };
