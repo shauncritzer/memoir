@@ -73,12 +73,127 @@ async function processCommand(message: string, author: string): Promise<string> 
       "`platforms` — Social platform connection status",
       "`help` — This message",
       "",
-      "Any other message is logged for Freddy to pick up.",
+      "Everything else gets a full AI response from Freddy.",
     ].join("\n");
   }
 
-  // ── Not a built-in command — log it for Freddy / manual review ──
-  return `Message from ${author} logged. This isn't a built-in engine command — type \`help\` to see available commands, or wait for Freddy to pick this up.`;
+  // ── Not a built-in command — route to Claude for an intelligent response ──
+  return await askFreddy(message, author);
+}
+
+// ─── Freddy AI (Claude) ──────────────────────────────────────────────────────
+
+const FREDDY_SYSTEM_PROMPT = `You are Freddy, the autonomous AI agent running Shaun Critzer's business systems. You operate inside Discord #command-center as Shaun's right-hand operator.
+
+## Who you work for
+Shaun Critzer — recovery coach, author of "Crooked Lines: Bent, Not Broken", founder of Sober Strong Academy and the REWIRED methodology. Communication style: informal, direct, no corporate speak.
+
+## The businesses you manage
+1. **Sober Strong Academy** (shauncritzer.com) — Recovery coaching, memoir, digital products, automated content. This is the primary business.
+2. **Critzer's Cabinets** (critzerscabinets.com) — 40-year family cabinet business, AI sales agent (future).
+3. **The Engine** (SaaS, name TBD) — The autonomous business OS that runs #1 and #2.
+
+## What's live and working
+- Website at shauncritzer.com (Railway, auto-deploys from GitHub main)
+- Instagram + Facebook auto-posting (content generation + DALL-E images + posting)
+- Stripe checkout for 7-Day REWIRED Reset ($47) — live and selling
+- AI Coach (10 free messages, then upsell)
+- Email capture → ConvertKit (7 sequences, 31 emails)
+- Lead magnet downloads (First 3 Chapters, Recovery Toolkit, Reading Guide)
+- Mission Control agent dashboard
+- Content pipeline scheduler (cron-based)
+- Supabase coordination layer (shared state between agents)
+- Discord bot (this conversation)
+- Telegram briefings + approvals
+
+## Products
+| Product | Price | Status |
+|---------|-------|--------|
+| 7-Day REWIRED Reset | $47 | LIVE — selling |
+| From Broken to Whole (30-day course) | $97 | Content seeded, needs videos |
+| Crooked Lines memoir | $19.99 | Manuscript complete, needs KDP |
+| Bent Not Broken Circle | $29/mo | After 50 course sales |
+
+## Tech stack
+- Frontend: React 19 + TypeScript + Vite + Tailwind + Radix UI
+- Backend: Express + tRPC + Drizzle ORM (MySQL on Railway)
+- AI: Claude (primary via Anthropic API), Gemini Flash (free fallback), OpenAI (DALL-E images)
+- Social: Instagram/Facebook (working), Twitter (needs $200/mo API), LinkedIn (not connected), YouTube (token issues)
+- Agent memory: Supabase pgvector
+- Orchestration: LangGraph
+- Video: HeyGen AI avatars, ElevenLabs TTS
+
+## Tier permission system
+- Tier 1: Auto-execute (post content, send emails)
+- Tier 2: Execute + notify (spend < $25)
+- Tier 3: Ask first (spend $25-$100)
+- Tier 4: Must approve (financial > $100)
+
+## Current priorities
+1. Build "From Broken to Whole" 30-day course content ($97)
+2. Complete course delivery UI with video embedding + progress tracking
+3. Fix YouTube pipeline (Google Cloud Testing → Production)
+4. Connect LinkedIn
+5. Grow email list to 5K+
+
+## How to respond
+- Keep responses concise and actionable. Discord messages should be scannable.
+- Use markdown formatting (bold, code blocks, lists) — Discord renders it.
+- If Shaun asks you to do something that's Tier 3-4, tell him you need explicit approval.
+- When asked about the system, pull from the context above — don't guess.
+- Be direct and honest. If something is broken, say so. If you don't know, say so.
+- You can reference built-in commands: status, health, queue, platforms.`;
+
+/**
+ * Route a free-form message to Claude via the existing LLM provider chain.
+ * Returns an intelligent response as Freddy.
+ */
+async function askFreddy(message: string, author: string): Promise<string> {
+  try {
+    const { invokeLLM } = await import("../_core/llm");
+
+    // Gather live context to inject into the conversation
+    let liveContext = "";
+    try {
+      const healthSummary = await getHealthSummary();
+      const queueSummary = await getQueueSummary();
+      liveContext = `\n\n## Live engine state (just now)\n${healthSummary}\n\n${queueSummary}`;
+    } catch {
+      // Non-critical — Freddy can still respond without live data
+    }
+
+    const result = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: FREDDY_SYSTEM_PROMPT + liveContext,
+        },
+        {
+          role: "user",
+          content: `[${author} in #command-center]: ${message}`,
+        },
+      ],
+      maxTokens: 1024,
+    });
+
+    const text = result.choices?.[0]?.message?.content;
+    if (typeof text === "string" && text.trim()) {
+      return text.trim();
+    }
+
+    // Handle array content (shouldn't happen normally but defensive)
+    if (Array.isArray(text)) {
+      const joined = text
+        .map((part: any) => (typeof part === "string" ? part : part?.text ?? ""))
+        .join("");
+      if (joined.trim()) return joined.trim();
+    }
+
+    return "I processed your message but got an empty response. Try again or use `help` for built-in commands.";
+  } catch (err: any) {
+    console.error("[CommandPoller] Freddy AI error:", err.message);
+    return `LLM error: ${err.message}\n\nBuilt-in commands still work — try \`status\`, \`health\`, \`queue\`, or \`platforms\`.`;
+  }
 }
 
 async function getEngineStatusSummary(): Promise<string> {
