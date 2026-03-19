@@ -106,12 +106,20 @@ async function pollForCommands() {
           sql`UPDATE agent_coordination SET status = 'processing' WHERE id = ${command.id}`
         );
 
-        // Process the command
+        // IMMEDIATE ACKNOWLEDGMENT (within 5 seconds)
+        const responseKey = `discord_response:${command.messageId}`;
+        await writeCommandResponse(db, responseKey, {
+          success: true,
+          message: `🔄 Processing: ${command.command}...`,
+        }, command);
+        console.log(`[DiscordPoller] ✅ ACK sent (5s): ${command.messageId}`);
+
+        // Process the command (can take longer)
         const response = await processCommand(command);
 
-        // Write response to system_state
-        const responseKey = `discord_response:${command.messageId}`;
+        // Update with full response
         await writeCommandResponse(db, responseKey, response, command);
+        console.log(`[DiscordPoller] ✅ Full response sent: ${command.messageId}`);
 
         // Mark as completed
         await db.execute(
