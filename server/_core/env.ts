@@ -44,4 +44,9 @@ export const ENV = {
   convertkitApiSecret: process.env.CONVERTKIT_API_SECRET ?? "",
   // Admin secret (shared across agents for coordination API auth)
   adminSecret: process.env.ADMIN_SECRET ?? "",
+  // Discord bot (command-center bridge)
+  discordBotToken: process.env.DISCORD_BOT_TOKEN ?? "",
+  discordCommandChannelId: process.env.DISCORD_COMMAND_CHANNEL_ID ?? "",
+  discordLogChannelId: process.env.DISCORD_LOG_CHANNEL_ID ?? "",
+  openClawApiUrl: process.env.OPENCLAW_API_URL ?? "",
 };
