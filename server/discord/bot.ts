@@ -6,11 +6,16 @@
  *   - Posts Freddy's responses back to #command-center
  *   - Logs all activity to #freddy-log automatically
  *
+ * Message delivery strategy (in order):
+ *   1. Direct HTTP POST to OPENCLAW_API_URL (fast path, if URL is set and reachable)
+ *   2. Supabase coordination layer (reliable path — writes a pending_command to
+ *      agent_coordination, Freddy polls for it and writes a response back)
+ *
  * Environment variables (set in Railway):
  *   DISCORD_BOT_TOKEN          — Bot token from Discord Developer Portal
  *   DISCORD_COMMAND_CHANNEL_ID — Channel ID for #command-center
  *   DISCORD_LOG_CHANNEL_ID     — Channel ID for #freddy-log
- *   OPENCLAW_API_URL           — Base URL of the OpenClaw agent API (optional, for forwarding)
+ *   OPENCLAW_API_URL           — Base URL of the OpenClaw agent API (optional fast path)
  *   ADMIN_SECRET               — Shared secret for agent-to-agent auth
  */
 
@@ -22,7 +27,12 @@ import {
   EmbedBuilder,
   ChannelType,
 } from "discord.js";
-import { logCoordinationAction, isCoordinationConfigured } from "../agent/coordination";
+import {
+  logCoordinationAction,
+  setSystemState,
+  getSystemState,
+  isCoordinationConfigured,
+} from "../agent/coordination";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -101,42 +111,108 @@ async function logToChannel(
 
 // ─── Forward to OpenClaw Agent ───────────────────────────────────────────────
 
-async function forwardToOpenClaw(
+/**
+ * Try direct HTTP POST to OpenClaw API.
+ * Returns the response string on success, or null if it fails / isn't configured.
+ */
+async function tryDirectForward(
   content: string,
   authorTag: string
-): Promise<string> {
+): Promise<string | null> {
   const cfg = getConfig();
-
-  if (!cfg.openClawApiUrl) {
-    return "OpenClaw API URL not configured (OPENCLAW_API_URL). Message logged but not forwarded.";
-  }
+  if (!cfg.openClawApiUrl) return null;
 
   try {
-    const response = await fetch(`${cfg.openClawApiUrl}/api/agent/message`, {
+    const response = await fetch(`${cfg.openClawApiUrl}/api/coordination/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(cfg.adminSecret ? { "X-Admin-Secret": cfg.adminSecret } : {}),
       },
       body: JSON.stringify({
-        message: content,
-        source: "discord",
-        author: authorTag,
-        channel: "command-center",
+        key: `discord_command:${Date.now()}`,
+        value: {
+          message: content,
+          source: "discord",
+          author: authorTag,
+          channel: "command-center",
+          timestamp: new Date().toISOString(),
+        },
+        agent_name: "discord_bot",
       }),
     });
 
     if (!response.ok) {
-      const errText = await response.text().catch(() => "unknown error");
-      return `Freddy returned ${response.status}: ${errText}`;
+      console.warn(`[Discord] Direct forward returned ${response.status}`);
+      return null;
     }
 
-    const data = await response.json();
-    return data.response || data.message || JSON.stringify(data);
+    // The direct endpoint is a state update, not a chat endpoint.
+    // Return null to fall through to coordination polling.
+    return null;
   } catch (err: any) {
-    console.error("[Discord] OpenClaw forward failed:", err.message);
-    return `Could not reach Freddy: ${err.message}`;
+    console.warn("[Discord] Direct forward failed:", err.message);
+    return null;
   }
+}
+
+/**
+ * Forward a message to Freddy via the Supabase coordination layer.
+ *
+ * Writes a pending_command to agent_coordination and sets a system_state key
+ * that Freddy can poll. Then polls for up to 30 seconds for a response.
+ */
+async function forwardToOpenClaw(
+  content: string,
+  authorTag: string
+): Promise<string> {
+  const messageId = `cmd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+  // Strategy 1: Try direct HTTP if OPENCLAW_API_URL is set
+  const directResult = await tryDirectForward(content, authorTag);
+  if (directResult) return directResult;
+
+  // Strategy 2: Use Supabase coordination layer
+  if (!isCoordinationConfigured()) {
+    return "Neither OPENCLAW_API_URL nor Supabase coordination is configured. Message was logged to #freddy-log but could not be delivered to Freddy.";
+  }
+
+  // Write the command to agent_coordination as a pending action
+  await logCoordinationAction("discord_bot", "pending_command", "pending", {
+    message_id: messageId,
+    message: content,
+    author: authorTag,
+    channel: "command-center",
+    awaiting_response: true,
+  });
+
+  // Write to system_state so Freddy can see the latest command at a glance
+  await setSystemState(`discord_command:latest`, {
+    message_id: messageId,
+    message: content,
+    author: authorTag,
+    channel: "command-center",
+    timestamp: new Date().toISOString(),
+    status: "pending",
+  }, "discord_bot");
+
+  // Poll for Freddy's response (he writes to system_state with the message_id)
+  const responseKey = `discord_response:${messageId}`;
+  const maxWaitMs = 30_000;
+  const pollIntervalMs = 2_000;
+  const deadline = Date.now() + maxWaitMs;
+
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+
+    const entry = await getSystemState(responseKey);
+    if (entry?.value?.response) {
+      return entry.value.response as string;
+    }
+  }
+
+  // Timeout — Freddy didn't respond within 30s
+  return `Message delivered to coordination layer (ID: \`${messageId}\`). Freddy hasn't responded yet — he may be busy or offline. Check back in #freddy-log.`;
 }
 
 // ─── Message Handler ─────────────────────────────────────────────────────────
@@ -163,15 +239,6 @@ async function handleCommandMessage(message: Message): Promise<void> {
     Channel: "#command-center",
   });
 
-  // Log to coordination layer if configured
-  if (isCoordinationConfigured()) {
-    await logCoordinationAction("discord_bot", "message_received", "completed", {
-      author: authorTag,
-      content: content.slice(0, 500),
-      channel: "command-center",
-    });
-  }
-
   // Show typing indicator while waiting for response
   try {
     await message.channel.sendTyping();
@@ -179,8 +246,18 @@ async function handleCommandMessage(message: Message): Promise<void> {
     // Non-critical
   }
 
-  // Forward to Freddy and get response
-  const response = await forwardToOpenClaw(content, authorTag);
+  // Keep typing indicator alive during the polling window (refreshes every 8s)
+  const typingInterval = setInterval(async () => {
+    try { await message.channel.sendTyping(); } catch { /* ignore */ }
+  }, 8_000);
+
+  // Forward to Freddy via coordination layer (with optional direct HTTP fast path)
+  let response: string;
+  try {
+    response = await forwardToOpenClaw(content, authorTag);
+  } finally {
+    clearInterval(typingInterval);
+  }
 
   // Post response back to #command-center
   try {
@@ -274,10 +351,16 @@ export async function startDiscordBot(): Promise<void> {
     console.log(`[Discord] Bot online as ${client!.user?.tag}`);
 
     // Log startup to #freddy-log
+    const deliveryMode = cfg.openClawApiUrl
+      ? `Direct HTTP (${cfg.openClawApiUrl}) + Supabase coordination`
+      : isCoordinationConfigured()
+        ? "Supabase coordination layer (polling)"
+        : "logging only (no delivery configured)";
+
     await logToChannel("system", "Bot Online", `Discord bot connected as ${client!.user?.tag}`, {
       "Command Channel": cfg.commandChannelId,
       "Log Channel": cfg.logChannelId,
-      "OpenClaw URL": cfg.openClawApiUrl || "not configured",
+      "Delivery Mode": deliveryMode,
     });
 
     // Log to coordination layer
