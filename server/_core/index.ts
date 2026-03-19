@@ -905,6 +905,17 @@ async function startServer() {
     } catch (err: any) {
       console.error("[EngagementReader] Import failed (non-fatal):", err.message);
     }
+
+    // Start Discord bot — command-center bridge (non-blocking)
+    try {
+      import("../discord/bot").then(({ startDiscordBot }) => {
+        startDiscordBot();
+      }).catch((err) => {
+        console.error("[Discord] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[Discord] Import failed (non-fatal):", err.message);
+    }
   });
 }
 
