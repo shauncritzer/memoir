@@ -829,6 +829,16 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
 
+    // Start Discord command poller
+    (async () => {
+      try {
+        const { startDiscordCommandPoller } = await import("../agent/discord-command-poller");
+        startDiscordCommandPoller();
+      } catch (err) {
+        console.error("[Boot] Failed to start Discord command poller:", err);
+      }
+    })();
+
     // Ensure course_lessons has video_script column (schema may be ahead of DB)
     (async () => {
       try {
