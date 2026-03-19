@@ -926,6 +926,17 @@ async function startServer() {
     } catch (err: any) {
       console.error("[Discord] Import failed (non-fatal):", err.message);
     }
+
+    // Start Discord command poller — picks up pending commands from Supabase (non-blocking)
+    try {
+      import("../discord/discord-command-poller").then(({ startCommandPoller }) => {
+        startCommandPoller();
+      }).catch((err) => {
+        console.error("[CommandPoller] Failed to start (non-fatal):", err.message);
+      });
+    } catch (err: any) {
+      console.error("[CommandPoller] Import failed (non-fatal):", err.message);
+    }
   });
 }
 
