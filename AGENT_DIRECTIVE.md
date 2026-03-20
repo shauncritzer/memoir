@@ -1,215 +1,173 @@
-# AGENT_DIRECTIVE.md — Master Operations Directive
-Last updated: March 11, 2026
-
-> **Read this first in every Claude Code session.** This is the single source of truth for what exists, what's wired, what's not, and what to build next.
-
+AGENT_DIRECTIVE.md — Master Operations Directive
+Last updated: March 19, 2026
+> **Read this first in every session — Claude Code, Freddy, Maverick, Claude.ai, or any AI agent.**
+> This is the single source of truth for what exists, what's wired, what's not, and what to build next.
 ---
-
-## The Three Businesses
-
-1. **Shaun Critzer Brand** (shauncritzer.com) — Recovery coaching, memoir, digital products, content
-2. **Critzer's Cabinets** (critzerscabinets.com) — 40-year family cabinet business, AI sales agent (separate repo, future)
-3. **The Engine** (SaaS, name TBD) — The autonomous business OS that runs #1 and #2, sold to the world
-
-This repo is **Business 1**. Cabinets and The Engine are future projects.
-
+Who Is Shaun Critzer
+13+ years sober, deeply involved in AA (sponsorship, speaking)
+Competitive bodybuilding background — 1998 Mr. Teen USA Overall, 3x Virginia State Champion
+Married to Shannon. Children including one with special needs.
+Based in Charlottesville, Virginia
+Recovery journey and personal transformation are central to identity and all business missions
 ---
-
-## Tech Stack — What's Live vs What's Not
-
-### Brain-Eyes-Arms-Ears Framework
-
-| Role | Tool | Status | Notes |
-|------|------|--------|-------|
-| **BRAIN** | Claude API Sonnet | NOT WIRED | Complex tasks, agent decisions, content generation |
-| **BRAIN** | Claude API Haiku | NOT WIRED | Bulk simple tasks (20x cheaper than Sonnet) |
-| **BRAIN** | LangGraph | NOT WIRED | Agent orchestration — coordinates who does what |
-| **BRAIN** | Gemini Flash (free) | LIVE | Current LLM provider for content generation |
-| **EYES** | Tavily | NOT WIRED | Web research API for trending topics, competitor intel |
-| **EYES** | Firecrawl | NOT WIRED | Deep site scraping when Tavily isn't enough |
-| **ARMS** | n8n (Railway) | LIVE | Workflow triggers and scheduling, replaces Make.com |
-| **ARMS** | Browserbase | NOT WIRED | Cloud browser automation (already paid) |
-| **EARS** | LangSmith | NOT WIRED | Agent observability — see every decision and failure |
-| **EARS** | Supabase pgvector | NOT WIRED | Agent memory — stores what worked |
-| **EARS** | Platform APIs | PARTIAL | IG/FB working, Twitter broken, LinkedIn not connected |
-
-### Full Stack Status
-
-| Tool | Status | Purpose |
-|------|--------|---------|
-| Railway | LIVE | Hosting — auto-deploys from `main` |
-| Stripe (Live) | LIVE | Payments — checkout sessions + webhooks |
-| HeyGen (1500cr) | LIVE (needs testing) | AI avatar video generation |
-| ElevenLabs | LIVE (needs testing) | Voice cloning / TTS |
-| ConvertKit | LIVE | Email sequences + lead magnets |
-| Cloudflare R2 | NOT WIRED | Media storage — should replace Forge proxy |
-| GitHub | LIVE | Source control |
-| n8n | LIVE | Self-hosted on Railway, hourly scheduler |
-| Flux (Replicate) | NOT WIRED | Image generation — replaces DALL-E |
-| Ideogram | NOT WIRED | Text-in-image for quote graphics |
-| LangGraph | NOT WIRED | Agent orchestration backbone |
-| Supabase pgvector | NOT WIRED | Agent memory — free tier |
-| LangSmith | NOT WIRED | Agent observability |
-| Tavily | NOT WIRED | Search API for research agent |
-| Browserbase | NOT WIRED | Cloud browser — already paid |
-| DALL-E | LIVE (being replaced) | Current image gen — switching to Flux |
-| Make.com | CANCELLED | Replaced by n8n |
-
-### AI Model Routing (Target)
-
-| Model | Use For | Status |
-|-------|---------|--------|
-| Claude Sonnet | Content generation, agent decisions, complex reasoning | NOT WIRED |
-| Claude Haiku | Bulk formatting, data extraction, simple classification | NOT WIRED |
-| Flux (Replicate) | Lifestyle photos, people, recovery imagery | NOT WIRED |
-| Ideogram | Quote graphics, text overlays, branded visuals | NOT WIRED |
-| Gemini Flash | Free-tier — current primary LLM | LIVE |
-| ElevenLabs | Course narration, podcast audio | LIVE (needs testing) |
-| HeyGen | Course lesson videos, YouTube avatar content | LIVE (needs testing) |
-
+The Three Businesses
+Shaun Critzer Brand (shauncritzer.com) — Recovery coaching, memoir, digital products, content
+Critzer's Cabinets (critzerscabinets.com) — 40-year family cabinet business, AI sales agent (future)
+The Engine (SaaS, name TBD) — The autonomous business OS that runs #1 and #2, sold to the world
+This repo is Business 1. Cabinets and The Engine are future projects.
 ---
-
-## Orchestration Architecture (Target)
-
-```
-n8n (heartbeat/trigger) → LangGraph (agent coordination)
-  → Research node (Tavily) → trending topics
-  → Content node (Claude Sonnet) → platform-optimized posts
-  → Publish node (existing pipeline) → IG, FB, LinkedIn, YouTube
-  → Feedback node (Browserbase) → reads engagement
-  → Memory node (Supabase pgvector) → stores what worked
-```
-
-### Daily Autonomous Loop (Target — Not Yet Built)
-- 6:00am — Research agent (Tavily) → trending topics
-- 6:15am — Content agent (Claude Sonnet) → platform-optimized posts
-- 7:00am — Publish queue executes (Tier 1, no approval needed)
-- 8:00pm — Feedback agent (Browserbase) → reads engagement data
-- 8:15pm — Memory update → Supabase vector stores what worked
-
+Brand Voice & Positioning
+NOT: addiction, sobriety, porn, alcohol, recovery (as primary framing)
+YES: neural rewiring, dopamine regulation, behavioral loops, identity transformation, human optimization
+Target audience: Anyone seeking transformation — not just those in recovery.
+Language: Neuroscience-forward. Process disorders. Nervous system regulation. Rewiring the operating system.
 ---
-
-## Tier Permission System
-
-| Tier | Type | Examples | Action |
-|------|------|----------|--------|
-| 1 | Auto-Execute | Post content, send scheduled emails, generate images | Just happens |
-| 2 | Execute + Notify | Spend under $25, adjust schedules, update copy | Review in briefing |
-| 3 | Ask First | Spend $25-$100, contact customers, new campaigns | YES or NO in Mission Control |
-| 4 | Must Approve | Financial over $100, pricing changes, new business | Explicit YES required |
-
-**Niche restriction enforced:** Agent research limited to recovery, sobriety, fitness, transformation, bodybuilding, nervous system regulation, trauma, special needs parenting. No AI/ML/tech/SaaS niches.
-
+The Agent Roster
+Agent	Platform	Role	Status
+Claude.ai	claude.ai subscription	Strategist, architect, thinking partner	LIVE
+Claude Code	Anthropic	Codebase builder — one task per session	LIVE
+Freddy	Railway (OpenClaw)	Cloud operator — autonomous execution, scheduling, monitoring	LIVE
+Maverick	Local Windows desktop (OpenClaw)	Desktop agent — computer control, local files, image gen, Whisper	LIVE
+Rewired Engine	Railway	Autonomous content pipeline — research, generate, publish	LIVE
+How to Use Each Agent
+Claude.ai — Strategy, planning, writing, complex decisions. Use heavily (subscription covers it).
+Claude Code — One specific coding task. Always start: "Read AGENT_DIRECTIVE.md. Your task is [X]. Do it now."
+Freddy — Cloud automations, cron jobs, API calls, monitoring. Primary interface: Discord Mission Control #command-center.
+Maverick — Desktop tasks, local file access, screenshot analysis, browser control. Requires Admin PowerShell gateway running. Access via dashboard or Discord once wired.
+Rewired Engine — Autonomous content pipeline. Freddy orchestrates it. Do not interact directly.
 ---
-
-## Products & Revenue
-
-| Product | Price | Status |
-|---------|-------|--------|
-| 7-Day REWIRED Reset | $47 | LIVE — ready to sell |
-| 30-Day From Broken to Whole | $97 | Content seeded, needs videos |
-| Crooked Lines Memoir | $19.99 | Manuscript complete, needs KDP + sales page |
-| Bent Not Broken Circle | $29/mo | After 50 course sales |
-| REWIRED Methodology License | $2k-$5k | Year 2 |
-
-### Revenue Targets
-- Month 1-3: $0 → $3,000/mo (personal brand)
-- Month 4-6: $3k → $15,000/mo (brand + cabinets)
-- Month 7-9: $15k → $40,000/mo (all three businesses)
-- Month 10-12: $40k → $85,000/mo (scale SaaS)
-
+Mission Control — Discord Server
+Single interface for all agent interaction. This is the primary command interface. Telegram is backup only.
+Category	Channel	Purpose
+COMMAND	`#command-center`	Primary — talk to Freddy here. Full AI responses.
+COMMAND	`#alerts`	Errors, failures, urgent flags
+OPERATIONS	`#content-lab`	Content outputs and ideas
+OPERATIONS	`#sales-engine`	Funnel stats, conversions
+OPERATIONS	`#dev-ops`	Code pushes, deployments
+AGENTS	`#freddy-log`	Freddy's full activity feed — all messages logged here
+AGENTS	`#maverick-log`	Maverick's activity feed (pending Discord wiring)
+MEMORY	`#source-of-truth`	AGENT_DIRECTIVE.md pinned here
+MEMORY	`#daily-brief`	Morning status reports
+Available commands in #command-center:
+`status` — Engine overview
+`health` — Full health check
+`queue` — Content pipeline queue counts
+`platforms` — Social platform connection status
+`help` — Command list
+Any free-form message → Full AI response from Freddy with live system context
 ---
-
-## Build Sequence — 90 Days
-
-### Week 1 — Make It Actually Post
-1. ~~Fix Ready → Published scheduler bug~~ ✓ DONE
-2. ~~Install and configure n8n on Railway~~ ✓ DONE — live at https://n8n-production-cddc.up.railway.app
-3. ~~Fix course_lessons module_id mismatch for video generation~~ ✓ DONE
-4. ~~Restrict niche research to brand verticals~~ ✓ DONE
-5. ~~Verify Stripe → ConvertKit webhook flow~~ ✓ DONE
-6. ~~Verify 7-Day Reset Stripe checkout wiring~~ ✓ DONE
-7. [SHAUN] Import ConvertKit sequences (31 emails, 7 sequences, 6 automation rules — manual task)
-
-### Week 2 — Make It Actually Think
-8. ~~Wire LangGraph as orchestration layer~~ ✓ DONE
-   - @langchain/langgraph + @langchain/core installed
-   - `server/agent/langgraph-orchestrator.ts` — StateGraph: research → replenish → content-gen → publish → metrics → quality → optimize
-   - `/api/scheduler/run` now uses LangGraph (with legacy fallback)
-   - `/api/orchestrator/run` — new endpoint for full orchestration (content + revenue + strategy + niche)
-   - LangSmith env vars ready: set `LANGCHAIN_TRACING_V2=true` + `LANGCHAIN_API_KEY` in Railway
-9. ~~Add Supabase pgvector for agent memory~~ ✓ DONE
-   - `server/agent/vector-memory.ts` — embeddings via Gemini embedding-001 (free, 768 dims)
-   - `server/agent/vector-memory-hooks.ts` — wired into optimize loop to store performance data
-   - SQL setup instructions in `setupInstructions()` — run in Supabase SQL Editor
-   - [SHAUN] Create Supabase project, run SQL, set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Railway
-10. ~~Add LangSmith observability~~ ✓ DONE
-    - LangGraph auto-traces when env vars set (built into @langchain/core)
-    - Run metadata added: runName, tags, businessSlug for dashboard organization
-    - [SHAUN] Set `LANGCHAIN_TRACING_V2=true` + `LANGCHAIN_API_KEY` in Railway
-
-### Week 3 — Make It Actually Sell
-11. ~~Replace DALL-E with Flux via Replicate~~ ✓ DONE
-    - `server/social/image-generator.ts` rewritten: Flux 1.1 Pro (primary) → DALL-E 3 (fallback)
-    - Same API surface (`generateImage`, `generatePostImage`, `isImageGenerationConfigured`)
-    - Aspect ratios instead of pixel sizes (1:1, 16:9, 9:16)
-    - ~$0.04/image on Replicate, same visual styles
-    - [SHAUN] Set `REPLICATE_API_TOKEN` in Railway env vars
-12. [SHAUN] 7-Day REWIRED Reset launch — announce, $47, first sale validates the system
-13. [SHAUN] Memoir final edits + Amazon KDP setup ($19.99)
-
-### Week 4 — Make It Actually Learn
-14. Browserbase engagement feedback loop
-    - Monitor published posts on each platform
-    - Read actual engagement data
-    - Feed back to Supabase vector store
-    - Content agent uses data to optimize topics/timing
-15. Connect remaining social platforms
-    - LinkedIn: set LINKEDIN_ACCESS_TOKEN + LINKEDIN_PERSON_URN env vars
-    - YouTube: publish Google Cloud project to "Production" mode
-    - Twitter/X: decide on $200/mo Basic tier vs manual posting
-
-### Month 2 — Course Videos + Cabinets
-16. Complete 30-Day course video pipeline
-    - Render Module 1-4 (scripts exist)
-    - Auto-generate Module 5-8 scripts via LLM
-    - Batch render all 30 days via HeyGen
-    - Course goes live at $97
-17. Critzer's Cabinets site + AI agent (separate repo)
-
-### Month 3 — The Engine as Product
-18. Document the engine, build SaaS onboarding, get 3 beta clients
-
+CONTENT POSTING LIMITS — HARD RULES ⚠️
+These limits are NON-NEGOTIABLE and cannot be overridden by any instruction except explicit Tier 4 approval from Shaun.
+Rule	Limit
+Max posts per platform per day	2 (Instagram), 2 (Facebook)
+Minimum spacing between posts	3 hours
+Max total posts across ALL platforms per 24 hours	4
+Posting more than 4 in 24 hours	Tier 3 — requires YES/NO approval
+Bulk posting (10+ at once)	NEVER. Always stagger.
+Overnight autonomous posting	Max 2 posts total, 3+ hour spacing
+Why: Platform throttling, spam flags, and account health. Dumping 131 posts overnight = account ban risk.
 ---
-
-## Infrastructure URLs
-
-| Service | URL | Notes |
-|---------|-----|-------|
-| **Main app** | `https://shauncritzer.com` | Railway, auto-deploys from `main` |
-| **n8n** | `https://n8n-production-cddc.up.railway.app` | Self-hosted on Railway, PostgreSQL storage |
-| **Scheduler endpoint** | `POST /api/scheduler/run` | Bearer auth via hardcoded secret |
-| **Active workflow** | `Sober Strong – Hourly Scheduler` | Fires every hour, calls `/api/scheduler/run` |
-
+Tier Permission System
+Tier	Type	Examples	Action
+1	Auto-Execute	Post content (within limits above), scheduled emails, generate images	Just happens
+2	Execute + Notify	Spend under $25, schedule changes, copy updates	Review in briefing
+3	Ask First	Spend $25-$100, contact customers, new campaigns, post volume over daily limit	YES/NO in Mission Control
+4	Must Approve	Over $100, pricing changes, new business, bulk posting override	Explicit YES required
+Niche restriction: Research limited to recovery, sobriety, fitness, transformation, bodybuilding, nervous system regulation, trauma, special needs parenting. No AI/ML/tech/SaaS niches.
 ---
-
-## Do Not Touch
-- Course content and UI (7-Day Reset is complete and sellable)
-- Stripe configuration (live mode, working)
-- IG/Facebook publishing (currently working)
-- Site navigation and design
-- AI Recovery Coach
-
+Tech Stack — Full Current Status
+Tool	Status	Notes
+Railway	LIVE	Auto-deploys from `main` branch
+Stripe	LIVE	Checkout + webhooks confirmed
+HeyGen	LIVE (needs testing)	AI avatar video
+ElevenLabs	LIVE	New API key March 18 — needs Railway env var update
+ConvertKit	LIVE ✓	31 emails, 7 sequences, 6 rules imported
+Cloudflare R2	PARTIAL	Course video storage live. DNS still on Namecheap — migration pending
+GitHub	LIVE	Public repo — shauncritzer/memoir
+n8n	LIVE	Hourly scheduler active on Railway
+Flux (Replicate)	LIVE	Replaced DALL-E — needs REPLICATE_API_TOKEN in Railway
+LangGraph	LIVE ✓	Wired into scheduler + orchestrator endpoints
+Supabase pgvector	LIVE ✓	Project created, SQL run, env vars set
+LangSmith	LIVE ✓	Tested — traces confirmed working
+Tavily	LIVE — needs test	Wired, not production-verified
+Browserbase	LIVE — needs test	Wired, not production-verified
+OpenAI	LIVE (Maverick)	Image gen + Whisper in Maverick locally
+Discord Mission Control	LIVE ✓	Freddy fully conversational in #command-center
+Telegram	BACKUP	Still active. Migrating to Discord as primary.
+Namecheap	LIVE	Current DNS + domain registrar
 ---
+Products & Revenue
+Product	Price	Status
+7-Day REWIRED Reset	$47	LIVE — ready to sell, drive traffic
+30-Day From Broken to Whole	$97	Scripts seeded, needs HeyGen video production
+Crooked Lines Memoir	$19.99	Manuscript complete, needs KDP + sales page
 
-## Anti-Loop Protocol for Code Sessions
-
-Every Code session follows this pattern:
-1. **OPEN:** "Read AGENT_DIRECTIVE.md."
-2. **TASK:** "Your task is [item N]. Do it now."
-3. **DONE:** "Show me the diff and confirm deployment."
-4. **ENFORCE:** If scope creeps — "Stop. One task. Back to [item N]."
-5. **CONFIRM:** Verify the fix actually works before ending.
-6. **UPDATE:** Mark completed items in this file.
-
-**Do not:** Analyze the full codebase. Do not ask "want me to do that?" Just do it.
+Bent Not Broken Circle	$29/mo	After 50 course sales
+REWIRED Methodology License	$2k-$5k	Year 2
+---
+Immediate Next Actions
+SHAUN
+[ ] Update ElevenLabs API key in Railway (new key March 18 — needs write permissions)
+[ ] Set REPLICATE_API_TOKEN in Railway (Flux image gen)
+[ ] Test Tavily in production via #command-center
+[ ] Test Browserbase in production
+[ ] Give Maverick first real desktop task
+[ ] DNS: migrate from Namecheap to Cloudflare
+[ ] Drive traffic → 7-Day REWIRED Reset → first sale
+[ ] Update posting limits enforcement in codebase (Claude Code task)
+[ ] Wire Maverick to #maverick-log in Discord
+CODE Tasks
+[ ] Enforce posting limits in scheduler (max 2/platform/day, 3hr spacing)
+[ ] LinkedIn connection (LINKEDIN_ACCESS_TOKEN + LINKEDIN_PERSON_URN)
+[ ] YouTube publish mode (Google Cloud → Production)
+[ ] Twitter/X decision ($200/mo Basic vs manual)
+[ ] 30-Day HeyGen video pipeline
+[ ] Memoir KDP + sales page
+---
+Infrastructure URLs
+Service	URL
+Main app	`https://shauncritzer.com`
+n8n	`https://n8n-production-cddc.up.railway.app`
+Scheduler	`POST /api/scheduler/run`
+Orchestrator	`POST /api/orchestrator/run`
+Maverick dashboard	`http://127.0.0.1:18789` (local, requires gateway)
+Maverick gateway	Admin PowerShell: `openclaw gateway` — must stay open
+---
+Do Not Touch
+Course content/UI (7-Day Reset complete)
+Stripe config (live, working)
+IG/Facebook publishing (working)
+Site navigation/design
+AI Recovery Coach
+ConvertKit sequences (imported and wired)
+---
+Anti-Loop Protocol (Code Sessions)
+"Read AGENT_DIRECTIVE.md."
+"Your task is [X]. Do it now."
+"Show me the diff and confirm deployment."
+Scope creep → "Stop. One task. Back to [X]."
+Verify fix works before ending.
+Mark completed items in this file.
+Do not analyze the full codebase. Do not ask "want me to do that?" Just do it.
+---
+Maverick (Local Desktop Agent)
+Start: Admin PowerShell as Administrator → `openclaw gateway`
+Dashboard: `http://127.0.0.1:18789`
+Model: anthropic/claude-sonnet-4-6
+Hooks: session-memory enabled
+Keys loaded: Anthropic, OpenAI (image gen + Whisper), ElevenLabs
+Identity: `C:\Users\shaun\.openclaw\workspace\IDENTITY.md`
+Name: Maverick
+Role: Desktop hands only — computer control, local files, browser automation on this machine
+Keep-alive: Set Windows Power settings to Never sleep. Keep Admin PowerShell terminal open.
+Remote access: Available via Discord from any device once #maverick-log bot is wired
+NOT for: strategy, writing, cloud ops (Claude.ai and Freddy handle those)
+---
+Memory Architecture (How Agent Memory Works)
+Agents are LLMs — they have no inherent memory between sessions. Persistence comes from:
+This file (AGENT_DIRECTIVE.md) — read at start of every session
+MEMORY.md — Freddy writes notes here during sessions
+Supabase `agent_coordination` table — logs every action taken
+Supabase `system_state` — stores current operational state
+Supabase pgvector — embeddings of what worked/didn't work
+If an agent seems to "forget" — it means one of these files wasn't loaded at session start.
