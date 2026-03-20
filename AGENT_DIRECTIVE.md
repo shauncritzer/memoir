@@ -92,7 +92,7 @@ LangSmith	LIVE ✓	Tested — traces confirmed working
 Tavily	LIVE — needs test	Wired, not production-verified
 Browserbase	LIVE — needs test	Wired, not production-verified
 OpenAI	LIVE (Maverick)	Image gen + Whisper in Maverick locally
-Discord Mission Control	LIVE ✓	Freddy fully conversational in #command-center
+Discord Mission Control | LIVE ✓ | Freddy + Maverick both connected and conversational |
 Telegram	BACKUP	Still active. Migrating to Discord as primary.
 Namecheap	LIVE	Current DNS + domain registrar
 ---
