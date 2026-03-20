@@ -115,7 +115,7 @@ SHAUN
 [ ] DNS: migrate from Namecheap to Cloudflare
 [ ] Drive traffic → 7-Day REWIRED Reset → first sale
 [ ] Update posting limits enforcement in codebase (Claude Code task)
-[ ] Wire Maverick to #maverick-log in Discord
+
 CODE Tasks
 [ ] Enforce posting limits in scheduler (max 2/platform/day, 3hr spacing)
 [ ] LinkedIn connection (LINKEDIN_ACCESS_TOKEN + LINKEDIN_PERSON_URN)
@@ -157,11 +157,12 @@ Model: anthropic/claude-sonnet-4-6
 Hooks: session-memory enabled
 Keys loaded: Anthropic, OpenAI (image gen + Whisper), ElevenLabs
 Identity: `C:\Users\shaun\.openclaw\workspace\IDENTITY.md`
-Name: Maverick
+Name: Maverick 
 Role: Desktop hands only — computer control, local files, browser automation on this machine
 Keep-alive: Set Windows Power settings to Never sleep. Keep Admin PowerShell terminal open.
 Remote access: Available via Discord from any device once #maverick-log bot is wired
 NOT for: strategy, writing, cloud ops (Claude.ai and Freddy handle those)
+- Discord: LIVE ✓ — Connected to Mission Control via #maverick-log
 ---
 Memory Architecture (How Agent Memory Works)
 Agents are LLMs — they have no inherent memory between sessions. Persistence comes from:
