@@ -20,9 +20,25 @@ import { sendDailyReport } from "./discord.js";
 const app = express();
 app.use(express.json());
 
+const PORT = parseInt(process.env.PORT ?? "3001", 10);
+let dbReady = false;
+
 // ─── GET /api/summary ────────────────────────────────────────────────────────
 
 app.get("/api/summary", async (_req, res) => {
+  // Always return 200 so Railway healthcheck passes, even before DB is ready
+  if (!dbReady) {
+    return res.json({
+      ok: true,
+      status: "starting",
+      date: null,
+      total_today_usd: 0,
+      mtd_total_usd: 0,
+      services: [],
+      mtd_by_service: [],
+    });
+  }
+
   try {
     const latest = await getLatestSummary();
     const mtd = await getMtdTotals();
@@ -241,21 +257,21 @@ function startCron(): void {
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 
-const PORT = parseInt(process.env.PORT ?? "3001", 10);
+// Start listening IMMEDIATELY so Railway healthcheck passes
+app.listen(PORT, () => {
+  console.log(`[API Monitor] Running on http://localhost:${PORT}`);
+  console.log(`  GET  /dashboard    — HTML dashboard`);
+  console.log(`  GET  /api/summary  — JSON summary`);
+  console.log(`  POST /api/sync     — Manual poll trigger`);
 
-async function boot() {
-  await initDb();
-  startCron();
-
-  app.listen(PORT, () => {
-    console.log(`[API Monitor] Running on http://localhost:${PORT}`);
-    console.log(`  GET  /dashboard    — HTML dashboard`);
-    console.log(`  GET  /api/summary  — JSON summary`);
-    console.log(`  POST /api/sync     — Manual poll trigger`);
-  });
-}
-
-boot().catch((err) => {
-  console.error("[API Monitor] Boot failed:", err);
-  process.exit(1);
+  // Database init and cron happen AFTER the server is already listening
+  initDb()
+    .then(() => {
+      dbReady = true;
+      console.log("[API Monitor] Database ready");
+      startCron();
+    })
+    .catch((err) => {
+      console.error("[API Monitor] Database init failed (will retry on first request):", err.message);
+    });
 });
