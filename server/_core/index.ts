@@ -872,27 +872,31 @@ async function startServer() {
       console.error("[Scheduler] Import failed (non-fatal):", err.message);
     }
 
-    // Start Mission Control autonomous agent (non-blocking)
-    try {
-      import("../agent/mission-control").then(({ startMissionControl }) => {
-        startMissionControl();
-      }).catch((err) => {
-        console.error("[MissionControl] Failed to start (non-fatal):", err.message);
-      });
-    } catch (err: any) {
-      console.error("[MissionControl] Import failed (non-fatal):", err.message);
-    }
+    // DISABLED: Mission Control autonomous agent (daily briefing + mission nudge crons burn tokens with no action taken)
+    // To re-enable, uncomment the block below:
+    // try {
+    //   import("../agent/mission-control").then(({ startMissionControl }) => {
+    //     startMissionControl();
+    //   }).catch((err) => {
+    //     console.error("[MissionControl] Failed to start (non-fatal):", err.message);
+    //   });
+    // } catch (err: any) {
+    //   console.error("[MissionControl] Import failed (non-fatal):", err.message);
+    // }
+    console.log("[MissionControl] DISABLED — daily briefing and mission nudge crons are off to save tokens");
 
-    // Start Telegram two-way polling (non-blocking)
-    try {
-      import("../agent/telegram").then(({ startTelegramPolling }) => {
-        startTelegramPolling();
-      }).catch((err) => {
-        console.error("[Telegram] Polling failed to start (non-fatal):", err.message);
-      });
-    } catch (err: any) {
-      console.error("[Telegram] Import failed (non-fatal):", err.message);
-    }
+    // DISABLED: Telegram bot polling (Freddy no longer listens on Telegram)
+    // To re-enable, uncomment the block below:
+    // try {
+    //   import("../agent/telegram").then(({ startTelegramPolling }) => {
+    //     startTelegramPolling();
+    //   }).catch((err) => {
+    //     console.error("[Telegram] Polling failed to start (non-fatal):", err.message);
+    //   });
+    // } catch (err: any) {
+    //   console.error("[Telegram] Import failed (non-fatal):", err.message);
+    // }
+    console.log("[Telegram] DISABLED — bot polling is off");
 
     // Start Self-Monitor health checks every 30 minutes (non-blocking)
     try {
