@@ -118,135 +118,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Activity Feed & Cron Jobs */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Activity Feed */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Activity Feed
-              </CardTitle>
-              <CardDescription>Recent agent and system activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {activityLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">Loading activity...</span>
-                </div>
-              ) : recentActions?.length ? (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {recentActions.map((action: any) => (
-                    <div
-                      key={action.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30"
-                    >
-                      {action.status === "executed" ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      ) : action.status === "failed" ? (
-                        <XCircle className="h-4 w-4 text-red-500 shrink-0" />
-                      ) : action.status === "proposed" ? (
-                        <Clock className="h-4 w-4 text-orange-500 shrink-0" />
-                      ) : (
-                        <Activity className="h-4 w-4 text-blue-500 shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{action.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {action.category} · Tier {action.risk_tier} · {new Date(action.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={
-                          action.status === "executed"
-                            ? "border-green-500 text-green-600"
-                            : action.status === "failed"
-                            ? "border-red-500 text-red-600"
-                            : "border-orange-500 text-orange-600"
-                        }
-                      >
-                        {action.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center py-8 text-muted-foreground">No activity recorded yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Cron Jobs */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Cron Jobs
-                  </CardTitle>
-                  <CardDescription>Scheduled automation tasks</CardDescription>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => refetchScheduler()}
-                  disabled={schedulerLoading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${schedulerLoading ? "animate-spin" : ""}`} />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {schedulerLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">Loading jobs...</span>
-                </div>
-              ) : schedulerStatus ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Scheduler:</span>
-                    <Badge variant={schedulerStatus.running ? "default" : "destructive"}>
-                      {schedulerStatus.running ? "Running" : "Stopped"}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Tasks</p>
-                    {Object.entries(schedulerStatus.tasks || {}).map(([name, status]) => (
-                      <div key={name} className="flex items-center justify-between p-2 rounded border bg-muted/30">
-                        <span className="text-sm capitalize">{name.replace(/([A-Z])/g, " $1").trim()}</span>
-                        <Badge variant="outline" className={String(status) === "initialized" ? "border-green-500 text-green-600" : "border-gray-500 text-gray-500"}>
-                          {String(status)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-
-                  {schedulerStatus.platforms && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Platforms</p>
-                      {Object.entries(schedulerStatus.platforms).map(([key, platform]: [string, any]) => (
-                        <div key={key} className="flex items-center justify-between p-2 rounded border bg-muted/30">
-                          <span className="text-sm">{platform.label}</span>
-                          <Badge variant="outline" className={platform.configured ? "border-green-500 text-green-600" : "border-gray-500 text-gray-500"}>
-                            {platform.configured ? "Connected" : "Not configured"}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-center py-8 text-muted-foreground">Unable to load scheduler status.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="grid w-full max-w-2xl grid-cols-3">
@@ -634,6 +505,135 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Activity Feed & Cron Jobs */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Activity Feed */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Activity Feed
+              </CardTitle>
+              <CardDescription>Recent agent and system activity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading activity...</span>
+                </div>
+              ) : recentActions?.length ? (
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {recentActions.map((action: any) => (
+                    <div
+                      key={action.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30"
+                    >
+                      {action.status === "executed" ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      ) : action.status === "failed" ? (
+                        <XCircle className="h-4 w-4 text-red-500 shrink-0" />
+                      ) : action.status === "proposed" ? (
+                        <Clock className="h-4 w-4 text-orange-500 shrink-0" />
+                      ) : (
+                        <Activity className="h-4 w-4 text-blue-500 shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{action.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {action.category} · Tier {action.risk_tier} · {new Date(action.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          action.status === "executed"
+                            ? "border-green-500 text-green-600"
+                            : action.status === "failed"
+                            ? "border-red-500 text-red-600"
+                            : "border-orange-500 text-orange-600"
+                        }
+                      >
+                        {action.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-8 text-muted-foreground">No activity recorded yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cron Jobs */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Cron Jobs
+                  </CardTitle>
+                  <CardDescription>Scheduled automation tasks</CardDescription>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => refetchScheduler()}
+                  disabled={schedulerLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 ${schedulerLoading ? "animate-spin" : ""}`} />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {schedulerLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading jobs...</span>
+                </div>
+              ) : schedulerStatus ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Scheduler:</span>
+                    <Badge variant={schedulerStatus.running ? "default" : "destructive"}>
+                      {schedulerStatus.running ? "Running" : "Stopped"}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Tasks</p>
+                    {Object.entries(schedulerStatus.tasks || {}).map(([name, status]) => (
+                      <div key={name} className="flex items-center justify-between p-2 rounded border bg-muted/30">
+                        <span className="text-sm capitalize">{name.replace(/([A-Z])/g, " $1").trim()}</span>
+                        <Badge variant="outline" className={String(status) === "initialized" ? "border-green-500 text-green-600" : "border-gray-500 text-gray-500"}>
+                          {String(status)}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+
+                  {schedulerStatus.platforms && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Platforms</p>
+                      {Object.entries(schedulerStatus.platforms).map(([key, platform]: [string, any]) => (
+                        <div key={key} className="flex items-center justify-between p-2 rounded border bg-muted/30">
+                          <span className="text-sm">{platform.label}</span>
+                          <Badge variant="outline" className={platform.configured ? "border-green-500 text-green-600" : "border-gray-500 text-gray-500"}>
+                            {platform.configured ? "Connected" : "Not configured"}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-center py-8 text-muted-foreground">Unable to load scheduler status.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
