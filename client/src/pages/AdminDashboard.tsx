@@ -34,8 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, ShoppingCart, Loader2, CheckCircle2, XCircle, Gift, Ban, FileText, Eye, Edit, Activity, Clock, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 import AdminNav from "@/components/AdminNav";
-import { ActivityFeed } from "@/components/ActivityFeed";
-import { CronJobsCalendar } from "@/components/CronJobsCalendar";
+
 
 export default function AdminDashboard() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -121,16 +120,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="activity" className="space-y-6">
-          <TabsList className="grid w-full max-w-4xl grid-cols-5">
-            <TabsTrigger value="activity">
-              <Edit className="mr-2 h-4 w-4" />
-              Activity Feed
-            </TabsTrigger>
-            <TabsTrigger value="cron">
-              <FileText className="mr-2 h-4 w-4" />
-              Cron Jobs
-            </TabsTrigger>
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="users">
               <Users className="mr-2 h-4 w-4" />
               Users
@@ -144,16 +135,6 @@ export default function AdminDashboard() {
               Blog Posts
             </TabsTrigger>
           </TabsList>
-
-          {/* Activity Feed Tab */}
-          <TabsContent value="activity" className="space-y-4">
-            <ActivityFeed />
-          </TabsContent>
-
-          {/* Cron Jobs Tab */}
-          <TabsContent value="cron" className="space-y-4">
-            <CronJobsCalendar />
-          </TabsContent>
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
@@ -526,10 +507,8 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Activity Feed & Cron Jobs */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Activity Feed */}
-          <Card>
+        {/* Activity Feed */}
+        <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
@@ -586,8 +565,8 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Cron Jobs */}
-          <Card>
+        {/* Cron Jobs */}
+        <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -653,7 +632,6 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
-        </div>
       </div>
     </div>
   );
