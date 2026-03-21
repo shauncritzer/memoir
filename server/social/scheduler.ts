@@ -27,13 +27,20 @@ export async function processContentGeneration() {
   if (!db) return;
 
   const { contentQueue, blogPosts, ctaOffers } = await import("../../drizzle/schema");
-  const { eq, and } = await import("drizzle-orm");
+  const { eq, and, inArray } = await import("drizzle-orm");
 
-  // Find items that need content generation
+  // ACTIVE PLATFORMS: Only generate content for Instagram and Facebook.
+  // All other platforms are disabled until explicitly re-enabled.
+  const ACTIVE_PLATFORMS = ["instagram", "facebook"];
+
+  // Find items that need content generation (active platforms only)
   const pendingItems = await db
     .select()
     .from(contentQueue)
-    .where(eq(contentQueue.status, "pending"))
+    .where(and(
+      eq(contentQueue.status, "pending"),
+      inArray(contentQueue.platform, ACTIVE_PLATFORMS),
+    ))
     .limit(5);
 
   for (const item of pendingItems) {
@@ -194,7 +201,7 @@ export async function processScheduledPosts() {
   }
 
   const { contentQueue } = await import("../../drizzle/schema");
-  const { eq, and, lte, isNull, or } = await import("drizzle-orm");
+  const { eq, and, lte, isNull, or, inArray } = await import("drizzle-orm");
 
   // Find items that are ready and either:
   // 1. Have a scheduled time that has passed, OR
@@ -206,18 +213,21 @@ export async function processScheduledPosts() {
   // Processing 10+ posts simultaneously triggered Instagram API rejections.
   // Slow and steady: 3 posts × 10 min cycles = ~18 posts/hour = sustainable.
   const now = new Date();
-  const { ne } = await import("drizzle-orm");
-  
-  console.log(`[Scheduler] Querying for ready posts (status='ready', platform!='x' and platform!='linkedin', scheduled_for <= now)`);
-  
+
+  // ACTIVE POSTING PLATFORMS: Instagram and Facebook ONLY.
+  // All other platforms (X, LinkedIn, YouTube, TikTok, podcast) are disabled
+  // until explicitly re-enabled. Do not remove this filter.
+  const ACTIVE_PLATFORMS = ["instagram", "facebook"];
+
+  console.log(`[Scheduler] Querying for ready posts (status='ready', platforms=${ACTIVE_PLATFORMS.join(",")}, scheduled_for <= now)`);
+
   const readyItems = await db
     .select()
     .from(contentQueue)
     .where(
       and(
         eq(contentQueue.status, "ready"),
-        ne(contentQueue.platform, "x"),  // Skip X/Twitter (read-only API)
-        ne(contentQueue.platform, "linkedin"),  // Skip LinkedIn (account not ready, needs more followers for API approval)
+        inArray(contentQueue.platform, ACTIVE_PLATFORMS),
         or(
           isNull(contentQueue.scheduledFor),
           lte(contentQueue.scheduledFor, now),
