@@ -1,22 +1,21 @@
 /**
- * Database — Railway MySQL, same instance as the main memoir app.
+ * Database — Railway Postgres via the pg library.
  * Creates the api_usage_logs table on first connect if it doesn't exist.
  */
 
-import mysql from "mysql2/promise";
+import pg from "pg";
 
-let pool: mysql.Pool | null = null;
+let pool: pg.Pool | null = null;
 
-export function getPool(): mysql.Pool {
+export function getPool(): pg.Pool {
   if (pool) return pool;
 
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL not set");
 
-  pool = mysql.createPool({
-    uri: url,
-    waitForConnections: true,
-    connectionLimit: 5,
+  pool = new pg.Pool({
+    connectionString: url,
+    max: 5,
   });
 
   return pool;
@@ -28,19 +27,19 @@ export function getPool(): mysql.Pool {
 export async function initDb(): Promise<void> {
   const db = getPool();
 
-  await db.execute(`
+  await db.query(`
     CREATE TABLE IF NOT EXISTS api_usage_logs (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
       service VARCHAR(50) NOT NULL,
       date DATE NOT NULL,
       tokens_used BIGINT DEFAULT 0,
       characters_used BIGINT DEFAULT 0,
-      credits_used DOUBLE DEFAULT 0,
-      credits_remaining DOUBLE DEFAULT NULL,
-      cost_usd DOUBLE DEFAULT 0,
-      raw_response JSON,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE KEY uq_service_date (service, date)
+      credits_used DOUBLE PRECISION DEFAULT 0,
+      credits_remaining DOUBLE PRECISION DEFAULT NULL,
+      cost_usd DOUBLE PRECISION DEFAULT 0,
+      raw_response JSONB,
+      created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (service, date)
     )
   `);
 
@@ -75,17 +74,17 @@ export async function upsertUsage(data: {
 }): Promise<void> {
   const db = getPool();
 
-  await db.execute(
+  await db.query(
     `INSERT INTO api_usage_logs
        (service, date, tokens_used, characters_used, credits_used, credits_remaining, cost_usd, raw_response)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       tokens_used = VALUES(tokens_used),
-       characters_used = VALUES(characters_used),
-       credits_used = VALUES(credits_used),
-       credits_remaining = VALUES(credits_remaining),
-       cost_usd = VALUES(cost_usd),
-       raw_response = VALUES(raw_response),
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (service, date) DO UPDATE SET
+       tokens_used = EXCLUDED.tokens_used,
+       characters_used = EXCLUDED.characters_used,
+       credits_used = EXCLUDED.credits_used,
+       credits_remaining = EXCLUDED.credits_remaining,
+       cost_usd = EXCLUDED.cost_usd,
+       raw_response = EXCLUDED.raw_response,
        created_at = CURRENT_TIMESTAMP`,
     [
       data.service,
@@ -106,7 +105,7 @@ export async function upsertUsage(data: {
 export async function getLatestSummary(): Promise<UsageRow[]> {
   const db = getPool();
 
-  const [rows] = await db.execute(`
+  const { rows } = await db.query(`
     SELECT * FROM api_usage_logs
     WHERE date = (SELECT MAX(date) FROM api_usage_logs)
     ORDER BY service
@@ -121,10 +120,10 @@ export async function getLatestSummary(): Promise<UsageRow[]> {
 export async function getMtdTotals(): Promise<{ service: string; total_cost: number }[]> {
   const db = getPool();
 
-  const [rows] = await db.execute(`
+  const { rows } = await db.query(`
     SELECT service, SUM(cost_usd) as total_cost
     FROM api_usage_logs
-    WHERE date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+    WHERE date >= DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY service
     ORDER BY total_cost DESC
   `);
@@ -138,9 +137,9 @@ export async function getMtdTotals(): Promise<{ service: string; total_cost: num
 export async function getLast30Days(): Promise<UsageRow[]> {
   const db = getPool();
 
-  const [rows] = await db.execute(`
+  const { rows } = await db.query(`
     SELECT * FROM api_usage_logs
-    WHERE date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    WHERE date >= CURRENT_DATE - INTERVAL '30 days'
     ORDER BY date ASC, service ASC
   `);
 
