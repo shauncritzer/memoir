@@ -63,7 +63,8 @@ function getConfig(): { token: string; chatId: string } {
 }
 
 export function isTelegramConfigured(): boolean {
-  return !!(ENV.telegramBotToken && ENV.telegramChatId);
+  // DISABLED — migrated to Discord as primary interface. All callers gate on this.
+  return false;
 }
 
 // ─── Core Send Function ─────────────────────────────────────────────────────
