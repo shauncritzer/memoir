@@ -387,7 +387,7 @@ async function queueMarketingContent(
   const { sql } = await import("drizzle-orm");
   let queued = 0;
 
-  const platforms = ["instagram", "facebook", "linkedin", "x"];
+  const platforms = ["instagram", "facebook"];
 
   for (const hook of blueprint.marketingHooks.slice(0, 5)) {
     for (const platform of platforms) {

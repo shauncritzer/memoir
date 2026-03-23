@@ -272,7 +272,7 @@ export async function activateNiche(
   const contentCount = opts.contentCount || 10;
   try {
     const { generateContentForPlatform } = await import("../social/content-generator");
-    const platforms = ["instagram", "facebook", "linkedin"];
+    const platforms = ["instagram", "facebook"];
     let generated = 0;
 
     for (let i = 0; i < contentCount; i++) {

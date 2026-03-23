@@ -114,7 +114,7 @@ export async function runResearchLoop(businessSlug: string = "sober-strong"): Pr
 
     // Queue content generation for each topic across platforms
     const { sql } = await import("drizzle-orm");
-    const platforms = ["instagram", "facebook", "linkedin"];
+    const platforms = ["instagram", "facebook"];
     let queued = 0;
 
     for (const topic of topics.slice(0, 2)) { // max 2 topics per cycle
@@ -173,7 +173,7 @@ export async function runReplenishLoop(): Promise<string | null> {
     const { sql } = await import("drizzle-orm");
     const { generateContentForPlatform } = await import("../social/content-generator");
 
-    const platforms = ["instagram", "facebook", "linkedin", "x", "youtube"];
+    const platforms = ["instagram", "facebook"];
     const generated: string[] = [];
 
     for (const platform of platforms) {

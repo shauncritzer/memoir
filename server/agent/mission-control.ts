@@ -663,7 +663,8 @@ async function executeQueuedActions(): Promise<void> {
         switch (action.category) {
           case "content": {
             const { generateContentForPlatform } = await import("../social/content-generator");
-            const platform = metadata.platform || "facebook";
+            const ALLOWED_PLATFORMS = ["instagram", "facebook"];
+            const platform = ALLOWED_PLATFORMS.includes(metadata.platform) ? metadata.platform : "facebook";
             const businessSlug = metadata.businessSlug || "sober-strong";
 
             const content = await generateContentForPlatform({
@@ -711,7 +712,8 @@ async function executeQueuedActions(): Promise<void> {
           case "engagement": {
             // Generate content to address engagement issues
             const { generateContentForPlatform } = await import("../social/content-generator");
-            const platform = metadata.platform || "instagram";
+            const ALLOWED_PLATFORMS_ENG = ["instagram", "facebook"];
+            const platform = ALLOWED_PLATFORMS_ENG.includes(metadata.platform) ? metadata.platform : "instagram";
             const content = await generateContentForPlatform({ platform, businessSlug: metadata.businessSlug || "sober-strong" });
             await db.execute(sql`INSERT INTO content_queue (platform, content_type, content, status, scheduled_for)
               VALUES (${platform}, ${content.contentType}, ${content.content}, 'ready', NOW())`);
@@ -723,7 +725,8 @@ async function executeQueuedActions(): Promise<void> {
             const instruction = action.description || "";
             if (instruction.toLowerCase().includes("generate") || instruction.toLowerCase().includes("post") || instruction.toLowerCase().includes("content")) {
               const { generateContentForPlatform } = await import("../social/content-generator");
-              const platform = metadata.platform || "instagram";
+              const ALLOWED_PLATFORMS_CMD = ["instagram", "facebook"];
+              const platform = ALLOWED_PLATFORMS_CMD.includes(metadata.platform) ? metadata.platform : "instagram";
               const content = await generateContentForPlatform({ platform, topic: instruction, businessSlug: metadata.businessSlug || "sober-strong" });
               await db.execute(sql`INSERT INTO content_queue (platform, content_type, content, status, scheduled_for)
                 VALUES (${platform}, ${content.contentType}, ${content.content}, 'ready', NOW())`);
