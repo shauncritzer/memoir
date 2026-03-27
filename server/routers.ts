@@ -2771,6 +2771,40 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
 
+    reinstateCourseAccess: protectedProcedure
+      .input(z.object({
+        purchaseId: z.number(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { purchases } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        await db
+          .update(purchases)
+          .set({
+            status: "completed",
+            metadata: JSON.stringify({
+              reinstatedBy: ctx.user.id,
+              reinstatedAt: new Date(),
+              reason: input.reason || "Reinstated by admin",
+            }),
+          })
+          .where(eq(purchases.id, input.purchaseId));
+
+        return {
+          success: true,
+          message: "Access reinstated successfully",
+        };
+      }),
+
     // Blog Post Management
     getAllBlogPosts: protectedProcedure
       .query(async ({ ctx }) => {
