@@ -1704,7 +1704,6 @@ Recovery is possible. But it requires working with your biology, not against it.
           const db = drizzle(process.env.DATABASE_URL!);
 
           const R2_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev";
-          const R2_VIDEO_BASE = "https://1eba786387fdbd3ea6c71526b8a61ed1.r2.cloudflarestorage.com/rewired/videos";
 
           const lessonData = [
             {
@@ -1712,7 +1711,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 1,
               title: "RECOGNIZE - Understanding Your Patterns",
               description: "Learn to identify your behavioral patterns and understand the root causes of your addiction.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_1.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_1.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_1_RECOGNIZE_-_Understanding_Your_Patterns.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/1_RECOGNIZE_Workbook.pdf`,
               durationMinutes: 45,
@@ -1722,7 +1721,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 2,
               title: "ESTABLISH - Safety & Connection",
               description: "Build a foundation of safety and connection to support your recovery journey.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_2.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_2.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_2_ESTABLISH_-_Safety_%26_Connection.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/2_ESTABLISH_Workbook.pdf`,
               durationMinutes: 50,
@@ -1732,7 +1731,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 3,
               title: "WORK - Triggers as Teachers",
               description: "Transform your triggers from obstacles into opportunities for growth and healing.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_3.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_3.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_3_WORK_-_Triggers_as_Teachers.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/3_WORK_Workbook.pdf`,
               durationMinutes: 55,
@@ -1742,7 +1741,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 4,
               title: "INTEGRATE - Building Sustainable Routines",
               description: "Create daily routines and habits that support long-term recovery and well-being.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_4.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_4.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_4_INTEGRATE_-_Building_Sustainable_Routines.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/4_INTEGRATE_Workbook.pdf`,
               durationMinutes: 48,
@@ -1752,7 +1751,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 5,
               title: "RELEASE - Letting Go of Shame",
               description: "Break free from shame and self-judgment to embrace self-compassion and healing.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_5.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_5.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_5_RELEASE_-_Letting_Go_of_Shame%20(1).pdf`,
               workbookUrl: `${R2_BASE}/workbooks/5_RELEASE_Workbook.pdf`,
               durationMinutes: 52,
@@ -1762,7 +1761,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 6,
               title: "EMBRACE - Your New Identity",
               description: "Step into your new identity as someone who is healing, growing, and thriving.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_6.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_6.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_6_EMBRACE_-_Your_New_Identity.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/6_EMBRACE_Workbook.pdf`,
               durationMinutes: 47,
@@ -1772,7 +1771,7 @@ Recovery is possible. But it requires working with your biology, not against it.
               dayNumber: 7,
               title: "DISCOVER - Your Purpose & Path Forward",
               description: "Find your purpose and create a clear path forward for sustained recovery and growth.",
-              videoUrl: `${R2_VIDEO_BASE}/Day_7.mp4`,
+              videoUrl: `${R2_BASE}/videos/Day_7.mp4`,
               slideshowUrl: `${R2_BASE}/slideshows/Day_7_DISCOVER_-_Your_Purpose_%26_Path_Forward.pdf`,
               workbookUrl: `${R2_BASE}/workbooks/7_DISCOVER_Workbook.pdf`,
               durationMinutes: 60,
