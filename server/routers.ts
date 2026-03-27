@@ -1949,6 +1949,12 @@ Recovery is possible. But it requires working with your biology, not against it.
             results.push(`Day ${day}: FAILED - ${err.message}`);
             console.error(`[Thumbnails] Day ${day} error:`, err.message);
           }
+
+          // Rate limit: wait 65s between Replicate calls (except after the last one)
+          if (day < 7) {
+            console.log(`[Thumbnails] Waiting 65s before next generation...`);
+            await new Promise(resolve => setTimeout(resolve, 65000));
+          }
         }
 
         return {
