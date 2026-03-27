@@ -16,6 +16,9 @@ export default function SeedDatabase() {
   const [courseMessage, setCourseMessage] = useState("");
   const [lessonsStatus, setLessonsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [lessonsMessage, setLessonsMessage] = useState("");
+  const [thumbStatus, setThumbStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [thumbMessage, setThumbMessage] = useState("");
+  const [thumbResults, setThumbResults] = useState<string[]>([]);
 
   const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -61,6 +64,18 @@ export default function SeedDatabase() {
     },
   });
 
+  const generateThumbnailsMutation = trpc.admin.generateCourseThumbnails.useMutation({
+    onSuccess: (data) => {
+      setThumbStatus("success");
+      setThumbMessage(data.message);
+      setThumbResults(data.results);
+    },
+    onError: (error) => {
+      setThumbStatus("error");
+      setThumbMessage(error.message);
+    },
+  });
+
   const migrateMutation = trpc.admin.migrateAiCoachTable.useMutation({
     onSuccess: (data) => {
       setMigrateStatus(data.success ? "success" : "error");
@@ -94,6 +109,13 @@ export default function SeedDatabase() {
     setLessonsStatus("loading");
     setLessonsMessage("");
     seedLessonsMutation.mutate({});
+  };
+
+  const handleGenerateThumbnails = () => {
+    setThumbStatus("loading");
+    setThumbMessage("");
+    setThumbResults([]);
+    generateThumbnailsMutation.mutate();
   };
 
   const handleMigrate = () => {
@@ -258,6 +280,53 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
                 <p className="text-sm text-red-800 dark:text-red-200">{lessonsMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Generate Course Thumbnails</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Generates 7 AI thumbnail images via Flux 1.1 Pro (Replicate), uploads them to Cloudflare R2,
+            and updates the lesson records with the new poster URLs. Takes ~2-3 minutes. Costs ~$0.28 (7 images × $0.04).
+          </p>
+
+          <Button
+            onClick={handleGenerateThumbnails}
+            disabled={thumbStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-purple-600 hover:bg-purple-700 text-white font-bold"
+          >
+            {thumbStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Generating Thumbnails (this takes a few minutes)...
+              </>
+            ) : (
+              "Generate 7-Day Reset Thumbnails"
+            )}
+          </Button>
+
+          {thumbStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{thumbMessage}</p>
+                {thumbResults.map((r, i) => (
+                  <p key={i} className="text-xs text-green-700 dark:text-green-300 font-mono">{r}</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {thumbStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{thumbMessage}</p>
               </div>
             </div>
           )}
