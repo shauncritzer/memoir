@@ -111,6 +111,7 @@ async function handleCheckoutSessionCompleted(
       email: customerEmail,
       firstName: session.customer_details?.name?.split(" ")[0],
       formUid: convertKitFormId,
+      doubleOptIn: false,
     });
 
     if (result.success) {
@@ -194,6 +195,7 @@ async function handleInvoicePaymentSucceeded(
     const result = await subscribeToForm({
       email: customerEmail,
       formUid: convertKitFormId,
+      doubleOptIn: false,
     });
 
     if (result.success) {
