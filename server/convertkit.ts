@@ -54,19 +54,24 @@ export async function subscribeToForm(params: {
   firstName?: string;
   formUid: string;
   tags?: number[];
+  doubleOptIn?: boolean;
 }): Promise<{ success: boolean; subscriberId?: number; error?: string }> {
   try {
+    const body: Record<string, any> = {
+      api_key: CONVERTKIT_API_KEY,
+      email: params.email,
+      first_name: params.firstName,
+      tags: params.tags,
+    };
+    if (params.doubleOptIn === false) {
+      body.double_opt_in = false;
+    }
     const response = await fetch(`${CONVERTKIT_API_BASE}/forms/${params.formUid}/subscribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        api_key: CONVERTKIT_API_KEY,
-        email: params.email,
-        first_name: params.firstName,
-        tags: params.tags,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
