@@ -661,9 +661,10 @@ function CourseMemberArea() {
                     </CardHeader>
                     <CardContent>
                       <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                        <video 
-                          src={currentLesson.videoUrl} 
-                          controls 
+                        <video
+                          src={currentLesson.videoUrl}
+                          poster={currentLesson.posterUrl || undefined}
+                          controls
                           className="w-full h-full"
                           controlsList="nodownload"
                         >

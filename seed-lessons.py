@@ -39,6 +39,7 @@ lessons = [
         "title": "RECOGNIZE - Understanding Your Patterns",
         "description": "Learn to identify your behavioral patterns and understand the root causes of your addiction.",
         "videoUrl": f"{R2_BASE}/videos/Day_1.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_1.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_1_RECOGNIZE_-_Understanding_Your_Patterns.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/1_RECOGNIZE_Workbook.pdf",
         "durationMinutes": 45
@@ -49,6 +50,7 @@ lessons = [
         "title": "ESTABLISH - Safety & Connection",
         "description": "Build a foundation of safety and connection to support your recovery journey.",
         "videoUrl": f"{R2_BASE}/videos/Day_2.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_2.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_2_ESTABLISH_-_Safety_%26_Connection.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/2_ESTABLISH_Workbook.pdf",
         "durationMinutes": 50
@@ -59,6 +61,7 @@ lessons = [
         "title": "WORK - Triggers as Teachers",
         "description": "Transform your triggers from obstacles into opportunities for growth and healing.",
         "videoUrl": f"{R2_BASE}/videos/Day_3.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_3.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_3_WORK_-_Triggers_as_Teachers.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/3_WORK_Workbook.pdf",
         "durationMinutes": 55
@@ -69,6 +72,7 @@ lessons = [
         "title": "INTEGRATE - Building Sustainable Routines",
         "description": "Create daily routines and habits that support long-term recovery and well-being.",
         "videoUrl": f"{R2_BASE}/videos/Day_4.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_4.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_4_INTEGRATE_-_Building_Sustainable_Routines.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/4_INTEGRATE_Workbook.pdf",
         "durationMinutes": 48
@@ -79,6 +83,7 @@ lessons = [
         "title": "RELEASE - Letting Go of Shame",
         "description": "Break free from shame and self-judgment to embrace self-compassion and healing.",
         "videoUrl": f"{R2_BASE}/videos/Day_5.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_5.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_5_RELEASE_-_Letting_Go_of_Shame%20(1).pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/5_RELEASE_Workbook.pdf",
         "durationMinutes": 52
@@ -89,6 +94,7 @@ lessons = [
         "title": "EMBRACE - Your New Identity",
         "description": "Step into your new identity as someone who is healing, growing, and thriving.",
         "videoUrl": f"{R2_BASE}/videos/Day_6.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_6.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_6_EMBRACE_-_Your_New_Identity.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/6_EMBRACE_Workbook.pdf",
         "durationMinutes": 47
@@ -99,6 +105,7 @@ lessons = [
         "title": "DISCOVER - Your Purpose & Path Forward",
         "description": "Find your purpose and create a clear path forward for sustained recovery and growth.",
         "videoUrl": f"{R2_BASE}/videos/Day_7.mp4",
+        "posterUrl": f"{R2_BASE}/thumbnails/Day_7.jpg",
         "slideshowUrl": f"{R2_BASE}/slideshows/Day_7_DISCOVER_-_Your_Purpose_%26_Path_Forward.pdf",
         "workbookUrl": f"{R2_BASE}/workbooks/7_DISCOVER_Workbook.pdf",
         "durationMinutes": 60
@@ -122,8 +129,8 @@ if count > 0:
 print(f"📝 Inserting {len(lessons)} lessons...")
 
 insert_query = """
-INSERT INTO lessons (product_id, day_number, title, description, video_url, slideshow_url, workbook_url, duration_minutes)
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+INSERT INTO lessons (product_id, day_number, title, description, video_url, poster_url, slideshow_url, workbook_url, duration_minutes)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 for lesson in lessons:
@@ -133,6 +140,7 @@ for lesson in lessons:
         lesson["title"],
         lesson["description"],
         lesson["videoUrl"],
+        lesson["posterUrl"],
         lesson["slideshowUrl"],
         lesson["workbookUrl"],
         lesson["durationMinutes"]
