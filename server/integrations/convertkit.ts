@@ -37,7 +37,7 @@ export function isConvertKitConfigured(): boolean {
 export const PURCHASE_SEQUENCES: Record<string, { sequenceId: number; tagName: string }> = {
   // 7-Day REWIRED Reset ($47)
   "price_1T0QQqC2dOpPzSOO61RNrJQR": {
-    sequenceId: 0, // TODO: Set actual sequence ID from ConvertKit dashboard
+    sequenceId: 2577789,
     tagName: "purchased-7-day-reset",
   },
   // From Broken to Whole ($97)
