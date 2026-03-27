@@ -14,6 +14,8 @@ export default function SeedDatabase() {
   const [migrateMessage, setMigrateMessage] = useState("");
   const [courseStatus, setCourseStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [courseMessage, setCourseMessage] = useState("");
+  const [lessonsStatus, setLessonsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [lessonsMessage, setLessonsMessage] = useState("");
 
   const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -48,6 +50,17 @@ export default function SeedDatabase() {
     },
   });
 
+  const seedLessonsMutation = trpc.admin.seedLessons.useMutation({
+    onSuccess: (data) => {
+      setLessonsStatus("success");
+      setLessonsMessage(data.message || `Seeded ${data.count} lessons!`);
+    },
+    onError: (error) => {
+      setLessonsStatus("error");
+      setLessonsMessage(error.message);
+    },
+  });
+
   const migrateMutation = trpc.admin.migrateAiCoachTable.useMutation({
     onSuccess: (data) => {
       setMigrateStatus(data.success ? "success" : "error");
@@ -75,6 +88,12 @@ export default function SeedDatabase() {
     setCourseStatus("loading");
     setCourseMessage("");
     seedCourseMutation.mutate();
+  };
+
+  const handleSeedLessons = () => {
+    setLessonsStatus("loading");
+    setLessonsMessage("");
+    seedLessonsMutation.mutate({});
   };
 
   const handleMigrate = () => {
@@ -198,6 +217,53 @@ export default function SeedDatabase() {
         </div>
 
         <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Seed 7-Day Reset Lessons</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Seeds (or re-seeds) the 7 daily lessons for the 7-Day REWIRED Reset course ($47).
+            Updates video URLs to the latest Cloudflare R2 location. Deletes existing lessons first to avoid duplicates.
+          </p>
+
+          <Button
+            onClick={handleSeedLessons}
+            disabled={lessonsStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 text-white font-bold"
+          >
+            {lessonsStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Seeding Lessons...
+              </>
+            ) : (
+              "Seed 7-Day Reset Lessons"
+            )}
+          </Button>
+
+          {lessonsStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{lessonsMessage}</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Visit <a href="/members/7-day-reset" className="underline font-medium hover:text-green-900">/members/7-day-reset</a> to test (requires purchase)
+                </p>
+              </div>
+            </div>
+          )}
+
+          {lessonsStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{lessonsMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
           <h3 className="font-semibold">Add Blog Posts</h3>
           <p className="text-sm text-muted-foreground">
             <strong>What this does:</strong> Adds new blog posts WITHOUT deleting existing ones. Checks for duplicates by slug.
@@ -298,6 +364,10 @@ export default function SeedDatabase() {
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
               <span>Course seeding creates 8 modules + 30 daily lessons for From Broken to Whole</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              <span>7-Day Reset seeding updates all 7 lesson video URLs to latest Cloudflare R2</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-0.5">•</span>
