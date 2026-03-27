@@ -2653,6 +2653,88 @@ Recovery is possible. But it requires working with your biology, not against it.
         };
       }),
 
+    grantCourseAccessByEmail: protectedProcedure
+      .input(z.object({
+        email: z.string().email(),
+        productId: z.string(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Unauthorized: Admin access required");
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users, purchases } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        // Find or create user by email
+        let user = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, input.email.toLowerCase()))
+          .limit(1);
+
+        let userId: number;
+
+        if (user[0]) {
+          userId = user[0].id;
+        } else {
+          // Create basic account
+          const result = await db.insert(users).values({
+            email: input.email.toLowerCase(),
+            name: input.email.split("@")[0],
+            openId: `admin_grant_${Date.now()}`,
+            loginMethod: "email",
+            role: "user",
+            lastSignedIn: new Date(),
+          });
+          userId = Number(result[0].insertId);
+        }
+
+        // Check if access already exists
+        const existing = await db
+          .select()
+          .from(purchases)
+          .where(
+            and(
+              eq(purchases.userId, userId),
+              eq(purchases.productId, input.productId),
+              eq(purchases.status, "completed")
+            )
+          )
+          .limit(1);
+
+        if (existing.length > 0) {
+          throw new Error("This email already has access to this course");
+        }
+
+        // Create manual purchase record
+        await db.insert(purchases).values({
+          userId,
+          productId: input.productId,
+          amount: 0,
+          status: "completed",
+          stripePaymentId: null,
+          stripeCustomerId: null,
+          purchasedAt: new Date(),
+          metadata: JSON.stringify({
+            type: "manual_grant",
+            grantedBy: ctx.user.id,
+            note: input.note || "Manually granted by admin",
+            email: input.email,
+          }),
+        });
+
+        return {
+          success: true,
+          message: `Access granted to ${input.email} for ${input.productId}`,
+          userCreated: !user[0],
+        };
+      }),
+
     revokeCourseAccess: protectedProcedure
       .input(z.object({
         purchaseId: z.number(),
