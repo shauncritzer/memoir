@@ -218,6 +218,7 @@ export const lessons = mysqlTable("lessons", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   videoUrl: varchar("video_url", { length: 500 }),
+  posterUrl: varchar("poster_url", { length: 500 }),
   slideshowUrl: varchar("slideshow_url", { length: 500 }),
   workbookUrl: varchar("workbook_url", { length: 500 }),
   durationMinutes: int("duration_minutes"),

@@ -626,6 +626,7 @@ function CourseMemberArea() {
                         ) : (
                           <video
                             src={activeLesson.videoUrl}
+                            poster={activeLesson.posterUrl || undefined}
                             controls
                             className="w-full h-full"
                             controlsList="nodownload"
