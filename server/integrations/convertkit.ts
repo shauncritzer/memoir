@@ -42,12 +42,12 @@ export const PURCHASE_SEQUENCES: Record<string, { sequenceId: number; tagName: s
   },
   // From Broken to Whole ($97)
   "price_1T83EwC2dOpPzSOOockMjc5R": {
-    sequenceId: 0, // TODO: Set actual sequence ID from ConvertKit dashboard
+    sequenceId: 2577797,
     tagName: "purchased-from-broken-to-whole",
   },
   // Bent Not Broken Circle ($29/mo)
   "price_1T83FTC2dOpPzSOOQCWvWdJd": {
-    sequenceId: 0, // TODO: Set actual sequence ID from ConvertKit dashboard
+    sequenceId: 2577810,
     tagName: "purchased-circle-membership",
   },
 };
