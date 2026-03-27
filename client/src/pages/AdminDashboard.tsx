@@ -42,6 +42,9 @@ export default function AdminDashboard() {
   const [note, setNote] = useState("");
   const [revokeReason, setRevokeReason] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [grantEmail, setGrantEmail] = useState("");
+  const [grantProductId, setGrantProductId] = useState("");
+  const [grantNote, setGrantNote] = useState("");
 
   const trpcUtils = trpc.useUtils();
 
@@ -60,6 +63,16 @@ export default function AdminDashboard() {
       setSelectedUserId(null);
       setProductId("");
       setNote("");
+    },
+  });
+
+  const grantByEmail = trpc.admin.grantCourseAccessByEmail.useMutation({
+    onSuccess: (data) => {
+      trpcUtils.admin.getAllUsers.invalidate();
+      trpcUtils.admin.getAllPurchases.invalidate();
+      setGrantEmail("");
+      setGrantProductId("");
+      setGrantNote("");
     },
   });
 
@@ -138,6 +151,75 @@ export default function AdminDashboard() {
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
+            {/* Grant Access by Email */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Grant Access by Email</CardTitle>
+                <CardDescription>
+                  Enter any email — if they don't have an account, one will be created automatically.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    type="email"
+                    placeholder="Email address"
+                    value={grantEmail}
+                    onChange={(e) => setGrantEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Select value={grantProductId} onValueChange={setGrantProductId}>
+                    <SelectTrigger className="w-full sm:w-[260px]">
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7-day-reset">7-Day REWIRED Reset</SelectItem>
+                      <SelectItem value="from-broken-to-whole">From Broken to Whole (30-Day)</SelectItem>
+                      <SelectItem value="bent-not-broken-circle">Bent Not Broken Circle (Monthly)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Note (optional)"
+                    value={grantNote}
+                    onChange={(e) => setGrantNote(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (grantEmail && grantProductId) {
+                        grantByEmail.mutate({
+                          email: grantEmail,
+                          productId: grantProductId,
+                          note: grantNote || undefined,
+                        });
+                      }
+                    }}
+                    disabled={!grantEmail || !grantProductId || grantByEmail.isPending}
+                  >
+                    {grantByEmail.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Gift className="mr-2 h-4 w-4" />
+                    )}
+                    Grant
+                  </Button>
+                </div>
+                {grantByEmail.isSuccess && (
+                  <p className="text-sm text-green-600 mt-2">
+                    <CheckCircle2 className="inline h-4 w-4 mr-1" />
+                    {grantByEmail.data.message}
+                    {grantByEmail.data.userCreated && " (new account created)"}
+                  </p>
+                )}
+                {grantByEmail.isError && (
+                  <p className="text-sm text-red-600 mt-2">
+                    <XCircle className="inline h-4 w-4 mr-1" />
+                    {grantByEmail.error.message}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
