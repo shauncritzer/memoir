@@ -49,4 +49,10 @@ export const ENV = {
   discordCommandChannelId: process.env.DISCORD_COMMAND_CHANNEL_ID ?? "",
   discordLogChannelId: process.env.DISCORD_LOG_CHANNEL_ID ?? "",
   openClawApiUrl: process.env.OPENCLAW_API_URL ?? "",
+  // Cloudflare R2 (S3-compatible storage)
+  r2AccessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ?? "",
+  r2SecretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ?? "",
+  r2BucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME ?? "rewired",
+  r2AccountId: process.env.CLOUDFLARE_R2_ACCOUNT_ID ?? "",
+  r2Endpoint: process.env.CLOUDFLARE_R2_ENDPOINT ?? "",
 };

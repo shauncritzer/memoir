@@ -1804,6 +1804,129 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    generateCourseThumbnails: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin access required");
+
+        const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+        const { default: Replicate } = await import("replicate");
+        const { lessons } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        const r2AccessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+        const r2SecretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
+        const r2AccountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
+        const r2BucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "rewired";
+        const replicateToken = process.env.REPLICATE_API_TOKEN;
+
+        if (!r2AccessKeyId || !r2SecretAccessKey || !r2AccountId) {
+          throw new Error("Cloudflare R2 credentials not configured");
+        }
+        if (!replicateToken) {
+          throw new Error("REPLICATE_API_TOKEN not configured");
+        }
+
+        const s3 = new S3Client({
+          region: "auto",
+          endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
+          credentials: {
+            accessKeyId: r2AccessKeyId,
+            secretAccessKey: r2SecretAccessKey,
+          },
+        });
+
+        const replicate = new Replicate({ auth: replicateToken });
+
+        const thumbnailPrompts: Record<number, string> = {
+          1: "Professional man in thoughtful reflection, looking at mirror, soft blue and gold lighting, clean modern background, cinematic portrait style, nervous system healing concept",
+          2: "Two hands reaching toward each other in connection, warm amber lighting, soft focus background, emotional safety concept, cinematic style",
+          3: "Close up of hands writing in journal, morning light through window, peaceful and purposeful, transformation concept, photorealistic",
+          4: "Person in morning routine, calm focused expression, sunlight streaming in, building habits concept, clean modern aesthetic",
+          5: "Person with eyes closed, releasing breath, subtle light radiating outward, letting go of shame concept, emotional cinematic style",
+          6: "Confident person looking forward, new identity emerging, bold warm lighting, transformation complete concept, inspiring portrait",
+          7: "Person standing at open door looking toward horizon, golden light, purpose and path forward concept, cinematic wide shot",
+        };
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const results: string[] = [];
+        const R2_PUBLIC_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev";
+
+        for (let day = 1; day <= 7; day++) {
+          const prompt = thumbnailPrompts[day];
+          const r2Key = `course-videos/thumbnails/day-${day}-thumbnail.jpg`;
+          const publicUrl = `${R2_PUBLIC_BASE}/course-videos/thumbnails/day-${day}-thumbnail.jpg`;
+
+          try {
+            // Generate image via Flux
+            console.log(`[Thumbnails] Generating Day ${day}...`);
+            const enhancedPrompt = `${prompt}. Style: cinematic, photorealistic. Warm earth tones with teal and gold accents. No text or words in the image. 1280x720 landscape composition.`;
+
+            const output = await replicate.run("black-forest-labs/flux-1.1-pro", {
+              input: {
+                prompt: enhancedPrompt,
+                aspect_ratio: "16:9",
+                output_format: "jpg",
+                output_quality: 90,
+                prompt_upsampling: true,
+                safety_tolerance: 2,
+              },
+            });
+
+            const imageUrl = typeof output === "string"
+              ? output
+              : (output as any)?.url?.() || (output as any)?.toString() || String(output);
+
+            if (!imageUrl || imageUrl === "undefined") {
+              results.push(`Day ${day}: FAILED - No image URL from Flux`);
+              continue;
+            }
+
+            // Download the generated image
+            console.log(`[Thumbnails] Downloading Day ${day} from Flux...`);
+            const imageResponse = await fetch(imageUrl);
+            if (!imageResponse.ok) {
+              results.push(`Day ${day}: FAILED - Could not download from Flux`);
+              continue;
+            }
+            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+            // Upload to R2
+            console.log(`[Thumbnails] Uploading Day ${day} to R2 at ${r2Key}...`);
+            await s3.send(new PutObjectCommand({
+              Bucket: r2BucketName,
+              Key: r2Key,
+              Body: imageBuffer,
+              ContentType: "image/jpeg",
+            }));
+
+            // Update DB
+            await db
+              .update(lessons)
+              .set({ posterUrl: publicUrl })
+              .where(
+                and(
+                  eq(lessons.productId, "7-day-reset"),
+                  eq(lessons.dayNumber, day)
+                )
+              );
+
+            results.push(`Day ${day}: OK - ${publicUrl}`);
+            console.log(`[Thumbnails] Day ${day} complete`);
+          } catch (err: any) {
+            results.push(`Day ${day}: FAILED - ${err.message}`);
+            console.error(`[Thumbnails] Day ${day} error:`, err.message);
+          }
+        }
+
+        return {
+          success: true,
+          message: `Thumbnail generation complete`,
+          results,
+        };
+      }),
+
     // Seed From Broken to Whole course - 8 modules, 30 daily lessons
     seedFromBrokenToWhole: protectedProcedure
       .mutation(async ({ ctx }) => {
