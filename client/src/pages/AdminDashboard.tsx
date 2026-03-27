@@ -84,6 +84,13 @@ export default function AdminDashboard() {
     },
   });
 
+  const reinstateAccess = trpc.admin.reinstateCourseAccess.useMutation({
+    onSuccess: () => {
+      trpcUtils.admin.getAllUsers.invalidate();
+      trpcUtils.admin.getAllPurchases.invalidate();
+    },
+  });
+
   const filteredUsers = users?.filter(
     (user) =>
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -473,6 +480,26 @@ export default function AdminDashboard() {
                                     </DialogFooter>
                                   </DialogContent>
                                 </Dialog>
+                              )}
+                              {purchase.status === "cancelled" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    reinstateAccess.mutate({
+                                      purchaseId: purchase.id,
+                                      reason: "Reinstated by admin",
+                                    });
+                                  }}
+                                  disabled={reinstateAccess.isPending}
+                                >
+                                  {reinstateAccess.isPending ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                  )}
+                                  Reinstate
+                                </Button>
                               )}
                             </TableCell>
                           </TableRow>
