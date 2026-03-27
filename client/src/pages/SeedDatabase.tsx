@@ -19,6 +19,8 @@ export default function SeedDatabase() {
   const [thumbStatus, setThumbStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [thumbMessage, setThumbMessage] = useState("");
   const [thumbResults, setThumbResults] = useState<string[]>([]);
+  const [posterMigrateStatus, setPosterMigrateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [posterMigrateMessage, setPosterMigrateMessage] = useState("");
 
   const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -76,6 +78,17 @@ export default function SeedDatabase() {
     },
   });
 
+  const posterMigrateMutation = trpc.admin.migrateLessonsPosterUrl.useMutation({
+    onSuccess: (data) => {
+      setPosterMigrateStatus(data.success ? "success" : "error");
+      setPosterMigrateMessage(data.message);
+    },
+    onError: (error) => {
+      setPosterMigrateStatus("error");
+      setPosterMigrateMessage(error.message);
+    },
+  });
+
   const migrateMutation = trpc.admin.migrateAiCoachTable.useMutation({
     onSuccess: (data) => {
       setMigrateStatus(data.success ? "success" : "error");
@@ -109,6 +122,12 @@ export default function SeedDatabase() {
     setLessonsStatus("loading");
     setLessonsMessage("");
     seedLessonsMutation.mutate({});
+  };
+
+  const handlePosterMigrate = () => {
+    setPosterMigrateStatus("loading");
+    setPosterMigrateMessage("");
+    posterMigrateMutation.mutate({});
   };
 
   const handleGenerateThumbnails = () => {
@@ -280,6 +299,49 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
                 <p className="text-sm text-red-800 dark:text-red-200">{lessonsMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Add poster_url Column</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Adds the poster_url column to the lessons table. Run this before generating thumbnails or seeding lessons with poster URLs.
+          </p>
+
+          <Button
+            onClick={handlePosterMigrate}
+            disabled={posterMigrateStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-orange-600 hover:bg-orange-700 text-white font-bold"
+          >
+            {posterMigrateStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Running Migration...
+              </>
+            ) : (
+              "Migrate: Add poster_url Column"
+            )}
+          </Button>
+
+          {posterMigrateStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{posterMigrateMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {posterMigrateStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{posterMigrateMessage}</p>
               </div>
             </div>
           )}

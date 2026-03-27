@@ -1627,6 +1627,32 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    migrateLessonsPosterUrl: publicProcedure
+      .input(z.object({ secret: z.string().optional() }).optional())
+      .mutation(async ({ input }) => {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET) {
+          throw new Error("Unauthorized");
+        }
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { sql } = await import("drizzle-orm");
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          // Add poster_url column if it doesn't exist
+          await db.execute(sql`
+            ALTER TABLE lessons ADD COLUMN IF NOT EXISTS poster_url VARCHAR(500) AFTER video_url
+          `);
+
+          return { success: true, message: "poster_url column added to lessons table (or already exists)." };
+        } catch (error: any) {
+          // MySQL < 8.0.1 doesn't support IF NOT EXISTS for ADD COLUMN
+          if (error.message?.includes("Duplicate column")) {
+            return { success: true, message: "poster_url column already exists." };
+          }
+          return { success: false, message: `Migration error: ${error.message}` };
+        }
+      }),
+
     fixResourcesOrder: publicProcedure
       .input(z.object({
         secret: z.string().optional(),
