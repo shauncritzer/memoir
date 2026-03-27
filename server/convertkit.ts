@@ -66,6 +66,7 @@ export async function subscribeToForm(params: {
     if (params.doubleOptIn === false) {
       body.double_opt_in = false;
     }
+    console.log(`[ConvertKit] subscribeToForm: email=${params.email}, form=${params.formUid}, double_opt_in=${body.double_opt_in ?? "default (true)"}`);
     const response = await fetch(`${CONVERTKIT_API_BASE}/forms/${params.formUid}/subscribe`, {
       method: "POST",
       headers: {
