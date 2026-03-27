@@ -7,6 +7,7 @@ import { getDb } from "./server/db";
  */
 
 const CLOUDFLARE_R2_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev";
+const CLOUDFLARE_R2_VIDEO_BASE = "https://1eba786387fdbd3ea6c71526b8a61ed1.r2.cloudflarestorage.com/rewired/videos";
 
 const lessons = [
   {
@@ -14,7 +15,7 @@ const lessons = [
     dayNumber: 1,
     title: "RECOGNIZE - Understanding Your Patterns",
     description: "Learn to identify your behavioral patterns and understand the root causes of your addiction.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/REWIRED%20DAY%201.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_1.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_1_RECOGNIZE_-_Understanding_Your_Patterns.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/1_RECOGNIZE_Workbook.pdf`,
     durationMinutes: 45,
@@ -24,7 +25,7 @@ const lessons = [
     dayNumber: 2,
     title: "ESTABLISH - Safety & Connection",
     description: "Build a foundation of safety and connection to support your recovery journey.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/REWIRED_DAY_2.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_2.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_2_ESTABLISH_-_Safety_%26_Connection.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/2_ESTABLISH_Workbook.pdf`,
     durationMinutes: 50,
@@ -34,7 +35,7 @@ const lessons = [
     dayNumber: 3,
     title: "WORK - Triggers as Teachers",
     description: "Transform your triggers from obstacles into opportunities for growth and healing.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/Rewired_Day_3.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_3.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_3_WORK_-_Triggers_as_Teachers.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/3_WORK_Workbook.pdf`,
     durationMinutes: 55,
@@ -44,7 +45,7 @@ const lessons = [
     dayNumber: 4,
     title: "INTEGRATE - Building Sustainable Routines",
     description: "Create daily routines and habits that support long-term recovery and well-being.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/Rewired_Day_4.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_4.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_4_INTEGRATE_-_Building_Sustainable_Routines.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/4_INTEGRATE_Workbook.pdf`,
     durationMinutes: 48,
@@ -54,7 +55,7 @@ const lessons = [
     dayNumber: 5,
     title: "RELEASE - Letting Go of Shame",
     description: "Break free from shame and self-judgment to embrace self-compassion and healing.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/Welcome_everyone._This_is_Day_5_of_The_REWIRED_7-D.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_5.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_5_RELEASE_-_Letting_Go_of_Shame%20(1).pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/5_RELEASE_Workbook.pdf`,
     durationMinutes: 52,
@@ -64,7 +65,7 @@ const lessons = [
     dayNumber: 6,
     title: "EMBRACE - Your New Identity",
     description: "Step into your new identity as someone who is healing, growing, and thriving.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/Welcome_everyone._This_is_Day_6_of_The_REWIRED_7-D.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_6.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_6_EMBRACE_-_Your_New_Identity.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/6_EMBRACE_Workbook.pdf`,
     durationMinutes: 47,
@@ -74,7 +75,7 @@ const lessons = [
     dayNumber: 7,
     title: "DISCOVER - Your Purpose & Path Forward",
     description: "Find your purpose and create a clear path forward for sustained recovery and growth.",
-    videoUrl: `${CLOUDFLARE_R2_BASE}/videos/Welcome_everyone._This_is_Day_7_of_The_REWIRED_7-D.mp4`,
+    videoUrl: `${CLOUDFLARE_R2_VIDEO_BASE}/Day_7.mp4`,
     slideshowUrl: `${CLOUDFLARE_R2_BASE}/slideshows/Day_7_DISCOVER_-_Your_Purpose_%26_Path_Forward.pdf`,
     workbookUrl: `${CLOUDFLARE_R2_BASE}/workbooks/7_DISCOVER_Workbook.pdf`,
     durationMinutes: 60,
