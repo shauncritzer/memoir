@@ -405,9 +405,12 @@ export const appRouter = router({
           success_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${process.env.VITE_APP_URL || "https://shauncritzer.com"}/products`,
           customer_email: ctx.user?.email || undefined,
-          payment_intent_data: {
-            statement_descriptor: "SHAUN CRITZER",
-          },
+          branding_settings: { display_name: "Shaun Critzer" },
+          ...(isSubscription ? {} : {
+            payment_intent_data: {
+              statement_descriptor_suffix: "SHAUNCRITZER",
+            },
+          }),
         });
         
         return {
