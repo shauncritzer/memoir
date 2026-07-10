@@ -227,6 +227,35 @@ export const lessons = mysqlTable("lessons", {
 export type Lesson = typeof lessons.$inferSelect;
 export type InsertLesson = typeof lessons.$inferInsert;
 
+/**
+ * Flat lesson progress — completion tracking for the flat `lessons` table
+ * (7-Day Reset). Separate from courseProgress, which is FK-bound to the
+ * courseModules/courseLessons hierarchy used by the 30-day course.
+ */
+export const lessonProgress = mysqlTable("lesson_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  lessonId: int("lesson_id").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});
+
+export type LessonProgress = typeof lessonProgress.$inferSelect;
+
+/**
+ * One-time login tokens for magic-link access (buyers who purchased via
+ * Stripe and have no password).
+ */
+export const loginTokens = mysqlTable("login_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  userId: int("user_id").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type LoginToken = typeof loginTokens.$inferSelect;
+
 // ============================================================
 // CONTENT PIPELINE - Agentic Content Creation & Distribution
 // ============================================================

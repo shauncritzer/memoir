@@ -239,6 +239,78 @@ export const appRouter = router({
 
         return { success: true };
       }),
+
+    requestAccessLink: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const { isEmailConfigured, sendEmail, createAccessLink, accessEmailHtml } = await import("./email");
+
+        if (!isEmailConfigured()) {
+          throw new Error(
+            "Email sending isn't set up yet. Please contact support@shauncritzer.com and we'll get you access."
+          );
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const userRows = await db.select().from(users).where(eq(users.email, input.email.toLowerCase())).limit(1);
+
+        // Always return the same message whether or not the account exists,
+        // so this endpoint can't be used to probe which emails have accounts.
+        const genericResponse = {
+          success: true,
+          message: "If an account exists for that email, an access link is on its way. Check your inbox.",
+        };
+
+        if (userRows.length === 0) return genericResponse;
+
+        const accessUrl = await createAccessLink(userRows[0].id, 30);
+        await sendEmail({
+          to: input.email,
+          subject: "Your login link — shauncritzer.com",
+          html: accessEmailHtml({
+            firstName: userRows[0].name?.split(" ")[0],
+            accessUrl,
+            productName: "member area",
+          }),
+        });
+
+        return genericResponse;
+      }),
+
+    redeemAccessLink: publicProcedure
+      .input(z.object({ token: z.string().min(32) }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { loginTokens, users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const tokenRows = await db.select().from(loginTokens).where(eq(loginTokens.token, input.token)).limit(1);
+        const record = tokenRows[0];
+
+        if (!record || record.usedAt || record.expiresAt < new Date()) {
+          throw new Error("This access link is invalid or has expired. Request a new one from the login page.");
+        }
+
+        await db.update(loginTokens).set({ usedAt: new Date() }).where(eq(loginTokens.id, record.id));
+
+        const userRows = await db.select().from(users).where(eq(users.id, record.userId)).limit(1);
+        if (userRows.length === 0) throw new Error("Account not found");
+        const user = userRows[0];
+
+        await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+
+        const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true };
+      }),
   }),
 
   // Email subscription
@@ -663,12 +735,80 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown fences):
       return getUserPurchases(ctx.user.id);
     }),
 
-    getCourseContent: publicProcedure
+    getCourseContent: protectedProcedure
       .input(z.object({ productId: z.string() }))
-      .query(async ({ input }) => {
-        const { getLessonsByProductId } = await import("./db");
+      .query(async ({ input, ctx }) => {
+        const { getLessonsByProductId, checkCourseAccess } = await import("./db");
+        const hasAccess = await checkCourseAccess(ctx.user.id, input.productId);
+        if (!hasAccess && ctx.user.role !== "admin") {
+          throw new Error("You don't have access to this course");
+        }
         const lessons = await getLessonsByProductId(input.productId);
         return { lessons };
+      }),
+
+    // Flat-lesson progress (7-Day Reset uses the flat `lessons` table, which
+    // the courseProgress FK chain can't reference)
+    getFlatProgress: protectedProcedure
+      .input(z.object({ productId: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return { completedLessonIds: [] as number[] };
+
+        const { lessonProgress, lessons } = await import("../drizzle/schema");
+        const { eq, and, inArray } = await import("drizzle-orm");
+
+        const productLessons = await db
+          .select({ id: lessons.id })
+          .from(lessons)
+          .where(eq(lessons.productId, input.productId));
+        if (productLessons.length === 0) return { completedLessonIds: [] as number[] };
+
+        const rows = await db
+          .select({ lessonId: lessonProgress.lessonId })
+          .from(lessonProgress)
+          .where(and(
+            eq(lessonProgress.userId, ctx.user.id),
+            inArray(lessonProgress.lessonId, productLessons.map(l => l.id))
+          ));
+
+        return { completedLessonIds: rows.map(r => r.lessonId) };
+      }),
+
+    markFlatLessonComplete: protectedProcedure
+      .input(z.object({ lessonId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { lessonProgress, lessons } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        const lessonRows = await db.select().from(lessons).where(eq(lessons.id, input.lessonId)).limit(1);
+        if (lessonRows.length === 0) throw new Error("Lesson not found");
+
+        const { checkCourseAccess } = await import("./db");
+        const hasAccess = await checkCourseAccess(ctx.user.id, lessonRows[0].productId);
+        if (!hasAccess && ctx.user.role !== "admin") {
+          throw new Error("You don't have access to this course");
+        }
+
+        const existing = await db
+          .select()
+          .from(lessonProgress)
+          .where(and(
+            eq(lessonProgress.userId, ctx.user.id),
+            eq(lessonProgress.lessonId, input.lessonId)
+          ))
+          .limit(1);
+
+        if (existing.length === 0) {
+          await db.insert(lessonProgress).values({
+            userId: ctx.user.id,
+            lessonId: input.lessonId,
+          });
+        }
+        return { success: true };
       }),
 
     checkCourseAccess: protectedProcedure
@@ -1633,6 +1773,45 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    migrateMemberTables: publicProcedure
+      .input(z.object({ secret: z.string().optional() }).optional())
+      .mutation(async ({ input }) => {
+        if (input?.secret && input.secret !== process.env.ADMIN_SECRET) {
+          throw new Error("Unauthorized");
+        }
+        try {
+          const { drizzle } = await import("drizzle-orm/mysql2");
+          const { sql } = await import("drizzle-orm");
+          const db = drizzle(process.env.DATABASE_URL!);
+
+          await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS lesson_progress (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              user_id INT NOT NULL,
+              lesson_id INT NOT NULL,
+              completed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE KEY uniq_user_lesson (user_id, lesson_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+          `);
+
+          await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS login_tokens (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              token VARCHAR(64) NOT NULL UNIQUE,
+              user_id INT NOT NULL,
+              expires_at TIMESTAMP NOT NULL,
+              used_at TIMESTAMP NULL,
+              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              INDEX idx_token (token)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+          `);
+
+          return { success: true, message: "lesson_progress and login_tokens tables created (or already exist)." };
+        } catch (error: any) {
+          return { success: false, message: `Migration error: ${error.message}` };
+        }
+      }),
+
     migrateLessonsPosterUrl: publicProcedure
       .input(z.object({ secret: z.string().optional() }).optional())
       .mutation(async ({ input }) => {
@@ -1650,7 +1829,7 @@ Recovery is possible. But it requires working with your biology, not against it.
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lessons' AND COLUMN_NAME = 'poster_url'
           `);
 
-          if ((rows as any[]).length > 0) {
+          if ((rows as unknown as any[]).length > 0) {
             return { success: true, message: "poster_url column already exists." };
           }
 

@@ -325,6 +325,38 @@ async function createPurchaseRecord(data: {
 
   console.log(`[Stripe Webhook] Purchase recorded: ${data.productId} for user ${userId}`);
 
+  // Send course access email with a magic login link (non-fatal if no provider configured)
+  try {
+    const { isEmailConfigured, sendEmail, createAccessLink, accessEmailHtml } = await import("./email");
+    if (isEmailConfigured()) {
+      const productNames: Record<string, string> = {
+        "7-day-reset": "7-Day REWIRED Reset",
+        "from-broken-to-whole": "From Broken to Whole",
+        "bent-not-broken-circle": "Bent Not Broken Circle",
+      };
+      // 7-day expiry: generous onboarding window; they can request fresh links after
+      const accessUrl = await createAccessLink(userId, 7 * 24 * 60);
+      const result = await sendEmail({
+        to: data.customerEmail,
+        subject: `Your ${productNames[data.productId] || "course"} access is ready`,
+        html: accessEmailHtml({
+          firstName: data.customerName?.split(" ")[0],
+          accessUrl,
+          productName: productNames[data.productId] || "course",
+        }),
+      });
+      if (result.success) {
+        console.log(`[Stripe Webhook] Access email sent to ${data.customerEmail}`);
+      } else {
+        console.warn(`[Stripe Webhook] Access email failed: ${result.error}`);
+      }
+    } else {
+      console.warn("[Stripe Webhook] No email provider configured — access email skipped");
+    }
+  } catch (err: any) {
+    console.error("[Stripe Webhook] Access email error (non-fatal):", err.message);
+  }
+
   // Grant unlimited AI Coach access for "From Broken to Whole" course purchase
   if (data.productId === "from-broken-to-whole") {
     const { grantAiCoachUnlimitedAccess } = await import("./db");

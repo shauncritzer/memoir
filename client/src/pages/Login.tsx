@@ -45,6 +45,15 @@ export default function Login() {
     },
   });
 
+  const accessLinkMutation = trpc.auth.requestAccessLink.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Could not send access link");
+    },
+  });
+
   // If already logged in, redirect to members
   if (!authLoading && user) {
     navigate("/members");
@@ -198,6 +207,40 @@ export default function Login() {
                 )}
               </Button>
             </form>
+
+            {/* Passwordless access link */}
+            {mode === "login" && (
+              <div className="mt-4 pt-4 border-t text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Bought a course but don't have a password?
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={accessLinkMutation.isPending}
+                  onClick={() => {
+                    if (!email) {
+                      toast.error("Enter your purchase email above first");
+                      return;
+                    }
+                    accessLinkMutation.mutate({ email });
+                  }}
+                >
+                  {accessLinkMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Email me an access link
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             {/* Footer help text */}
             <div className="mt-6 text-center text-sm text-muted-foreground">
