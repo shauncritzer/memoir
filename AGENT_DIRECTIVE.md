@@ -25,10 +25,10 @@ Language: Neuroscience-forward. Process disorders. Nervous system regulation. Re
 The Agent Roster
 Agent	Platform	Role	Status
 Claude.ai	claude.ai subscription	Strategist, architect, thinking partner	LIVE
-Claude Code	Anthropic	Codebase builder — one task per session	LIVE
-Freddy	Railway (OpenClaw)	Cloud operator — autonomous execution, scheduling, monitoring	LIVE
-Maverick	Local Windows desktop (OpenClaw)	Desktop agent — computer control, local files, image gen, Whisper	LIVE
-Rewired Engine	Railway	Autonomous content pipeline — research, generate, publish	LIVE
+Claude Code	Anthropic	Codebase builder + scheduled autonomous runs (Routines)	LIVE
+Freddy	Railway (OpenClaw)	DECOMMISSIONED (July 2026) — replaced by Claude Code + in-app agents. Delete the OpenClaw Railway service + revoke its API keys.
+Maverick	Local Windows desktop (OpenClaw)	DECOMMISSIONED (July 2026) — stop `openclaw gateway`, remove from startup, revoke its API keys.
+Rewired Engine	Railway	Autonomous content pipeline — being extracted to shauncritzer/TrueLeadEngine (see docs/ENGINE_EXTRACTION_MAP.md)	LIVE, migrating
 How to Use Each Agent
 Claude.ai — Strategy, planning, writing, complex decisions. Use heavily (subscription covers it).
 Claude Code — One specific coding task. Always start: "Read AGENT_DIRECTIVE.md. Your task is [X]. Do it now."
