@@ -6,8 +6,12 @@
  * API Documentation: https://developers.convertkit.com/
  */
 
-const CONVERTKIT_API_KEY = "dZ4CxMb5Zwp-5jy87pwcvQ";
-const CONVERTKIT_API_SECRET = "x9Uzt8Xs2179XCHdJ6vZrb_-sq12AGihK_sxmuqK3ZY";
+// Env-first so keys can be rotated without a code change. The literals below
+// are the LEGACY keys already exposed in git history — after CONVERTKIT_API_KEY /
+// CONVERTKIT_API_SECRET are set in Railway and the keys are rotated in the Kit
+// dashboard, these fallbacks are dead and should be deleted.
+const CONVERTKIT_API_KEY = process.env.CONVERTKIT_API_KEY || "dZ4CxMb5Zwp-5jy87pwcvQ";
+const CONVERTKIT_API_SECRET = process.env.CONVERTKIT_API_SECRET || "x9Uzt8Xs2179XCHdJ6vZrb_-sq12AGihK_sxmuqK3ZY";
 const CONVERTKIT_API_BASE = "https://api.convertkit.com/v3";
 
 /**
