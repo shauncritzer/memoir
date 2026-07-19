@@ -38,6 +38,7 @@ import ThrivingSober from "./pages/ThrivingSober";
 import Success from "./pages/Success";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import AccessLink from "./pages/AccessLink";
 import BookLaunch from "./pages/BookLaunch";
 import SystemDiagnostics from "./pages/SystemDiagnostics";
 import { AdminRoute } from "./components/AdminRoute";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/admin/migrate">{() => <AdminRoute component={AdminMigrate} />}</Route>
       <Route path="/admin/diagnostics">{() => <AdminRoute component={SystemDiagnostics} />}</Route>
       <Route path="/login" component={Login} />
+      <Route path="/access" component={AccessLink} />
       <Route path="/products" component={Products} />
       <Route path="/stripe-test" component={StripeTest} />
       <Route path="/admin/stripe-test">{() => <AdminRoute component={StripeTest} />}</Route>

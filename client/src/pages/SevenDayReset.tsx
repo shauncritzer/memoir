@@ -520,20 +520,17 @@ function CourseMemberArea() {
     { enabled: true }
   );
 
-  // Debug logging
-  console.log('CourseMemberArea render:', { courseLoading, courseData, courseError, lessonsCount: courseData?.lessons?.length });
-
-  // Get user's progress
-  const { data: progressData } = trpc.members.getCourseProgress.useQuery(
+  // Get user's progress (flat lesson_progress table — matches the flat lessons this course uses)
+  const { data: progressData } = trpc.members.getFlatProgress.useQuery(
     { productId: "7-day-reset" },
     { enabled: !!user }
   );
 
   // Mark lesson complete mutation
   const trpcUtils = trpc.useUtils();
-  const markComplete = trpc.members.markLessonComplete.useMutation({
+  const markComplete = trpc.members.markFlatLessonComplete.useMutation({
     onSuccess: () => {
-      trpcUtils.members.getCourseProgress.invalidate();
+      trpcUtils.members.getFlatProgress.invalidate();
     },
   });
 
@@ -549,16 +546,13 @@ function CourseMemberArea() {
   }
 
   const lessons = courseData?.lessons || [];
-  const completedLessons = progressData?.completedLessons || 0;
+  const completedLessonIds = progressData?.completedLessonIds || [];
+  const completedLessons = completedLessonIds.length;
   const currentLesson = currentLessonId
     ? lessons.find(l => l.id === currentLessonId)
     : lessons[0];
 
-  const isLessonComplete = (lessonId: number) => {
-    return progressData?.modules?.some(m =>
-      m.lessons.some(l => l.id === lessonId && l.completed)
-    ) || false;
-  };
+  const isLessonComplete = (lessonId: number) => completedLessonIds.includes(lessonId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -574,7 +568,7 @@ function CourseMemberArea() {
           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
             <div 
               className="bg-[#D4AF37] h-2 rounded-full transition-all"
-              style={{ width: `${(completedLessons / lessons.length) * 100}%` }}
+              style={{ width: `${lessons.length > 0 ? (completedLessons / lessons.length) * 100 : 0}%` }}
             />
           </div>
         </div>
@@ -740,10 +734,7 @@ function CourseMemberArea() {
                       <Button
                         onClick={() => {
                           if (currentLesson) {
-                            markComplete.mutate({
-                              lessonId: currentLesson.id,
-                              productId: "7-day-reset",
-                            });
+                            markComplete.mutate({ lessonId: currentLesson.id });
                           }
                         }}
                         disabled={isLessonComplete(currentLesson.id)}

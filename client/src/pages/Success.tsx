@@ -122,10 +122,12 @@ export default function Success() {
               <div className="flex items-start gap-4">
                 <Mail className="h-6 w-6 text-[#D4AF37] mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Check Your Email</h3>
+                  <h3 className="font-semibold text-lg mb-2">You're Logged In</h3>
                   <p className="text-muted-foreground">
-                    We've sent you a receipt and course access details to your email address.
-                    If you don't see it in a few minutes, check your spam folder.
+                    You have instant access on this device — just click the button above.
+                    To access your course on another device later, go to the{" "}
+                    <a href="/login" className="text-[#D4AF37] hover:underline font-medium">login page</a>{" "}
+                    and choose "Email me an access link" with your purchase email.
                   </p>
                 </div>
               </div>

@@ -21,6 +21,8 @@ export default function SeedDatabase() {
   const [thumbResults, setThumbResults] = useState<string[]>([]);
   const [posterMigrateStatus, setPosterMigrateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [posterMigrateMessage, setPosterMigrateMessage] = useState("");
+  const [memberTablesStatus, setMemberTablesStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [memberTablesMessage, setMemberTablesMessage] = useState("");
 
   const seedMutation = trpc.admin.seedNewBlogPosts.useMutation({
     onSuccess: (data) => {
@@ -75,6 +77,17 @@ export default function SeedDatabase() {
     onError: (error) => {
       setThumbStatus("error");
       setThumbMessage(error.message);
+    },
+  });
+
+  const memberTablesMutation = trpc.admin.migrateMemberTables.useMutation({
+    onSuccess: (data) => {
+      setMemberTablesStatus(data.success ? "success" : "error");
+      setMemberTablesMessage(data.message);
+    },
+    onError: (error) => {
+      setMemberTablesStatus("error");
+      setMemberTablesMessage(error.message);
     },
   });
 
@@ -299,6 +312,54 @@ export default function SeedDatabase() {
               <div className="space-y-1">
                 <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
                 <p className="text-sm text-red-800 dark:text-red-200">{lessonsMessage}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-semibold">Migrate Member Tables (Progress + Login Links)</h3>
+          <p className="text-sm text-muted-foreground">
+            <strong>What this does:</strong> Creates the lesson_progress table (fixes the broken 7-Day Reset progress tracking)
+            and login_tokens table (enables magic-link login for buyers). Safe to run multiple times.
+          </p>
+
+          <Button
+            onClick={() => {
+              setMemberTablesStatus("loading");
+              setMemberTablesMessage("");
+              memberTablesMutation.mutate({});
+            }}
+            disabled={memberTablesStatus === "loading"}
+            variant="default"
+            className="w-full h-12 text-lg bg-teal-600 hover:bg-teal-700 text-white font-bold"
+          >
+            {memberTablesStatus === "loading" ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Running Migration...
+              </>
+            ) : (
+              "Migrate: Member Tables"
+            )}
+          </Button>
+
+          {memberTablesStatus === "success" && (
+            <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-green-900 dark:text-green-100">Success!</p>
+                <p className="text-sm text-green-800 dark:text-green-200">{memberTablesMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {memberTablesStatus === "error" && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+                <p className="text-sm text-red-800 dark:text-red-200">{memberTablesMessage}</p>
               </div>
             </div>
           )}
