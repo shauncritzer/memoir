@@ -2066,86 +2066,110 @@ Recovery is possible. But it requires working with your biology, not against it.
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
-        const results: string[] = [];
         const R2_PUBLIC_BASE = "https://pub-c6dbcc3c636f459ca30a6067b6dbc758.r2.dev";
 
-        for (let day = 1; day <= 7; day++) {
-          const prompt = thumbnailPrompts[day];
-          const r2Key = `course-videos/thumbnails/day-${day}-thumbnail.jpg`;
-          const publicUrl = `${R2_PUBLIC_BASE}/course-videos/thumbnails/day-${day}-thumbnail.jpg`;
+        // The full run takes ~8 minutes (7 images x 65s rate-limit spacing), far
+        // past the HTTP proxy timeout — so run it in the background and return
+        // immediately. Progress is visible in Railway logs under [Thumbnails],
+        // and days that already have a thumbnail are skipped so re-runs only
+        // generate what's missing.
+        const existing = await db
+          .select({ dayNumber: lessons.dayNumber, posterUrl: lessons.posterUrl })
+          .from(lessons)
+          .where(eq(lessons.productId, "7-day-reset"));
+        const doneDays = new Set(
+          existing
+            .filter(l => l.posterUrl?.includes("/course-videos/thumbnails/"))
+            .map(l => l.dayNumber)
+        );
+        const pendingDays = [1, 2, 3, 4, 5, 6, 7].filter(d => !doneDays.has(d));
 
-          try {
-            // Generate image via Flux
-            console.log(`[Thumbnails] Generating Day ${day}...`);
-            const enhancedPrompt = `${prompt}. Style: cinematic, photorealistic. Warm earth tones with teal and gold accents. No text or words in the image. 1280x720 landscape composition.`;
-
-            const output = await replicate.run("black-forest-labs/flux-1.1-pro", {
-              input: {
-                prompt: enhancedPrompt,
-                aspect_ratio: "16:9",
-                output_format: "jpg",
-                output_quality: 90,
-                prompt_upsampling: true,
-                safety_tolerance: 2,
-              },
-            });
-
-            const imageUrl = typeof output === "string"
-              ? output
-              : (output as any)?.url?.() || (output as any)?.toString() || String(output);
-
-            if (!imageUrl || imageUrl === "undefined") {
-              results.push(`Day ${day}: FAILED - No image URL from Flux`);
-              continue;
-            }
-
-            // Download the generated image
-            console.log(`[Thumbnails] Downloading Day ${day} from Flux...`);
-            const imageResponse = await fetch(imageUrl);
-            if (!imageResponse.ok) {
-              results.push(`Day ${day}: FAILED - Could not download from Flux`);
-              continue;
-            }
-            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-
-            // Upload to R2
-            console.log(`[Thumbnails] Uploading Day ${day} to R2 at ${r2Key}...`);
-            await s3.send(new PutObjectCommand({
-              Bucket: r2BucketName,
-              Key: r2Key,
-              Body: imageBuffer,
-              ContentType: "image/jpeg",
-            }));
-
-            // Update DB
-            await db
-              .update(lessons)
-              .set({ posterUrl: publicUrl })
-              .where(
-                and(
-                  eq(lessons.productId, "7-day-reset"),
-                  eq(lessons.dayNumber, day)
-                )
-              );
-
-            results.push(`Day ${day}: OK - ${publicUrl}`);
-            console.log(`[Thumbnails] Day ${day} complete`);
-          } catch (err: any) {
-            results.push(`Day ${day}: FAILED - ${err.message}`);
-            console.error(`[Thumbnails] Day ${day} error:`, err.message);
-          }
-
-          // Rate limit: wait 65s between Replicate calls (except after the last one)
-          if (day < 7) {
-            console.log(`[Thumbnails] Waiting 65s before next generation...`);
-            await new Promise(resolve => setTimeout(resolve, 65000));
-          }
+        if (pendingDays.length === 0) {
+          return {
+            success: true,
+            message: "All 7 thumbnails already generated — nothing to do.",
+            results: [] as string[],
+          };
         }
+
+        const runGeneration = async () => {
+          for (const day of pendingDays) {
+            const prompt = thumbnailPrompts[day];
+            const r2Key = `course-videos/thumbnails/day-${day}-thumbnail.jpg`;
+            const publicUrl = `${R2_PUBLIC_BASE}/course-videos/thumbnails/day-${day}-thumbnail.jpg`;
+
+            try {
+              console.log(`[Thumbnails] Generating Day ${day}...`);
+              const enhancedPrompt = `${prompt}. Style: cinematic, photorealistic. Warm earth tones with teal and gold accents. No text or words in the image. 1280x720 landscape composition.`;
+
+              const output = await replicate.run("black-forest-labs/flux-1.1-pro", {
+                input: {
+                  prompt: enhancedPrompt,
+                  aspect_ratio: "16:9",
+                  output_format: "jpg",
+                  output_quality: 90,
+                  prompt_upsampling: true,
+                  safety_tolerance: 2,
+                },
+              });
+
+              const imageUrl = typeof output === "string"
+                ? output
+                : (output as any)?.url?.() || (output as any)?.toString() || String(output);
+
+              if (!imageUrl || imageUrl === "undefined") {
+                console.error(`[Thumbnails] Day ${day}: no image URL from Flux`);
+                continue;
+              }
+
+              console.log(`[Thumbnails] Downloading Day ${day} from Flux...`);
+              const imageResponse = await fetch(imageUrl);
+              if (!imageResponse.ok) {
+                console.error(`[Thumbnails] Day ${day}: could not download from Flux`);
+                continue;
+              }
+              const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+              console.log(`[Thumbnails] Uploading Day ${day} to R2 at ${r2Key}...`);
+              await s3.send(new PutObjectCommand({
+                Bucket: r2BucketName,
+                Key: r2Key,
+                Body: imageBuffer,
+                ContentType: "image/jpeg",
+              }));
+
+              await db
+                .update(lessons)
+                .set({ posterUrl: publicUrl })
+                .where(
+                  and(
+                    eq(lessons.productId, "7-day-reset"),
+                    eq(lessons.dayNumber, day)
+                  )
+                );
+
+              console.log(`[Thumbnails] Day ${day} complete: ${publicUrl}`);
+            } catch (err: any) {
+              console.error(`[Thumbnails] Day ${day} error:`, err.message);
+            }
+
+            // Rate limit: wait 65s between Replicate calls
+            if (day !== pendingDays[pendingDays.length - 1]) {
+              console.log(`[Thumbnails] Waiting 65s before next generation...`);
+              await new Promise(resolve => setTimeout(resolve, 65000));
+            }
+          }
+          console.log(`[Thumbnails] Background run finished (${pendingDays.length} day(s) attempted)`);
+        };
+
+        void runGeneration().catch(err =>
+          console.error("[Thumbnails] Background run crashed:", err.message)
+        );
 
         return {
           success: true,
-          message: `Thumbnail generation complete`,
-          results,
+          message: `Started generating ${pendingDays.length} thumbnail(s) in the background (~${pendingDays.length} min). Re-click this button later — it skips finished days and reports "nothing to do" when all 7 are done.`,
+          results: [] as string[],
         };
       }),
 

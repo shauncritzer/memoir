@@ -411,8 +411,9 @@ export default function SeedDatabase() {
         <div className="border-t pt-6 space-y-4">
           <h3 className="font-semibold">Generate Course Thumbnails</h3>
           <p className="text-sm text-muted-foreground">
-            <strong>What this does:</strong> Generates 7 AI thumbnail images via Flux 1.1 Pro (Replicate), uploads them to Cloudflare R2,
-            and updates the lesson records with the new poster URLs. Takes ~2-3 minutes. Costs ~$0.28 (7 images × $0.04).
+            <strong>What this does:</strong> Starts generating AI thumbnails via Flux 1.1 Pro (Replicate) in the background, uploads them to
+            Cloudflare R2, and updates the lesson records. Runs ~1 min per image and skips days that are already done — click once, come back
+            in ~8 minutes, and click again to confirm it reports "nothing to do." Costs ~$0.04 per image.
           </p>
 
           <Button
