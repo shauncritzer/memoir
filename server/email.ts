@@ -9,6 +9,9 @@
  */
 
 const FROM = process.env.EMAIL_FROM || "Shaun Critzer <support@shauncritzer.com>";
+// The domain can send but not receive (no inbound mail set up), so replies to
+// the from-address would bounce. EMAIL_REPLY_TO routes replies to a real inbox.
+const REPLY_TO = process.env.EMAIL_REPLY_TO || "";
 
 export function isEmailConfigured(): boolean {
   return !!(process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY);
@@ -35,6 +38,7 @@ export async function sendEmail(params: {
           to: [params.to],
           subject: params.subject,
           html: params.html,
+          ...(REPLY_TO ? { reply_to: REPLY_TO } : {}),
         }),
       });
       if (!res.ok) {
@@ -58,6 +62,7 @@ export async function sendEmail(params: {
           from: parseFromAddress(FROM),
           subject: params.subject,
           content: [{ type: "text/html", value: params.html }],
+          ...(REPLY_TO ? { reply_to: { email: REPLY_TO } } : {}),
         }),
       });
       if (!res.ok) {
