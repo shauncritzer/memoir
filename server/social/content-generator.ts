@@ -179,9 +179,28 @@ export async function generateContentForPlatform(opts: {
       ? `\n\nTOPIC TO WRITE ABOUT: ${topic}`
       : "";
 
-  const ctaContext = ctaText && ctaUrl
+  // Content mix — the strategy-brain weights, finally wired in. Before this,
+  // 100% of posts carried a sales CTA (the engagement audit's #2 finding);
+  // now only "promotional" rolls (15%) include one.
+  const CONTENT_STYLES: { style: string; weight: number; instruction: string }[] = [
+    { style: "educational", weight: 35, instruction: "Teach ONE concrete, neuroscience-informed insight about rewiring habits or nervous-system regulation. Practical, specific, no selling." },
+    { style: "personal_story", weight: 25, instruction: "Tell one short, specific first-person moment from lived experience — a scene, not a lesson. Vulnerable and real. No selling." },
+    { style: "motivational", weight: 20, instruction: "One resonant, non-cliché encouragement in the brand's voice. No selling." },
+    { style: "promotional", weight: 15, instruction: "Naturally present the offer as the next step for someone who resonates with the message." },
+    { style: "engagement", weight: 5, instruction: "Ask one genuine, easy-to-answer question that invites replies. No selling." },
+  ];
+  const totalWeight = CONTENT_STYLES.reduce((s, c) => s + c.weight, 0);
+  let roll = Math.random() * totalWeight;
+  let chosenStyle = CONTENT_STYLES[0];
+  for (const c of CONTENT_STYLES) {
+    roll -= c.weight;
+    if (roll <= 0) { chosenStyle = c; break; }
+  }
+  const isPromotional = chosenStyle.style === "promotional";
+
+  const ctaContext = isPromotional && ctaText && ctaUrl
     ? `\n\nCTA TO INCLUDE: "${ctaText}" linking to ${ctaUrl}`
-    : "";
+    : `\n\nPOST TYPE: ${chosenStyle.style} — ${chosenStyle.instruction} Do NOT include any links, offers, or calls to buy.`;
 
   // Retrieve past performance context from vector memory (pgvector)
   let memoryContext = "";
