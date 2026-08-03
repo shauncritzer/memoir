@@ -23,6 +23,14 @@ function isDue(scheduledFor: Date): boolean {
 
 /** Process pending content generation */
 export async function processContentGeneration() {
+  // PAUSED by default (Aug 2026): 151 posts over 90 days earned zero engagement.
+  // Relaunch requires the content pivot (real video, fixed mix) — set
+  // SOCIAL_POSTING_ENABLED=true in Railway to resume generation + posting.
+  if (process.env.SOCIAL_POSTING_ENABLED !== "true") {
+    console.log("[Scheduler] Content generation PAUSED (set SOCIAL_POSTING_ENABLED=true to resume)");
+    return;
+  }
+
   const db = await getDb();
   if (!db) return;
 
@@ -194,6 +202,12 @@ async function getPlatformPostCountToday(platform: string): Promise<number> {
 }
 
 export async function processScheduledPosts() {
+  // PAUSED by default — see processContentGeneration note.
+  if (process.env.SOCIAL_POSTING_ENABLED !== "true") {
+    console.log("[Scheduler] Posting PAUSED (set SOCIAL_POSTING_ENABLED=true to resume)");
+    return;
+  }
+
   const db = await getDb();
   if (!db) {
     console.error("[Scheduler] Database not available");
@@ -442,8 +456,20 @@ async function postContentItem(item: {
           }
         }
 
+        // Append generated hashtags to the caption. They were being stored in
+        // the mediaUrls JSON and never posted — the engagement audit found
+        // every IG post shipped tagless.
+        let igCaption = item.content;
+        try {
+          const meta = item.mediaUrls ? JSON.parse(item.mediaUrls) : {};
+          const tags = String(meta.hashtags || "").trim();
+          if (tags && !item.content.includes("#")) {
+            igCaption = `${item.content}\n\n${tags}`;
+          }
+        } catch { /* no media metadata */ }
+
         if (imageUrl) {
-          const igResult = await postToInstagram(item.content, imageUrl);
+          const igResult = await postToInstagram(igCaption, imageUrl);
           result = {
             success: igResult.success,
             tweetId: igResult.postId,
@@ -451,7 +477,7 @@ async function postContentItem(item: {
             error: igResult.error,
           };
         } else {
-          const igResult = await postTextToInstagram(item.content);
+          const igResult = await postTextToInstagram(igCaption);
           result = {
             success: igResult.success,
             tweetId: igResult.postId,
