@@ -1773,6 +1773,75 @@ Recovery is possible. But it requires working with your biology, not against it.
         }
       }),
 
+    getEngagementAudit: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new Error("Admin access required");
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      const { sql } = await import("drizzle-orm");
+
+      const [rows] = (await db.execute(sql`
+        SELECT id, platform, content_type, LEFT(content, 160) AS preview,
+               posted_at, platform_post_url, metrics
+        FROM content_queue
+        WHERE status = 'posted'
+          AND posted_at > DATE_SUB(NOW(), INTERVAL 90 DAY)
+        ORDER BY posted_at DESC
+        LIMIT 500
+      `)) as unknown as [any[], unknown];
+
+      type PostRow = {
+        id: number; platform: string; contentType: string | null; preview: string;
+        postedAt: string; url: string | null;
+        likes: number; comments: number; shares: number; views: number; engagement: number;
+      };
+
+      const posts: PostRow[] = (rows || []).map((r: any) => {
+        let m: any = {};
+        try { m = r.metrics ? JSON.parse(r.metrics) : {}; } catch { /* unparseable metrics */ }
+        const likes = Number(m.likes) || 0;
+        const comments = Number(m.comments) || 0;
+        const shares = Number(m.shares || m.retweets) || 0;
+        const views = Number(m.views || m.reach || m.impression_count) || 0;
+        return {
+          id: r.id,
+          platform: r.platform,
+          contentType: r.content_type,
+          preview: r.preview,
+          postedAt: r.posted_at,
+          url: r.platform_post_url,
+          likes, comments, shares, views,
+          engagement: likes + comments + shares,
+        };
+      });
+
+      const byPlatform: Record<string, { posts: number; likes: number; comments: number; shares: number; views: number; zeroEngagement: number }> = {};
+      for (const p of posts) {
+        const b = (byPlatform[p.platform] ||= { posts: 0, likes: 0, comments: 0, shares: 0, views: 0, zeroEngagement: 0 });
+        b.posts++; b.likes += p.likes; b.comments += p.comments; b.shares += p.shares; b.views += p.views;
+        if (p.engagement === 0) b.zeroEngagement++;
+      }
+
+      const contentTypeMix: Record<string, number> = {};
+      for (const p of posts) {
+        const key = p.contentType || "unknown";
+        contentTypeMix[key] = (contentTypeMix[key] || 0) + 1;
+      }
+
+      const oldest = posts.length ? new Date(posts[posts.length - 1].postedAt) : new Date();
+      const spanDays = Math.max(1, (Date.now() - oldest.getTime()) / 86400000);
+
+      return {
+        windowDays: Math.round(spanDays),
+        totalPosts: posts.length,
+        postsPerWeek: Math.round((posts.length / spanDays) * 7 * 10) / 10,
+        zeroEngagementCount: posts.filter(p => p.engagement === 0).length,
+        byPlatform,
+        contentTypeMix,
+        topPosts: [...posts].sort((a, b) => b.engagement - a.engagement).slice(0, 5),
+        recentPosts: posts.slice(0, 10),
+      };
+    }),
+
     migrateMemberTables: publicProcedure
       .input(z.object({ secret: z.string().optional() }).optional())
       .mutation(async ({ input }) => {
