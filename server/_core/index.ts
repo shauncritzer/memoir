@@ -829,15 +829,23 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
 
-    // Start Discord command poller
-    (async () => {
-      try {
-        const { startDiscordCommandPoller } = await import("../agent/discord-command-poller");
-        startDiscordCommandPoller();
-      } catch (err) {
-        console.error("[Boot] Failed to start Discord command poller:", err);
-      }
-    })();
+    // Discord command poller — DISABLED by default. It queries an
+    // agent_coordination table that only ever existed in Supabase, not this
+    // MySQL database, so every 10s poll has failed since day one and flooded
+    // the logs. OpenClaw-era plumbing; the interactive Discord bot (bot.ts)
+    // is separate and unaffected. Set DISCORD_POLLER_ENABLED=true to revive.
+    if (process.env.DISCORD_POLLER_ENABLED === "true") {
+      (async () => {
+        try {
+          const { startDiscordCommandPoller } = await import("../agent/discord-command-poller");
+          startDiscordCommandPoller();
+        } catch (err) {
+          console.error("[Boot] Failed to start Discord command poller:", err);
+        }
+      })();
+    } else {
+      console.log("[DiscordPoller] DISABLED (set DISCORD_POLLER_ENABLED=true to enable)");
+    }
 
     // Ensure course_lessons has video_script column (schema may be ahead of DB)
     (async () => {
